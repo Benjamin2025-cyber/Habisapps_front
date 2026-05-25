@@ -1,0 +1,129 @@
+{
+  "common": {
+    "brandName": "HabisLoan",
+    "back": "Retour",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "save": "Enregistrer",
+    "submit": "Valider",
+    "close": "Fermer",
+    "loading": "Chargement…",
+    "tryAgain": "Réessayer",
+    "yes": "Oui",
+    "no": "Non",
+    "unknownError": "Erreur inconnue",
+    "networkError": "Erreur réseau. Vérifiez votre connexion et réessayez.",
+    "retryIn": "Réessayez dans {time}",
+    "passwordHint": "Au moins 8 caractères. Mélangez lettres, chiffres et symboles.",
+    "language": {
+      "switcher": "Changer de langue",
+      "comingSoon": "Bientôt disponible",
+      "active": "Langue actuelle : {name}"
+    }
+  },
+  "duration": {
+    "seconds": "{count} s",
+    "minutesSeconds": "{minutes} min {seconds} s"
+  },
+  "auth": {
+    "topBar": {
+      "about": "À propos de Habis"
+    },
+    "shared": {
+      "phoneLabel": "Numéro de téléphone",
+      "phonePlaceholder": "+237 6 .. .. .. ..",
+      "passwordLabel": "Mot de passe",
+      "newPasswordLabel": "Nouveau mot de passe",
+      "newPasswordPlaceholder": "Choisissez un mot de passe",
+      "newPasswordPlaceholderReset": "Choisissez un nouveau mot de passe",
+      "confirmPasswordLabel": "Confirmer le mot de passe",
+      "confirmPasswordPlaceholder": "Saisissez à nouveau",
+      "showPassword": "Afficher le mot de passe",
+      "hidePassword": "Masquer le mot de passe",
+      "passwordsDontMatch": "Les deux mots de passe ne correspondent pas.",
+      "otpAriaLabelDefault": "Code de vérification",
+      "otpAriaLabelActivation": "Code de vérification à 6 chiffres",
+      "otpAriaLabelReset": "Code de réinitialisation à 6 chiffres",
+      "otpDigitAriaLabel": "Chiffre {position}",
+      "otpNotReceived": "Code non reçu ?",
+      "resendCode": "Renvoyer le code",
+      "resending": "Envoi…",
+      "resendIn": "Renvoyer dans {seconds}s",
+      "rateLimitTitle": "Trop de tentatives",
+      "rateLimitBody": "Pour des raisons de sécurité, veuillez patienter {time} avant de réessayer.",
+      "resendToast": {
+        "successTitle": "Code renvoyé",
+        "successBody": "Vérifiez vos messages.",
+        "errorTitle": "Renvoi impossible"
+      }
+    },
+    "login": {
+      "pageTitle": "Connexion",
+      "heading": "Connexion",
+      "phonePlaceholder": "Entrez votre numéro de téléphone",
+      "passwordPlaceholder": "Entrez votre mot de passe",
+      "forgotPassword": "Oublié ?",
+      "submit": "Se connecter",
+      "submitting": "Connexion…",
+      "firstLoginPrompt": "Première connexion ?",
+      "activateLink": "Activer mon compte",
+      "errorTitle": "Connexion impossible",
+      "successToastTitle": "Connexion réussie",
+      "successToastBody": "Bienvenue, {name}.",
+      "resetSuccess": {
+        "title": "Mot de passe mis à jour",
+        "body": "Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
+      }
+    },
+    "activate": {
+      "pageTitle": "Activer mon compte",
+      "phoneStep": {
+        "heading": "Activer mon compte",
+        "intro": "Saisissez votre numéro de téléphone. Vous recevrez un code de vérification par SMS pour activer votre compte et choisir votre mot de passe.",
+        "submit": "Recevoir le code",
+        "submitting": "Envoi du code…",
+        "errorTitle": "Envoi du code impossible"
+      },
+      "verifyStep": {
+        "heading": "Vérification",
+        "introWithPhone": "Saisissez le code à 6 chiffres envoyé au {phone} puis choisissez votre mot de passe.",
+        "changePhone": "Changer de numéro",
+        "submit": "Activer mon compte",
+        "submitting": "Activation…",
+        "errorTitle": "Activation impossible"
+      },
+      "success": {
+        "heading": "Compte activé",
+        "body": "Votre compte est actif. Vous pouvez maintenant vous connecter avec votre numéro de téléphone et votre mot de passe.",
+        "cta": "Se connecter"
+      }
+    },
+    "forgotPassword": {
+      "pageTitle": "Mot de passe oublié",
+      "heading": "Mot de passe oublié",
+      "intro": "Saisissez votre numéro de téléphone. Si un compte actif y est associé, vous recevrez un code par SMS pour réinitialiser votre mot de passe.",
+      "submit": "Recevoir le code",
+      "submitting": "Envoi du code…",
+      "errorTitle": "Envoi du code impossible"
+    },
+    "resetPassword": {
+      "pageTitle": "Réinitialiser le mot de passe",
+      "heading": "Nouveau mot de passe",
+      "introWithPhone": "Saisissez le code reçu au {phone} et choisissez votre nouveau mot de passe.",
+      "introWithoutPhone": "Saisissez le code reçu par SMS et choisissez un nouveau mot de passe.",
+      "submit": "Mettre à jour le mot de passe",
+      "submitting": "Mise à jour…",
+      "errorTitle": "Mise à jour impossible"
+    }
+  },
+  "dashboard": {
+    "placeholder": {
+      "greeting": "Bonjour {name} 👋",
+      "intro": "Vous êtes connecté. Le tableau de bord opérationnel sera disponible dans la prochaine phase de l'implémentation.",
+      "signOut": "Se déconnecter"
+    }
+  },
+  "toast": {
+    "dismissAriaLabel": "Fermer la notification"
+  }
+}
