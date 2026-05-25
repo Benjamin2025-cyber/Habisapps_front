@@ -117,10 +117,89 @@
     }
   },
   "dashboard": {
+    "pageTitle": "Tableau de bord",
     "placeholder": {
       "greeting": "Bonjour {name} 👋",
       "intro": "Vous êtes connecté. Le tableau de bord opérationnel sera disponible dans la prochaine phase de l'implémentation.",
       "signOut": "Se déconnecter"
+    }
+  },
+  "shell": {
+    "loading": "Chargement de votre espace…",
+    "sidebar": {
+      "expand": "Déployer la barre latérale",
+      "collapse": "Réduire la barre latérale",
+      "comingSoon": "Bientôt disponible",
+      "groups": {
+        "main": "Espace de travail",
+        "administration": "Administration",
+        "referentiel": "Référentiel",
+        "credit": "Crédit",
+        "accounting": "Comptabilité",
+        "operations": "Opérations",
+        "edition": "Édition",
+        "settings": "Paramétrage"
+      },
+      "items": {
+        "dashboard": "Tableau de bord",
+        "users": "Gestion des utilisateurs",
+        "agencies": "Agences",
+        "roles": "Rôles & permissions",
+        "accountingDay": "Journée comptable",
+        "audit": "Journal d'audit",
+        "clients": "Clients",
+        "accounts": "Comptes",
+        "guarantors": "Garants",
+        "proxies": "Mandataires",
+        "loanProducts": "Produits de prêt",
+        "loans": "Prêts",
+        "collaterals": "Garanties",
+        "loanTransfers": "Mutation",
+        "delinquencies": "Suivi des exigibles",
+        "loanDisbursement": "Déblocage prêt",
+        "ledger": "Plan comptable",
+        "sectors": "Secteurs",
+        "journalEntries": "Opérations diverses",
+        "ledgerJournal": "Journal des écritures",
+        "tills": "Caisses",
+        "tellerSessions": "Sessions de caisse",
+        "tellerTransactions": "Retrait / Versement",
+        "tellerInspection": "Consultation caisse",
+        "reportsPar": "PAR — Portefeuille à risque",
+        "reportsExigible": "Exigible prêt",
+        "reportsRelease": "Main levée",
+        "reportsBalance": "Balance des comptes",
+        "denominations": "Type monnaie",
+        "batch": "Procédure Batch"
+      }
+    },
+    "topBar": {
+      "toggleSidebar": "Afficher la barre latérale",
+      "search": {
+        "placeholder": "Rechercher (clients, prêts, comptes…)",
+        "shortcut": "⌘K",
+        "comingSoon": "La recherche globale arrive bientôt."
+      },
+      "notifications": {
+        "label": "Notifications",
+        "empty": "Aucune notification pour l'instant."
+      },
+      "accountingDay": {
+        "open": "Journée ouverte",
+        "closed": "Journée fermée",
+        "loading": "Statut journée…"
+      }
+    },
+    "userMenu": {
+      "open": "Ouvrir le menu utilisateur",
+      "viewProfile": "Mon profil",
+      "preferences": "Préférences",
+      "signOut": "Se déconnecter",
+      "noRole": "Sans rôle attribué",
+      "agencyFallback": "Sans agence"
+    },
+    "breadcrumbs": {
+      "home": "Accueil"
     }
   },
   "toast": {
