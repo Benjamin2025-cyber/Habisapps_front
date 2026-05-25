@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "@/lib/i18n/server";
-import { DashboardPlaceholder } from "./_components/DashboardPlaceholder";
+import { DashboardContent } from "./_components/DashboardContent";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();
@@ -8,5 +8,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function DashboardPage() {
-  return <DashboardPlaceholder />;
+  return <DashboardContent />;
 }

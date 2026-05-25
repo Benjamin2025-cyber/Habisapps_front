@@ -1,5 +1,5 @@
 import { apiRequest } from "@/lib/api/client";
-import type { LoginResponse, StaffUser } from "@/lib/api/types";
+import type { LoginResponse, MeResponse, StaffUser } from "@/lib/api/types";
 
 export async function loginRequest(payload: {
   phone_number: string;
@@ -48,5 +48,12 @@ export async function resetPasswordRequest(payload: {
   return apiRequest<null>("password/reset", {
     method: "POST",
     body: payload,
+  });
+}
+
+export async function fetchMeRequest(token: string): Promise<MeResponse> {
+  return apiRequest<MeResponse>("me", {
+    method: "GET",
+    token,
   });
 }

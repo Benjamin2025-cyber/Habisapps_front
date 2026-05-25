@@ -31,6 +31,20 @@ type Formatter = {
     value: number,
     options?: { currency?: string; minimumFractionDigits?: number },
   ) => string;
+  /**
+   * Currency formatter that takes a value in the **minor** unit and converts to
+   * the major unit before formatting. The API uses `*_minor` fields for all
+   * monetary amounts; with XAF's accounting scale of 2, divide by 100.
+   */
+  currencyMinor: (
+    minor: number,
+    options?: {
+      currency?: string;
+      /** Scale of the currency. Defaults to 2 (loan/account amounts). Pass 0 for physical cash counts. */
+      scale?: number;
+      minimumFractionDigits?: number;
+    },
+  ) => string;
   /** Compact `DD MMM YYYY` date. */
   date: (value: Date | string | number) => string;
   /** Full `DD MMM YYYY HH:mm` date+time. */
@@ -97,6 +111,15 @@ export function I18nProvider({
           currency: options?.currency ?? "XAF",
           minimumFractionDigits: options?.minimumFractionDigits ?? 0,
         }).format(value),
+      currencyMinor: (minor, options) => {
+        const scale = options?.scale ?? 2;
+        const divisor = Math.pow(10, scale);
+        return new Intl.NumberFormat(intlLocale, {
+          style: "currency",
+          currency: options?.currency ?? "XAF",
+          minimumFractionDigits: options?.minimumFractionDigits ?? 0,
+        }).format(minor / divisor);
+      },
       date: (value) =>
         new Intl.DateTimeFormat(intlLocale, {
           day: "2-digit",

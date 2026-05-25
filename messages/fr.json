@@ -118,10 +118,132 @@
   },
   "dashboard": {
     "pageTitle": "Tableau de bord",
-    "placeholder": {
-      "greeting": "Bonjour {name} 👋",
-      "intro": "Vous êtes connecté. Le tableau de bord opérationnel sera disponible dans la prochaine phase de l'implémentation.",
-      "signOut": "Se déconnecter"
+    "welcome": {
+      "greeting": "Bienvenue {name}",
+      "role": "Sans rôle"
+    },
+    "filters": {
+      "title": "Informations Financières",
+      "creditType": "Type de crédit",
+      "creditTypeAll": "Tous les crédits",
+      "period": "Période",
+      "periodToday": "Aujourd'hui",
+      "periodWeek": "Cette semaine",
+      "periodMonth": "Ce mois",
+      "periodYear": "Cette année",
+      "agent": "Agent",
+      "agentAll": "Tous les agents",
+      "agency": "Agence",
+      "agencyAll": "Toutes les agences",
+      "agencyLoading": "Chargement des agences…"
+    },
+    "freshness": {
+      "label": "Dernière mise à jour {relative}",
+      "refresh": "Rafraîchir",
+      "refreshing": "Rafraîchissement…"
+    },
+    "errorTitle": "Impossible de charger le tableau de bord",
+    "forbiddenTitle": "Accès refusé",
+    "forbiddenBody": "Votre profil ne dispose pas des droits nécessaires pour consulter ces indicateurs.",
+    "comingSoon": "Bientôt disponible",
+    "comingSoonChart": "Graphique disponible bientôt — endpoint de série temporelle en cours d'implémentation.",
+    "viewMore": "Voir plus",
+    "quickActions": {
+      "deposit": "Dépôt en caisse",
+      "loan": "Demander un crédit",
+      "client": "Créer un client",
+      "user": "Ajouter un utilisateur"
+    },
+    "kpi": {
+      "balance": {
+        "title": "Solde Principal",
+        "hint": "Encours total du portefeuille."
+      },
+      "todayCollection": {
+        "title": "Collecte du jour",
+        "hint": "Remboursements perçus aujourd'hui."
+      },
+      "activeLoans": {
+        "title": "Crédits en cours",
+        "count": "{count} crédits en cours",
+        "hint": "Encours total des crédits actifs."
+      },
+      "delinquentLoans": {
+        "title": "Crédits en retard",
+        "count": "{count} crédits en retard",
+        "hint": "Encours à risque (PAR 30+60+90).",
+        "countUnavailable": "Compteur disponible bientôt."
+      },
+      "clientsCount": {
+        "title": "Clients",
+        "hint": "Clients enregistrés dans le périmètre."
+      }
+    },
+    "financialPerformance": {
+      "title": "Performances Financières",
+      "subtitle": "Évolution du solde principal et de la collecte sur la période.",
+      "today": "Aujourd'hui",
+      "week": "Semaine",
+      "month": "Mois",
+      "year": "Année",
+      "legendBalance": "Solde Principal",
+      "legendCollection": "Collecte du Jour"
+    },
+    "alerts": {
+      "title": "Alertes Systèmes",
+      "delinquentLoans": "Crédits en retard",
+      "inactiveUsers": "Utilisateurs inactifs",
+      "lowCollection": "Collecte faible aujourd'hui",
+      "loading": "Chargement des alertes…"
+    },
+    "userManagement": {
+      "title": "Gestion des utilisateurs",
+      "registered": "Utilisateurs Inscrits",
+      "active": "Comptes Actifs",
+      "suspended": "Comptes suspendus",
+      "addUser": "Ajouter un utilisateur",
+      "createRole": "Créer un rôle",
+      "countsUnavailable": "Comptes détaillés disponibles bientôt."
+    },
+    "loanTracking": {
+      "title": "Suivi des Crédits",
+      "filterAllAgencies": "Toutes les agences",
+      "granted": "Crédits accordés",
+      "delinquent": "Crédits en retard",
+      "repaid": "Crédits remboursés"
+    },
+    "recentActivities": {
+      "title": "Activités récentes",
+      "today": "Aujourd'hui",
+      "empty": "Aucune activité récente.",
+      "loading": "Chargement des activités…"
+    },
+    "agenciesPerformance": {
+      "title": "Performance des agences",
+      "thisMonth": "Ce mois",
+      "columns": {
+        "agency": "Agence",
+        "collections": "Collectes",
+        "topAgent": "Meilleur Agent",
+        "loans": "Crédits",
+        "delinquent": "Retards"
+      },
+      "comingSoon": "Endpoint d'agrégation par agence en cours d'implémentation."
+    },
+    "field": {
+      "title": "Espace de travail",
+      "intro": "Vos chiffres et vos prochaines actions pour la journée.",
+      "loansCount": "Crédits suivis",
+      "clientsCount": "Clients suivis",
+      "todaySession": "Session de caisse",
+      "todaySessionOpen": "Caisse ouverte",
+      "todaySessionClosed": "Aucune session ouverte",
+      "kycPendingCount": "KYC en attente"
+    },
+    "minimal": {
+      "title": "Bienvenue {name}",
+      "body": "Votre compte est actif. Votre administrateur va vous attribuer un rôle pour débloquer les fonctionnalités correspondantes.",
+      "contactAdmin": "Contactez votre administrateur"
     }
   },
   "shell": {
