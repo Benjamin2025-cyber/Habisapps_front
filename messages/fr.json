@@ -340,6 +340,113 @@
     "pageOf": "Page {current} / {total}",
     "range": "{from}–{to} sur {total}"
   },
+  "staffUsers": {
+    "pageTitle": "Gestion des utilisateurs",
+    "pageDescription": "Création, modification, affectation des rôles et statut des utilisateurs de l'institution.",
+    "errorTitle": "Impossible de charger les utilisateurs",
+    "filters": {
+      "searchLabel": "Rechercher",
+      "searchPlaceholder": "Nom, téléphone, matricule, email…",
+      "statusLabel": "Statut",
+      "statusAll": "Tous les statuts",
+      "agencyLabel": "Agence",
+      "agencyAll": "Toutes les agences",
+      "roleLabel": "Rôle",
+      "roleAll": "Tous les rôles"
+    },
+    "status": {
+      "active": "Actif",
+      "pending_verification": "En attente d'activation",
+      "suspended": "Suspendu",
+      "deactivated": "Désactivé"
+    },
+    "gender": {
+      "male": "Homme",
+      "female": "Femme",
+      "other": "Autre"
+    },
+    "columns": {
+      "matricule": "Matricule",
+      "name": "Nom complet",
+      "phone": "Téléphone",
+      "email": "Email",
+      "roles": "Rôles",
+      "agency": "Agence",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "list": {
+      "titleHeader": "Liste des utilisateurs enregistrés",
+      "count": "{count} utilisateur(s)",
+      "totalCaption": "{count} utilisateur(s) enregistré(s) au total",
+      "empty": "Aucun utilisateur à afficher."
+    },
+    "actions": {
+      "create": "Nouvel utilisateur",
+      "menu": "Actions",
+      "edit": "Modifier",
+      "manageRoles": "Gérer les rôles",
+      "changeStatus": "Changer le statut",
+      "statusActive": "Réactiver",
+      "statusSuspended": "Suspendre",
+      "statusDeactivated": "Désactiver"
+    },
+    "drawer": {
+      "titleCreate": "Nouvel utilisateur",
+      "titleEdit": "Modifier — {name}",
+      "createHint": "Saisissez les informations du nouvel utilisateur, sélectionnez ses rôles et il recevra un SMS d'activation pour finaliser son inscription.",
+      "editHint": "Le numéro de téléphone n'est pas modifiable depuis cet écran.",
+      "create": "Créer l'utilisateur",
+      "sectionIdentity": "Identité",
+      "sectionAssignment": "Affectation",
+      "sectionProfile": "Profil (optionnel)",
+      "sectionRoles": "Rôles",
+      "rolesPlaceholder": "Aucun rôle sélectionné",
+      "rolesHint": "L'attribution est appliquée juste après la création.",
+      "activationNotice": "Le compte sera créé en statut « En attente d'activation ». Un SMS d'activation sera envoyé à l'utilisateur, qui choisira son mot de passe en finalisant l'inscription."
+    },
+    "fields": {
+      "name": "Nom complet",
+      "phone": "Téléphone",
+      "phoneEditHint": "Modifiable uniquement via un workflow de changement de numéro.",
+      "email": "Email",
+      "matricule": "Matricule",
+      "matriculeHint": "Identifiant interne de l'institution.",
+      "jobTitle": "Fonction",
+      "gender": "Genre",
+      "genderPlaceholder": "Sélectionner…",
+      "birthDate": "Date de naissance",
+      "birthPlace": "Lieu de naissance",
+      "serviceName": "Service",
+      "portfolioCode": "Code portefeuille",
+      "agency": "Agence d'affectation",
+      "agencyPlaceholder": "Sélectionner une agence…",
+      "roles": "Rôles"
+    },
+    "rolesDrawer": {
+      "title": "Rôles de l'utilisateur",
+      "subtitle": "Utilisateur : {name}",
+      "currentLabel": "Rôles actuels :",
+      "fieldLabel": "Rôles",
+      "atLeastOne": "Sélectionnez au moins un rôle.",
+      "permissionsCount": "{count} permission(s)",
+      "empty": "Aucun rôle assignable disponible."
+    },
+    "toast": {
+      "createdTitle": "Utilisateur créé",
+      "createdBody": "{name} a été créé(e). Un SMS d'activation lui a été envoyé.",
+      "createdWithRolesBody": "{name} a été créé(e) avec {count} rôle(s). Un SMS d'activation lui a été envoyé.",
+      "createdRolesFailedTitle": "Utilisateur créé mais rôles non attribués",
+      "createdRolesFailedBody": "{name} a été créé(e), mais l'attribution des rôles a échoué : {error}. Vous pouvez la corriger via « Gérer les rôles ».",
+      "updatedTitle": "Utilisateur mis à jour",
+      "updatedBody": "Les modifications de {name} ont été enregistrées.",
+      "statusChangedTitle": "Statut modifié",
+      "statusChangedBody": "{name} est maintenant : {status}.",
+      "statusErrorTitle": "Changement de statut impossible",
+      "rolesChangedTitle": "Rôles mis à jour",
+      "rolesChangedBody": "Les rôles de {name} ont été mis à jour."
+    }
+  },
   "agencies": {
     "pageTitle": "Référentiel — Agences",
     "pageDescription": "Liste des agences de l'institution. Création, modification, statut et gestionnaire.",

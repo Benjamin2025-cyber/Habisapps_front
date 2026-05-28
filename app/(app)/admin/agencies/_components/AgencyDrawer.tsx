@@ -318,9 +318,7 @@ export function AgencyDrawer({
               label={t("agencies.fields.status")}
               value={form.status}
               options={statusOptions}
-              onChange={(event) =>
-                set("status", event.target.value as AgencyStatus)
-              }
+              onChange={(next) => set("status", next as AgencyStatus)}
               error={errors.status}
             />
           ) : null}

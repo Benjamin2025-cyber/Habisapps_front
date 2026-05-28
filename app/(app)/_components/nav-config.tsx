@@ -59,7 +59,7 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     defaultExpanded: false,
     items: [
       { labelKey: "accountingDay", href: "/admin/accounting-day", available: false },
-      { labelKey: "users", href: "/admin/users", available: false },
+      { labelKey: "users", href: "/admin/users", available: true },
       { labelKey: "roles", href: "/admin/roles", available: false },
       { labelKey: "audit", href: "/admin/audit", available: false },
     ],

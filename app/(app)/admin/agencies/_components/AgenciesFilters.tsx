@@ -67,11 +67,9 @@ export function AgenciesFilters({ value, onChange }: Props) {
           value={value.status}
           options={statusOptions}
           placeholder={t("agencies.filters.statusAll")}
-          onChange={(event) =>
-            onChange({
-              ...value,
-              status: event.target.value as AgencyStatus | "",
-            })
+          isClearable
+          onChange={(next) =>
+            onChange({ ...value, status: next as AgencyStatus | "" })
           }
           className="mt-2"
         />
