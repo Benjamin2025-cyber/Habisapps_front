@@ -16,7 +16,9 @@ import {
   type PaginatedAgencies,
 } from "@/lib/api/agencies";
 import { localizeApiError, localizeApiMessage } from "@/lib/api/errors";
+import { useCan } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
+import { usePermissionGuard } from "@/lib/auth/usePermissionGuard";
 import { useApi } from "@/lib/hooks/useApi";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import { useToast } from "@/lib/toast/ToastProvider";
@@ -45,6 +47,8 @@ export default function AgenciesPage() {
   const t = useTranslations();
   const session = useSession();
   const toast = useToast();
+  const allowed = usePermissionGuard(["agencies.view"]);
+  const canManage = useCan("agencies.manage");
   const [filters, setFilters] = useState<AgenciesFilterState>(
     EMPTY_AGENCIES_FILTERS,
   );
@@ -91,7 +95,7 @@ export default function AgenciesPage() {
     });
   }, [data, filters]);
 
-  if (session.status !== "authenticated") return null;
+  if (session.status !== "authenticated" || !allowed) return null;
 
   function openCreate() {
     setEditing(null);
@@ -176,11 +180,13 @@ export default function AgenciesPage() {
         title={t("agencies.pageTitle")}
         description={t("agencies.pageDescription")}
         actions={
-          <Button variant="primary" size="md" onClick={openCreate}>
-            <span className="inline-flex items-center gap-2">
-              <PlusIcon /> {t("agencies.actions.create")}
-            </span>
-          </Button>
+          canManage ? (
+            <Button variant="primary" size="md" onClick={openCreate}>
+              <span className="inline-flex items-center gap-2">
+                <PlusIcon /> {t("agencies.actions.create")}
+              </span>
+            </Button>
+          ) : null
         }
       />
 
@@ -207,6 +213,7 @@ export default function AgenciesPage() {
       <AgenciesTable
         rows={visibleAgencies}
         loading={loading && !data}
+        canManage={canManage}
         pagination={
           pageMeta
             ? {

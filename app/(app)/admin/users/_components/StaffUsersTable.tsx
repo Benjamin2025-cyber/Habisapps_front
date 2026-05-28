@@ -21,6 +21,10 @@ type Props = {
   pagination?: DataTablePagination;
   /** Optional map of role.name → display_name for prettier badges. */
   roleLabels?: Record<string, string>;
+  /** Permission flags — items hidden when the matching flag is false. */
+  canEdit: boolean;
+  canManageRoles: boolean;
+  canChangeStatus: boolean;
   onEdit: (user: StaffUser) => void;
   onManageRoles: (user: StaffUser) => void;
   onChangeStatus: (
@@ -44,10 +48,14 @@ export function StaffUsersTable({
   loading,
   pagination,
   roleLabels = {},
+  canEdit,
+  canManageRoles,
+  canChangeStatus,
   onEdit,
   onManageRoles,
   onChangeStatus,
 }: Props) {
+  const hasAnyAction = canEdit || canManageRoles || canChangeStatus;
   const t = useTranslations();
 
   const columns = useMemo<ColumnDef<StaffUser, unknown>[]>(
@@ -145,56 +153,79 @@ export function StaffUsersTable({
           );
         },
       },
-      {
-        id: "actions",
-        header: t("staffUsers.columns.actions"),
-        meta: { align: "right" },
-        cell: ({ row }) => {
-          const user = row.original;
-          const items: DropdownMenuItem[] = [
+      ...(hasAnyAction
+        ? [
             {
-              label: t("staffUsers.actions.edit"),
-              onClick: () => onEdit(user),
-            },
-            {
-              label: t("staffUsers.actions.manageRoles"),
-              onClick: () => onManageRoles(user),
-            },
-            { kind: "separator" },
-            { kind: "label", label: t("staffUsers.actions.changeStatus") },
-            {
-              label: t("staffUsers.actions.statusActive"),
-              onClick: () => onChangeStatus(user, "active"),
-              disabled:
-                user.status === "active" ||
-                user.status === "pending_verification",
-            },
-            {
-              label: t("staffUsers.actions.statusSuspended"),
-              onClick: () => onChangeStatus(user, "suspended"),
-              disabled: user.status === "suspended",
-            },
-            {
-              label: t("staffUsers.actions.statusDeactivated"),
-              onClick: () => onChangeStatus(user, "deactivated"),
-              disabled: user.status === "deactivated",
-              destructive: true,
-            },
-          ];
-          return (
-            <div className="flex justify-end">
-              <DropdownMenu
-                trigger={<MoreVerticalIcon className="h-4 w-4" />}
-                triggerLabel={t("staffUsers.actions.menu")}
-                items={items}
-                align="right"
-              />
-            </div>
-          );
-        },
-      },
+              id: "actions",
+              header: t("staffUsers.columns.actions"),
+              meta: { align: "right" },
+              cell: ({ row }) => {
+                const user = row.original;
+                const items: DropdownMenuItem[] = [];
+                if (canEdit) {
+                  items.push({
+                    label: t("staffUsers.actions.edit"),
+                    onClick: () => onEdit(user),
+                  });
+                }
+                if (canManageRoles) {
+                  items.push({
+                    label: t("staffUsers.actions.manageRoles"),
+                    onClick: () => onManageRoles(user),
+                  });
+                }
+                if (canChangeStatus) {
+                  if (items.length > 0) items.push({ kind: "separator" });
+                  items.push({
+                    kind: "label",
+                    label: t("staffUsers.actions.changeStatus"),
+                  });
+                  items.push({
+                    label: t("staffUsers.actions.statusActive"),
+                    onClick: () => onChangeStatus(user, "active"),
+                    disabled:
+                      user.status === "active" ||
+                      user.status === "pending_verification",
+                  });
+                  items.push({
+                    label: t("staffUsers.actions.statusSuspended"),
+                    onClick: () => onChangeStatus(user, "suspended"),
+                    disabled: user.status === "suspended",
+                  });
+                  items.push({
+                    label: t("staffUsers.actions.statusDeactivated"),
+                    onClick: () => onChangeStatus(user, "deactivated"),
+                    disabled: user.status === "deactivated",
+                    destructive: true,
+                  });
+                }
+                if (items.length === 0) return null;
+                return (
+                  <div className="flex justify-end">
+                    <DropdownMenu
+                      trigger={<MoreVerticalIcon className="h-4 w-4" />}
+                      triggerLabel={t("staffUsers.actions.menu")}
+                      items={items}
+                      align="right"
+                    />
+                  </div>
+                );
+              },
+            } satisfies ColumnDef<StaffUser, unknown>,
+          ]
+        : []),
     ],
-    [t, roleLabels, onEdit, onManageRoles, onChangeStatus],
+    [
+      t,
+      roleLabels,
+      canEdit,
+      canManageRoles,
+      canChangeStatus,
+      hasAnyAction,
+      onEdit,
+      onManageRoles,
+      onChangeStatus,
+    ],
   );
 
   return (

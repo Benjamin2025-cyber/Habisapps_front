@@ -33,3 +33,33 @@ export async function fetchRoles(token: string): Promise<RolesIndexResponse> {
     permissions: raw?.permissions ?? {},
   };
 }
+
+export type UpdateRolePermissionsResponse = {
+  role: {
+    name: string;
+    guard_name: string;
+    permissions: string[];
+  };
+};
+
+/**
+ * Replaces (not merges) the permission set for a role. The API enforces
+ *   - at least one permission
+ *   - "protected" permissions can only be granted to `platform-admin`
+ *   - `platform-admin` must keep a minimum administration set
+ * so callers should handle 422 responses gracefully.
+ */
+export async function updateRolePermissions(
+  token: string,
+  roleName: string,
+  permissions: string[],
+): Promise<UpdateRolePermissionsResponse> {
+  return apiRequest<UpdateRolePermissionsResponse>(
+    `roles/${roleName}/permissions`,
+    {
+      method: "PUT",
+      token,
+      body: { permissions },
+    },
+  );
+}

@@ -17,6 +17,17 @@ import { useSession } from "@/lib/auth/SessionProvider";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import { NAV_GROUPS, NAV_SOLO_ITEMS, type NavItem } from "./nav-config";
 
+/** True iff the item has no permission gate, or the user holds at least one. */
+function itemAllowed(
+  item: { permissions?: ReadonlyArray<string> },
+  ownedPermissions: ReadonlyArray<string>,
+): boolean {
+  if (!item.permissions || item.permissions.length === 0) return true;
+  return item.permissions.some((permission) =>
+    ownedPermissions.includes(permission),
+  );
+}
+
 type SidebarProps = {
   collapsed: boolean;
   onToggle: () => void;
@@ -90,6 +101,18 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
 
+  // Permission-gate everything against the session's union of role + direct
+  // permissions. Items with no permission gate stay visible.
+  const ownedPermissions =
+    session.status === "authenticated" ? session.user.permissions ?? [] : [];
+  const visibleSoloItems = NAV_SOLO_ITEMS.filter((item) =>
+    itemAllowed(item, ownedPermissions),
+  );
+  const visibleGroups = NAV_GROUPS.map((group) => ({
+    ...group,
+    items: group.items.filter((item) => itemAllowed(item, ownedPermissions)),
+  })).filter((group) => group.items.length > 0);
+
   return (
     <aside
       style={{ backgroundColor: PALETTE.background }}
@@ -119,7 +142,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       </div>
 
       <nav className="flex-1 overflow-y-auto py-3">
-        {NAV_SOLO_ITEMS.map((item) => (
+        {visibleSoloItems.map((item) => (
           <div key={item.href} className="px-2">
             <SoloLink
               item={item}
@@ -131,7 +154,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </div>
         ))}
 
-        {NAV_GROUPS.map((group) => {
+        {visibleGroups.map((group) => {
           const open = openGroups.has(group.labelKey);
           const hasActiveItem = group.items.some(
             (item) => item.available && isActive(item.href),

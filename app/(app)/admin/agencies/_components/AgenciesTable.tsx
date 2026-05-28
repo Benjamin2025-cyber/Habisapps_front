@@ -15,6 +15,8 @@ import type { Agency, AgencyStatus } from "@/lib/api/agencies";
 type Props = {
   rows: ReadonlyArray<Agency>;
   loading: boolean;
+  /** When false, the row action menu is hidden entirely. */
+  canManage: boolean;
   pagination?: DataTablePagination;
   onEdit: (agency: Agency) => void;
   onChangeStatus: (agency: Agency, next: AgencyStatus) => void;
@@ -34,6 +36,7 @@ const STATUS_TONE: Record<
 export function AgenciesTable({
   rows,
   loading,
+  canManage,
   pagination,
   onEdit,
   onChangeStatus,
@@ -128,59 +131,63 @@ export function AgenciesTable({
           );
         },
       },
-      {
-        id: "actions",
-        header: t("agencies.columns.actions"),
-        meta: { align: "right" },
-        cell: ({ row }) => {
-          const agency = row.original;
-          const items: DropdownMenuItem[] = [
+      ...(canManage
+        ? [
             {
-              label: t("agencies.actions.edit"),
-              onClick: () => onEdit(agency),
-            },
-            {
-              label: t("agencies.actions.transferManager"),
-              onClick: () => onTransferManager(agency),
-            },
-            { kind: "separator" },
-            { kind: "label", label: t("agencies.actions.changeStatus") },
-            {
-              label: t("agencies.actions.statusActive"),
-              onClick: () => onChangeStatus(agency, "active"),
-              disabled: agency.status === "active",
-            },
-            {
-              label: t("agencies.actions.statusInactive"),
-              onClick: () => onChangeStatus(agency, "inactive"),
-              disabled: agency.status === "inactive",
-            },
-            {
-              label: t("agencies.actions.statusSuspended"),
-              onClick: () => onChangeStatus(agency, "suspended"),
-              disabled: agency.status === "suspended",
-            },
-            {
-              label: t("agencies.actions.statusArchived"),
-              onClick: () => onChangeStatus(agency, "archived"),
-              disabled: agency.status === "archived",
-              destructive: true,
-            },
-          ];
-          return (
-            <div className="flex justify-end">
-              <DropdownMenu
-                trigger={<MoreVerticalIcon className="h-4 w-4" />}
-                triggerLabel={t("agencies.actions.menu")}
-                items={items}
-                align="right"
-              />
-            </div>
-          );
-        },
-      },
+              id: "actions",
+              header: t("agencies.columns.actions"),
+              meta: { align: "right" },
+              cell: ({ row }) => {
+                const agency = row.original;
+                const items: DropdownMenuItem[] = [
+                  {
+                    label: t("agencies.actions.edit"),
+                    onClick: () => onEdit(agency),
+                  },
+                  {
+                    label: t("agencies.actions.transferManager"),
+                    onClick: () => onTransferManager(agency),
+                  },
+                  { kind: "separator" },
+                  { kind: "label", label: t("agencies.actions.changeStatus") },
+                  {
+                    label: t("agencies.actions.statusActive"),
+                    onClick: () => onChangeStatus(agency, "active"),
+                    disabled: agency.status === "active",
+                  },
+                  {
+                    label: t("agencies.actions.statusInactive"),
+                    onClick: () => onChangeStatus(agency, "inactive"),
+                    disabled: agency.status === "inactive",
+                  },
+                  {
+                    label: t("agencies.actions.statusSuspended"),
+                    onClick: () => onChangeStatus(agency, "suspended"),
+                    disabled: agency.status === "suspended",
+                  },
+                  {
+                    label: t("agencies.actions.statusArchived"),
+                    onClick: () => onChangeStatus(agency, "archived"),
+                    disabled: agency.status === "archived",
+                    destructive: true,
+                  },
+                ];
+                return (
+                  <div className="flex justify-end">
+                    <DropdownMenu
+                      trigger={<MoreVerticalIcon className="h-4 w-4" />}
+                      triggerLabel={t("agencies.actions.menu")}
+                      items={items}
+                      align="right"
+                    />
+                  </div>
+                );
+              },
+            } satisfies ColumnDef<Agency, unknown>,
+          ]
+        : []),
     ],
-    [t, onEdit, onChangeStatus, onTransferManager],
+    [t, canManage, onEdit, onChangeStatus, onTransferManager],
   );
 
   return (

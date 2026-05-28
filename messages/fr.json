@@ -335,6 +335,36 @@
   "toast": {
     "dismissAriaLabel": "Fermer la notification"
   },
+  "rolesPage": {
+    "pageTitle": "Rôles & permissions",
+    "pageDescription": "Sélectionnez un rôle pour voir et modifier ses permissions. Les changements ne sont enregistrés qu'après clic sur « Enregistrer ».",
+    "errorTitle": "Impossible de charger les rôles",
+    "emptySelection": "Sélectionnez un rôle dans la liste de gauche pour voir et éditer ses permissions.",
+    "list": {
+      "title": "Rôles",
+      "count": "{count} rôle(s)",
+      "permissionsCount": "{count} permission(s)",
+      "protectedBadge": "Protégé"
+    },
+    "editor": {
+      "title": "Permissions de {name}",
+      "count": "{active} active(s) sur {total}",
+      "save": "Enregistrer",
+      "reset": "Annuler les modifications",
+      "searchPlaceholder": "Filtrer les permissions (ex. crm.clients)…",
+      "empty": "Aucune permission ne correspond au filtre.",
+      "toggleAll": "Tout cocher",
+      "confirmDiscard": "Des modifications non enregistrées seront perdues. Continuer ?",
+      "errorTitle": "Modification refusée",
+      "protectedRoleTitle": "Rôle protégé",
+      "protectedRoleBody": "Ce rôle est marqué comme protégé : certaines permissions ne peuvent pas être retirées ou ajoutées. L'API refusera toute modification qui viole ces contraintes."
+    },
+    "toast": {
+      "savedTitle": "Permissions mises à jour",
+      "savedBody": "Les permissions du rôle {name} ont été enregistrées.",
+      "errorTitle": "Enregistrement impossible"
+    }
+  },
   "dataTable": {
     "empty": "Aucune ligne à afficher.",
     "pageOf": "Page {current} / {total}",

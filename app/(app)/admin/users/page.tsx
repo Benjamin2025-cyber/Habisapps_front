@@ -17,7 +17,9 @@ import {
   type StaffUserStatus,
   type StaffUserWritePayload,
 } from "@/lib/api/staff-users";
+import { useCan } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
+import { usePermissionGuard } from "@/lib/auth/usePermissionGuard";
 import { useApi } from "@/lib/hooks/useApi";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import { useToast } from "@/lib/toast/ToastProvider";
@@ -48,6 +50,11 @@ export default function StaffUsersPage() {
   const t = useTranslations();
   const session = useSession();
   const toast = useToast();
+  const allowed = usePermissionGuard(["users.view"]);
+  const canCreate = useCan("users.create");
+  const canEdit = useCan("users.update");
+  const canManageRoles = useCan("users.roles.manage");
+  const canChangeStatus = useCan("users.status.manage");
   const [filters, setFilters] = useState<StaffUsersFilterState>(
     EMPTY_STAFF_USERS_FILTERS,
   );
@@ -127,7 +134,7 @@ export default function StaffUsersPage() {
     });
   }, [data, filters]);
 
-  if (session.status !== "authenticated") return null;
+  if (session.status !== "authenticated" || !allowed) return null;
 
   function openCreate() {
     setEditing(null);
@@ -244,11 +251,13 @@ export default function StaffUsersPage() {
         title={t("staffUsers.pageTitle")}
         description={t("staffUsers.pageDescription")}
         actions={
-          <Button variant="primary" size="md" onClick={openCreate}>
-            <span className="inline-flex items-center gap-2">
-              <PlusIcon /> {t("staffUsers.actions.create")}
-            </span>
-          </Button>
+          canCreate ? (
+            <Button variant="primary" size="md" onClick={openCreate}>
+              <span className="inline-flex items-center gap-2">
+                <PlusIcon /> {t("staffUsers.actions.create")}
+              </span>
+            </Button>
+          ) : null
         }
       />
 
@@ -281,6 +290,9 @@ export default function StaffUsersPage() {
         rows={visibleStaffUsers}
         loading={loading && !data}
         roleLabels={roleLabels}
+        canEdit={canEdit}
+        canManageRoles={canManageRoles}
+        canChangeStatus={canChangeStatus}
         pagination={
           pageMeta
             ? {

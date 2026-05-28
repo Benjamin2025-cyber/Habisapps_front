@@ -18,6 +18,12 @@ export type NavItem = {
   href: string;
   /** False when the page hasn't been built yet — UI shows a padlock + "Bientôt disponible". */
   available: boolean;
+  /**
+   * Permission gate. Item is hidden unless the user holds at least one of the
+   * listed permissions. `undefined` means visible to every authenticated user.
+   * Use names defined in `HabisApi/config/security.php`.
+   */
+  permissions?: ReadonlyArray<string>;
 };
 
 export type NavGroup = {
@@ -32,9 +38,8 @@ export type NavGroup = {
 
 /**
  * Solo links that sit above the grouped navigation (no group header). The
- * dashboard isn't shown in the PDF sidebar (the maquette assumes the user
- * navigates back via the logo) but we keep it surfaced for now so there's a
- * clear way home until the topbar carries that affordance.
+ * dashboard is visible to every authenticated user — the page itself adapts
+ * its content to the user's permissions.
  */
 export const NAV_SOLO_ITEMS: ReadonlyArray<NavItem & { icon: ComponentType<SVGProps<SVGSVGElement>> }> = [
   {
@@ -46,11 +51,9 @@ export const NAV_SOLO_ITEMS: ReadonlyArray<NavItem & { icon: ComponentType<SVGPr
 ];
 
 /**
- * Group order, labels, and items mirror interfaces.pdf p6/p8 exactly:
- * Administration → Base de donnée → Paramétrage → Opérations courantes →
- * Référentiel → Crédit → Comptabilité → Édition. Items inside groups that
- * are collapsed in the PDF are our best mapping of existing entities to the
- * group's role.
+ * Group order, labels, and items mirror interfaces.pdf p6/p8 exactly. Each
+ * item carries the permission(s) that unlock it; see HabisApi
+ * `config/security.php` for the canonical names.
  */
 export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
   {
@@ -58,10 +61,30 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     icon: SettingsIcon,
     defaultExpanded: false,
     items: [
-      { labelKey: "accountingDay", href: "/admin/accounting-day", available: false },
-      { labelKey: "users", href: "/admin/users", available: true },
-      { labelKey: "roles", href: "/admin/roles", available: false },
-      { labelKey: "audit", href: "/admin/audit", available: false },
+      {
+        labelKey: "accountingDay",
+        href: "/admin/accounting-day",
+        available: false,
+        permissions: ["accounting.audit.view"],
+      },
+      {
+        labelKey: "users",
+        href: "/admin/users",
+        available: true,
+        permissions: ["users.view"],
+      },
+      {
+        labelKey: "roles",
+        href: "/admin/roles",
+        available: true,
+        permissions: ["roles.view", "roles.manage"],
+      },
+      {
+        labelKey: "audit",
+        href: "/admin/audit",
+        available: false,
+        permissions: ["audit.view"],
+      },
     ],
   },
   {
@@ -69,7 +92,14 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     icon: DatabaseIcon,
     defaultExpanded: false,
     items: [
-      { labelKey: "databaseBackups", href: "/database/backups", available: false },
+      // Backups have no dedicated permission in security.php — gate behind a
+      // platform-admin-only proxy. `system.view-health` is the closest match.
+      {
+        labelKey: "databaseBackups",
+        href: "/database/backups",
+        available: false,
+        permissions: ["system.view-health"],
+      },
     ],
   },
   {
@@ -77,8 +107,18 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     icon: SlidersIcon,
     defaultExpanded: false,
     items: [
-      { labelKey: "denominations", href: "/settings/denominations", available: false },
-      { labelKey: "batch", href: "/settings/batch", available: false },
+      {
+        labelKey: "denominations",
+        href: "/settings/denominations",
+        available: false,
+        permissions: ["cash.denominations.view"],
+      },
+      {
+        labelKey: "batch",
+        href: "/settings/batch",
+        available: false,
+        permissions: ["batch.procedures.view", "batch.procedures.manage"],
+      },
     ],
   },
   {
@@ -86,10 +126,30 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     icon: WorkflowIcon,
     defaultExpanded: false,
     items: [
-      { labelKey: "tills", href: "/operations/tills", available: false },
-      { labelKey: "tellerSessions", href: "/operations/sessions", available: false },
-      { labelKey: "tellerTransactions", href: "/operations/transactions", available: false },
-      { labelKey: "tellerInspection", href: "/operations/inspection", available: false },
+      {
+        labelKey: "tills",
+        href: "/operations/tills",
+        available: false,
+        permissions: ["cash.tills.view"],
+      },
+      {
+        labelKey: "tellerSessions",
+        href: "/operations/sessions",
+        available: false,
+        permissions: ["cash.sessions.view"],
+      },
+      {
+        labelKey: "tellerTransactions",
+        href: "/operations/transactions",
+        available: false,
+        permissions: ["cash.transactions.view"],
+      },
+      {
+        labelKey: "tellerInspection",
+        href: "/operations/inspection",
+        available: false,
+        permissions: ["cash.sessions.view"],
+      },
     ],
   },
   {
@@ -97,12 +157,42 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     icon: BookIcon,
     defaultExpanded: true,
     items: [
-      { labelKey: "agencies", href: "/admin/agencies", available: true },
-      { labelKey: "managers", href: "/admin/managers", available: false },
-      { labelKey: "clients", href: "/clients", available: false },
-      { labelKey: "accounts", href: "/accounts", available: false },
-      { labelKey: "guarantors", href: "/guarantors", available: false },
-      { labelKey: "proxies", href: "/proxies", available: false },
+      {
+        labelKey: "agencies",
+        href: "/admin/agencies",
+        available: true,
+        permissions: ["agencies.view"],
+      },
+      {
+        labelKey: "managers",
+        href: "/admin/managers",
+        available: false,
+        permissions: ["users.view"],
+      },
+      {
+        labelKey: "clients",
+        href: "/clients",
+        available: false,
+        permissions: ["crm.clients.view"],
+      },
+      {
+        labelKey: "accounts",
+        href: "/accounts",
+        available: false,
+        permissions: ["customer.accounts.view"],
+      },
+      {
+        labelKey: "guarantors",
+        href: "/guarantors",
+        available: false,
+        permissions: ["crm.guarantors.view"],
+      },
+      {
+        labelKey: "proxies",
+        href: "/proxies",
+        available: false,
+        permissions: ["crm.proxies.view"],
+      },
     ],
   },
   {
@@ -110,12 +200,48 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     icon: BanknoteIcon,
     defaultExpanded: true,
     items: [
-      { labelKey: "loans", href: "/credit/loans", available: false },
-      { labelKey: "collaterals", href: "/credit/collaterals", available: false },
-      { labelKey: "loanDisbursement", href: "/credit/disbursement", available: false },
-      { labelKey: "loanDecision", href: "/credit/decision", available: false },
-      { labelKey: "loanTransfers", href: "/credit/transfers", available: false },
-      { labelKey: "delinquencies", href: "/credit/delinquencies", available: false },
+      {
+        labelKey: "loans",
+        href: "/credit/loans",
+        available: false,
+        permissions: ["loans.view"],
+      },
+      {
+        labelKey: "collaterals",
+        href: "/credit/collaterals",
+        available: false,
+        permissions: ["loans.collaterals.manage", "loans.guarantees.manage"],
+      },
+      {
+        labelKey: "loanDisbursement",
+        href: "/credit/disbursement",
+        available: false,
+        permissions: ["loans.disburse"],
+      },
+      {
+        labelKey: "loanDecision",
+        href: "/credit/decision",
+        available: false,
+        permissions: [
+          "loans.approvals.montage",
+          "loans.approvals.comptabilite",
+          "loans.approvals.controle",
+          "loans.approvals.direction",
+          "loans.status.transition",
+        ],
+      },
+      {
+        labelKey: "loanTransfers",
+        href: "/credit/transfers",
+        available: false,
+        permissions: ["loans.transfers.manage"],
+      },
+      {
+        labelKey: "delinquencies",
+        href: "/credit/delinquencies",
+        available: false,
+        permissions: ["loans.delinquency.manage", "loans.recoveries.manage"],
+      },
     ],
   },
   {
@@ -123,7 +249,12 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     icon: LayersIcon,
     defaultExpanded: true,
     items: [
-      { labelKey: "globalClientImage", href: "/accounting/global-client-image", available: false },
+      {
+        labelKey: "globalClientImage",
+        href: "/accounting/global-client-image",
+        available: false,
+        permissions: ["crm.clients.view"],
+      },
     ],
   },
   {
@@ -131,12 +262,42 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     icon: FileTextIcon,
     defaultExpanded: true,
     items: [
-      { labelKey: "reportsPar", href: "/reports/par", available: false },
-      { labelKey: "ledgerJournal", href: "/reports/journal", available: false },
-      { labelKey: "cashDraft", href: "/reports/cash-draft", available: false },
-      { labelKey: "reportsExigible", href: "/reports/exigible", available: false },
-      { labelKey: "reportsRelease", href: "/reports/release", available: false },
-      { labelKey: "reportsBalance", href: "/reports/balance", available: false },
+      {
+        labelKey: "reportsPar",
+        href: "/reports/par",
+        available: false,
+        permissions: ["loans.delinquency.manage", "ledger.accounts.view"],
+      },
+      {
+        labelKey: "ledgerJournal",
+        href: "/reports/journal",
+        available: false,
+        permissions: ["journal.entries.view"],
+      },
+      {
+        labelKey: "cashDraft",
+        href: "/reports/cash-draft",
+        available: false,
+        permissions: ["cash.reconciliations.view"],
+      },
+      {
+        labelKey: "reportsExigible",
+        href: "/reports/exigible",
+        available: false,
+        permissions: ["loans.delinquency.manage"],
+      },
+      {
+        labelKey: "reportsRelease",
+        href: "/reports/release",
+        available: false,
+        permissions: ["loans.collaterals.manage"],
+      },
+      {
+        labelKey: "reportsBalance",
+        href: "/reports/balance",
+        available: false,
+        permissions: ["ledger.accounts.view"],
+      },
     ],
   },
 ];
@@ -154,6 +315,7 @@ export function flatNavItems(): ReadonlyArray<NavItem> {
       labelKey: item.labelKey,
       href: item.href,
       available: item.available,
+      permissions: item.permissions,
     })),
     ...NAV_GROUPS.flatMap((group) => group.items),
   ];
