@@ -6,10 +6,13 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
-import { apiRequest, ApiError } from "@/lib/api/client";
+import { apiRequest, ApiError, setAuthExpiredHandler } from "@/lib/api/client";
+import { useTranslations } from "@/lib/i18n/I18nProvider";
+import { useToast } from "@/lib/toast/ToastProvider";
 import type { MeResponse, StaffUser } from "@/lib/api/types";
 import { fetchMeRequest } from "./api";
 import { sessionStorageDriver, type StoredSession } from "./session-storage";
@@ -29,11 +32,15 @@ type SessionContextValue = SessionState & {
 const SessionContext = createContext<SessionContextValue | null>(null);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
+  const t = useTranslations();
+  const toast = useToast();
   const [state, setState] = useState<SessionState>({
     status: "loading",
     user: null,
     token: null,
   });
+  // Guard so a burst of in-flight 401s only fires one toast / state reset.
+  const expiredFiredRef = useRef(false);
 
   // Hydrate from localStorage on first client paint.
   useEffect(() => {
@@ -78,7 +85,28 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const signIn = useCallback((session: StoredSession) => {
     sessionStorageDriver.write(session);
     setState({ status: "authenticated", user: session.user, token: session.token });
+    // Allow a future 401 to surface a fresh toast for the new session.
+    expiredFiredRef.current = false;
   }, []);
+
+  // Wire the API layer's auth-expired handler. When any request comes back
+  // 401 with a bearer token, we clear the local session and surface a single
+  // toast — the (app) layout's auth guard handles the redirect to /login.
+  useEffect(() => {
+    setAuthExpiredHandler(() => {
+      if (expiredFiredRef.current) return;
+      expiredFiredRef.current = true;
+      sessionStorageDriver.clear();
+      setState({ status: "anonymous", user: null, token: null });
+      toast.info(
+        t("auth.sessionExpired.title"),
+        t("auth.sessionExpired.body"),
+      );
+    });
+    return () => {
+      setAuthExpiredHandler(null);
+    };
+  }, [toast, t]);
 
   const signOut = useCallback(async () => {
     const currentToken = state.status === "authenticated" ? state.token : null;

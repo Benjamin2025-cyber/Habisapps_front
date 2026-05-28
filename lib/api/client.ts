@@ -154,6 +154,10 @@ export async function apiRequest<T>(
       parseRetryAfterHeader(response.headers.get("Retry-After")) ??
       extractRetryAfterFromMessage(envelope?.message);
 
+    if (response.status === 401 && options.token) {
+      notifyAuthExpired();
+    }
+
     throw new ApiError(
       envelope?.message ?? `Request failed (HTTP ${response.status})`,
       response.status,
@@ -163,4 +167,22 @@ export async function apiRequest<T>(
   }
 
   return (envelope?.data ?? null) as T;
+}
+
+/**
+ * Handler called whenever a request with a bearer token comes back 401.
+ * The session provider registers a handler on mount that clears the local
+ * session and surfaces a "session expirée" toast — the auth guard in
+ * `app/(app)/layout.tsx` then routes the user back to `/login`.
+ */
+let authExpiredHandler: (() => void) | null = null;
+
+export function setAuthExpiredHandler(handler: (() => void) | null): void {
+  authExpiredHandler = handler;
+}
+
+export function notifyAuthExpired(): void {
+  if (authExpiredHandler) {
+    authExpiredHandler();
+  }
 }

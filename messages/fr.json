@@ -108,6 +108,10 @@
       "submitting": "Envoi du code…",
       "errorTitle": "Envoi du code impossible"
     },
+    "sessionExpired": {
+      "title": "Session expirée",
+      "body": "Veuillez vous reconnecter pour continuer."
+    },
     "resetPassword": {
       "pageTitle": "Réinitialiser le mot de passe",
       "heading": "Nouveau mot de passe",

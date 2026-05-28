@@ -1,4 +1,4 @@
-import { apiRequest } from "./client";
+import { apiRequest, notifyAuthExpired } from "./client";
 
 export type AgencyStatus = "active" | "inactive" | "suspended" | "archived";
 
@@ -86,6 +86,9 @@ export async function fetchAgencies(
 
   const text = await response.text();
   if (!response.ok || text.length === 0) {
+    if (response.status === 401) {
+      notifyAuthExpired();
+    }
     throw new Error(`Failed to fetch agencies (HTTP ${response.status})`);
   }
 
