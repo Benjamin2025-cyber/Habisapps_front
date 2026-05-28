@@ -32,7 +32,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-muted/30">
+    <div className="flex h-dvh bg-muted/30">
       <Sidebar
         collapsed={collapsed}
         onToggle={() => setCollapsed((current) => !current)}
@@ -42,7 +42,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           user={session.user}
           onToggleSidebar={() => setCollapsed((current) => !current)}
         />
-        <main className="flex-1 overflow-x-hidden">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden">
           <div className="flex flex-col gap-6 px-4 py-6 sm:px-5 lg:px-6">
             {children}
           </div>

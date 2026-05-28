@@ -1,228 +1,161 @@
 import type { ComponentType, SVGProps } from "react";
 import {
   BanknoteIcon,
-  BellIcon,
   BookIcon,
-  BuildingIcon,
-  CalendarIcon,
-  CashIcon,
-  CheckCircleIcon,
+  DatabaseIcon,
   FileTextIcon,
   HomeIcon,
-  PrinterIcon,
+  LayersIcon,
   SettingsIcon,
-  ShieldIcon,
-  UserIcon,
-  UsersIcon,
+  SlidersIcon,
+  WorkflowIcon,
 } from "@/components/ui/icons";
 
 export type NavItem = {
   /** Translation key under `shell.sidebar.items.*` (no namespace prefix). */
   labelKey: string;
-  /** Concrete URL. For locked items, the href is still set so we can hover-preview but clicks are no-ops. */
+  /** Concrete URL. Locked items keep their href for hover-preview but never navigate. */
   href: string;
-  icon: ComponentType<SVGProps<SVGSVGElement>>;
   /** False when the page hasn't been built yet — UI shows a padlock + "Bientôt disponible". */
   available: boolean;
 };
 
 export type NavGroup = {
-  /** Translation key under `shell.sidebar.groups.*`. `null` skips the group label. */
-  labelKey: string | null;
+  /** Translation key under `shell.sidebar.groups.*`. */
+  labelKey: string;
+  /** Icon shown in the collapsible group header. */
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
+  /** Whether the group is expanded the first time the sidebar mounts. */
+  defaultExpanded: boolean;
   items: NavItem[];
 };
 
 /**
- * Each entry is grouped exactly as DESIGN_PRINCIPLES.md §8.1 prescribes.
- * `available: false` means the page does not exist yet and will render with a
- * padlock. Flip to `true` as each implementation phase ships.
+ * Solo links that sit above the grouped navigation (no group header). The
+ * dashboard isn't shown in the PDF sidebar (the maquette assumes the user
+ * navigates back via the logo) but we keep it surfaced for now so there's a
+ * clear way home until the topbar carries that affordance.
+ */
+export const NAV_SOLO_ITEMS: ReadonlyArray<NavItem & { icon: ComponentType<SVGProps<SVGSVGElement>> }> = [
+  {
+    labelKey: "dashboard",
+    href: "/dashboard",
+    icon: HomeIcon,
+    available: true,
+  },
+];
+
+/**
+ * Group order, labels, and items mirror interfaces.pdf p6/p8 exactly:
+ * Administration → Base de donnée → Paramétrage → Opérations courantes →
+ * Référentiel → Crédit → Comptabilité → Édition. Items inside groups that
+ * are collapsed in the PDF are our best mapping of existing entities to the
+ * group's role.
  */
 export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
   {
-    labelKey: "main",
-    items: [
-      {
-        labelKey: "dashboard",
-        href: "/dashboard",
-        icon: HomeIcon,
-        available: true,
-      },
-    ],
-  },
-  {
     labelKey: "administration",
+    icon: SettingsIcon,
+    defaultExpanded: false,
     items: [
-      { labelKey: "users", href: "/admin/users", icon: UsersIcon, available: false },
-      {
-        labelKey: "agencies",
-        href: "/admin/agencies",
-        icon: BuildingIcon,
-        available: false,
-      },
-      { labelKey: "roles", href: "/admin/roles", icon: ShieldIcon, available: false },
-      {
-        labelKey: "accountingDay",
-        href: "/admin/accounting-day",
-        icon: CalendarIcon,
-        available: false,
-      },
-      { labelKey: "audit", href: "/admin/audit", icon: FileTextIcon, available: false },
+      { labelKey: "accountingDay", href: "/admin/accounting-day", available: false },
+      { labelKey: "users", href: "/admin/users", available: false },
+      { labelKey: "roles", href: "/admin/roles", available: false },
+      { labelKey: "audit", href: "/admin/audit", available: false },
     ],
   },
   {
-    labelKey: "referentiel",
+    labelKey: "database",
+    icon: DatabaseIcon,
+    defaultExpanded: false,
     items: [
-      { labelKey: "clients", href: "/clients", icon: UserIcon, available: false },
-      { labelKey: "accounts", href: "/accounts", icon: BookIcon, available: false },
-      { labelKey: "guarantors", href: "/guarantors", icon: ShieldIcon, available: false },
-      { labelKey: "proxies", href: "/proxies", icon: UsersIcon, available: false },
-    ],
-  },
-  {
-    labelKey: "credit",
-    items: [
-      {
-        labelKey: "loanProducts",
-        href: "/credit/loan-products",
-        icon: BanknoteIcon,
-        available: false,
-      },
-      { labelKey: "loans", href: "/credit/loans", icon: BanknoteIcon, available: false },
-      {
-        labelKey: "loanDisbursement",
-        href: "/credit/disbursement",
-        icon: CheckCircleIcon,
-        available: false,
-      },
-      {
-        labelKey: "collaterals",
-        href: "/credit/collaterals",
-        icon: ShieldIcon,
-        available: false,
-      },
-      {
-        labelKey: "loanTransfers",
-        href: "/credit/transfers",
-        icon: UsersIcon,
-        available: false,
-      },
-      {
-        labelKey: "delinquencies",
-        href: "/credit/delinquencies",
-        icon: BellIcon,
-        available: false,
-      },
-    ],
-  },
-  {
-    labelKey: "accounting",
-    items: [
-      {
-        labelKey: "ledger",
-        href: "/accounting/ledger",
-        icon: BookIcon,
-        available: false,
-      },
-      {
-        labelKey: "sectors",
-        href: "/accounting/sectors",
-        icon: BookIcon,
-        available: false,
-      },
-      {
-        labelKey: "journalEntries",
-        href: "/accounting/journal-entries",
-        icon: FileTextIcon,
-        available: false,
-      },
-      {
-        labelKey: "ledgerJournal",
-        href: "/accounting/journal",
-        icon: FileTextIcon,
-        available: false,
-      },
-    ],
-  },
-  {
-    labelKey: "operations",
-    items: [
-      { labelKey: "tills", href: "/operations/tills", icon: CashIcon, available: false },
-      {
-        labelKey: "tellerSessions",
-        href: "/operations/sessions",
-        icon: CalendarIcon,
-        available: false,
-      },
-      {
-        labelKey: "tellerTransactions",
-        href: "/operations/transactions",
-        icon: BanknoteIcon,
-        available: false,
-      },
-      {
-        labelKey: "tellerInspection",
-        href: "/operations/inspection",
-        icon: FileTextIcon,
-        available: false,
-      },
-    ],
-  },
-  {
-    labelKey: "edition",
-    items: [
-      {
-        labelKey: "reportsPar",
-        href: "/reports/par",
-        icon: PrinterIcon,
-        available: false,
-      },
-      {
-        labelKey: "reportsExigible",
-        href: "/reports/exigible",
-        icon: PrinterIcon,
-        available: false,
-      },
-      {
-        labelKey: "reportsRelease",
-        href: "/reports/release",
-        icon: PrinterIcon,
-        available: false,
-      },
-      {
-        labelKey: "reportsBalance",
-        href: "/reports/balance",
-        icon: PrinterIcon,
-        available: false,
-      },
+      { labelKey: "databaseBackups", href: "/database/backups", available: false },
     ],
   },
   {
     labelKey: "settings",
+    icon: SlidersIcon,
+    defaultExpanded: false,
     items: [
-      {
-        labelKey: "denominations",
-        href: "/settings/denominations",
-        icon: CashIcon,
-        available: false,
-      },
-      {
-        labelKey: "batch",
-        href: "/settings/batch",
-        icon: SettingsIcon,
-        available: false,
-      },
+      { labelKey: "denominations", href: "/settings/denominations", available: false },
+      { labelKey: "batch", href: "/settings/batch", available: false },
+    ],
+  },
+  {
+    labelKey: "operations",
+    icon: WorkflowIcon,
+    defaultExpanded: false,
+    items: [
+      { labelKey: "tills", href: "/operations/tills", available: false },
+      { labelKey: "tellerSessions", href: "/operations/sessions", available: false },
+      { labelKey: "tellerTransactions", href: "/operations/transactions", available: false },
+      { labelKey: "tellerInspection", href: "/operations/inspection", available: false },
+    ],
+  },
+  {
+    labelKey: "referentiel",
+    icon: BookIcon,
+    defaultExpanded: true,
+    items: [
+      { labelKey: "agencies", href: "/admin/agencies", available: false },
+      { labelKey: "managers", href: "/admin/managers", available: false },
+      { labelKey: "clients", href: "/clients", available: false },
+      { labelKey: "accounts", href: "/accounts", available: false },
+      { labelKey: "guarantors", href: "/guarantors", available: false },
+      { labelKey: "proxies", href: "/proxies", available: false },
+    ],
+  },
+  {
+    labelKey: "credit",
+    icon: BanknoteIcon,
+    defaultExpanded: true,
+    items: [
+      { labelKey: "loans", href: "/credit/loans", available: false },
+      { labelKey: "collaterals", href: "/credit/collaterals", available: false },
+      { labelKey: "loanDisbursement", href: "/credit/disbursement", available: false },
+      { labelKey: "loanDecision", href: "/credit/decision", available: false },
+      { labelKey: "loanTransfers", href: "/credit/transfers", available: false },
+      { labelKey: "delinquencies", href: "/credit/delinquencies", available: false },
+    ],
+  },
+  {
+    labelKey: "accounting",
+    icon: LayersIcon,
+    defaultExpanded: true,
+    items: [
+      { labelKey: "globalClientImage", href: "/accounting/global-client-image", available: false },
+    ],
+  },
+  {
+    labelKey: "edition",
+    icon: FileTextIcon,
+    defaultExpanded: true,
+    items: [
+      { labelKey: "reportsPar", href: "/reports/par", available: false },
+      { labelKey: "ledgerJournal", href: "/reports/journal", available: false },
+      { labelKey: "cashDraft", href: "/reports/cash-draft", available: false },
+      { labelKey: "reportsExigible", href: "/reports/exigible", available: false },
+      { labelKey: "reportsRelease", href: "/reports/release", available: false },
+      { labelKey: "reportsBalance", href: "/reports/balance", available: false },
     ],
   },
 ];
 
 /**
- * Flat lookup used by breadcrumb derivation. Built lazily so the array isn't
- * recreated on every render.
+ * Flat lookup used by breadcrumb derivation. Includes both solo items and
+ * group items. Built lazily so the array isn't recreated on every render.
  */
 let flatCache: ReadonlyArray<NavItem> | null = null;
 
 export function flatNavItems(): ReadonlyArray<NavItem> {
   if (flatCache) return flatCache;
-  flatCache = NAV_GROUPS.flatMap((group) => group.items);
+  flatCache = [
+    ...NAV_SOLO_ITEMS.map((item) => ({
+      labelKey: item.labelKey,
+      href: item.href,
+      available: item.available,
+    })),
+    ...NAV_GROUPS.flatMap((group) => group.items),
+  ];
   return flatCache;
 }
