@@ -30,8 +30,8 @@
 
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 
-  --radius-card: 1rem;
-  --radius-field: 0.75rem;
+  --radius-card: 0.625rem;
+  --radius-field: 0.375rem;
 }
 
 /*

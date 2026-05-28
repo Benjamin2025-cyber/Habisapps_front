@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { PasswordField } from "@/components/ui/PasswordField";
 import { OtpInput } from "@/components/ui/OtpInput";
 import { ApiError } from "@/lib/api/client";
+import { localizeApiMessage, localizeFieldError } from "@/lib/api/errors";
 import { activateRequest, resendActivationOtpRequest } from "@/lib/auth/api";
 import { useCountdown, useCountdownFormatter } from "@/lib/hooks/useCountdown";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
@@ -74,21 +75,35 @@ export function ActivationVerifyStep({ phone, onBack, onSuccess }: Props) {
         if (cause.isRateLimited() && cause.retryAfter !== null) {
           setFormError({ kind: "rateLimit", retryAfter: cause.retryAfter });
         } else {
-          const otpFieldError = cause.fieldError("otp");
-          const passwordFieldError = cause.fieldError("password");
+          const otpFieldError = localizeFieldError(
+            cause,
+            "otp",
+            t("auth.shared.otpAriaLabelActivation"),
+          );
+          const passwordFieldError = localizeFieldError(
+            cause,
+            "password",
+            t("auth.shared.newPasswordLabel"),
+          );
           if (otpFieldError || passwordFieldError) {
             setFieldErrors({
               otp: otpFieldError ?? undefined,
               password: passwordFieldError ?? undefined,
             });
           } else {
-            setFormError({ kind: "message", message: cause.message });
+            setFormError({
+              kind: "message",
+              message: localizeApiMessage(cause.message),
+            });
           }
         }
       } else {
         setFormError({
           kind: "message",
-          message: cause instanceof Error ? cause.message : t("common.unknownError"),
+          message:
+            cause instanceof Error
+              ? localizeApiMessage(cause.message)
+              : t("common.unknownError"),
         });
       }
     } finally {
@@ -112,7 +127,9 @@ export function ActivationVerifyStep({ phone, onBack, onSuccess }: Props) {
       } else {
         toast.error(
           t("auth.shared.resendToast.errorTitle"),
-          cause instanceof Error ? cause.message : t("common.unknownError"),
+          cause instanceof Error
+            ? localizeApiMessage(cause.message)
+            : t("common.unknownError"),
         );
       }
     } finally {

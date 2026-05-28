@@ -11,6 +11,8 @@
     "tryAgain": "Réessayer",
     "yes": "Oui",
     "no": "Non",
+    "previous": "Précédent",
+    "next": "Suivant",
     "unknownError": "Erreur inconnue",
     "networkError": "Erreur réseau. Vérifiez votre connexion et réessayez.",
     "retryIn": "Réessayez dans {time}",
@@ -328,5 +330,103 @@
   },
   "toast": {
     "dismissAriaLabel": "Fermer la notification"
+  },
+  "dataTable": {
+    "empty": "Aucune ligne à afficher.",
+    "pageOf": "Page {current} / {total}",
+    "range": "{from}–{to} sur {total}"
+  },
+  "agencies": {
+    "pageTitle": "Référentiel — Agences",
+    "pageDescription": "Liste des agences de l'institution. Création, modification, statut et gestionnaire.",
+    "errorTitle": "Impossible de charger les agences",
+    "filters": {
+      "searchLabel": "Rechercher",
+      "searchPlaceholder": "Code, nom, ville, région, responsable…",
+      "statusLabel": "Statut",
+      "statusAll": "Tous les statuts"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif",
+      "suspended": "Suspendu",
+      "archived": "Archivé"
+    },
+    "columns": {
+      "code": "Code",
+      "name": "Nom agence",
+      "region": "Région",
+      "city": "Ville",
+      "poBox": "B.P.",
+      "phone": "Téléphone",
+      "fax": "Fax",
+      "status": "Statut",
+      "manager": "Responsable",
+      "actions": "Actions"
+    },
+    "list": {
+      "titleHeader": "Liste des agences enregistrées",
+      "count": "{count} agence(s)",
+      "totalCaption": "{count} agence(s) enregistrée(s) au total",
+      "empty": "Aucune agence à afficher.",
+      "pageOf": "Page {current} / {total}"
+    },
+    "actions": {
+      "create": "Nouvelle agence",
+      "menu": "Actions",
+      "edit": "Modifier",
+      "transferManager": "Transférer la gestion",
+      "changeStatus": "Changer le statut",
+      "statusActive": "Marquer actif",
+      "statusInactive": "Marquer inactif",
+      "statusSuspended": "Suspendre",
+      "statusArchived": "Archiver"
+    },
+    "drawer": {
+      "titleCreate": "Nouvelle agence",
+      "titleEdit": "Modifier — {name}",
+      "createHint": "Renseignez les informations de la nouvelle agence.",
+      "editHint": "Code agence {code} — non modifiable",
+      "create": "Créer l'agence"
+    },
+    "fields": {
+      "code": "Code agence",
+      "name": "Nom de l'agence",
+      "region": "Région",
+      "city": "Ville",
+      "branchName": "Démembrement",
+      "branchType": "Type démembrement",
+      "phone": "Téléphone",
+      "fax": "Fax",
+      "email": "Email",
+      "addressLine1": "Adresse",
+      "addressLine2": "Complément d'adresse",
+      "poBox": "B.P.",
+      "creationDate": "Date de création",
+      "status": "Statut",
+      "geographic": "Situation géographique",
+      "geographicPlaceholder": "Décrire la localisation, les repères, le quartier…"
+    },
+    "managerDrawer": {
+      "title": "Transférer la gestion",
+      "subtitle": "Agence {code} — {name}",
+      "currentManager": "Responsable actuel : {name}",
+      "noManager": "Aucun responsable assigné pour l'instant.",
+      "publicIdLabel": "Identifiant utilisateur (public_id)",
+      "publicIdHint": "Le sélecteur de gestionnaire arrive avec la phase Référentiel Gestionnaires.",
+      "roleAtAgencyLabel": "Rôle à l'agence (optionnel)",
+      "roleAtAgencyHint": "Par défaut : agency-manager."
+    },
+    "toast": {
+      "createdTitle": "Agence créée",
+      "createdBody": "L'agence {name} a été ajoutée à la liste.",
+      "updatedTitle": "Agence mise à jour",
+      "updatedBody": "Les modifications de {name} ont été enregistrées.",
+      "statusChangedTitle": "Statut modifié",
+      "statusChangedBody": "{name} est maintenant : {status}.",
+      "statusErrorTitle": "Changement de statut impossible",
+      "managerChangedTitle": "Responsable modifié",
+      "managerChangedBody": "La gestion de {name} a été mise à jour."
+    }
   }
 }

@@ -9,6 +9,7 @@ import { PasswordField } from "@/components/ui/PasswordField";
 import { TextField } from "@/components/ui/TextField";
 import { PhoneIcon } from "@/components/ui/icons";
 import { ApiError } from "@/lib/api/client";
+import { localizeApiMessage, localizeFieldError } from "@/lib/api/errors";
 import {
   requestPasswordResetOtpRequest,
   resetPasswordRequest,
@@ -87,9 +88,21 @@ export function ResetPasswordForm({ initialPhone }: Props) {
         if (cause.isRateLimited() && cause.retryAfter !== null) {
           setFormError({ kind: "rateLimit", retryAfter: cause.retryAfter });
         } else {
-          const phoneFieldError = cause.fieldError("phone_number");
-          const otpFieldError = cause.fieldError("otp");
-          const passwordFieldError = cause.fieldError("password");
+          const phoneFieldError = localizeFieldError(
+            cause,
+            "phone_number",
+            t("auth.shared.phoneLabel"),
+          );
+          const otpFieldError = localizeFieldError(
+            cause,
+            "otp",
+            t("auth.shared.otpAriaLabelReset"),
+          );
+          const passwordFieldError = localizeFieldError(
+            cause,
+            "password",
+            t("auth.shared.newPasswordLabel"),
+          );
           if (phoneFieldError || otpFieldError || passwordFieldError) {
             setFieldErrors({
               phone: phoneFieldError ?? undefined,
@@ -97,13 +110,19 @@ export function ResetPasswordForm({ initialPhone }: Props) {
               password: passwordFieldError ?? undefined,
             });
           } else {
-            setFormError({ kind: "message", message: cause.message });
+            setFormError({
+              kind: "message",
+              message: localizeApiMessage(cause.message),
+            });
           }
         }
       } else {
         setFormError({
           kind: "message",
-          message: cause instanceof Error ? cause.message : t("common.unknownError"),
+          message:
+            cause instanceof Error
+              ? localizeApiMessage(cause.message)
+              : t("common.unknownError"),
         });
       }
     } finally {
@@ -127,7 +146,9 @@ export function ResetPasswordForm({ initialPhone }: Props) {
       } else {
         toast.error(
           t("auth.shared.resendToast.errorTitle"),
-          cause instanceof Error ? cause.message : t("common.unknownError"),
+          cause instanceof Error
+            ? localizeApiMessage(cause.message)
+            : t("common.unknownError"),
         );
       }
     } finally {

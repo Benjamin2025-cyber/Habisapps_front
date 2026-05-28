@@ -97,7 +97,7 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     icon: BookIcon,
     defaultExpanded: true,
     items: [
-      { labelKey: "agencies", href: "/admin/agencies", available: false },
+      { labelKey: "agencies", href: "/admin/agencies", available: true },
       { labelKey: "managers", href: "/admin/managers", available: false },
       { labelKey: "clients", href: "/clients", available: false },
       { labelKey: "accounts", href: "/accounts", available: false },

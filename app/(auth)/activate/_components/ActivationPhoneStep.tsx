@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
 import { PhoneIcon } from "@/components/ui/icons";
 import { ApiError } from "@/lib/api/client";
+import { localizeApiMessage, localizeFieldError } from "@/lib/api/errors";
 import { resendActivationOtpRequest } from "@/lib/auth/api";
 import { useCountdown, useCountdownFormatter } from "@/lib/hooks/useCountdown";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
@@ -51,14 +52,25 @@ export function ActivationPhoneStep({ initialPhone, onSubmitted }: Props) {
         if (cause.isRateLimited() && cause.retryAfter !== null) {
           setFormError({ kind: "rateLimit", retryAfter: cause.retryAfter });
         } else {
-          const phoneFieldError = cause.fieldError("phone_number");
+          const phoneFieldError = localizeFieldError(
+            cause,
+            "phone_number",
+            t("auth.shared.phoneLabel"),
+          );
           if (phoneFieldError) setFieldError(phoneFieldError);
-          else setFormError({ kind: "message", message: cause.message });
+          else
+            setFormError({
+              kind: "message",
+              message: localizeApiMessage(cause.message),
+            });
         }
       } else {
         setFormError({
           kind: "message",
-          message: cause instanceof Error ? cause.message : t("common.unknownError"),
+          message:
+            cause instanceof Error
+              ? localizeApiMessage(cause.message)
+              : t("common.unknownError"),
         });
       }
     } finally {

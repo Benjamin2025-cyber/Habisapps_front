@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { ApiError } from "@/lib/api/client";
+import { localizeApiMessage } from "@/lib/api/errors";
 import {
   getOperationalDashboard,
   type OperationalDashboard,
@@ -234,7 +235,7 @@ function ErrorBlock({
         )
       }
     >
-      {isForbidden ? t("dashboard.forbiddenBody") : error.message}
+      {isForbidden ? t("dashboard.forbiddenBody") : localizeApiMessage(error.message)}
     </Alert>
   );
 }

@@ -9,6 +9,7 @@ import { TextField } from "@/components/ui/TextField";
 import { PasswordField } from "@/components/ui/PasswordField";
 import { PhoneIcon } from "@/components/ui/icons";
 import { ApiError } from "@/lib/api/client";
+import { localizeApiMessage, localizeFieldError } from "@/lib/api/errors";
 import { loginRequest } from "@/lib/auth/api";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useCountdown, useCountdownFormatter } from "@/lib/hooks/useCountdown";
@@ -65,21 +66,34 @@ export function LoginForm() {
         if (cause.isRateLimited() && cause.retryAfter !== null) {
           setFormError({ kind: "rateLimit", retryAfter: cause.retryAfter });
         } else {
-          const phoneFieldError = cause.fieldError("phone_number");
-          const passwordFieldError = cause.fieldError("password");
+          const phoneFieldError = localizeFieldError(
+            cause,
+            "phone_number",
+            t("auth.shared.phoneLabel"),
+          );
+          const passwordFieldError = localizeFieldError(
+            cause,
+            "password",
+            t("auth.shared.passwordLabel"),
+          );
           if (phoneFieldError || passwordFieldError) {
             setFieldErrors({
               phone: phoneFieldError ?? undefined,
               password: passwordFieldError ?? undefined,
             });
           } else {
-            setFormError({ kind: "message", message: cause.message });
+            setFormError({
+              kind: "message",
+              message: localizeApiMessage(cause.message),
+            });
           }
         }
       } else {
         toast.error(
           t("auth.login.errorTitle"),
-          cause instanceof Error ? cause.message : t("common.networkError"),
+          cause instanceof Error
+            ? localizeApiMessage(cause.message)
+            : t("common.networkError"),
         );
       }
     } finally {
