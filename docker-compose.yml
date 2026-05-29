@@ -1,0 +1,28 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Baked into the build (rewrites() runs at build time). Defaults reach the
+        # API container by name over the shared external `proxy` network.
+        HABIS_API_ORIGIN: ${HABIS_API_ORIGIN:-http://habis-finance-api:8000}
+        NEXT_PUBLIC_API_VERSION: ${NEXT_PUBLIC_API_VERSION:-1}
+    image: habis-finance-front:latest
+    container_name: habis-finance-front
+    restart: unless-stopped
+    expose:
+      - "3000"
+    networks:
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.habis-finance-front.rule=Host(`app.abbisapps.site`)
+      - traefik.http.routers.habis-finance-front.entrypoints=websecure
+      - traefik.http.routers.habis-finance-front.tls=true
+      - traefik.http.routers.habis-finance-front.tls.certresolver=letsencrypt
+      - traefik.http.services.habis-finance-front.loadbalancer.server.port=3000
+
+networks:
+  proxy:
+    external: true
