@@ -25,7 +25,7 @@ import {
   updateGuarantorStatus,
   type ClientGuarantor,
   type GuarantorAction,
-  type GuarantorStatus,
+  type GuarantorVerificationStatus,
   type GuarantorWritePayload,
 } from "@/lib/api/client-guarantors";
 import { localizeApiError } from "@/lib/api/errors";
@@ -72,16 +72,19 @@ function isKnownRelationship(value: string): value is RelationshipSlug {
   return (RELATIONSHIP_SLUGS as readonly string[]).includes(value);
 }
 
-const STATUS_TONE: Record<
-  GuarantorStatus,
+/**
+ * Tones for the KYC review state shown in the "Statut" column. The lifecycle
+ * states (inactive/archived) are handled directly in the column cell with a
+ * muted treatment rather than via this map.
+ */
+const VERIFICATION_TONE: Record<
+  GuarantorVerificationStatus,
   "neutral" | "info" | "success" | "danger" | "warning"
 > = {
-  draft: "neutral",
+  pending: "neutral",
   pending_review: "info",
   verified: "success",
   rejected: "danger",
-  deactivated: "warning",
-  archived: "neutral",
 };
 
 export function GuarantorsTab({ clientPublicId, onCountChange }: Props) {
@@ -219,13 +222,23 @@ export function GuarantorsTab({ clientPublicId, onCountChange }: Props) {
         },
       },
       {
-        accessorKey: "status",
+        accessorKey: "verification_status",
         header: t("clientDetail.guarantors.columns.status"),
-        cell: ({ getValue }) => {
-          const status = getValue() as GuarantorStatus;
+        cell: ({ row, getValue }) => {
+          // Inactive/archived records are out of the review flow — show the
+          // lifecycle state muted rather than a stale verification badge.
+          const lifecycle = row.original.status;
+          if (lifecycle === "archived" || lifecycle === "inactive") {
+            return (
+              <Badge tone="neutral">
+                {t(`clientDetail.guarantors.status.${lifecycle}`)}
+              </Badge>
+            );
+          }
+          const verification = getValue() as GuarantorVerificationStatus;
           return (
-            <Badge tone={STATUS_TONE[status]}>
-              {t(`clientDetail.guarantors.status.${status}`)}
+            <Badge tone={VERIFICATION_TONE[verification]}>
+              {t(`clientDetail.guarantors.verificationStatus.${verification}`)}
             </Badge>
           );
         },
@@ -239,7 +252,15 @@ export function GuarantorsTab({ clientPublicId, onCountChange }: Props) {
               cell: ({ row }) => {
                 const rec = row.original;
                 const items: DropdownMenuItem[] = [];
-                if (canEdit && (rec.status === "draft" || rec.status === "rejected")) {
+                // Review actions only apply to live (active) records and are
+                // gated on the KYC review state, not the lifecycle flag.
+                const isLive = rec.status === "active";
+                const verification = rec.verification_status;
+                if (
+                  canEdit &&
+                  isLive &&
+                  (verification === "pending" || verification === "rejected")
+                ) {
                   items.push({
                     label: t("clientDetail.guarantors.actions.edit"),
                     onClick: () => {
@@ -248,26 +269,26 @@ export function GuarantorsTab({ clientPublicId, onCountChange }: Props) {
                     },
                   });
                 }
-                if (canSubmit && rec.status === "draft") {
+                if (canSubmit && isLive && verification === "pending") {
                   items.push({
                     label: t("clientDetail.guarantors.actions.submit"),
                     onClick: () => setActionDrawer({ row: rec, action: "submit" }),
                   });
                 }
-                if (canVerify && rec.status === "pending_review") {
+                if (canVerify && isLive && verification === "pending_review") {
                   items.push({
                     label: t("clientDetail.guarantors.actions.verify"),
                     onClick: () => setActionDrawer({ row: rec, action: "verify" }),
                   });
                 }
-                if (canReject && rec.status === "pending_review") {
+                if (canReject && isLive && verification === "pending_review") {
                   items.push({
                     label: t("clientDetail.guarantors.actions.reject"),
                     onClick: () => setActionDrawer({ row: rec, action: "reject" }),
                     destructive: true,
                   });
                 }
-                if (canArchive && rec.status === "verified") {
+                if (canArchive && isLive && verification === "verified") {
                   items.push({
                     label: t("clientDetail.guarantors.actions.deactivate"),
                     onClick: () => setActionDrawer({ row: rec, action: "deactivate" }),

@@ -515,11 +515,14 @@
       "count": "{count} document(s)",
       "empty": "Aucun document d'identité enregistré.",
       "status": {
-        "draft": "Brouillon",
+        "active": "Actif",
+        "archived": "Archivé"
+      },
+      "verificationStatus": {
+        "pending": "En attente",
         "pending_review": "En cours de vérification",
         "verified": "Vérifié",
-        "rejected": "Rejeté",
-        "archived": "Archivé"
+        "rejected": "Rejeté"
       },
       "columns": {
         "type": "Type",
@@ -602,12 +605,15 @@
       "count": "{count} garant(s)",
       "empty": "Aucun garant enregistré.",
       "status": {
-        "draft": "Brouillon",
+        "active": "Actif",
+        "inactive": "Désactivé",
+        "archived": "Archivé"
+      },
+      "verificationStatus": {
+        "pending": "En attente",
         "pending_review": "En cours de vérification",
         "verified": "Vérifié",
-        "rejected": "Rejeté",
-        "deactivated": "Désactivé",
-        "archived": "Archivé"
+        "rejected": "Rejeté"
       },
       "columns": {
         "name": "Nom du garant",
@@ -695,13 +701,16 @@
       "count": "{count} mandataire(s)",
       "empty": "Aucun mandataire enregistré.",
       "status": {
-        "draft": "Brouillon",
-        "pending_review": "En cours de vérification",
-        "verified": "Vérifié",
-        "rejected": "Rejeté",
-        "deactivated": "Désactivé",
+        "active": "Actif",
+        "inactive": "Désactivé",
         "expired": "Expiré",
         "archived": "Archivé"
+      },
+      "verificationStatus": {
+        "pending": "En attente",
+        "pending_review": "En cours de vérification",
+        "verified": "Vérifié",
+        "rejected": "Rejeté"
       },
       "columns": {
         "name": "Nom du mandataire",
@@ -751,6 +760,7 @@
         "phone": "Téléphone",
         "email": "Email",
         "idType": "Type de pièce d'identité",
+        "idTypePlaceholder": "Sélectionner un type de pièce…",
         "idNumber": "Numéro de pièce d'identité",
         "mandateType": "Type de mandat",
         "mandateTypeHint": "Procuration générale, opérations spécifiques, etc.",

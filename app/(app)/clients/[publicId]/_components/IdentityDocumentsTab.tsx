@@ -25,10 +25,14 @@ import {
   updateIdentityDocumentStatus,
   type ClientIdentityDocument,
   type IdentityDocumentAction,
-  type IdentityDocumentStatus,
+  type IdentityDocumentVerificationStatus,
   type IdentityDocumentWritePayload,
 } from "@/lib/api/client-identity-documents";
 import { localizeApiError } from "@/lib/api/errors";
+import {
+  IDENTITY_DOCUMENT_TYPE_SLUGS,
+  isKnownIdentityDocumentType,
+} from "@/lib/catalogs/identity-document-types";
 import { SubResourceActionDrawer } from "./SubResourceActionDrawer";
 
 type Props = {
@@ -37,51 +41,20 @@ type Props = {
   onCountChange?: (count: number) => void;
 };
 
+
 /**
- * Canonical identity-document catalog for a Cameroon microfinance.
- *
- * Stored value is the slug (machine-friendly, locale-stable). The FR label
- * comes from i18n. Adding a new type = one entry here + one i18n key.
- * Grouped into personal (CNI, passport, etc.) then business (RCCM, NIU, …)
- * documents — same select but conceptually distinct.
+ * Tones for the KYC review state shown in the "Statut" column. Archived
+ * records are rendered with a muted treatment by the column cell rather than
+ * via this map (archival is a lifecycle flag, not a verification state).
  */
-const DOCUMENT_TYPE_SLUGS = [
-  "national_id_card",
-  "national_id_receipt",
-  "passport",
-  "residence_permit",
-  "driver_license",
-  "voter_card",
-  "consular_card",
-  "professional_card",
-  "civil_servant_card",
-  "military_id",
-  "student_card",
-  "pension_card",
-  "birth_certificate",
-  "marriage_certificate",
-  "business_registry",
-  "taxpayer_id",
-  "business_license",
-  "company_bylaws",
-  "tax_clearance",
-] as const;
-
-type DocumentTypeSlug = (typeof DOCUMENT_TYPE_SLUGS)[number];
-
-function isKnownSlug(value: string): value is DocumentTypeSlug {
-  return (DOCUMENT_TYPE_SLUGS as readonly string[]).includes(value);
-}
-
-const STATUS_TONE: Record<
-  IdentityDocumentStatus,
+const VERIFICATION_TONE: Record<
+  IdentityDocumentVerificationStatus,
   "neutral" | "info" | "success" | "danger" | "warning"
 > = {
-  draft: "neutral",
+  pending: "neutral",
   pending_review: "info",
   verified: "success",
   rejected: "danger",
-  archived: "neutral",
 };
 
 export function IdentityDocumentsTab({
@@ -182,7 +155,7 @@ export function IdentityDocumentsTab({
         header: t("clientDetail.identityDocs.columns.type"),
         cell: ({ getValue }) => {
           const raw = String(getValue() ?? "");
-          const label = isKnownSlug(raw)
+          const label = isKnownIdentityDocumentType(raw)
             ? t(`clientDetail.identityDocs.types.${raw}`)
             : raw || "—";
           return <span className="font-semibold text-foreground">{label}</span>;
@@ -229,13 +202,22 @@ export function IdentityDocumentsTab({
         },
       },
       {
-        accessorKey: "status",
+        accessorKey: "verification_status",
         header: t("clientDetail.identityDocs.columns.status"),
-        cell: ({ getValue }) => {
-          const status = getValue() as IdentityDocumentStatus;
+        cell: ({ row, getValue }) => {
+          // Archived records are out of the review flow — show the lifecycle
+          // state muted rather than a stale verification badge.
+          if (row.original.status === "archived") {
+            return (
+              <Badge tone="neutral">
+                {t("clientDetail.identityDocs.status.archived")}
+              </Badge>
+            );
+          }
+          const verification = getValue() as IdentityDocumentVerificationStatus;
           return (
-            <Badge tone={STATUS_TONE[status]}>
-              {t(`clientDetail.identityDocs.status.${status}`)}
+            <Badge tone={VERIFICATION_TONE[verification]}>
+              {t(`clientDetail.identityDocs.verificationStatus.${verification}`)}
             </Badge>
           );
         },
@@ -249,32 +231,40 @@ export function IdentityDocumentsTab({
               cell: ({ row }) => {
                 const doc = row.original;
                 const items: DropdownMenuItem[] = [];
-                if (canEdit && (doc.status === "draft" || doc.status === "rejected")) {
+                // Review actions only apply to live (non-archived) records and
+                // are gated on the KYC review state, not the lifecycle flag.
+                const isArchived = doc.status === "archived";
+                const verification = doc.verification_status;
+                if (
+                  canEdit &&
+                  !isArchived &&
+                  (verification === "pending" || verification === "rejected")
+                ) {
                   items.push({
                     label: t("clientDetail.identityDocs.actions.edit"),
                     onClick: () => openEdit(doc),
                   });
                 }
-                if (canSubmit && doc.status === "draft") {
+                if (canSubmit && !isArchived && verification === "pending") {
                   items.push({
                     label: t("clientDetail.identityDocs.actions.submit"),
                     onClick: () => setActionDrawer({ doc, action: "submit" }),
                   });
                 }
-                if (canVerify && doc.status === "pending_review") {
+                if (canVerify && !isArchived && verification === "pending_review") {
                   items.push({
                     label: t("clientDetail.identityDocs.actions.verify"),
                     onClick: () => setActionDrawer({ doc, action: "verify" }),
                   });
                 }
-                if (canReject && doc.status === "pending_review") {
+                if (canReject && !isArchived && verification === "pending_review") {
                   items.push({
                     label: t("clientDetail.identityDocs.actions.reject"),
                     onClick: () => setActionDrawer({ doc, action: "reject" }),
                     destructive: true,
                   });
                 }
-                if (canArchive && doc.status !== "archived") {
+                if (canArchive && !isArchived) {
                   if (items.length > 0) items.push({ kind: "separator" });
                   items.push({
                     label: t("clientDetail.identityDocs.actions.archive"),
@@ -397,7 +387,7 @@ function IdentityDocumentDrawer({
     Array<{ value: string; label: string }>
   >(() => {
     const options: Array<{ value: string; label: string }> =
-      DOCUMENT_TYPE_SLUGS.map((slug) => ({
+      IDENTITY_DOCUMENT_TYPE_SLUGS.map((slug) => ({
         value: slug,
         label: t(`clientDetail.identityDocs.types.${slug}`),
       }));

@@ -12,6 +12,7 @@ import {
 import { MoreVerticalIcon } from "@/components/ui/icons";
 import { Drawer } from "@/components/ui/Drawer";
 import { TextField } from "@/components/ui/TextField";
+import { Select } from "@/components/ui/Select";
 import { useCan } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useApi } from "@/lib/hooks/useApi";
@@ -24,10 +25,11 @@ import {
   updateProxyStatus,
   type ClientProxy,
   type ProxyAction,
-  type ProxyStatus,
+  type ProxyVerificationStatus,
   type ProxyWritePayload,
 } from "@/lib/api/client-proxies";
 import { localizeApiError } from "@/lib/api/errors";
+import { PERSONAL_IDENTITY_DOCUMENT_SLUGS } from "@/lib/catalogs/identity-document-types";
 import { SubResourceActionDrawer } from "./SubResourceActionDrawer";
 
 type Props = {
@@ -35,17 +37,19 @@ type Props = {
   onCountChange?: (count: number) => void;
 };
 
-const STATUS_TONE: Record<
-  ProxyStatus,
+/**
+ * Tones for the KYC review state shown in the "Statut" column. The lifecycle
+ * states (inactive/expired/archived) are handled directly in the column cell
+ * with a muted/warning treatment rather than via this map.
+ */
+const VERIFICATION_TONE: Record<
+  ProxyVerificationStatus,
   "neutral" | "info" | "success" | "danger" | "warning"
 > = {
-  draft: "neutral",
+  pending: "neutral",
   pending_review: "info",
   verified: "success",
   rejected: "danger",
-  deactivated: "warning",
-  expired: "warning",
-  archived: "neutral",
 };
 
 export function ProxiesTab({ clientPublicId, onCountChange }: Props) {
@@ -179,13 +183,23 @@ export function ProxiesTab({ clientPublicId, onCountChange }: Props) {
         },
       },
       {
-        accessorKey: "status",
+        accessorKey: "verification_status",
         header: t("clientDetail.proxies.columns.status"),
-        cell: ({ getValue }) => {
-          const status = getValue() as ProxyStatus;
+        cell: ({ row, getValue }) => {
+          // Out-of-flow lifecycle states (inactive/expired/archived) take
+          // precedence over the verification badge. Expired reads as a warning.
+          const lifecycle = row.original.status;
+          if (lifecycle !== "active") {
+            return (
+              <Badge tone={lifecycle === "expired" ? "warning" : "neutral"}>
+                {t(`clientDetail.proxies.status.${lifecycle}`)}
+              </Badge>
+            );
+          }
+          const verification = getValue() as ProxyVerificationStatus;
           return (
-            <Badge tone={STATUS_TONE[status]}>
-              {t(`clientDetail.proxies.status.${status}`)}
+            <Badge tone={VERIFICATION_TONE[verification]}>
+              {t(`clientDetail.proxies.verificationStatus.${verification}`)}
             </Badge>
           );
         },
@@ -199,7 +213,15 @@ export function ProxiesTab({ clientPublicId, onCountChange }: Props) {
               cell: ({ row }) => {
                 const rec = row.original;
                 const items: DropdownMenuItem[] = [];
-                if (canEdit && (rec.status === "draft" || rec.status === "rejected")) {
+                // Review actions only apply to live (active) records and are
+                // gated on the KYC review state, not the lifecycle flag.
+                const isLive = rec.status === "active";
+                const verification = rec.verification_status;
+                if (
+                  canEdit &&
+                  isLive &&
+                  (verification === "pending" || verification === "rejected")
+                ) {
                   items.push({
                     label: t("clientDetail.proxies.actions.edit"),
                     onClick: () => {
@@ -208,32 +230,32 @@ export function ProxiesTab({ clientPublicId, onCountChange }: Props) {
                     },
                   });
                 }
-                if (canSubmit && rec.status === "draft") {
+                if (canSubmit && isLive && verification === "pending") {
                   items.push({
                     label: t("clientDetail.proxies.actions.submit"),
                     onClick: () => setActionDrawer({ row: rec, action: "submit" }),
                   });
                 }
-                if (canVerify && rec.status === "pending_review") {
+                if (canVerify && isLive && verification === "pending_review") {
                   items.push({
                     label: t("clientDetail.proxies.actions.verify"),
                     onClick: () => setActionDrawer({ row: rec, action: "verify" }),
                   });
                 }
-                if (canReject && rec.status === "pending_review") {
+                if (canReject && isLive && verification === "pending_review") {
                   items.push({
                     label: t("clientDetail.proxies.actions.reject"),
                     onClick: () => setActionDrawer({ row: rec, action: "reject" }),
                     destructive: true,
                   });
                 }
-                if (canExpire && rec.status === "verified") {
+                if (canExpire && isLive && verification === "verified") {
                   items.push({
                     label: t("clientDetail.proxies.actions.expire"),
                     onClick: () => setActionDrawer({ row: rec, action: "expire" }),
                   });
                 }
-                if (canArchive && rec.status === "verified") {
+                if (canArchive && isLive && verification === "verified") {
                   items.push({
                     label: t("clientDetail.proxies.actions.deactivate"),
                     onClick: () => setActionDrawer({ row: rec, action: "deactivate" }),
@@ -370,6 +392,31 @@ function ProxyDrawer({
     }
   }, [open, editing]);
 
+  // A proxy is a natural person, so only personal identity documents apply.
+  // Labels are shared with the identity-documents tab (single i18n source).
+  const idDocumentTypeOptions = useMemo<
+    Array<{ value: string; label: string }>
+  >(() => {
+    const options: Array<{ value: string; label: string }> =
+      PERSONAL_IDENTITY_DOCUMENT_SLUGS.map((slug) => ({
+        value: slug,
+        label: t(`clientDetail.identityDocs.types.${slug}`),
+      }));
+    // Preserve any legacy free-text value on an existing record so editing
+    // doesn't silently clear it.
+    const currentValue = editing?.proxy_id_document_type;
+    if (
+      currentValue &&
+      !options.some((option) => option.value === currentValue)
+    ) {
+      options.push({
+        value: currentValue,
+        label: `${currentValue} (${t("clientDetail.identityDocs.types.legacyTag")})`,
+      });
+    }
+    return options;
+  }, [editing, t]);
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setSubmitting(true);
@@ -470,11 +517,13 @@ function ProxyDrawer({
             onChange={(event) => setForm((c) => ({ ...c, proxy_email: event.target.value }))}
             error={errors.proxy_email}
           />
-          <TextField
+          <Select
             label={t("clientDetail.proxies.fields.idType")}
             value={form.proxy_id_document_type}
-            onChange={(event) =>
-              setForm((c) => ({ ...c, proxy_id_document_type: event.target.value }))
+            options={idDocumentTypeOptions}
+            placeholder={t("clientDetail.proxies.fields.idTypePlaceholder")}
+            onChange={(next) =>
+              setForm((c) => ({ ...c, proxy_id_document_type: next }))
             }
             error={errors.proxy_id_document_type}
           />

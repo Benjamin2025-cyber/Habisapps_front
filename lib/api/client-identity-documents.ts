@@ -1,15 +1,20 @@
 import { apiRequest, notifyAuthExpired } from "./client";
 
-export type IdentityDocumentStatus =
-  | "draft"
-  | "pending_review"
-  | "verified"
-  | "rejected"
-  | "archived";
+/**
+ * Record lifecycle (soft-delete). A document is `active` on creation and
+ * becomes `archived` via the `archive` action. NOT the KYC review state —
+ * that lives on `verification_status`.
+ */
+export type IdentityDocumentStatus = "active" | "archived";
 
+/**
+ * KYC review workflow. `pending` on creation, then driven by the
+ * submit/verify/reject actions. This is the state surfaced in the "Statut"
+ * column and the one that gates the row actions.
+ */
 export type IdentityDocumentVerificationStatus =
-  | "not_submitted"
-  | "submitted"
+  | "pending"
+  | "pending_review"
   | "verified"
   | "rejected";
 

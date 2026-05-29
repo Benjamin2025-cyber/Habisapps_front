@@ -1,16 +1,20 @@
 import { apiRequest, notifyAuthExpired } from "./client";
 
-export type GuarantorStatus =
-  | "draft"
-  | "pending_review"
-  | "verified"
-  | "rejected"
-  | "deactivated"
-  | "archived";
+/**
+ * Record lifecycle. `active` on creation, `inactive` via the `deactivate`
+ * action, `archived` via `archive`. NOT the KYC review state — that lives on
+ * `verification_status`.
+ */
+export type GuarantorStatus = "active" | "inactive" | "archived";
 
+/**
+ * KYC review workflow. `pending` on creation, then driven by the
+ * submit/verify/reject actions. This is the state surfaced in the "Statut"
+ * column and the one that gates the row actions.
+ */
 export type GuarantorVerificationStatus =
-  | "not_submitted"
-  | "submitted"
+  | "pending"
+  | "pending_review"
   | "verified"
   | "rejected";
 

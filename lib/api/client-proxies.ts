@@ -1,17 +1,20 @@
 import { apiRequest, notifyAuthExpired } from "./client";
 
-export type ProxyStatus =
-  | "draft"
-  | "pending_review"
-  | "verified"
-  | "rejected"
-  | "deactivated"
-  | "expired"
-  | "archived";
+/**
+ * Record lifecycle. `active` on creation, then `inactive` (deactivate),
+ * `expired` (expire / auto-expiry), or `archived` (archive). NOT the KYC
+ * review state — that lives on `verification_status`.
+ */
+export type ProxyStatus = "active" | "inactive" | "expired" | "archived";
 
+/**
+ * KYC review workflow. `pending` on creation, then driven by the
+ * submit/verify/reject actions. This is the state surfaced in the "Statut"
+ * column and the one that gates the row actions.
+ */
 export type ProxyVerificationStatus =
-  | "not_submitted"
-  | "submitted"
+  | "pending"
+  | "pending_review"
   | "verified"
   | "rejected";
 

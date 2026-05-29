@@ -17,6 +17,11 @@ export function localizeValidationMessage(
   fieldLabel: string,
 ): string {
   const label = fieldLabel;
+  // Defensive: the API contract is a string here, but a malformed/non-422
+  // payload could hand us something else. Never let `.match` throw.
+  if (typeof rawMessage !== "string") {
+    return `Le champ ${label} est invalide.`;
+  }
 
   if (/is required/i.test(rawMessage)) {
     return `Le champ ${label} est obligatoire.`;
@@ -103,11 +108,20 @@ export function localizeApiError(
 } {
   if (error instanceof ApiError) {
     const fieldErrors: Record<string, string> = {};
-    if (error.errors) {
+    // Only a 422 carries a field-keyed validation bag. Other statuses (e.g. a
+    // dev-mode 500 whose `errors` holds an exception/file/line/trace debug
+    // payload) must NOT be treated as field errors — mapping a `trace` array
+    // here would feed a stack-frame object into the localizer and crash.
+    if (error.status === 422 && error.errors) {
       for (const [field, messages] of Object.entries(error.errors)) {
-        if (Array.isArray(messages) && messages.length > 0) {
+        const firstString = Array.isArray(messages)
+          ? messages.find((m): m is string => typeof m === "string")
+          : typeof messages === "string"
+            ? messages
+            : undefined;
+        if (firstString !== undefined) {
           const label = fieldLabels[field] ?? humanize(field);
-          fieldErrors[field] = localizeValidationMessage(messages[0], label);
+          fieldErrors[field] = localizeValidationMessage(firstString, label);
         }
       }
     }
