@@ -14,7 +14,6 @@ import {
   DEFAULT_LOCALE,
   LOCALE_COOKIE,
   intlLocaleFor,
-  isLocale,
   type Locale,
 } from "./locales";
 
