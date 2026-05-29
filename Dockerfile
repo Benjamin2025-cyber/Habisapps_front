@@ -4,7 +4,9 @@
 FROM node:22-bookworm-slim AS base
 ENV PNPM_HOME=/pnpm \
     PATH="/pnpm:$PATH" \
-    NEXT_TELEMETRY_DISABLED=1
+    NEXT_TELEMETRY_DISABLED=1 \
+    COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+# corepack picks the exact pnpm version from package.json's "packageManager" field.
 RUN corepack enable
 WORKDIR /app
 
