@@ -335,6 +335,438 @@
   "toast": {
     "dismissAriaLabel": "Fermer la notification"
   },
+  "clients": {
+    "pageTitle": "Référentiel — Clients",
+    "pageDescription": "Liste des clients de l'institution. Création, modification, statut et workflow KYC.",
+    "errorTitle": "Impossible de charger les clients",
+    "filters": {
+      "searchLabel": "Rechercher",
+      "searchPlaceholder": "Code client, nom, téléphone, email…",
+      "statusLabel": "Statut",
+      "statusAll": "Tous les statuts",
+      "kycLabel": "Statut KYC",
+      "kycAll": "Tous les statuts KYC"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif",
+      "suspended": "Suspendu",
+      "archived": "Archivé"
+    },
+    "kyc": {
+      "draft": "Brouillon",
+      "pending_review": "En cours de vérification",
+      "verified": "Vérifié",
+      "rejected": "Rejeté",
+      "suspended": "Suspendu",
+      "archived": "Archivé"
+    },
+    "gender": {
+      "male": "Homme",
+      "female": "Femme",
+      "other": "Autre"
+    },
+    "frequency": {
+      "daily": "Quotidienne",
+      "weekly": "Hebdomadaire",
+      "monthly": "Mensuelle",
+      "custom": "Personnalisée"
+    },
+    "columns": {
+      "reference": "Code client",
+      "fullName": "Nom complet",
+      "phone": "Téléphone",
+      "email": "Email",
+      "gender": "Genre",
+      "status": "Statut",
+      "kyc": "KYC",
+      "onboardedOn": "Inscrit le",
+      "actions": "Actions"
+    },
+    "list": {
+      "titleHeader": "Liste des clients enregistrés",
+      "count": "{count} client(s)",
+      "totalCaption": "{count} client(s) enregistré(s) au total",
+      "empty": "Aucun client à afficher."
+    },
+    "actions": {
+      "create": "Nouveau client",
+      "menu": "Actions",
+      "edit": "Modifier",
+      "changeStatus": "Changer le statut",
+      "statusActive": "Marquer actif",
+      "statusInactive": "Marquer inactif",
+      "statusSuspended": "Suspendre",
+      "statusArchived": "Archiver",
+      "kycSubmit": "Soumettre KYC",
+      "kycVerify": "Valider KYC",
+      "kycReject": "Rejeter KYC",
+      "kycSuspend": "Suspendre KYC"
+    },
+    "drawer": {
+      "titleCreate": "Nouveau client",
+      "titleEdit": "Modifier — {name}",
+      "createHint": "Saisissez les informations du nouveau client. Le KYC démarre en statut « Brouillon » et passe en revue après soumission.",
+      "editHint": "Code client {reference}",
+      "create": "Créer le client",
+      "sectionIdentity": "Identité",
+      "sectionContact": "Contact & adresse",
+      "sectionProfessional": "Activité professionnelle",
+      "sectionAssignment": "Affectation",
+      "sectionCollection": "Modalités de collecte"
+    },
+    "fields": {
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "middleName": "Second prénom",
+      "fatherName": "Nom du père",
+      "motherName": "Nom de la mère",
+      "dateOfBirth": "Date de naissance",
+      "placeOfBirth": "Lieu de naissance",
+      "gender": "Genre",
+      "genderPlaceholder": "Sélectionner…",
+      "phone": "Téléphone",
+      "homePhone": "Téléphone fixe",
+      "email": "Email",
+      "addressLine1": "Adresse",
+      "addressLine2": "Complément d'adresse",
+      "city": "Ville",
+      "region": "Région",
+      "occupation": "Profession",
+      "employerName": "Employeur",
+      "agency": "Agence d'affectation",
+      "agencyPlaceholder": "Sélectionner une agence…",
+      "collectionType": "Type de collecte",
+      "collectionFrequency": "Fréquence de collecte",
+      "collectionFrequencyPlaceholder": "Sélectionner…",
+      "collectionTargetAmount": "Montant cible (FCFA)",
+      "collectionTargetAmountHint": "Montant attendu par échéance."
+    },
+    "kycReason": {
+      "title": {
+        "submit": "Soumettre le KYC",
+        "verify": "Valider le KYC",
+        "reject": "Rejeter le KYC",
+        "suspend": "Suspendre le KYC",
+        "archive": "Archiver le KYC"
+      },
+      "intro": {
+        "submit": "Confirmer la soumission du KYC pour {name} ?",
+        "verify": "Confirmer la validation du KYC pour {name} ?",
+        "reject": "Rejeter le KYC de {name}. Saisissez le motif (obligatoire).",
+        "suspend": "Suspendre le KYC de {name} ?",
+        "archive": "Archiver le KYC de {name} ?"
+      },
+      "reasonLabel": "Motif du rejet",
+      "reasonPlaceholder": "Décrire le motif du rejet (visible côté audit)…",
+      "reasonRequired": "Le motif est obligatoire pour un rejet.",
+      "commentLabel": "Commentaire (optionnel)",
+      "commentPlaceholder": "Information complémentaire (visible côté audit)…"
+    },
+    "toast": {
+      "createdTitle": "Client créé",
+      "createdBody": "Le client {name} a été ajouté.",
+      "updatedTitle": "Client mis à jour",
+      "updatedBody": "Les modifications de {name} ont été enregistrées.",
+      "statusChangedTitle": "Statut modifié",
+      "statusChangedBody": "{name} est maintenant : {status}.",
+      "statusErrorTitle": "Changement de statut impossible",
+      "kycChangedTitle": "KYC mis à jour",
+      "kycChangedBody": "Action « {action} » appliquée à {name}."
+    }
+  },
+  "clientDetail": {
+    "loading": "Chargement…",
+    "untitled": "Client",
+    "referenceLabel": "Code client {reference}",
+    "backToList": "Retour à la liste",
+    "errorTitle": "Impossible de charger le client",
+    "tabsAriaLabel": "Sections de la fiche client",
+    "tabs": {
+      "identity": "Identité",
+      "identityDocs": "Documents KYC",
+      "guarantors": "Garants",
+      "proxies": "Mandataires",
+      "accounts": "Comptes",
+      "loans": "Prêts"
+    },
+    "identity": {
+      "summaryLabel": "Fiche client",
+      "kycPrefix": "KYC : {status}",
+      "edit": "Modifier"
+    },
+    "accounts": {
+      "title": "Comptes du client",
+      "comingSoon": "Les comptes clients arrivent avec la phase P7 (Référentiel Comptes)."
+    },
+    "loans": {
+      "title": "Prêts du client",
+      "comingSoon": "Les prêts du client arrivent avec la phase P11 (Crédit — Mise en place)."
+    },
+    "action": {
+      "reasonLabel": "Motif",
+      "reasonPlaceholder": "Décrire le motif (visible côté audit)…",
+      "reasonRequired": "Le motif est obligatoire pour cette action.",
+      "commentLabel": "Commentaire (optionnel)",
+      "commentPlaceholder": "Information complémentaire (visible côté audit)…"
+    },
+    "identityDocs": {
+      "title": "Documents d'identité",
+      "count": "{count} document(s)",
+      "empty": "Aucun document d'identité enregistré.",
+      "status": {
+        "draft": "Brouillon",
+        "pending_review": "En cours de vérification",
+        "verified": "Vérifié",
+        "rejected": "Rejeté",
+        "archived": "Archivé"
+      },
+      "columns": {
+        "type": "Type",
+        "number": "Numéro",
+        "authority": "Autorité émettrice",
+        "issuedOn": "Émis le",
+        "expiresOn": "Expire le",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "actions": {
+        "menu": "Actions",
+        "create": "Ajouter un document",
+        "edit": "Modifier",
+        "submit": "Soumettre",
+        "verify": "Valider",
+        "reject": "Rejeter",
+        "archive": "Archiver"
+      },
+      "action": {
+        "title": {
+          "submit": "Soumettre le document",
+          "verify": "Valider le document",
+          "reject": "Rejeter le document",
+          "archive": "Archiver le document"
+        },
+        "intro": {
+          "submit": "Confirmer la soumission du document {target} ?",
+          "verify": "Confirmer la validation du document {target} ?",
+          "reject": "Rejeter le document {target}. Saisissez le motif (obligatoire).",
+          "archive": "Archiver le document {target} ?"
+        }
+      },
+      "drawer": {
+        "titleCreate": "Ajouter un document d'identité",
+        "titleEdit": "Modifier le document",
+        "hint": "Renseignez les informations du document. Il démarre en statut « Brouillon »."
+      },
+      "fields": {
+        "type": "Type de document",
+        "typePlaceholder": "Sélectionner un type de document…",
+        "number": "Numéro",
+        "authority": "Autorité émettrice",
+        "issuedOn": "Date d'émission",
+        "expiresOn": "Date d'expiration"
+      },
+      "types": {
+        "legacyTag": "valeur existante",
+        "national_id_card": "Carte Nationale d'Identité (CNI)",
+        "national_id_receipt": "Récépissé de CNI",
+        "passport": "Passeport",
+        "residence_permit": "Carte de séjour",
+        "driver_license": "Permis de conduire",
+        "voter_card": "Carte d'électeur",
+        "consular_card": "Carte consulaire",
+        "professional_card": "Carte professionnelle",
+        "civil_servant_card": "Carte de fonctionnaire",
+        "military_id": "Carte militaire",
+        "student_card": "Carte d'étudiant",
+        "pension_card": "Carte de retraité",
+        "birth_certificate": "Acte de naissance",
+        "marriage_certificate": "Acte de mariage",
+        "business_registry": "Registre du Commerce (RCCM)",
+        "taxpayer_id": "Numéro Identifiant Unique (NIU)",
+        "business_license": "Patente / Carte de commerçant",
+        "company_bylaws": "Statuts de l'entreprise",
+        "tax_clearance": "Attestation de non-redevance fiscale"
+      },
+      "toast": {
+        "createdTitle": "Document ajouté",
+        "createdBody": "Le document a été enregistré en brouillon.",
+        "updatedTitle": "Document mis à jour",
+        "updatedBody": "Les modifications ont été enregistrées.",
+        "statusChangedTitle": "Statut modifié",
+        "statusChangedBody": "Action « {action} » appliquée."
+      }
+    },
+    "guarantors": {
+      "title": "Garants",
+      "count": "{count} garant(s)",
+      "empty": "Aucun garant enregistré.",
+      "status": {
+        "draft": "Brouillon",
+        "pending_review": "En cours de vérification",
+        "verified": "Vérifié",
+        "rejected": "Rejeté",
+        "deactivated": "Désactivé",
+        "archived": "Archivé"
+      },
+      "columns": {
+        "name": "Nom du garant",
+        "relationship": "Relation",
+        "phone": "Téléphone",
+        "startsOn": "Démarre le",
+        "endsOn": "Termine le",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "actions": {
+        "menu": "Actions",
+        "create": "Ajouter un garant",
+        "edit": "Modifier",
+        "submit": "Soumettre",
+        "verify": "Valider",
+        "reject": "Rejeter",
+        "deactivate": "Désactiver",
+        "archive": "Archiver"
+      },
+      "action": {
+        "title": {
+          "submit": "Soumettre le garant",
+          "verify": "Valider le garant",
+          "reject": "Rejeter le garant",
+          "deactivate": "Désactiver le garant",
+          "archive": "Archiver le garant"
+        },
+        "intro": {
+          "submit": "Confirmer la soumission du garant {target} ?",
+          "verify": "Confirmer la validation du garant {target} ?",
+          "reject": "Rejeter le garant {target}. Saisissez le motif (obligatoire).",
+          "deactivate": "Désactiver le garant {target} ?",
+          "archive": "Archiver le garant {target} ?"
+        }
+      },
+      "drawer": {
+        "titleCreate": "Ajouter un garant",
+        "titleEdit": "Modifier le garant",
+        "hint": "Renseignez les informations du garant."
+      },
+      "fields": {
+        "name": "Nom complet",
+        "phone": "Téléphone",
+        "relationship": "Relation",
+        "relationshipHint": "Lien du garant avec le client.",
+        "relationshipPlaceholder": "Sélectionner la relation…",
+        "startsOn": "Démarre le",
+        "endsOn": "Termine le"
+      },
+      "relationships": {
+        "legacyTag": "valeur existante",
+        "father": "Père",
+        "mother": "Mère",
+        "spouse": "Conjoint(e)",
+        "sibling": "Frère / Sœur",
+        "child": "Fils / Fille",
+        "uncle_aunt": "Oncle / Tante",
+        "cousin": "Cousin(e)",
+        "grandparent": "Grand-parent",
+        "parent_in_law": "Beau-parent",
+        "friend": "Ami(e)",
+        "neighbor": "Voisin(e)",
+        "colleague": "Collègue",
+        "employer": "Employeur",
+        "employee": "Employé(e)",
+        "business_partner": "Associé(e)",
+        "tontine_member": "Membre de tontine",
+        "traditional_chief": "Chef traditionnel",
+        "religious_leader": "Autorité religieuse",
+        "legal_guardian": "Tuteur légal",
+        "other": "Autre"
+      },
+      "toast": {
+        "createdTitle": "Garant ajouté",
+        "createdBody": "Le garant a été enregistré en brouillon.",
+        "updatedTitle": "Garant mis à jour",
+        "updatedBody": "Les modifications ont été enregistrées.",
+        "statusChangedTitle": "Statut modifié",
+        "statusChangedBody": "Action « {action} » appliquée."
+      }
+    },
+    "proxies": {
+      "title": "Mandataires",
+      "count": "{count} mandataire(s)",
+      "empty": "Aucun mandataire enregistré.",
+      "status": {
+        "draft": "Brouillon",
+        "pending_review": "En cours de vérification",
+        "verified": "Vérifié",
+        "rejected": "Rejeté",
+        "deactivated": "Désactivé",
+        "expired": "Expiré",
+        "archived": "Archivé"
+      },
+      "columns": {
+        "name": "Nom du mandataire",
+        "mandate": "Type de mandat",
+        "phone": "Téléphone",
+        "startsOn": "Démarre le",
+        "endsOn": "Termine le",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "actions": {
+        "menu": "Actions",
+        "create": "Ajouter un mandataire",
+        "edit": "Modifier",
+        "submit": "Soumettre",
+        "verify": "Valider",
+        "reject": "Rejeter",
+        "deactivate": "Désactiver",
+        "expire": "Marquer expiré",
+        "archive": "Archiver"
+      },
+      "action": {
+        "title": {
+          "submit": "Soumettre le mandataire",
+          "verify": "Valider le mandataire",
+          "reject": "Rejeter le mandataire",
+          "deactivate": "Désactiver le mandataire",
+          "expire": "Marquer expiré",
+          "archive": "Archiver le mandataire"
+        },
+        "intro": {
+          "submit": "Confirmer la soumission du mandataire {target} ?",
+          "verify": "Confirmer la validation du mandataire {target} ?",
+          "reject": "Rejeter le mandataire {target}. Saisissez le motif (obligatoire).",
+          "deactivate": "Désactiver le mandataire {target} ?",
+          "expire": "Marquer le mandataire {target} comme expiré ?",
+          "archive": "Archiver le mandataire {target} ?"
+        }
+      },
+      "drawer": {
+        "titleCreate": "Ajouter un mandataire",
+        "titleEdit": "Modifier le mandataire",
+        "hint": "Renseignez les informations du mandataire et les modalités de mandat."
+      },
+      "fields": {
+        "name": "Nom complet",
+        "phone": "Téléphone",
+        "email": "Email",
+        "idType": "Type de pièce d'identité",
+        "idNumber": "Numéro de pièce d'identité",
+        "mandateType": "Type de mandat",
+        "mandateTypeHint": "Procuration générale, opérations spécifiques, etc.",
+        "startsOn": "Démarre le",
+        "endsOn": "Termine le"
+      },
+      "toast": {
+        "createdTitle": "Mandataire ajouté",
+        "createdBody": "Le mandataire a été enregistré en brouillon.",
+        "updatedTitle": "Mandataire mis à jour",
+        "updatedBody": "Les modifications ont été enregistrées.",
+        "statusChangedTitle": "Statut modifié",
+        "statusChangedBody": "Action « {action} » appliquée."
+      }
+    }
+  },
   "rolesPage": {
     "pageTitle": "Rôles & permissions",
     "pageDescription": "Sélectionnez un rôle pour voir et modifier ses permissions. Les changements ne sont enregistrés qu'après clic sur « Enregistrer ».",

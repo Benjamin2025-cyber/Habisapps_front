@@ -172,7 +172,7 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "clients",
         href: "/clients",
-        available: false,
+        available: true,
         permissions: ["crm.clients.view"],
       },
       {
