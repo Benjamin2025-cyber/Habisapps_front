@@ -13,7 +13,7 @@ export function BrandLogo({
 }: BrandLogoProps) {
   return (
     <div
-      className={cn("flex items-center gap-3", className)}
+      className={cn("flex items-center gap-1.5", className)}
       aria-label="HabisLoan"
     >
       <BrandMark className={iconClassName} />
@@ -32,40 +32,17 @@ export function BrandLogo({
 
 function BrandMark({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 64 64"
-      className={cn("h-10 w-10", className)}
-      role="presentation"
+    // Plain <img> (next/image isn't used in this project — same pattern as
+    // ImageUploadField). The icon is a transparent PNG so it sits on any surface.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/brand/logo-icon.png"
+      alt=""
       aria-hidden="true"
-    >
-      <defs>
-        <linearGradient id="habis-ring" x1="0" y1="0" x2="64" y2="64">
-          <stop offset="0%" stopColor="#22c55e" />
-          <stop offset="50%" stopColor="#06b6d4" />
-          <stop offset="100%" stopColor="#a3158a" />
-        </linearGradient>
-        <linearGradient id="habis-bird" x1="8" y1="20" x2="56" y2="44">
-          <stop offset="0%" stopColor="#22d3ee" />
-          <stop offset="100%" stopColor="#3b82f6" />
-        </linearGradient>
-      </defs>
-
-      <circle
-        cx="32"
-        cy="32"
-        r="26"
-        fill="none"
-        stroke="url(#habis-ring)"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeDasharray="140 40"
-      />
-
-      <path
-        d="M14 38 Q22 22 32 28 Q40 22 50 26 Q44 34 36 36 Q32 44 22 42 Q18 42 14 38 Z"
-        fill="url(#habis-bird)"
-      />
-      <circle cx="44" cy="28" r="1.6" fill="#0b1020" />
-    </svg>
+      // `cn` here just joins (no tailwind-merge), so a caller's size must
+      // replace the default rather than sit alongside it. Default h-14 w-14
+      // (auth screens); callers like the sidebar pass their own size.
+      className={cn("object-contain", className || "h-14 w-14")}
+    />
   );
 }

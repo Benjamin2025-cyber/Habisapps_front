@@ -1290,6 +1290,179 @@
     "hint": "JPG ou PNG.",
     "linked": "Image associée (aperçu indisponible)."
   },
+  "guarantees": {
+    "pageTitle": "Crédit — Garanties",
+    "pageDescription": "Garants (cautions) et objets en garantie rattachés à un prêt.",
+    "selectLoanPrompt": "Sélectionnez un prêt pour gérer ses garanties.",
+    "tabsAriaLabel": "Onglets des garanties",
+    "tabs": {
+      "guarantors": "Garants",
+      "objects": "Objets en garantie"
+    },
+    "loanSelector": {
+      "label": "Prêt",
+      "placeholder": "Sélectionner un prêt…",
+      "viewClient": "Voir le client",
+      "releaseHint": "La libération des garanties n'est possible qu'après clôture du prêt."
+    },
+    "collateralType": {
+      "real_estate": "Immobilier",
+      "movable": "Bien mobilier",
+      "personal_guarantee": "Caution personnelle"
+    },
+    "obligation": {
+      "intro": "Garants engagés sur ce prêt (cautions). Le garant doit être un garant vérifié du client.",
+      "title": "Garants",
+      "count": "{count} garant(s)",
+      "empty": "Aucun garant rattaché à ce prêt.",
+      "errorTitle": "Impossible de charger les garants",
+      "status": {
+        "active": "Actif",
+        "released": "Libéré",
+        "cancelled": "Annulé"
+      },
+      "columns": {
+        "guarantor": "Garant",
+        "coverage": "Couverture",
+        "status": "Statut",
+        "period": "Période",
+        "actions": "Actions"
+      },
+      "actions": {
+        "create": "Ajouter un garant",
+        "menu": "Actions",
+        "edit": "Modifier",
+        "cancel": "Annuler l'engagement",
+        "release": "Libérer"
+      },
+      "fields": {
+        "guarantor": "Garant",
+        "guarantorPlaceholder": "Sélectionner un garant…",
+        "noGuarantors": "Aucun garant vérifié pour ce client. Ajoutez-en un depuis la fiche client.",
+        "amount": "Montant garanti",
+        "amountHint": "Montant en devise. Laisser vide si garantie en pourcentage.",
+        "percentage": "Pourcentage garanti",
+        "percentageHint": "0 à 100.",
+        "currency": "Devise",
+        "currencyHint": "Code ISO à 3 lettres (ex. XAF).",
+        "startsOn": "Début",
+        "endsOn": "Fin",
+        "releaseCondition": "Condition de libération",
+        "releaseConditionHint": "Par défaut : à la clôture du prêt (loan_closed)."
+      },
+      "drawer": {
+        "titleCreate": "Ajouter un garant",
+        "titleEdit": "Modifier l'engagement de garant",
+        "hint": "Rattachez un garant vérifié et précisez la couverture.",
+        "create": "Ajouter"
+      },
+      "toast": {
+        "createdTitle": "Garant ajouté",
+        "createdBody": "L'engagement de garant a été créé.",
+        "updatedTitle": "Engagement mis à jour",
+        "updatedBody": "L'engagement de garant a été modifié.",
+        "cancelledTitle": "Engagement annulé",
+        "cancelledBody": "L'engagement de garant a été annulé.",
+        "releasedTitle": "Garant libéré",
+        "releasedBody": "L'engagement de garant a été libéré.",
+        "errorTitle": "Action impossible"
+      }
+    },
+    "collateral": {
+      "intro": "Objets donnés en garantie du prêt (immobilier, biens mobiliers…). Chaque garantie peut contenir plusieurs objets.",
+      "untitled": "Garantie sans description",
+      "ownerLine": "Propriétaire : {owner}",
+      "valueLine": "Valeur déclarée : {value}",
+      "empty": "Aucun objet en garantie pour ce prêt.",
+      "errorTitle": "Impossible de charger les garanties",
+      "status": {
+        "active": "Active",
+        "released": "Libérée",
+        "archived": "Archivée"
+      },
+      "actions": {
+        "create": "Ajouter une garantie",
+        "menu": "Actions",
+        "edit": "Modifier",
+        "addItem": "Ajouter un objet",
+        "release": "Libérer"
+      },
+      "fields": {
+        "type": "Type de garantie",
+        "typePlaceholder": "Sélectionner un type…",
+        "description": "Description",
+        "owner": "Propriétaire",
+        "valuationDate": "Date d'évaluation",
+        "declaredValue": "Valeur déclarée",
+        "amountHint": "Montant en devise.",
+        "currency": "Devise",
+        "currencyHint": "Code ISO à 3 lettres (ex. XAF)."
+      },
+      "drawer": {
+        "titleCreate": "Nouvelle garantie",
+        "titleEdit": "Modifier la garantie",
+        "hint": "Le type détermine les champs des objets ajoutés ensuite.",
+        "create": "Créer la garantie"
+      },
+      "toast": {
+        "createdTitle": "Garantie créée",
+        "createdBody": "La garantie a été créée.",
+        "updatedTitle": "Garantie mise à jour",
+        "updatedBody": "La garantie a été modifiée.",
+        "releasedTitle": "Garantie libérée",
+        "releasedBody": "La garantie a été libérée.",
+        "errorTitle": "Action impossible"
+      }
+    },
+    "item": {
+      "empty": "Aucun objet. Utilisez « Ajouter un objet ».",
+      "columns": {
+        "description": "Objet",
+        "quantity": "Qté",
+        "details": "Détails",
+        "amount": "Valeur",
+        "actions": "Actions"
+      },
+      "actions": {
+        "edit": "Modifier"
+      },
+      "groups": {
+        "movable": "Détails du bien mobilier",
+        "realEstate": "Détails du bien immobilier"
+      },
+      "fields": {
+        "description": "Désignation",
+        "quantity": "Quantité",
+        "reference": "Référence",
+        "amount": "Valeur",
+        "amountHint": "Montant en devise.",
+        "currency": "Devise",
+        "chassis": "N° de châssis",
+        "registration": "Immatriculation",
+        "brand": "Marque",
+        "model": "Modèle",
+        "titleDeed": "N° de titre foncier",
+        "lot": "N° de lot",
+        "location": "Localisation"
+      },
+      "drawer": {
+        "titleCreate": "Nouvel objet",
+        "titleEdit": "Modifier l'objet",
+        "create": "Ajouter l'objet",
+        "hint": {
+          "real_estate": "Renseignez les références foncières du bien.",
+          "movable": "Renseignez les identifiants du bien (châssis, immatriculation…).",
+          "personal_guarantee": "Décrivez l'objet de la caution."
+        }
+      },
+      "toast": {
+        "createdTitle": "Objet ajouté",
+        "createdBody": "L'objet a été ajouté à la garantie.",
+        "updatedTitle": "Objet mis à jour",
+        "updatedBody": "L'objet a été modifié."
+      }
+    }
+  },
   "loans": {
     "pageTitle": "Crédit — Mise en place",
     "pageDescription": "Création et suivi des prêts : montage, visas, génération du tableau d'amortissement.",

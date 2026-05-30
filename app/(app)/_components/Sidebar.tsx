@@ -104,7 +104,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   // Permission-gate everything against the session's union of role + direct
   // permissions. Items with no permission gate stay visible.
   const ownedPermissions =
-    session.status === "authenticated" ? session.user.permissions ?? [] : [];
+    session.status === "authenticated" ? (session.user.permissions ?? []) : [];
   const visibleSoloItems = NAV_SOLO_ITEMS.filter((item) =>
     itemAllowed(item, ownedPermissions),
   );
@@ -119,7 +119,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       className={cn(
         "hidden md:flex md:shrink-0 md:flex-col",
         "transition-[width] duration-200 ease-out",
-        collapsed ? "md:w-16" : "md:w-64",
+        collapsed ? "md:w-20" : "md:w-64",
       )}
       aria-label={t("common.brandName")}
     >
@@ -131,12 +131,16 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         style={{ borderBottom: `1px solid ${PALETTE.divider}` }}
       >
         {collapsed ? (
-          <Link href="/dashboard" aria-label={t("common.brandName")} className="block">
+          <Link
+            href="/dashboard"
+            aria-label={t("common.brandName")}
+            className="block"
+          >
             <SmallBrand />
           </Link>
         ) : (
           <Link href="/dashboard" className="block w-full">
-            <BrandLogo wordmarkClassName="text-xl" iconClassName="h-8 w-8" />
+            <BrandLogo wordmarkClassName="text-xl" iconClassName="h-14 w-14" />
           </Link>
         )}
       </div>
@@ -457,8 +461,12 @@ function SubLink({
 
 function SmallBrand() {
   return (
-    <span className="inline-flex h-9 w-9 items-center justify-center rounded-[var(--radius-field)] bg-primary text-primary-foreground">
-      <span className="text-sm font-extrabold">H</span>
-    </span>
+    // Collapsed sidebar mark — the real dove icon (transparent PNG).
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/brand/logo-icon.png"
+      alt="HabisLoan"
+      className="h-16 w-16 object-contain"
+    />
   );
 }

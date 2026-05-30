@@ -221,7 +221,7 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "collaterals",
         href: "/credit/collaterals",
-        available: false,
+        available: true,
         permissions: ["loans.collaterals.manage", "loans.guarantees.manage"],
       },
       {
