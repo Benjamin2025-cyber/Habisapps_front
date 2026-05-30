@@ -61,6 +61,13 @@ export function localizeValidationMessage(
   if (/does not exist/i.test(rawMessage) || /does not match/i.test(rawMessage)) {
     return `Le champ ${label} fait référence à une valeur inconnue.`;
   }
+  // Laravel field-validation messages start with "The <field> ...". Anything
+  // else is a domain/business message (e.g. a respondUnprocessable rule like
+  // "Loan must define a positive number of installments.") — surface it
+  // verbatim rather than forcing a misleading "Le champ X :" prefix.
+  if (!/^the\s/i.test(rawMessage.trim())) {
+    return rawMessage;
+  }
   return `Le champ ${label} : ${rawMessage}`;
 }
 
@@ -125,8 +132,15 @@ export function localizeApiError(
         }
       }
     }
+    // Prefer the specific validation/domain messages over the generic
+    // top-level "Validation failed" so toasts (which only show generalMessage)
+    // surface the real reason instead of "La saisie comporte des erreurs."
+    const specifics = Object.values(fieldErrors);
     return {
-      generalMessage: localizeApiMessage(error.message),
+      generalMessage:
+        specifics.length > 0
+          ? specifics.join(" ")
+          : localizeApiMessage(error.message),
       fieldErrors,
     };
   }

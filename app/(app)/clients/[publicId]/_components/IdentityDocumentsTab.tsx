@@ -33,6 +33,7 @@ import {
   IDENTITY_DOCUMENT_TYPE_SLUGS,
   isKnownIdentityDocumentType,
 } from "@/lib/catalogs/identity-document-types";
+import { ImageUploadField } from "../../../_components/ImageUploadField";
 import { SubResourceActionDrawer } from "./SubResourceActionDrawer";
 
 type Props = {
@@ -40,6 +41,20 @@ type Props = {
   /** Hoisted so the parent can show a badge count next to the tab. */
   onCountChange?: (count: number) => void;
 };
+
+/**
+ * Common Cameroon issuing authorities offered as autocomplete suggestions on
+ * the free-text `issuing_authority` field. The user can pick one or type any
+ * value (e.g. a foreign authority for a non-national document).
+ */
+const ISSUING_AUTHORITY_SUGGESTIONS = [
+  "Délégation Générale à la Sûreté Nationale (DGSN)",
+  "Ministère des Transports",
+  "Préfecture",
+  "Sous-préfecture",
+  "Mairie",
+  "Consulat",
+];
 
 
 /**
@@ -215,10 +230,21 @@ export function IdentityDocumentsTab({
             );
           }
           const verification = getValue() as IdentityDocumentVerificationStatus;
+          const reason = row.original.rejection_reason;
           return (
-            <Badge tone={VERIFICATION_TONE[verification]}>
-              {t(`clientDetail.identityDocs.verificationStatus.${verification}`)}
-            </Badge>
+            <div className="flex flex-col items-start gap-1">
+              <Badge tone={VERIFICATION_TONE[verification]}>
+                {t(`clientDetail.identityDocs.verificationStatus.${verification}`)}
+              </Badge>
+              {verification === "rejected" && reason ? (
+                <span
+                  className="max-w-[18rem] text-xs text-danger"
+                  title={reason}
+                >
+                  {t("common.rejectionReason", { reason })}
+                </span>
+              ) : null}
+            </div>
           );
         },
       },
@@ -245,7 +271,11 @@ export function IdentityDocumentsTab({
                     onClick: () => openEdit(doc),
                   });
                 }
-                if (canSubmit && !isArchived && verification === "pending") {
+                if (
+                  canSubmit &&
+                  !isArchived &&
+                  (verification === "pending" || verification === "rejected")
+                ) {
                   items.push({
                     label: t("clientDetail.identityDocs.actions.submit"),
                     onClick: () => setActionDrawer({ doc, action: "submit" }),
@@ -355,6 +385,7 @@ function IdentityDocumentDrawer({
     issuing_authority: "",
     issued_on: "",
     expires_on: "",
+    document_public_id: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -371,6 +402,7 @@ function IdentityDocumentDrawer({
         issuing_authority: editing.issuing_authority ?? "",
         issued_on: editing.issued_on ? editing.issued_on.slice(0, 10) : "",
         expires_on: editing.expires_on ? editing.expires_on.slice(0, 10) : "",
+        document_public_id: editing.document_public_id ?? "",
       });
     } else {
       setForm({
@@ -379,6 +411,7 @@ function IdentityDocumentDrawer({
         issuing_authority: "",
         issued_on: "",
         expires_on: "",
+        document_public_id: "",
       });
     }
   }, [open, editing]);
@@ -418,6 +451,7 @@ function IdentityDocumentDrawer({
         issuing_authority: nullable(form.issuing_authority),
         issued_on: nullable(form.issued_on),
         expires_on: nullable(form.expires_on),
+        document_public_id: nullable(form.document_public_id),
       });
     } catch (cause) {
       const { generalMessage, fieldErrors } = localizeApiError(cause, {
@@ -492,7 +526,14 @@ function IdentityDocumentDrawer({
           value={form.issuing_authority}
           onChange={(event) => setForm((c) => ({ ...c, issuing_authority: event.target.value }))}
           error={errors.issuing_authority}
+          hint={t("clientDetail.identityDocs.fields.authorityHint")}
+          list="kyc-issuing-authorities"
         />
+        <datalist id="kyc-issuing-authorities">
+          {ISSUING_AUTHORITY_SUGGESTIONS.map((authority) => (
+            <option key={authority} value={authority} />
+          ))}
+        </datalist>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <TextField
             label={t("clientDetail.identityDocs.fields.issuedOn")}
@@ -509,6 +550,22 @@ function IdentityDocumentDrawer({
             error={errors.expires_on}
           />
         </div>
+        {/* An expired (or same-day) document can't be verified by the API
+            (expires_on < now), so warn before the user submits it. */}
+        {form.expires_on &&
+        form.expires_on <= new Date().toISOString().slice(0, 10) ? (
+          <p className="rounded-[var(--radius-field)] border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-foreground">
+            {t("clientDetail.identityDocs.fields.expiredWarning")}
+          </p>
+        ) : null}
+        <ImageUploadField
+          category="identity"
+          value={form.document_public_id}
+          onChange={(id) => setForm((c) => ({ ...c, document_public_id: id }))}
+          label={t("clientDetail.identityDocs.fields.document")}
+          hint={t("clientDetail.identityDocs.fields.documentHint")}
+          error={errors.document_public_id}
+        />
       </form>
     </Drawer>
   );

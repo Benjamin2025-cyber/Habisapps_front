@@ -17,7 +17,13 @@ export type DataTablePagination = {
   total: number;
   lastPage: number;
   onPageChange: (next: number) => void;
+  /** When provided, renders an "items per page" selector in the footer. */
+  onPageSizeChange?: (size: number) => void;
+  /** Options for the per-page selector. Defaults to [10, 25, 50, 100]. */
+  pageSizeOptions?: number[];
 };
+
+const DEFAULT_PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
 type Props<TRow> = {
   columns: ColumnDef<TRow, unknown>[];
@@ -71,7 +77,9 @@ export function DataTable<TRow>({
     pageCount: pagination?.lastPage ?? 1,
   });
 
-  const showsPagination = !!pagination && pagination.lastPage > 1;
+  // The footer shows whenever pagination is provided so the per-page selector
+  // and range stay visible even on a single page; prev/next only when > 1 page.
+  const showsPagination = !!pagination;
   const showsBottomBar = !!bottomCaption || showsPagination;
 
   return (
@@ -174,10 +182,35 @@ export function DataTable<TRow>({
         <footer className="flex flex-wrap items-center justify-between gap-3 px-1 text-xs">
           <span className="text-muted-foreground">{bottomCaption}</span>
           {showsPagination && pagination ? (
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              {pagination.onPageSizeChange ? (
+                <label className="flex items-center gap-1.5 text-muted-foreground">
+                  {t("dataTable.perPage")}
+                  <select
+                    value={pagination.pageSize}
+                    onChange={(event) =>
+                      pagination.onPageSizeChange?.(Number(event.target.value))
+                    }
+                    disabled={loading}
+                    aria-label={t("dataTable.perPage")}
+                    className="h-8 rounded-[var(--radius-field)] border border-border bg-background px-2 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                  >
+                    {(pagination.pageSizeOptions ?? DEFAULT_PAGE_SIZE_OPTIONS).map(
+                      (size) => (
+                        <option key={size} value={size}>
+                          {size}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                </label>
+              ) : null}
               <span className="text-muted-foreground tabular-nums">
                 {t("dataTable.range", {
-                  from: (pagination.page - 1) * pagination.pageSize + 1,
+                  from:
+                    pagination.total === 0
+                      ? 0
+                      : (pagination.page - 1) * pagination.pageSize + 1,
                   to: Math.min(
                     pagination.page * pagination.pageSize,
                     pagination.total,
@@ -185,34 +218,38 @@ export function DataTable<TRow>({
                   total: pagination.total,
                 })}
               </span>
-              <button
-                type="button"
-                onClick={() =>
-                  pagination.onPageChange(Math.max(1, pagination.page - 1))
-                }
-                disabled={pagination.page <= 1 || loading}
-                className="inline-flex h-8 items-center rounded-[var(--radius-field)] border border-border bg-background px-3 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {t("common.previous")}
-              </button>
-              <span className="text-muted-foreground tabular-nums">
-                {t("dataTable.pageOf", {
-                  current: pagination.page,
-                  total: pagination.lastPage,
-                })}
-              </span>
-              <button
-                type="button"
-                onClick={() =>
-                  pagination.onPageChange(
-                    Math.min(pagination.lastPage, pagination.page + 1),
-                  )
-                }
-                disabled={pagination.page >= pagination.lastPage || loading}
-                className="inline-flex h-8 items-center rounded-[var(--radius-field)] border border-border bg-background px-3 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {t("common.next")}
-              </button>
+              {pagination.lastPage > 1 ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      pagination.onPageChange(Math.max(1, pagination.page - 1))
+                    }
+                    disabled={pagination.page <= 1 || loading}
+                    className="inline-flex h-8 items-center rounded-[var(--radius-field)] border border-border bg-background px-3 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {t("common.previous")}
+                  </button>
+                  <span className="text-muted-foreground tabular-nums">
+                    {t("dataTable.pageOf", {
+                      current: pagination.page,
+                      total: pagination.lastPage,
+                    })}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      pagination.onPageChange(
+                        Math.min(pagination.lastPage, pagination.page + 1),
+                      )
+                    }
+                    disabled={pagination.page >= pagination.lastPage || loading}
+                    className="inline-flex h-8 items-center rounded-[var(--radius-field)] border border-border bg-background px-3 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {t("common.next")}
+                  </button>
+                </>
+              ) : null}
             </div>
           ) : null}
         </footer>

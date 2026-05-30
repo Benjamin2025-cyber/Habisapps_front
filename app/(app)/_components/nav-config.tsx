@@ -245,7 +245,7 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "loanTransfers",
         href: "/credit/transfers",
-        available: false,
+        available: true,
         permissions: ["loans.transfers.manage"],
       },
       {

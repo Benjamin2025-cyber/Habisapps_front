@@ -67,7 +67,7 @@ export function ObligationDrawer({
         currency: initial.currency ?? defaultCurrency ?? "XAF",
         starts_on: initial.starts_on ?? "",
         ends_on: initial.ends_on ?? "",
-        release_condition: initial.release_condition ?? "",
+        release_condition: initial.release_condition ?? "loan_closed",
       });
     } else {
       setForm(emptyForm(defaultCurrency));
@@ -226,12 +226,18 @@ export function ObligationDrawer({
             error={errors.currency}
             hint={t("guarantees.obligation.fields.currencyHint")}
           />
-          <TextField
+          <Select
             label={t("guarantees.obligation.fields.releaseCondition")}
             value={form.release_condition}
-            onChange={(event) =>
-              set("release_condition", event.target.value)
-            }
+            options={[
+              {
+                value: "loan_closed",
+                label: t(
+                  "guarantees.obligation.fields.releaseConditionOptions.loanClosed",
+                ),
+              },
+            ]}
+            onChange={(next) => set("release_condition", next)}
             error={errors.release_condition}
             hint={t("guarantees.obligation.fields.releaseConditionHint")}
           />
@@ -263,7 +269,7 @@ function emptyForm(defaultCurrency: string | null): FormState {
     currency: defaultCurrency ?? "XAF",
     starts_on: "",
     ends_on: "",
-    release_condition: "",
+    release_condition: "loan_closed",
   };
 }
 

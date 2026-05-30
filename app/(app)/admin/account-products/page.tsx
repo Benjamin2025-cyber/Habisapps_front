@@ -57,6 +57,7 @@ export default function AccountProductsPage() {
     EMPTY_ACCOUNT_PRODUCTS_FILTERS,
   );
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   const [drawerMode, setDrawerMode] = useState<AccountProductDrawerMode | null>(
     null,
   );
@@ -70,17 +71,18 @@ export default function AccountProductsPage() {
       void signal;
       return fetchAccountProducts(token, {
         page,
-        perPage: 100,
+        perPage: pageSize,
         accountFamily: filters.family || undefined,
         status: filters.status || undefined,
       });
     },
-    [token, page, filters.family, filters.status],
+    [token, page, pageSize, filters.family, filters.status],
   );
 
   const { data, loading, error, refetch } = useApi(fetcher, [
     token,
     page,
+    pageSize,
     filters.family,
     filters.status,
   ]);
@@ -236,6 +238,10 @@ export default function AccountProductsPage() {
                 total: pageMeta.total,
                 lastPage: pageMeta.last_page,
                 onPageChange: setPage,
+                onPageSizeChange: (size) => {
+                  setPageSize(size);
+                  setPage(1);
+                },
               }
             : undefined
         }

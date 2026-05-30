@@ -46,6 +46,7 @@ export default function LoansPage() {
 
   const [filters, setFilters] = useState<LoansFilterState>(EMPTY_LOANS_FILTERS);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const token = session.status === "authenticated" ? session.token : null;
@@ -56,16 +57,17 @@ export default function LoansPage() {
       void signal;
       return fetchLoans(token, {
         page,
-        perPage: 100,
+        perPage: pageSize,
         status: filters.status || undefined,
       });
     },
-    [token, page, filters.status],
+    [token, page, pageSize, filters.status],
   );
 
   const { data, loading, error, refetch } = useApi(fetcher, [
     token,
     page,
+    pageSize,
     filters.status,
   ]);
 
@@ -170,6 +172,10 @@ export default function LoansPage() {
                 total: pageMeta.total,
                 lastPage: pageMeta.last_page,
                 onPageChange: setPage,
+                onPageSizeChange: (size) => {
+                  setPageSize(size);
+                  setPage(1);
+                },
               }
             : undefined
         }

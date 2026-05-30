@@ -21,7 +21,8 @@
       "switcher": "Changer de langue",
       "comingSoon": "Bientôt disponible",
       "active": "Langue actuelle : {name}"
-    }
+    },
+    "rejectionReason": "Motif du rejet : {reason}"
   },
   "duration": {
     "seconds": "{count} s",
@@ -585,7 +586,11 @@
         "number": "Numéro",
         "authority": "Autorité émettrice",
         "issuedOn": "Date d'émission",
-        "expiresOn": "Date d'expiration"
+        "expiresOn": "Date d'expiration",
+        "document": "Pièce justificative (image)",
+        "documentHint": "Photo de la pièce. Obligatoire pour pouvoir vérifier le document KYC. Une seule image (recto) — le recto/verso n'est pas encore géré par l'API.",
+        "authorityHint": "Organisme ayant délivré la pièce (ex. DGSN pour la CNI). Optionnel.",
+        "expiredWarning": "⚠ Cette date d'expiration est dépassée — le document ne pourra pas être vérifié. Saisissez une date future."
       },
       "types": {
         "legacyTag": "valeur existante",
@@ -680,7 +685,9 @@
         "relationshipHint": "Lien du garant avec le client.",
         "relationshipPlaceholder": "Sélectionner la relation…",
         "startsOn": "Démarre le",
-        "endsOn": "Termine le"
+        "endsOn": "Termine le",
+        "document": "Pièce KYC du garant",
+        "documentHint": "Pièce d'identité du garant (image). Obligatoire pour pouvoir vérifier le garant."
       },
       "relationships": {
         "legacyTag": "valeur existante",
@@ -783,7 +790,9 @@
         "mandateType": "Type de mandat",
         "mandateTypeHint": "Procuration générale, opérations spécifiques, etc.",
         "startsOn": "Démarre le",
-        "endsOn": "Termine le"
+        "endsOn": "Termine le",
+        "document": "Pièce KYC du mandataire (image)",
+        "documentHint": "Pièce d'identité du mandataire (image). Obligatoire pour pouvoir vérifier le mandataire."
       },
       "toast": {
         "createdTitle": "Mandataire ajouté",
@@ -828,7 +837,8 @@
   "dataTable": {
     "empty": "Aucune ligne à afficher.",
     "pageOf": "Page {current} / {total}",
-    "range": "{from}–{to} sur {total}"
+    "range": "{from}–{to} sur {total}",
+    "perPage": "Par page"
   },
   "staffUsers": {
     "pageTitle": "Gestion des utilisateurs",
@@ -1348,7 +1358,10 @@
         "startsOn": "Début",
         "endsOn": "Fin",
         "releaseCondition": "Condition de libération",
-        "releaseConditionHint": "Par défaut : à la clôture du prêt (loan_closed)."
+        "releaseConditionHint": "Quand la caution prend fin. La libération s'effectue à la clôture du prêt.",
+        "releaseConditionOptions": {
+          "loanClosed": "À la clôture du prêt"
+        }
       },
       "drawer": {
         "titleCreate": "Ajouter un garant",
@@ -1461,6 +1474,70 @@
         "updatedTitle": "Objet mis à jour",
         "updatedBody": "L'objet a été modifié."
       }
+    }
+  },
+  "loanTransfers": {
+    "pageTitle": "Crédit — Mutation de prêt",
+    "pageDescription": "Réaffectez le gestionnaire de plusieurs prêts vers un nouveau gestionnaire.",
+    "errorTitle": "Impossible de charger les prêts",
+    "selectAgencyPrompt": "Sélectionnez l'agence sur laquelle effectuer la mutation.",
+    "reasonRequired": "Le motif de mutation est obligatoire.",
+    "needTarget": "Sélectionnez un gestionnaire cible pour confirmer.",
+    "preview": "Vous allez muter {count} prêt(s) — encours total {total} — vers {manager}.",
+    "previewNoTarget": "{count} prêt(s) sélectionné(s) — encours total {total}. Choisissez un gestionnaire cible.",
+    "fields": {
+      "agency": "Agence",
+      "agencyPlaceholder": "Sélectionner une agence…",
+      "agencyHint": "Détermine les gestionnaires et les prêts proposés.",
+      "targetManager": "Gestionnaire cible",
+      "targetManagerPlaceholder": "Sélectionner le nouveau gestionnaire…",
+      "targetManagerHint": "Gestionnaires (agent de crédit / responsable) de l'agence sélectionnée.",
+      "currentManager": "Filtrer par gestionnaire actuel",
+      "currentManagerAll": "Tous les gestionnaires actuels",
+      "reason": "Motif de la mutation",
+      "reasonHint": "Obligatoire — conservé dans l'audit (max 255).",
+      "transferDate": "Date de mutation",
+      "transferDateHint": "Par défaut : aujourd'hui."
+    },
+    "list": {
+      "title": "Prêts mutables — agence {agency}",
+      "count": "{count} prêt(s)",
+      "empty": "Aucun prêt mutable pour ce gestionnaire (agence, statut, ou déjà géré par lui).",
+      "selectAll": "Tout sélectionner"
+    },
+    "columns": {
+      "number": "N° prêt",
+      "currentManager": "Gestionnaire actuel",
+      "amount": "Encours (principal)",
+      "status": "Statut"
+    },
+    "actions": {
+      "confirm": "Confirmer la mutation",
+      "clear": "Vider la sélection"
+    },
+    "confirmDialog": {
+      "title": "Confirmer la mutation",
+      "description": "Vous êtes sur le point de muter {count} prêt(s) vers {manager}. Cette action réaffecte le gestionnaire de chaque prêt sélectionné.",
+      "loans": "Prêts concernés",
+      "total": "Encours total",
+      "target": "Nouveau gestionnaire"
+    },
+    "results": {
+      "title": "Résultat de la mutation",
+      "ok": "OK",
+      "failed": "Échec"
+    },
+    "toast": {
+      "doneTitle": "Mutation effectuée",
+      "doneBody": "{count} prêt(s) muté(s) avec succès.",
+      "partialTitle": "Mutation partielle",
+      "partialBody": "{ok} réussi(s), {fail} en échec."
+    },
+    "managers": {
+      "title": "Gestionnaires",
+      "searchPlaceholder": "Rechercher un gestionnaire…",
+      "all": "Tous les gestionnaires",
+      "empty": "Aucun gestionnaire pour cette agence."
     }
   },
   "loans": {

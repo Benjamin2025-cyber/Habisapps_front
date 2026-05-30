@@ -58,6 +58,7 @@ export default function ClientsPage() {
     EMPTY_CLIENTS_FILTERS,
   );
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   const [drawerMode, setDrawerMode] = useState<ClientDrawerMode | null>(null);
   const [editing, setEditing] = useState<Client | null>(null);
   const [kycDrawer, setKycDrawer] = useState<{
@@ -73,16 +74,17 @@ export default function ClientsPage() {
       void signal;
       return fetchClients(token, {
         page,
-        perPage: 100,
+        perPage: pageSize,
         scope: canScopeInstitution ? "all" : undefined,
       });
     },
-    [token, page, canScopeInstitution],
+    [token, page, pageSize, canScopeInstitution],
   );
 
   const { data, loading, error, refetch } = useApi(fetcher, [
     token,
     page,
+    pageSize,
     canScopeInstitution,
   ]);
 
@@ -269,6 +271,10 @@ export default function ClientsPage() {
                 total: pageMeta.total,
                 lastPage: pageMeta.last_page,
                 onPageChange: setPage,
+                onPageSizeChange: (size) => {
+                  setPageSize(size);
+                  setPage(1);
+                },
               }
             : undefined
         }

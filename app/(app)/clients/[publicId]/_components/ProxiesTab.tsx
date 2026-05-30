@@ -30,6 +30,7 @@ import {
 } from "@/lib/api/client-proxies";
 import { localizeApiError } from "@/lib/api/errors";
 import { PERSONAL_IDENTITY_DOCUMENT_SLUGS } from "@/lib/catalogs/identity-document-types";
+import { ImageUploadField } from "../../../_components/ImageUploadField";
 import { SubResourceActionDrawer } from "./SubResourceActionDrawer";
 
 type Props = {
@@ -197,10 +198,21 @@ export function ProxiesTab({ clientPublicId, onCountChange }: Props) {
             );
           }
           const verification = getValue() as ProxyVerificationStatus;
+          const reason = row.original.rejection_reason;
           return (
-            <Badge tone={VERIFICATION_TONE[verification]}>
-              {t(`clientDetail.proxies.verificationStatus.${verification}`)}
-            </Badge>
+            <div className="flex flex-col items-start gap-1">
+              <Badge tone={VERIFICATION_TONE[verification]}>
+                {t(`clientDetail.proxies.verificationStatus.${verification}`)}
+              </Badge>
+              {verification === "rejected" && reason ? (
+                <span
+                  className="max-w-[18rem] text-xs text-danger"
+                  title={reason}
+                >
+                  {t("common.rejectionReason", { reason })}
+                </span>
+              ) : null}
+            </div>
           );
         },
       },
@@ -230,7 +242,11 @@ export function ProxiesTab({ clientPublicId, onCountChange }: Props) {
                     },
                   });
                 }
-                if (canSubmit && isLive && verification === "pending") {
+                if (
+                  canSubmit &&
+                  isLive &&
+                  (verification === "pending" || verification === "rejected")
+                ) {
                   items.push({
                     label: t("clientDetail.proxies.actions.submit"),
                     onClick: () => setActionDrawer({ row: rec, action: "submit" }),
@@ -358,6 +374,7 @@ function ProxyDrawer({
     mandate_type: "",
     starts_on: "",
     ends_on: "",
+    document_public_id: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -377,6 +394,7 @@ function ProxyDrawer({
         mandate_type: editing.mandate_type ?? "",
         starts_on: editing.starts_on ? editing.starts_on.slice(0, 10) : "",
         ends_on: editing.ends_on ? editing.ends_on.slice(0, 10) : "",
+        document_public_id: editing.document_public_id ?? "",
       });
     } else {
       setForm({
@@ -388,6 +406,7 @@ function ProxyDrawer({
         mandate_type: "",
         starts_on: "",
         ends_on: "",
+        document_public_id: "",
       });
     }
   }, [open, editing]);
@@ -432,6 +451,7 @@ function ProxyDrawer({
         mandate_type: form.mandate_type.trim(),
         starts_on: nullable(form.starts_on),
         ends_on: nullable(form.ends_on),
+        document_public_id: nullable(form.document_public_id),
       });
     } catch (cause) {
       const { generalMessage, fieldErrors } = localizeApiError(cause, {
@@ -550,6 +570,14 @@ function ProxyDrawer({
             error={errors.ends_on}
           />
         </div>
+        <ImageUploadField
+          category="identity"
+          value={form.document_public_id}
+          onChange={(id) => setForm((c) => ({ ...c, document_public_id: id }))}
+          label={t("clientDetail.proxies.fields.document")}
+          hint={t("clientDetail.proxies.fields.documentHint")}
+          error={errors.document_public_id}
+        />
       </form>
     </Drawer>
   );

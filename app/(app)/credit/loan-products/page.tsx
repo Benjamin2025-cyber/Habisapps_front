@@ -55,6 +55,7 @@ export default function LoanProductsPage() {
     EMPTY_LOAN_PRODUCTS_FILTERS,
   );
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   const [drawerMode, setDrawerMode] = useState<LoanProductDrawerMode | null>(
     null,
   );
@@ -68,16 +69,17 @@ export default function LoanProductsPage() {
       void signal;
       return fetchLoanProducts(token, {
         page,
-        perPage: 100,
+        perPage: pageSize,
         status: filters.status || undefined,
       });
     },
-    [token, page, filters.status],
+    [token, page, pageSize, filters.status],
   );
 
   const { data, loading, error, refetch } = useApi(fetcher, [
     token,
     page,
+    pageSize,
     filters.status,
   ]);
 
@@ -216,6 +218,10 @@ export default function LoanProductsPage() {
                 total: pageMeta.total,
                 lastPage: pageMeta.last_page,
                 onPageChange: setPage,
+                onPageSizeChange: (size) => {
+                  setPageSize(size);
+                  setPage(1);
+                },
               }
             : undefined
         }

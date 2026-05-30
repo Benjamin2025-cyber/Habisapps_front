@@ -53,6 +53,7 @@ export default function AgenciesPage() {
     EMPTY_AGENCIES_FILTERS,
   );
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   const [drawerMode, setDrawerMode] = useState<AgencyDrawerMode | null>(null);
   const [editing, setEditing] = useState<Agency | null>(null);
   const [managerDrawerAgency, setManagerDrawerAgency] = useState<Agency | null>(
@@ -70,12 +71,16 @@ export default function AgenciesPage() {
       // For typical EMF agency counts (< 100) that's a single round-trip; if
       // an institution outgrows it, we'll wire `?filter[...]` server-side
       // once the backend ships it.
-      return fetchAgencies(token, { page, perPage: 100 });
+      return fetchAgencies(token, { page, perPage: pageSize });
     },
-    [token, page],
+    [token, page, pageSize],
   );
 
-  const { data, loading, error, refetch } = useApi(fetcher, [token, page]);
+  const { data, loading, error, refetch } = useApi(fetcher, [
+    token,
+    page,
+    pageSize,
+  ]);
 
   // Filter client-side because the index endpoint doesn't expose query-builder
   // filters yet. Switch to server-side filters when the backend adds them.
@@ -222,6 +227,10 @@ export default function AgenciesPage() {
                 total: pageMeta.total,
                 lastPage: pageMeta.last_page,
                 onPageChange: setPage,
+                onPageSizeChange: (size) => {
+                  setPageSize(size);
+                  setPage(1);
+                },
               }
             : undefined
         }

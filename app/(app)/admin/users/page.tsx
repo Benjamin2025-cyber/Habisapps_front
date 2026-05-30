@@ -59,6 +59,7 @@ export default function StaffUsersPage() {
     EMPTY_STAFF_USERS_FILTERS,
   );
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   const [drawerMode, setDrawerMode] = useState<StaffUserDrawerMode | null>(null);
   const [editing, setEditing] = useState<StaffUser | null>(null);
   const [rolesDrawerUser, setRolesDrawerUser] = useState<StaffUser | null>(null);
@@ -71,12 +72,16 @@ export default function StaffUsersPage() {
     async (signal: AbortSignal): Promise<PaginatedStaffUsers> => {
       if (!token) throw new Error("Missing session token");
       void signal;
-      return fetchStaffUsers(token, { page, perPage: 100 });
+      return fetchStaffUsers(token, { page, perPage: pageSize });
     },
-    [token, page],
+    [token, page, pageSize],
   );
 
-  const { data, loading, error, refetch } = useApi(fetcher, [token, page]);
+  const { data, loading, error, refetch } = useApi(fetcher, [
+    token,
+    page,
+    pageSize,
+  ]);
 
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -301,6 +306,10 @@ export default function StaffUsersPage() {
                 total: pageMeta.total,
                 lastPage: pageMeta.last_page,
                 onPageChange: setPage,
+                onPageSizeChange: (size) => {
+                  setPageSize(size);
+                  setPage(1);
+                },
               }
             : undefined
         }
