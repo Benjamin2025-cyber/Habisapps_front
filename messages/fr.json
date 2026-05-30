@@ -289,6 +289,7 @@
         "accountProducts": "Produit de compte",
         "guarantors": "Garant",
         "proxies": "Mandataire",
+        "loanProducts": "Produits de prêt",
         "loans": "Mise en place",
         "collaterals": "Garanties",
         "loanDisbursement": "Déblocage prêt",
@@ -1288,6 +1289,134 @@
     "remove": "Retirer",
     "hint": "JPG ou PNG.",
     "linked": "Image associée (aperçu indisponible)."
+  },
+  "loanProducts": {
+    "pageTitle": "Crédit — Produits de prêt",
+    "pageDescription": "Catalogue des types de prêt : limites, fréquences, taux, frais, pénalités et comptes comptables.",
+    "errorTitle": "Impossible de charger les produits de prêt",
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif",
+      "archived": "Archivé"
+    },
+    "termUnit": {
+      "day": "jour(s)",
+      "week": "semaine(s)",
+      "month": "mois"
+    },
+    "frequency": {
+      "daily": "Quotidienne",
+      "weekly": "Hebdomadaire",
+      "monthly": "Mensuelle",
+      "custom": "Personnalisée"
+    },
+    "depositType": {
+      "percentage": "Pourcentage",
+      "fixed": "Montant fixe"
+    },
+    "filters": {
+      "searchLabel": "Rechercher",
+      "searchPlaceholder": "Code ou nom du produit…",
+      "statusLabel": "Statut",
+      "statusAll": "Tous les statuts"
+    },
+    "columns": {
+      "code": "Code",
+      "name": "Nom",
+      "term": "Durée",
+      "amountRange": "Montant",
+      "interestRate": "Taux d'intérêt",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "list": {
+      "titleHeader": "Catalogue des produits de prêt",
+      "count": "{count} produit(s)",
+      "totalCaption": "{count} produit(s) enregistré(s) au total",
+      "empty": "Aucun produit de prêt à afficher."
+    },
+    "actions": {
+      "create": "Nouveau produit",
+      "menu": "Actions",
+      "edit": "Modifier",
+      "activate": "Activer",
+      "deactivate": "Désactiver",
+      "archive": "Archiver"
+    },
+    "drawer": {
+      "titleCreate": "Nouveau produit de prêt",
+      "titleEdit": "Modifier — {name}",
+      "createHint": "Définissez le type de prêt et ses paramètres.",
+      "editHint": "Le code n'est pas modifiable après création.",
+      "create": "Créer le produit",
+      "sectionIdentity": "Identité",
+      "sectionLimits": "Limites",
+      "sectionFees": "Frais & taux",
+      "sectionPenalty": "Pénalité",
+      "sectionAccounting": "Comptabilité",
+      "sectionStatus": "Statut"
+    },
+    "fields": {
+      "code": "Code",
+      "codeEditHint": "Le code n'est pas modifiable après création.",
+      "name": "Nom du produit",
+      "requiresGuarantor": "Garant obligatoire",
+      "requiresCollateral": "Garantie (objet) obligatoire",
+      "minTerm": "Durée minimale",
+      "maxTerm": "Durée maximale",
+      "termUnit": "Unité de durée",
+      "termUnitPlaceholder": "Sélectionner…",
+      "repaymentFrequencies": "Fréquences de remboursement autorisées",
+      "minAmount": "Montant minimum",
+      "maxAmount": "Montant maximum",
+      "amountHint": "Montant en devise (XAF).",
+      "dueDateDay": "Jour d'échéance",
+      "dueDateDayHint": "Jour du mois (1–31).",
+      "minGrace": "Délai de grâce min. (jours)",
+      "maxGrace": "Délai de grâce max. (jours)",
+      "interestRate": "Taux d'intérêt",
+      "taxRate": "Taux de taxe",
+      "insuranceRate": "Taux d'assurance",
+      "rateHint": "Valeur décimale (selon la convention de l'API).",
+      "feeAmount": "Frais de dossier",
+      "floorAmount": "Montant plancher",
+      "depositType": "Type de dépôt de garantie",
+      "depositTypePlaceholder": "Sélectionner…",
+      "depositValue": "Valeur du dépôt de garantie",
+      "depositValueHint": "Pourcentage ou montant selon le type choisi.",
+      "penaltyGraceDays": "Jours de grâce avant pénalité",
+      "penaltyGraceDaysHint": "Délai (en jours) après l'échéance avant l'application d'une pénalité. Champ réellement utilisé par le moteur.",
+      "penaltyDisabledNote": "Champs désactivés : ils sont enregistrés et copiés sur le prêt mais ne sont pas encore exploités par le moteur de pénalité (qui s'appuie sur les jours de grâce + une politique globale). En attente du back-end — voir back-issues.md #14.",
+      "penaltyValue": "Valeur de pénalité",
+      "penaltyValueType": "Type de valeur de pénalité",
+      "penaltyFormulaType": "Type de formule de pénalité",
+      "penaltyFormulaBase": "Base de la formule de pénalité",
+      "ledgerAccount": "Compte comptable par défaut (public_id)",
+      "ledgerAccountHint": "Compte comptable hérité par défaut par les prêts créés avec ce produit (sélecteur P16 à venir).",
+      "policiesLabel": "Politiques de calcul rattachées",
+      "policiesHint": "Active une politique de calcul nommée (formule paramétrée côté back). Laisser décoché si non utilisée.",
+      "policyInterest": "Politique d'intérêt",
+      "policyPenalty": "Politique de pénalités & arriérés",
+      "policyRepaymentAllocation": "Ordre d'imputation des remboursements",
+      "policyFee": "Politique de frais",
+      "policyTax": "Politique de taxe",
+      "policyInsurance": "Politique d'assurance",
+      "policyGuaranteeDeposit": "Politique de dépôt de garantie",
+      "status": "Statut",
+      "statusPlaceholder": "Statut par défaut (actif)…",
+      "statusHint": "L'archivage se fait via l'action « Archiver »."
+    },
+    "toast": {
+      "createdTitle": "Produit créé",
+      "createdBody": "Le produit {name} a été créé.",
+      "updatedTitle": "Produit mis à jour",
+      "updatedBody": "Le produit {name} a été modifié.",
+      "statusChangedTitle": "Statut modifié",
+      "statusChangedBody": "Le produit {name} est maintenant : {status}.",
+      "archivedTitle": "Produit archivé",
+      "archivedBody": "Le produit {name} a été archivé.",
+      "errorTitle": "Action impossible"
+    }
   },
   "accountProducts": {
     "pageTitle": "Paramétrage — Produits de compte",

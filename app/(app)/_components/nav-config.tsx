@@ -207,6 +207,12 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     defaultExpanded: true,
     items: [
       {
+        labelKey: "loanProducts",
+        href: "/credit/loan-products",
+        available: true,
+        permissions: ["loan.products.view"],
+      },
+      {
         labelKey: "loans",
         href: "/credit/loans",
         available: false,
