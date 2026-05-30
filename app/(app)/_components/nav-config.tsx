@@ -178,8 +178,14 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "accounts",
         href: "/accounts",
-        available: false,
+        available: true,
         permissions: ["customer.accounts.view"],
+      },
+      {
+        labelKey: "accountProducts",
+        href: "/admin/account-products",
+        available: true,
+        permissions: ["account.products.view"],
       },
       {
         labelKey: "guarantors",

@@ -39,6 +39,59 @@ const HEIGHTS: Record<SelectSize, string> = {
 };
 
 /**
+ * Shared `classNames` for our react-select wrappers (sync `Select` and the
+ * async `AsyncSelect`), so both render identically against the design tokens.
+ */
+export function buildSelectClassNames(config: {
+  size: SelectSize;
+  error?: string | null;
+  disabled?: boolean;
+}) {
+  const { size, error, disabled } = config;
+  return {
+    control: ({ isFocused }: { isFocused: boolean }) =>
+      cn(
+        "flex items-center rounded-[var(--radius-field)] border bg-background px-3 text-base text-foreground transition-colors",
+        HEIGHTS[size],
+        error
+          ? "border-danger"
+          : isFocused
+            ? "border-foreground/30 ring-2 ring-ring/10"
+            : "border-input",
+        disabled && "cursor-not-allowed opacity-60",
+      ),
+    valueContainer: () => "gap-1 px-0 py-0",
+    placeholder: () => "text-base text-muted-foreground/80",
+    singleValue: () => "text-base text-foreground",
+    input: () => "text-base text-foreground caret-foreground",
+    indicatorsContainer: () => "gap-1",
+    dropdownIndicator: () => "text-muted-foreground p-1",
+    clearIndicator: () =>
+      "text-muted-foreground hover:text-foreground p-1 cursor-pointer",
+    menu: () =>
+      "mt-1 overflow-hidden rounded-[var(--radius-field)] border border-border bg-background shadow-[0_24px_60px_-30px_rgba(20,6,47,0.30)]",
+    menuList: () => "py-1 max-h-72",
+    option: ({
+      isFocused,
+      isSelected,
+    }: {
+      isFocused: boolean;
+      isSelected: boolean;
+    }) =>
+      cn(
+        "px-3 py-2 text-sm cursor-pointer transition-colors",
+        isSelected
+          ? "bg-accent/15 font-semibold text-foreground"
+          : isFocused
+            ? "bg-muted/40 text-foreground"
+            : "text-foreground",
+      ),
+    noOptionsMessage: () => "px-3 py-3 text-sm text-muted-foreground",
+    loadingMessage: () => "px-3 py-3 text-sm text-muted-foreground",
+  };
+}
+
+/**
  * Single-select dropdown built on `react-select` v5 (headless, accessible,
  * keyboard-navigable, with built-in search). Exposes a string `value` so
  * call sites work the same as our previous native-select wrapper.
@@ -98,40 +151,7 @@ export function Select({
         }
         menuPosition="fixed"
         components={{ IndicatorSeparator: null }}
-        classNames={{
-          control: ({ isFocused }) =>
-            cn(
-              "flex items-center rounded-[var(--radius-field)] border bg-background px-3 text-base text-foreground transition-colors",
-              HEIGHTS[size],
-              error
-                ? "border-danger"
-                : isFocused
-                  ? "border-foreground/30 ring-2 ring-ring/10"
-                  : "border-input",
-              disabled && "cursor-not-allowed opacity-60",
-            ),
-          valueContainer: () => "gap-1 px-0 py-0",
-          placeholder: () => "text-base text-muted-foreground/80",
-          singleValue: () => "text-base text-foreground",
-          input: () => "text-base text-foreground caret-foreground",
-          indicatorsContainer: () => "gap-1",
-          dropdownIndicator: () => "text-muted-foreground p-1",
-          clearIndicator: () =>
-            "text-muted-foreground hover:text-foreground p-1 cursor-pointer",
-          menu: () =>
-            "mt-1 overflow-hidden rounded-[var(--radius-field)] border border-border bg-background shadow-[0_24px_60px_-30px_rgba(20,6,47,0.30)]",
-          menuList: () => "py-1 max-h-72",
-          option: ({ isFocused, isSelected }) =>
-            cn(
-              "px-3 py-2 text-sm cursor-pointer transition-colors",
-              isSelected
-                ? "bg-accent/15 font-semibold text-foreground"
-                : isFocused
-                  ? "bg-muted/40 text-foreground"
-                  : "text-foreground",
-            ),
-          noOptionsMessage: () => "px-3 py-3 text-sm text-muted-foreground",
-        }}
+        classNames={buildSelectClassNames({ size, error, disabled })}
         styles={MENU_PORTAL_STYLE}
       />
 

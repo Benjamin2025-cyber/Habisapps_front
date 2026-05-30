@@ -286,6 +286,7 @@
         "managers": "Gestionnaire",
         "clients": "Client",
         "accounts": "Compte",
+        "accountProducts": "Produit de compte",
         "guarantors": "Garant",
         "proxies": "Mandataire",
         "loans": "Mise en place",
@@ -434,8 +435,15 @@
       "region": "Région",
       "occupation": "Profession",
       "employerName": "Employeur",
+      "photo": "Photo du client",
+      "photoHint": "JPG ou PNG, 10 Mo max.",
       "agency": "Agence d'affectation",
       "agencyPlaceholder": "Sélectionner une agence…",
+      "agencyEditHint": "L'agence n'est pas modifiable après la création.",
+      "prospector": "Prospecteur",
+      "prospectorPlaceholder": "Sélectionner un agent…",
+      "collectionAgent": "Agent de collecte",
+      "collectionAgentPlaceholder": "Sélectionner un agent…",
       "collectionType": "Type de collecte",
       "collectionFrequency": "Fréquence de collecte",
       "collectionFrequencyPlaceholder": "Sélectionner…",
@@ -497,7 +505,16 @@
     },
     "accounts": {
       "title": "Comptes du client",
-      "comingSoon": "Les comptes clients arrivent avec la phase P7 (Référentiel Comptes)."
+      "count": "{count} compte(s)",
+      "empty": "Aucun compte pour ce client.",
+      "errorTitle": "Impossible de charger les comptes",
+      "columns": {
+        "number": "Numéro de compte",
+        "product": "Type / Produit",
+        "currency": "Devise",
+        "status": "Statut",
+        "openedOn": "Ouvert le"
+      }
     },
     "loans": {
       "title": "Prêts du client",
@@ -1010,6 +1027,359 @@
       "statusErrorTitle": "Changement de statut impossible",
       "managerChangedTitle": "Responsable modifié",
       "managerChangedBody": "La gestion de {name} a été mise à jour."
+    }
+  },
+  "accounts": {
+    "pageTitle": "Référentiel — Comptes clients",
+    "pageDescription": "Comptes clients de l'agence : soldes, mouvements et cycle de vie.",
+    "errorTitle": "Impossible de charger les comptes",
+    "filters": {
+      "searchLabel": "Rechercher",
+      "searchPlaceholder": "Numéro de compte, intitulé ou titulaire…",
+      "statusLabel": "Statut",
+      "statusAll": "Tous les statuts"
+    },
+    "status": {
+      "active": "Actif",
+      "suspended": "Suspendu",
+      "closed": "Clôturé",
+      "archived": "Archivé"
+    },
+    "types": {
+      "savings": "Épargne",
+      "current": "Compte courant",
+      "term_deposit": "Dépôt à terme",
+      "wallet": "Portefeuille"
+    },
+    "columns": {
+      "number": "Numéro de compte",
+      "title": "Intitulé",
+      "holder": "Titulaire",
+      "type": "Type",
+      "currency": "Devise",
+      "status": "Statut",
+      "openedOn": "Ouvert le",
+      "actions": "Actions"
+    },
+    "list": {
+      "titleHeader": "Liste des comptes clients",
+      "count": "{count} compte(s)",
+      "totalCaption": "{count} compte(s) enregistré(s) au total",
+      "empty": "Aucun compte à afficher."
+    },
+    "actions": {
+      "create": "Nouveau compte",
+      "menu": "Actions",
+      "edit": "Modifier",
+      "changeStatus": "Changer le statut",
+      "statusActive": "Marquer actif",
+      "statusSuspended": "Suspendre",
+      "statusClosed": "Clôturer",
+      "archive": "Archiver"
+    },
+    "drawer": {
+      "titleCreate": "Nouveau compte client",
+      "titleEdit": "Modifier — {number}",
+      "createHint": "Renseignez le titulaire et les informations du compte.",
+      "editHint": "Le titulaire et le numéro de compte ne sont pas modifiables.",
+      "create": "Créer le compte",
+      "sectionHolder": "Titulaire & affectation",
+      "sectionAccount": "Compte",
+      "sectionAccounting": "Comptabilité (optionnel)",
+      "sectionLifecycle": "Cycle de vie"
+    },
+    "fields": {
+      "client": "Titulaire (client)",
+      "clientPlaceholder": "Rechercher un client…",
+      "agency": "Agence",
+      "agencyPlaceholder": "Sélectionner une agence…",
+      "agencyEditHint": "L'agence n'est pas modifiable après création.",
+      "number": "Numéro de compte",
+      "currency": "Devise",
+      "currencyHint": "Code ISO à 3 lettres (ex. XAF).",
+      "title": "Intitulé du compte",
+      "titleHint": "Par défaut le nom du titulaire. Modifiable (compte joint, entreprise, groupe…).",
+      "product": "Type / Produit de compte",
+      "productPlaceholder": "Sélectionner un produit…",
+      "productHint": "Catalogue géré dans « Produits de compte ».",
+      "legacyType": "Type (libellé libre)",
+      "ledgerAccount": "Compte comptable (override)",
+      "ledgerAccountHint": "Optionnel — laissé vide, le compte hérite du compte comptable du produit (sélecteur P16 à venir).",
+      "accountProduct": "Produit de compte (public_id)",
+      "accountProductHint": "Optionnel — à saisir manuellement pour l'instant.",
+      "openedOn": "Date d'ouverture",
+      "closedOn": "Date de clôture",
+      "status": "Statut",
+      "statusPlaceholder": "Sélectionner un statut…"
+    },
+    "toast": {
+      "createdTitle": "Compte créé",
+      "createdBody": "Le compte {number} a été créé.",
+      "updatedTitle": "Compte mis à jour",
+      "updatedBody": "Le compte {number} a été modifié.",
+      "statusChangedTitle": "Statut modifié",
+      "statusChangedBody": "Le compte {number} est maintenant : {status}.",
+      "statusErrorTitle": "Action impossible",
+      "archivedTitle": "Compte archivé",
+      "archivedBody": "Le compte {number} a été archivé."
+    }
+  },
+  "accountDetail": {
+    "loading": "Chargement du compte…",
+    "referenceLabel": "Compte n° {number}",
+    "backToList": "Retour à la liste",
+    "errorTitle": "Impossible de charger le compte",
+    "tabsAriaLabel": "Sections du compte",
+    "summaryLabel": "Compte client",
+    "edit": "Modifier",
+    "tabs": {
+      "infos": "Infos",
+      "proxies": "Mandataires",
+      "balances": "Soldes",
+      "statement": "Relevé",
+      "signatures": "Signatures",
+      "holds": "Mises en attente"
+    },
+    "balances": {
+      "errorTitle": "Impossible de charger les soldes",
+      "accounting": "Solde comptable",
+      "available": "Solde disponible",
+      "activeHolds": "Mises en attente actives",
+      "minimum": "Solde minimum",
+      "unavailable": "Montant indisponible",
+      "accountingFloor": "Base comptable",
+      "movementsTitle": "Cumuls de mouvements",
+      "totalDebit": "Total débits",
+      "totalCredit": "Total crédits",
+      "currencyNote": "Montants exprimés en {currency}."
+    },
+    "statement": {
+      "errorTitle": "Impossible de charger le relevé",
+      "from": "Du",
+      "to": "Au",
+      "opening": "Solde d'ouverture",
+      "totalDebit": "Total débits",
+      "totalCredit": "Total crédits",
+      "closing": "Solde de clôture",
+      "title": "Mouvements du compte",
+      "count": "{count} mouvement(s)",
+      "empty": "Aucun mouvement sur la période.",
+      "columns": {
+        "date": "Date",
+        "reference": "Référence",
+        "memo": "Libellé",
+        "debit": "Débit",
+        "credit": "Crédit"
+      }
+    },
+    "proxies": {
+      "title": "Mandataires du compte",
+      "count": "{count} mandataire(s)",
+      "empty": "Aucun mandataire rattaché à ce compte.",
+      "errorTitle": "Impossible de charger les mandataires",
+      "manageHint": "Les mandataires se gèrent depuis la fiche du client.",
+      "manageLink": "Ouvrir la fiche client",
+      "columns": {
+        "name": "Nom",
+        "phone": "Téléphone",
+        "mandate": "Type de mandat",
+        "status": "Statut",
+        "period": "Période"
+      }
+    },
+    "signatures": {
+      "title": "Spécimens de signature",
+      "count": "{count} signature(s)",
+      "empty": "Aucune signature enregistrée.",
+      "errorTitle": "Impossible de charger les signatures",
+      "addHint": "L'ajout de signature nécessite un document téléversé (gestion documentaire à venir).",
+      "reasonRequired": "Le motif est obligatoire.",
+      "verifiedTitle": "Signature vérifiée",
+      "revokedTitle": "Signature révoquée",
+      "verifyTitle": "Vérifier la signature",
+      "revokeTitle": "Révoquer la signature",
+      "verifyIntro": "Confirmer la vérification de la signature de {signer} ?",
+      "revokeIntro": "Révoquer la signature de {signer}. Saisissez le motif (obligatoire).",
+      "reasonLabel": "Motif de révocation",
+      "columns": {
+        "type": "Type",
+        "signer": "Signataire",
+        "role": "Rôle",
+        "status": "Statut",
+        "verified": "Vérifiée le",
+        "actions": "Actions"
+      },
+      "types": {
+        "primary_holder": "Titulaire principal",
+        "joint_holder": "Cotitulaire",
+        "proxy": "Mandataire",
+        "mandate": "Mandat",
+        "thumbprint": "Empreinte digitale"
+      },
+      "status": {
+        "active": "Active",
+        "superseded": "Remplacée",
+        "revoked": "Révoquée",
+        "archived": "Archivée"
+      },
+      "actions": {
+        "menu": "Actions",
+        "verify": "Vérifier",
+        "revoke": "Révoquer"
+      }
+    },
+    "holds": {
+      "title": "Mises en attente",
+      "count": "{count} blocage(s)",
+      "empty": "Aucune mise en attente sur ce compte.",
+      "errorTitle": "Action impossible",
+      "createdTitle": "Blocage créé",
+      "updatedTitle": "Blocage mis à jour",
+      "releasedTitle": "Blocage levé",
+      "archivedTitle": "Blocage archivé",
+      "createTitle": "Nouveau blocage",
+      "editTitle": "Modifier le blocage",
+      "releaseTitle": "Lever le blocage",
+      "releaseIntro": "Libérer les fonds bloqués pour ce compte ?",
+      "columns": {
+        "amount": "Montant",
+        "reason": "Motif",
+        "status": "Statut",
+        "placedAt": "Posé le",
+        "expiresAt": "Expire le",
+        "reference": "Référence",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Actif",
+        "released": "Levé",
+        "cancelled": "Annulé",
+        "archived": "Archivé"
+      },
+      "actions": {
+        "menu": "Actions",
+        "create": "Nouveau blocage",
+        "edit": "Modifier",
+        "release": "Lever",
+        "archive": "Archiver"
+      },
+      "fields": {
+        "amount": "Montant à bloquer",
+        "amountHint": "Montant dans la devise du compte.",
+        "currency": "Devise",
+        "reason": "Motif du blocage",
+        "reasonHint": "Libellé libre (ex. saisie judiciaire, opération en attente).",
+        "sourceType": "Type de source",
+        "sourceId": "Identifiant source",
+        "expiresAt": "Date d'expiration",
+        "reference": "Référence",
+        "releaseReason": "Motif de levée",
+        "releaseReasonHint": "Optionnel."
+      }
+    }
+  },
+  "clientPicker": {
+    "noResults": "Aucun client trouvé.",
+    "searching": "Recherche…"
+  },
+  "imageUpload": {
+    "choose": "Choisir une image",
+    "replace": "Remplacer",
+    "remove": "Retirer",
+    "hint": "JPG ou PNG.",
+    "linked": "Image associée (aperçu indisponible)."
+  },
+  "accountProducts": {
+    "pageTitle": "Paramétrage — Produits de compte",
+    "pageDescription": "Catalogue des types de compte client : famille, solde minimum, politique de découvert.",
+    "errorTitle": "Impossible de charger les produits",
+    "family": {
+      "savings": "Épargne",
+      "current": "Compte courant",
+      "recovery": "Recouvrement",
+      "islamic": "Islamique"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif",
+      "archived": "Archivé"
+    },
+    "filters": {
+      "searchLabel": "Rechercher",
+      "searchPlaceholder": "Code ou nom du produit…",
+      "familyLabel": "Famille",
+      "familyAll": "Toutes les familles",
+      "statusLabel": "Statut",
+      "statusAll": "Tous les statuts"
+    },
+    "columns": {
+      "code": "Code",
+      "name": "Nom",
+      "family": "Famille",
+      "minimumBalance": "Solde minimum",
+      "currency": "Devise",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "list": {
+      "titleHeader": "Catalogue des produits de compte",
+      "count": "{count} produit(s)",
+      "totalCaption": "{count} produit(s) enregistré(s) au total",
+      "empty": "Aucun produit à afficher."
+    },
+    "actions": {
+      "create": "Nouveau produit",
+      "menu": "Actions",
+      "edit": "Modifier",
+      "activate": "Activer",
+      "deactivate": "Désactiver",
+      "archive": "Archiver"
+    },
+    "drawer": {
+      "titleCreate": "Nouveau produit de compte",
+      "titleEdit": "Modifier — {name}",
+      "createHint": "Définissez le type de compte et ses règles.",
+      "editHint": "Le code et l'agence ne sont pas modifiables.",
+      "create": "Créer le produit",
+      "sectionIdentity": "Identité",
+      "sectionAccounting": "Comptabilité",
+      "sectionRules": "Règles",
+      "sectionStatus": "Statut"
+    },
+    "fields": {
+      "code": "Code",
+      "codeEditHint": "Le code n'est pas modifiable après création.",
+      "name": "Nom du produit",
+      "family": "Famille",
+      "familyPlaceholder": "Sélectionner une famille…",
+      "agency": "Agence",
+      "agencyPlaceholder": "Toutes les agences",
+      "agencyEditHint": "L'agence n'est pas modifiable après création.",
+      "currency": "Devise",
+      "currencyHint": "Code ISO à 3 lettres (ex. XAF).",
+      "ledgerAccount": "Compte comptable par défaut (public_id)",
+      "ledgerAccountHint": "Compte comptable hérité par défaut par les comptes créés avec ce produit (sélecteur P16 à venir).",
+      "minimumBalance": "Solde minimum",
+      "amountHint": "Montant dans la devise du produit.",
+      "isOrdinarySavings": "Épargne ordinaire",
+      "isRecoveryAccount": "Compte de recouvrement",
+      "allowsRecoveryDebit": "Autorise le débit de recouvrement",
+      "allowsOverdraft": "Autorise le découvert",
+      "overdraftLimit": "Plafond de découvert",
+      "status": "Statut",
+      "statusPlaceholder": "Statut par défaut (actif)…",
+      "statusHint": "L'archivage se fait via l'action « Archiver »."
+    },
+    "toast": {
+      "createdTitle": "Produit créé",
+      "createdBody": "Le produit {name} a été créé.",
+      "updatedTitle": "Produit mis à jour",
+      "updatedBody": "Le produit {name} a été modifié.",
+      "statusChangedTitle": "Statut modifié",
+      "statusChangedBody": "Le produit {name} est maintenant : {status}.",
+      "archivedTitle": "Produit archivé",
+      "archivedBody": "Le produit {name} a été archivé.",
+      "errorTitle": "Action impossible"
     }
   }
 }

@@ -78,6 +78,7 @@ export type PaginatedClients = {
 
 export type ClientWritePayload = {
   agency_public_id?: string | null;
+  profile_photo_document_public_id?: string | null;
   prospector_public_id?: string | null;
   collection_agent_public_id?: string | null;
   sector_public_id?: string | null;
@@ -134,6 +135,8 @@ export async function fetchClients(
     scope?: "all";
     status?: ClientStatus;
     kycStatus?: ClientKycStatus;
+    /** Free-text search (ilike on reference / names / phone / email). */
+    search?: string;
   } = {},
 ): Promise<PaginatedClients> {
   const query = new URLSearchParams();
@@ -142,6 +145,9 @@ export async function fetchClients(
   if (options.scope) query.set("scope", options.scope);
   if (options.status) query.set("filter[status]", options.status);
   if (options.kycStatus) query.set("filter[kyc_status]", options.kycStatus);
+  if (options.search && options.search.trim().length > 0) {
+    query.set("search", options.search.trim());
+  }
 
   const response = await fetch(`/api/v1/clients?${query.toString()}`, {
     method: "GET",

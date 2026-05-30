@@ -7,6 +7,8 @@ import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
 import { localizeApiError } from "@/lib/api/errors";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
+import { StaffUserPicker } from "../../_components/StaffUserPicker";
+import { ImageUploadField } from "../../_components/ImageUploadField";
 import type { Agency } from "@/lib/api/agencies";
 import type {
   Client,
@@ -43,7 +45,10 @@ type FormState = {
   region: string;
   occupation: string;
   employer_name: string;
+  profile_photo_document_public_id: string;
   agency_public_id: string;
+  prospector_public_id: string;
+  collection_agent_public_id: string;
   collection_type: string;
   collection_frequency: ClientCollectionFrequency | "";
   collection_target_amount: string;
@@ -67,7 +72,10 @@ const EMPTY: FormState = {
   region: "",
   occupation: "",
   employer_name: "",
+  profile_photo_document_public_id: "",
   agency_public_id: "",
+  prospector_public_id: "",
+  collection_agent_public_id: "",
   collection_type: "",
   collection_frequency: "",
   collection_target_amount: "",
@@ -112,7 +120,11 @@ export function ClientDrawer({
         region: initial.region ?? "",
         occupation: initial.occupation ?? "",
         employer_name: initial.employer_name ?? "",
+        profile_photo_document_public_id:
+          initial.profile_photo_document_public_id ?? "",
         agency_public_id: initial.agency_public_id ?? "",
+        prospector_public_id: initial.prospector_public_id ?? "",
+        collection_agent_public_id: initial.collection_agent_public_id ?? "",
         collection_type: initial.collection_type ?? "",
         collection_frequency: initial.collection_frequency ?? "",
         collection_target_amount:
@@ -153,7 +165,15 @@ export function ClientDrawer({
       region: nullable(form.region),
       occupation: nullable(form.occupation),
       employer_name: nullable(form.employer_name),
-      agency_public_id: nullable(form.agency_public_id),
+      profile_photo_document_public_id: nullable(
+        form.profile_photo_document_public_id,
+      ),
+      // Agency is set at creation and immutable afterwards — the update
+      // endpoint prohibits it. Omit on edit (stripUndefined drops it).
+      agency_public_id:
+        mode === "edit" ? undefined : nullable(form.agency_public_id),
+      prospector_public_id: nullable(form.prospector_public_id),
+      collection_agent_public_id: nullable(form.collection_agent_public_id),
       collection_type: nullable(form.collection_type),
       collection_frequency: form.collection_frequency
         ? (form.collection_frequency as ClientCollectionFrequency)
@@ -184,7 +204,10 @@ export function ClientDrawer({
         region: t("clients.fields.region"),
         occupation: t("clients.fields.occupation"),
         employer_name: t("clients.fields.employerName"),
+        profile_photo_document_public_id: t("clients.fields.photo"),
         agency_public_id: t("clients.fields.agency"),
+        prospector_public_id: t("clients.fields.prospector"),
+        collection_agent_public_id: t("clients.fields.collectionAgent"),
         collection_type: t("clients.fields.collectionType"),
         collection_frequency: t("clients.fields.collectionFrequency"),
         collection_target_amount: t("clients.fields.collectionTargetAmount"),
@@ -280,7 +303,15 @@ export function ClientDrawer({
         noValidate
       >
         <Section title={t("clients.drawer.sectionIdentity")}>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <ImageUploadField
+            label={t("clients.fields.photo")}
+            value={form.profile_photo_document_public_id}
+            category="client_profile_photo"
+            onChange={(next) => set("profile_photo_document_public_id", next)}
+            error={errors.profile_photo_document_public_id}
+            hint={t("clients.fields.photoHint")}
+          />
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <TextField
               label={t("clients.fields.lastName")}
               value={form.last_name}
@@ -412,15 +443,34 @@ export function ClientDrawer({
         </Section>
 
         <Section title={t("clients.drawer.sectionAssignment")}>
-          <Select
-            label={t("clients.fields.agency")}
-            value={form.agency_public_id}
-            options={agencyOptions}
-            placeholder={t("clients.fields.agencyPlaceholder")}
-            isClearable
-            onChange={(next) => set("agency_public_id", next)}
-            error={errors.agency_public_id}
-          />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Select
+              label={t("clients.fields.agency")}
+              value={form.agency_public_id}
+              options={agencyOptions}
+              placeholder={t("clients.fields.agencyPlaceholder")}
+              isClearable
+              onChange={(next) => set("agency_public_id", next)}
+              error={errors.agency_public_id}
+              disabled={mode === "edit"}
+              hint={mode === "edit" ? t("clients.fields.agencyEditHint") : undefined}
+              className="sm:col-span-2"
+            />
+            <StaffUserPicker
+              label={t("clients.fields.prospector")}
+              value={form.prospector_public_id}
+              placeholder={t("clients.fields.prospectorPlaceholder")}
+              onChange={(next) => set("prospector_public_id", next)}
+              error={errors.prospector_public_id}
+            />
+            <StaffUserPicker
+              label={t("clients.fields.collectionAgent")}
+              value={form.collection_agent_public_id}
+              placeholder={t("clients.fields.collectionAgentPlaceholder")}
+              onChange={(next) => set("collection_agent_public_id", next)}
+              error={errors.collection_agent_public_id}
+            />
+          </div>
         </Section>
 
         <Section title={t("clients.drawer.sectionCollection")}>

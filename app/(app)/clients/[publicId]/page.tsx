@@ -24,6 +24,7 @@ import { GuarantorsTab } from "./_components/GuarantorsTab";
 import { IdentityDocumentsTab } from "./_components/IdentityDocumentsTab";
 import { IdentityTab } from "./_components/IdentityTab";
 import { ProxiesTab } from "./_components/ProxiesTab";
+import { ClientAccountsTab } from "./_components/ClientAccountsTab";
 
 type TabId =
   | "identity"
@@ -55,6 +56,7 @@ export default function ClientDetailPage(props: {
   const canViewDocs = useCan("crm.identity_documents.view");
   const canViewGuarantors = useCan("crm.guarantors.view");
   const canViewProxies = useCan("crm.proxies.view");
+  const canViewAccounts = useCan("customer.accounts.view");
   const canEditClient = useCan("crm.clients.update");
 
   const token = session.status === "authenticated" ? session.token : null;
@@ -78,6 +80,7 @@ export default function ClientDetailPage(props: {
   const [docsCount, setDocsCount] = useState<number>(0);
   const [guarantorsCount, setGuarantorsCount] = useState<number>(0);
   const [proxiesCount, setProxiesCount] = useState<number>(0);
+  const [accountsCount, setAccountsCount] = useState<number>(0);
 
   // Load agencies for the edit drawer's agency picker.
   const [agencies, setAgencies] = useState<Agency[]>([]);
@@ -140,6 +143,8 @@ export default function ClientDetailPage(props: {
     {
       id: "accounts",
       label: t("clientDetail.tabs.accounts"),
+      hidden: !canViewAccounts,
+      badge: accountsCount > 0 ? accountsCount : undefined,
     },
     {
       id: "loans",
@@ -240,11 +245,11 @@ export default function ClientDetailPage(props: {
             </TabsPanel>
           ) : null}
 
-          {activeTab === "accounts" ? (
+          {activeTab === "accounts" && canViewAccounts ? (
             <TabsPanel id="accounts">
-              <PlaceholderCard
-                title={t("clientDetail.accounts.title")}
-                body={t("clientDetail.accounts.comingSoon")}
+              <ClientAccountsTab
+                clientPublicId={client.public_id}
+                onCountChange={setAccountsCount}
               />
             </TabsPanel>
           ) : null}
