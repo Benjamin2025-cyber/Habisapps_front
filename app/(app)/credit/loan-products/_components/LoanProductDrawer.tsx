@@ -6,11 +6,11 @@ import { Drawer } from "@/components/ui/Drawer";
 import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
 import { localizeApiError } from "@/lib/api/errors";
+import { cn } from "@/lib/cn";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import {
   FEE_POLICY_VALUE,
   INTEREST_POLICY_VALUE,
-  PENALTY_POLICY_VALUE,
   REPAYMENT_ALLOCATION_POLICY_VALUE,
   type GuaranteeDepositType,
   type LoanProduct,
@@ -242,7 +242,10 @@ export function LoanProductDrawer({
       penalty_value: toNum(form.penalty_value),
       ledger_account_public_id: nullable(form.ledger_account_public_id),
       interest_policy_key: form.policy_interest ? INTEREST_POLICY_VALUE : null,
-      penalty_policy_key: form.policy_penalty ? PENALTY_POLICY_VALUE : null,
+      // `penalties_and_arrears` is approved=false in the backend formula config,
+      // and attaching it makes loan creation 500 (back-issues #16). Always clear
+      // it from this form until the backend approves it.
+      penalty_policy_key: null,
       repayment_allocation_policy_key: form.policy_repayment_allocation
         ? REPAYMENT_ALLOCATION_POLICY_VALUE
         : null,
@@ -645,6 +648,8 @@ export function LoanProductDrawer({
                 label={t("loanProducts.fields.policyPenalty")}
                 checked={form.policy_penalty}
                 onChange={(checked) => set("policy_penalty", checked)}
+                disabled
+                hint={t("loanProducts.fields.policyPenaltyDisabledHint")}
               />
               <CheckboxField
                 label={t("loanProducts.fields.policyRepaymentAllocation")}
@@ -720,21 +725,38 @@ function CheckboxField({
   label,
   checked,
   onChange,
+  disabled,
+  hint,
 }: {
   label: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
+  disabled?: boolean;
+  hint?: string;
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-        className="h-4 w-4 rounded border-input text-accent focus:ring-2 focus:ring-ring/20"
-      />
-      {label}
-    </label>
+    <div className="flex flex-col gap-0.5">
+      <label
+        className={cn(
+          "flex items-center gap-2.5 text-sm text-foreground",
+          disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
+        )}
+      >
+        <input
+          type="checkbox"
+          checked={checked}
+          disabled={disabled}
+          onChange={(event) => onChange(event.target.checked)}
+          className="h-4 w-4 rounded border-input text-accent focus:ring-2 focus:ring-ring/20"
+        />
+        {label}
+      </label>
+      {hint ? (
+        <span className="pl-[1.625rem] text-[11px] text-muted-foreground">
+          {hint}
+        </span>
+      ) : null}
+    </div>
   );
 }
 

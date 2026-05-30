@@ -1290,6 +1290,224 @@
     "hint": "JPG ou PNG.",
     "linked": "Image associée (aperçu indisponible)."
   },
+  "loans": {
+    "pageTitle": "Crédit — Mise en place",
+    "pageDescription": "Création et suivi des prêts : montage, visas, génération du tableau d'amortissement.",
+    "errorTitle": "Impossible de charger les prêts",
+    "status": {
+      "application": "Brouillon",
+      "in_review": "À l'étude",
+      "approved": "Approuvé",
+      "rejected": "Rejeté",
+      "disbursed": "Décaissé",
+      "active": "Actif",
+      "rescheduled": "Rééchelonné",
+      "closed": "Clôturé",
+      "written_off": "Passé en perte"
+    },
+    "filters": {
+      "searchLabel": "Rechercher",
+      "searchPlaceholder": "Numéro de prêt…",
+      "statusLabel": "Statut",
+      "statusAll": "Tous les statuts"
+    },
+    "columns": {
+      "number": "N° prêt",
+      "product": "Produit",
+      "amount": "Montant demandé",
+      "status": "Statut",
+      "appliedOn": "Demandé le"
+    },
+    "list": {
+      "titleHeader": "Prêts",
+      "count": "{count} prêt(s)",
+      "totalCaption": "{count} prêt(s) au total",
+      "empty": "Aucun prêt à afficher."
+    },
+    "actions": {
+      "create": "Nouveau prêt"
+    },
+    "drawer": {
+      "titleCreate": "Nouveau prêt",
+      "titleEdit": "Modifier — {number}",
+      "createHint": "Renseignez le client, le produit et le montant. Le prêt est créé en brouillon.",
+      "editHint": "Le client et le produit ne sont pas modifiables après création. Édition possible tant que le prêt est en brouillon.",
+      "create": "Créer le prêt",
+      "sectionLinkage": "Rattachement",
+      "sectionFinancial": "Montant & échéancier",
+      "sectionAccounts": "Comptes rattachés",
+      "sectionActivity": "Activité financée"
+    },
+    "fields": {
+      "client": "Titulaire (client)",
+      "clientEditHint": "Le client n'est pas modifiable après création.",
+      "product": "Produit de prêt",
+      "productPlaceholder": "Sélectionner un produit…",
+      "productEditHint": "Le produit n'est pas modifiable après création.",
+      "creditAgent": "Agent de crédit",
+      "creditAgentPlaceholder": "Sélectionner un agent…",
+      "appliedOn": "Date de demande",
+      "appliedOnHint": "Par défaut : aujourd'hui.",
+      "requestedAmount": "Montant demandé",
+      "amountHint": "Montant en devise (XAF). Doit respecter les bornes du produit.",
+      "currency": "Devise",
+      "currencyHint": "Code ISO à 3 lettres (ex. XAF).",
+      "installments": "Nombre d'échéances",
+      "firstInstallment": "1re échéance",
+      "trancheDuration": "Périodicité (jours)",
+      "daysHint": "En jours.",
+      "gracePeriod": "Différé (jours)",
+      "totalDuration": "Durée totale (jours)",
+      "amortizationAccount": "Compte d'amortissement",
+      "unpaidAccount": "Compte des impayés",
+      "recoveryAccount": "Compte de recouvrement",
+      "transferAccount": "Compte de virement",
+      "accountPlaceholder": "Sélectionner un compte…",
+      "accountsNeedClient": "Sélectionnez d'abord un client pour rattacher ses comptes.",
+      "purpose": "Objet du prêt",
+      "sector": "Secteur d'activité",
+      "sectorPlaceholder": "Sélectionner un secteur…",
+      "subSector": "Sous-secteur",
+      "subSectorPlaceholder": "Sélectionner un sous-secteur…",
+      "financedActivityCode": "Code activité financée",
+      "activityAddress": "Adresse de l'activité",
+      "entrepreneurAddress": "Adresse de l'entrepreneur"
+    },
+    "toast": {
+      "createdTitle": "Prêt créé",
+      "createdBody": "Le prêt {number} a été créé en brouillon.",
+      "updatedTitle": "Prêt mis à jour",
+      "updatedBody": "Le prêt {number} a été modifié."
+    }
+  },
+  "loanDetail": {
+    "loading": "Chargement du prêt…",
+    "untitled": "Prêt",
+    "appliedLabel": "Demandé le {date}",
+    "backToList": "Retour aux prêts",
+    "errorTitle": "Impossible de charger le prêt",
+    "statusLabel": "Statut",
+    "tabsAriaLabel": "Onglets de la fiche prêt",
+    "edit": "Modifier",
+    "tabs": {
+      "infos": "Infos générales",
+      "financial": "Financières",
+      "schedule": "Amortissement"
+    },
+    "sections": {
+      "general": "Informations générales",
+      "activity": "Activité financée",
+      "lifecycle": "Cycle de vie",
+      "amounts": "Montants & échéancier",
+      "fees": "Frais, taxes & garantie",
+      "accounts": "Comptes rattachés"
+    },
+    "feesHint": "Montants calculés par le moteur (snapshot du produit au montage). Lecture seule.",
+    "fields": {
+      "approvedOn": "Approuvé le",
+      "disbursedOn": "Décaissé le",
+      "closedOn": "Clôturé le",
+      "approvedPrincipal": "Principal approuvé",
+      "dossierFees": "Frais de dossier",
+      "dossierFeesTax": "Taxe sur frais de dossier",
+      "guaranteeDeposit": "Dépôt de garantie",
+      "insurance": "Prime d'assurance"
+    },
+    "schedule": {
+      "title": "Tableau d'amortissement",
+      "subtitle": "Générez l'échéancier à partir des termes du prêt et du produit.",
+      "notEligible": "Le tableau ne peut être généré que sur un prêt approuvé ou rééchelonné.",
+      "generate": "Générer le tableau",
+      "regenerate": "Régénérer",
+      "persistenceNote": "Le tableau n'est pas (encore) consultable via l'API après un rechargement — il s'affiche uniquement après génération (voir back-issues #15). Régénérez-le si besoin.",
+      "empty": "Aucun tableau généré. Cliquez sur « Générer le tableau ».",
+      "emptyNotEligible": "Tableau indisponible : le prêt doit d'abord être approuvé.",
+      "generatedTitle": "Tableau généré",
+      "generatedBody": "{count} échéance(s) calculée(s).",
+      "errorTitle": "Génération impossible",
+      "columns": {
+        "number": "#",
+        "dueDate": "Échéance",
+        "principal": "Principal",
+        "interest": "Intérêt",
+        "fees": "Frais",
+        "insurance": "Assurance",
+        "tax": "Taxe",
+        "total": "Total",
+        "remaining": "Capital restant"
+      }
+    },
+    "visa": {
+      "title": "Circuit de visa",
+      "historyNote": "L'historique des visas n'est pas rechargé depuis l'API (aucun GET — voir back-issues #15). Les décisions prises ici s'affichent jusqu'au rechargement ; le statut du prêt reflète l'avancement réel.",
+      "actedLine": "Visa : {decision} le {at}",
+      "steps": {
+        "montage": "Montage",
+        "comptabilite": "Comptabilité",
+        "controle": "Contrôle",
+        "direction": "Direction"
+      },
+      "stepHint": {
+        "montage": "Revue du dossier et des pièces par l'agent de crédit.",
+        "comptabilite": "Vérification comptable et financière.",
+        "controle": "Contrôle de conformité.",
+        "direction": "Approbation finale par la direction."
+      },
+      "state": {
+        "approved": "Visé",
+        "pending": "En attente",
+        "rejected": "Rejeté",
+        "idle": "—"
+      },
+      "decision": {
+        "approved": "Approuver",
+        "rejected": "Rejeter",
+        "returned": "Renvoyer en correction"
+      },
+      "actions": {
+        "approve": "Approuver",
+        "return": "Renvoyer",
+        "reject": "Rejeter"
+      },
+      "drawer": {
+        "title": "{step} — {decision}",
+        "hint": "Ajoutez un commentaire (optionnel) puis confirmez la décision.",
+        "confirm": "Confirmer le visa",
+        "commentsLabel": "Commentaire",
+        "commentsPlaceholder": "Motif, réserve, observation…"
+      },
+      "toast": {
+        "doneTitle": "Visa enregistré",
+        "doneBody": "{step} : {decision}.",
+        "errorTitle": "Visa impossible"
+      }
+    },
+    "transition": {
+      "to": {
+        "in_review": "Soumettre à l'étude",
+        "application": "Renvoyer en brouillon",
+        "rejected": "Rejeter",
+        "disbursed": "Marquer décaissé",
+        "active": "Activer",
+        "rescheduled": "Rééchelonner",
+        "closed": "Clôturer",
+        "written_off": "Passer en perte"
+      },
+      "drawer": {
+        "title": "Changer le statut → {status}",
+        "hint": "Motif et notes optionnels, conservés dans l'audit.",
+        "confirm": "Confirmer",
+        "reasonLabel": "Motif",
+        "reasonHint": "Court motif (optionnel).",
+        "notesLabel": "Notes"
+      },
+      "toast": {
+        "doneTitle": "Statut modifié",
+        "doneBody": "Le prêt est maintenant : {status}.",
+        "errorTitle": "Transition impossible"
+      }
+    }
+  },
   "loanProducts": {
     "pageTitle": "Crédit — Produits de prêt",
     "pageDescription": "Catalogue des types de prêt : limites, fréquences, taux, frais, pénalités et comptes comptables.",
@@ -1397,6 +1615,7 @@
       "policiesHint": "Active une politique de calcul nommée (formule paramétrée côté back). Laisser décoché si non utilisée.",
       "policyInterest": "Politique d'intérêt",
       "policyPenalty": "Politique de pénalités & arriérés",
+      "policyPenaltyDisabledHint": "Non disponible : cette politique n'est pas approuvée côté back (la rattacher fait échouer la création de prêt). Voir back-issues #16.",
       "policyRepaymentAllocation": "Ordre d'imputation des remboursements",
       "policyFee": "Politique de frais",
       "policyTax": "Politique de taxe",
