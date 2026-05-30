@@ -296,7 +296,7 @@
         "loanDisbursement": "Déblocage prêt",
         "loanDecision": "Décision / Annulation",
         "loanTransfers": "Muter prêt",
-        "delinquencies": "Suivi exceptionnel",
+        "delinquencies": "Suivi des exigibles",
         "globalClientImage": "Image globale client",
         "reportsPar": "PAR",
         "ledgerJournal": "Journal des écritures",
@@ -1978,6 +1978,134 @@
       "archivedTitle": "Produit archivé",
       "archivedBody": "Le produit {name} a été archivé.",
       "errorTitle": "Action impossible"
+    }
+  },
+  "delinquencies": {
+    "pageTitle": "Crédit — Suivi des exigibles",
+    "pageDescription": "Suivi des relances et tentatives de recouvrement sur un prêt.",
+    "selectLoanPrompt": "Sélectionnez un prêt pour gérer son suivi et ses recouvrements.",
+    "tabsAriaLabel": "Onglets du suivi des exigibles",
+    "tabs": {
+      "trackings": "Suivis",
+      "recoveries": "Recouvrements"
+    },
+    "loanSelector": {
+      "label": "Prêt",
+      "placeholder": "Sélectionner un prêt…",
+      "viewClient": "Voir le client",
+      "notRecoverable": "Recouvrement possible uniquement sur un prêt décaissé / actif / rééchelonné."
+    },
+    "tracking": {
+      "intro": "Relances, rendez-vous et promesses de paiement consignés sur ce prêt.",
+      "title": "Suivis",
+      "count": "{count} suivi(s)",
+      "empty": "Aucun suivi enregistré pour ce prêt.",
+      "errorTitle": "Impossible de charger les suivis",
+      "columns": {
+        "date": "Date",
+        "reason": "Motif",
+        "appointment": "Rendez-vous",
+        "promised": "Montant promis",
+        "actions": "Actions"
+      },
+      "actions": {
+        "create": "Nouveau suivi",
+        "edit": "Modifier",
+        "print": "Imprimer / Exporter PDF"
+      },
+      "fields": {
+        "date": "Date du suivi",
+        "dateHint": "Par défaut : aujourd'hui.",
+        "reason": "Motif",
+        "reasonPlaceholder": "Sélectionner un motif…",
+        "appointmentType": "Type de rendez-vous",
+        "appointmentTypePlaceholder": "Sélectionner…",
+        "appointmentDate": "Date du rendez-vous",
+        "promisedAmount": "Montant promis",
+        "amountHint": "Montant en devise (XAF).",
+        "currency": "Devise",
+        "comments": "Commentaires"
+      },
+      "reason": {
+        "forgot_due_date": "Oubli de l'échéance",
+        "cash_flow_issue": "Problème de trésorerie",
+        "business_downturn": "Baisse d'activité",
+        "illness": "Maladie",
+        "travel": "Voyage",
+        "dispute": "Litige",
+        "refusal_to_pay": "Refus de payer",
+        "unreachable": "Injoignable",
+        "diverted_funds": "Fonds détournés",
+        "other": "Autre"
+      },
+      "appointment": {
+        "phone_call": "Appel téléphonique",
+        "field_visit": "Visite terrain",
+        "office_meeting": "Rendez-vous en agence",
+        "sms": "SMS",
+        "letter": "Courrier",
+        "third_party": "Tiers / caution"
+      },
+      "drawer": {
+        "titleCreate": "Nouveau suivi",
+        "titleEdit": "Modifier le suivi",
+        "hint": "Consignez la relance et l'éventuelle promesse de paiement.",
+        "create": "Enregistrer"
+      },
+      "toast": {
+        "createdTitle": "Suivi enregistré",
+        "createdBody": "Le suivi a été ajouté.",
+        "updatedTitle": "Suivi mis à jour",
+        "updatedBody": "Le suivi a été modifié."
+      },
+      "report": {
+        "heading": "Suivi des exigibles — Relances",
+        "generated": "Généré le",
+        "loan": "Prêt",
+        "status": "Statut",
+        "count": "Nombre de suivis",
+        "popupBlockedTitle": "Fenêtre bloquée",
+        "popupBlockedBody": "Autorisez les pop-ups pour ce site afin d'imprimer ou d'exporter en PDF."
+      }
+    },
+    "recovery": {
+      "intro": "Tente de recouvrer le montant demandé en débitant les comptes du client liés au prêt.",
+      "notRecoverable": "Le recouvrement n'est possible que sur un prêt décaissé / actif / rééchelonné.",
+      "title": "Tentatives de recouvrement",
+      "count": "{count} tentative(s)",
+      "empty": "Aucune tentative de recouvrement.",
+      "errorTitle": "Impossible de charger les tentatives",
+      "amountInvalid": "Saisissez un montant valide (supérieur à 0).",
+      "columns": {
+        "date": "Date",
+        "requested": "Demandé",
+        "recovered": "Recouvré",
+        "status": "Statut"
+      },
+      "status": {
+        "succeeded": "Réussi",
+        "failed": "Échec"
+      },
+      "actions": {
+        "attempt": "Nouvelle tentative"
+      },
+      "fields": {
+        "amount": "Montant à recouvrer",
+        "amountHint": "Montant en devise (XAF).",
+        "recoveredOn": "Date de recouvrement",
+        "recoveredOnHint": "Par défaut : aujourd'hui."
+      },
+      "drawer": {
+        "title": "Tentative de recouvrement",
+        "hint": "Le moteur débite les comptes du client liés au prêt jusqu'au montant demandé.",
+        "confirm": "Lancer le recouvrement"
+      },
+      "toast": {
+        "doneTitle": "Recouvrement effectué",
+        "doneBody": "Recouvré : {recovered}. Restant : {remaining}.",
+        "nothingTitle": "Aucun montant recouvré",
+        "nothingBody": "Aucun solde disponible sur les comptes liés."
+      }
     }
   }
 }
