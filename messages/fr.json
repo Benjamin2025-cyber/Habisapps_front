@@ -1313,7 +1313,8 @@
       "label": "Prêt",
       "placeholder": "Sélectionner un prêt…",
       "viewClient": "Voir le client",
-      "releaseHint": "La libération des garanties n'est possible qu'après clôture du prêt."
+      "releaseHint": "La libération des garanties n'est possible qu'après clôture du prêt.",
+      "needClient": "Sélectionnez d'abord un client."
     },
     "collateralType": {
       "real_estate": "Immobilier",
@@ -1474,7 +1475,13 @@
         "updatedTitle": "Objet mis à jour",
         "updatedBody": "L'objet a été modifié."
       }
-    }
+    },
+    "clientSelector": {
+      "label": "Client",
+      "placeholder": "Rechercher un client par nom…",
+      "hint": "Sélectionnez d'abord le client pour filtrer ses prêts."
+    },
+    "selectClientPrompt": "Sélectionnez un client pour afficher ses prêts."
   },
   "loanTransfers": {
     "pageTitle": "Crédit — Mutation de prêt",
@@ -1993,7 +2000,8 @@
       "label": "Prêt",
       "placeholder": "Sélectionner un prêt…",
       "viewClient": "Voir le client",
-      "notRecoverable": "Recouvrement possible uniquement sur un prêt décaissé / actif / rééchelonné."
+      "notRecoverable": "Recouvrement possible uniquement sur un prêt décaissé / actif / rééchelonné.",
+      "needClient": "Sélectionnez d'abord un client."
     },
     "tracking": {
       "intro": "Relances, rendez-vous et promesses de paiement consignés sur ce prêt.",
@@ -2106,6 +2114,12 @@
         "nothingTitle": "Aucun montant recouvré",
         "nothingBody": "Aucun solde disponible sur les comptes liés."
       }
-    }
+    },
+    "clientSelector": {
+      "label": "Client",
+      "placeholder": "Rechercher un client par nom…",
+      "hint": "Sélectionnez d'abord le client pour filtrer ses prêts."
+    },
+    "selectClientPrompt": "Sélectionnez un client pour afficher ses prêts."
   }
 }

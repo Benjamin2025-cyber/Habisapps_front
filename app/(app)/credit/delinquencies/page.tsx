@@ -12,6 +12,7 @@ import { useSession } from "@/lib/auth/SessionProvider";
 import { usePermissionGuard } from "@/lib/auth/usePermissionGuard";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import { PageHeader } from "../../_components/PageHeader";
+import { ClientPicker, type ClientOption } from "../../_components/ClientPicker";
 import { LOAN_STATUS_TONE } from "../loans/_components/status";
 import { DelinquencyTrackingsTab } from "./_components/DelinquencyTrackingsTab";
 import { RecoveryAttemptsTab } from "./_components/RecoveryAttemptsTab";
@@ -45,6 +46,7 @@ export default function DelinquenciesPage() {
 
   const [loans, setLoans] = useState<Loan[]>([]);
   const [loansError, setLoansError] = useState<string | null>(null);
+  const [client, setClient] = useState<ClientOption | null>(null);
   const [selectedId, setSelectedId] = useState("");
   const [activeTab, setActiveTab] = useState<TabId>(
     canDelinquency ? "trackings" : "recoveries",
@@ -68,14 +70,27 @@ export default function DelinquenciesPage() {
     };
   }, [token]);
 
+  // Loans of the selected client only (the loans index has no client filter —
+  // see back-issues; filtered client-side from the loaded set).
+  const clientLoans = useMemo(
+    () =>
+      client ? loans.filter((l) => l.client_public_id === client.value) : [],
+    [loans, client],
+  );
+
   const loanOptions = useMemo(
     () =>
-      loans.map((loan) => ({
+      clientLoans.map((loan) => ({
         value: loan.public_id,
         label: `${loan.loan_number ?? loan.public_id} — ${t(`loans.status.${loan.status}`)}`,
       })),
-    [loans, t],
+    [clientLoans, t],
   );
+
+  function changeClient(option: ClientOption | null) {
+    setClient(option);
+    setSelectedId("");
+  }
 
   const selectedLoan = useMemo(
     () => loans.find((l) => l.public_id === selectedId) ?? null,
@@ -109,20 +124,36 @@ export default function DelinquenciesPage() {
       />
 
       <section className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-border bg-background p-4">
-        <label
-          htmlFor="delinquencies-loan"
-          className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-        >
-          {t("delinquencies.loanSelector.label")}
-        </label>
-        <Select
-          id="delinquencies-loan"
-          value={selectedId}
-          options={loanOptions}
-          placeholder={t("delinquencies.loanSelector.placeholder")}
-          isClearable
-          onChange={setSelectedId}
+        <ClientPicker
+          label={t("delinquencies.clientSelector.label")}
+          value={client}
+          onChange={changeClient}
+          placeholder={t("delinquencies.clientSelector.placeholder")}
+          hint={t("delinquencies.clientSelector.hint")}
+          required
         />
+        <div>
+          <label
+            htmlFor="delinquencies-loan"
+            className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+          >
+            {t("delinquencies.loanSelector.label")}
+          </label>
+          <Select
+            id="delinquencies-loan"
+            className="mt-2"
+            value={selectedId}
+            options={loanOptions}
+            placeholder={
+              client
+                ? t("delinquencies.loanSelector.placeholder")
+                : t("delinquencies.loanSelector.needClient")
+            }
+            isClearable
+            onChange={setSelectedId}
+            disabled={!client}
+          />
+        </div>
         {loansError ? (
           <p className="text-xs text-danger">{localizeApiMessage(loansError)}</p>
         ) : null}
@@ -149,7 +180,11 @@ export default function DelinquenciesPage() {
         ) : null}
       </section>
 
-      {!selectedLoan ? (
+      {!client ? (
+        <div className="rounded-[var(--radius-card)] border border-dashed border-border bg-background p-10 text-center text-sm text-muted-foreground">
+          {t("delinquencies.selectClientPrompt")}
+        </div>
+      ) : !selectedLoan ? (
         <div className="rounded-[var(--radius-card)] border border-dashed border-border bg-background p-10 text-center text-sm text-muted-foreground">
           {t("delinquencies.selectLoanPrompt")}
         </div>
