@@ -5,6 +5,10 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { fetchAgencies, type Agency } from "@/lib/api/agencies";
 import {
+  fetchLedgerAccounts,
+  type LedgerAccount,
+} from "@/lib/api/ledger-accounts";
+import {
   createAccountProduct,
   deleteAccountProduct,
   fetchAccountProducts,
@@ -88,16 +92,18 @@ export default function AccountProductsPage() {
   ]);
 
   const [agencies, setAgencies] = useState<Agency[]>([]);
+  const [ledgerAccounts, setLedgerAccounts] = useState<LedgerAccount[]>([]);
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
-    fetchAgencies(token, { perPage: 100 })
-      .then((response) => {
-        if (!cancelled) setAgencies(response.data);
-      })
-      .catch(() => {
-        if (!cancelled) setAgencies([]);
-      });
+    Promise.all([
+      fetchAgencies(token, { perPage: 100 }).catch(() => ({ data: [] })),
+      fetchLedgerAccounts(token, { perPage: 100 }).catch(() => ({ data: [] })),
+    ]).then(([ag, la]) => {
+      if (cancelled) return;
+      setAgencies(ag.data as Agency[]);
+      setLedgerAccounts(la.data as LedgerAccount[]);
+    });
     return () => {
       cancelled = true;
     };
@@ -256,6 +262,7 @@ export default function AccountProductsPage() {
           mode={drawerMode ?? "create"}
           initial={editing}
           agencies={agencies}
+          ledgerAccounts={ledgerAccounts}
           onClose={closeDrawer}
           onSubmit={handleSubmit}
         />

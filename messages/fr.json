@@ -247,7 +247,78 @@
       "todaySession": "Session de caisse",
       "todaySessionOpen": "Caisse ouverte",
       "todaySessionClosed": "Aucune session ouverte",
-      "kycPendingCount": "KYC en attente"
+      "openSessionCta": "Ouvrir une session →",
+      "kycPendingCount": "KYC en attente",
+      "usersCount": "Utilisateurs",
+      "odPendingCount": "OD à valider"
+    },
+    "teller": {
+      "greeting": "Bonjour {name} 👋",
+      "subtitle": "Tableau de bord caissier",
+      "drawer": {
+        "title": "Ma caisse",
+        "open": "Ouverte",
+        "closed": "Fermée",
+        "till": "Caisse",
+        "date": "Date d'ouverture",
+        "opening": "Fonds d'ouverture",
+        "noneBody": "Aucune session de caisse ouverte. Ouvrez votre caisse pour commencer la journée.",
+        "openCta": "Ouvrir une session",
+        "closeCta": "Gérer / clôturer la caisse",
+        "liveNote": "Le solde courant et l'écart de caisse sont calculés à la clôture."
+      },
+      "actionsTitle": "Actions rapides",
+      "actions": {
+        "deposit": "Versement",
+        "withdrawal": "Retrait",
+        "sessions": "Sessions de caisse",
+        "clients": "Clients",
+        "accounts": "Comptes"
+      },
+      "tipsTitle": "Conseils caissier",
+      "tips": {
+        "t1": "Confirmez le titulaire et le numéro de compte avant chaque opération.",
+        "t2": "Comptez les espèces et vérifiez le total avant de valider.",
+        "t3": "Vérifiez le spécimen de signature pour tout retrait."
+      },
+      "demo": "Démo",
+      "demoNote": "Données de démonstration — sera connecté au backend une fois l'endpoint disponible.",
+      "customer": {
+        "title": "Client en cours",
+        "verified": "Vérifié",
+        "id": "ID client",
+        "since": "Client depuis",
+        "kycCompleted": "KYC complété"
+      },
+      "accounts": {
+        "title": "Aperçu des comptes",
+        "available": "Solde disponible",
+        "savings": "Compte épargne",
+        "current": "Compte courant",
+        "term": "Dépôt à terme"
+      },
+      "recent": {
+        "title": "Opérations récentes",
+        "date": "Date",
+        "type": "Type",
+        "account": "Compte",
+        "amount": "Montant",
+        "channel": "Canal",
+        "types": {
+          "deposit": "Versement",
+          "withdrawal": "Retrait",
+          "transfer": "Virement",
+          "bill": "Facture"
+        },
+        "channels": {
+          "teller": "Guichet",
+          "mobile": "Mobile",
+          "internet": "Internet"
+        }
+      },
+      "notifications": {
+        "title": "Notifications"
+      }
     },
     "minimal": {
       "title": "Bienvenue {name}",
@@ -1119,8 +1190,10 @@
       "productPlaceholder": "Sélectionner un produit…",
       "productHint": "Catalogue géré dans « Produits de compte ».",
       "legacyType": "Type (libellé libre)",
-      "ledgerAccount": "Compte comptable (override)",
-      "ledgerAccountHint": "Optionnel — laissé vide, le compte hérite du compte comptable du produit (sélecteur P16 à venir).",
+      "ledgerAccount": "Compte comptable",
+      "ledgerAccountPlaceholder": "Hériter du produit",
+      "ledgerAccountHint": "Optionnel — laissé vide, le compte hérite du compte comptable du produit.",
+      "noLedgerAccounts": "Aucun compte comptable actif dans cette agence. Créez-en dans Comptes généraux.",
       "accountProduct": "Produit de compte (public_id)",
       "accountProductHint": "Optionnel — à saisir manuellement pour l'instant.",
       "openedOn": "Date d'ouverture",
@@ -1208,8 +1281,22 @@
       "count": "{count} signature(s)",
       "empty": "Aucune signature enregistrée.",
       "errorTitle": "Impossible de charger les signatures",
-      "addHint": "L'ajout de signature nécessite un document téléversé (gestion documentaire à venir).",
+      "addHint": "Téléversez l'image du spécimen (signature ou empreinte) puis enregistrez-le ; il devient actif et utilisable pour les retraits.",
       "reasonRequired": "Le motif est obligatoire.",
+      "create": {
+        "cta": "Ajouter un spécimen",
+        "title": "Nouveau spécimen de signature",
+        "hint": "Téléversez l'image de la signature/empreinte et renseignez le signataire.",
+        "specimen": "Image du spécimen",
+        "specimenHint": "Photo ou scan de la signature (ou empreinte) — PNG/JPEG.",
+        "type": "Type de spécimen",
+        "signerName": "Nom du signataire",
+        "signerRole": "Rôle (optionnel)",
+        "capturedOn": "Date de capture (optionnel)",
+        "submit": "Enregistrer le spécimen",
+        "documentRequired": "Téléversez d'abord l'image du spécimen.",
+        "doneTitle": "Spécimen enregistré"
+      },
       "verifiedTitle": "Signature vérifiée",
       "revokedTitle": "Signature révoquée",
       "verifyTitle": "Vérifier la signature",
@@ -1967,8 +2054,10 @@
       "agencyEditHint": "L'agence n'est pas modifiable après création.",
       "currency": "Devise",
       "currencyHint": "Code ISO à 3 lettres (ex. XAF).",
-      "ledgerAccount": "Compte comptable par défaut (public_id)",
-      "ledgerAccountHint": "Compte comptable hérité par défaut par les comptes créés avec ce produit (sélecteur P16 à venir).",
+      "ledgerAccount": "Compte comptable par défaut",
+      "ledgerAccountPlaceholder": "Choisir un compte",
+      "ledgerAccountHint": "Compte comptable hérité par défaut par les comptes créés avec ce produit.",
+      "noLedgerAccounts": "Aucun compte comptable actif dans cette agence. Créez-en dans Comptes généraux.",
       "minimumBalance": "Solde minimum",
       "amountHint": "Montant dans la devise du produit.",
       "isOrdinarySavings": "Épargne ordinaire",
@@ -2156,8 +2245,10 @@
       "transferAccountPlaceholder": "Sélectionner un compte du client…",
       "transferAccountHint": "Compte du client crédité du montant du prêt.",
       "noAccounts": "Ce client n'a aucun compte. Créez-en un d'abord.",
-      "tellerSession": "Session de caisse (public_id)",
-      "tellerSessionHint": "Nécessite une session de caisse ouverte (module Caisse — P20).",
+      "tellerSession": "Session de caisse",
+      "tellerSessionPlaceholder": "Choisir une session ouverte",
+      "tellerSessionHint": "Session de caisse ouverte de l'agence du prêt.",
+      "noOpenSessions": "Aucune session de caisse ouverte dans l'agence du prêt. Ouvrez-en une d'abord.",
       "businessDate": "Date comptable",
       "businessDateHint": "Par défaut : aujourd'hui.",
       "notes": "Notes"
@@ -2689,6 +2780,131 @@
       "openedBody": "Session ouverte sur {till}.",
       "closedTitle": "Session clôturée",
       "closedBody": "Session clôturée sur {till}.",
+      "errorTitle": "Action impossible"
+    }
+  },
+  "cashTx": {
+    "pageTitle": "Retrait / Versement",
+    "pageDescription": "Mouvements d'espèces (versements et retraits) sur une session de caisse ouverte.",
+    "sessionLabel": "Session de caisse",
+    "noSession": {
+      "title": "Aucune session ouverte",
+      "body": "Les opérations de caisse nécessitent une session ouverte. Ouvrez d'abord votre caisse.",
+      "link": "Aller aux sessions de caisse →"
+    },
+    "readOnly": {
+      "title": "Consultation seule",
+      "body": "Vous n'avez pas la permission d'enregistrer des opérations de caisse."
+    },
+    "direction": {
+      "deposit": "Versement",
+      "withdrawal": "Retrait"
+    },
+    "fields": {
+      "client": "Client",
+      "clientPlaceholder": "Rechercher un client…",
+      "account": "Compte client",
+      "accountPlaceholder": "Choisir un compte",
+      "noAccounts": "Aucun compte actif pour ce client dans cette agence.",
+      "amount": "Montant ({currency})",
+      "amountHint": "Montant en unité principale (sera converti).",
+      "initiator": "Initiateur",
+      "depositorName": "Nom du déposant (optionnel)",
+      "depositorAddress": "Adresse du déposant (optionnel)",
+      "signature": "Spécimen de signature",
+      "signaturePlaceholder": "Choisir une signature",
+      "noSignatures": "Aucun spécimen de signature actif sur ce compte — requis pour un retrait.",
+      "method": "Méthode de vérification",
+      "description": "Libellé / note"
+    },
+    "initiator": {
+      "holder": "Titulaire",
+      "proxy": "Mandataire",
+      "staff_on_behalf": "Agent (pour le compte de)",
+      "system": "Système"
+    },
+    "method": {
+      "visual_match": "Comparaison visuelle",
+      "thumbprint_match": "Empreinte digitale",
+      "verified_proxy_mandate": "Mandat de mandataire vérifié",
+      "exception_override": "Dérogation exceptionnelle"
+    },
+    "signatureType": {
+      "primary_holder": "Titulaire principal",
+      "joint_holder": "Cotitulaire",
+      "proxy": "Mandataire",
+      "mandate": "Mandat",
+      "thumbprint": "Empreinte"
+    },
+    "availableBalance": "Solde disponible",
+    "overAvailable": "Le montant dépasse le solde disponible du compte.",
+    "section": {
+      "customer": "1. Client & compte",
+      "details": "2. Détails de l'opération",
+      "depositInfo": "3. Informations déposant",
+      "withdrawalControls": "3. Vérification du retrait"
+    },
+    "account": {
+      "holder": "Titulaire",
+      "number": "N° de compte",
+      "type": "Type",
+      "status": "Statut",
+      "available": "Solde disponible"
+    },
+    "method_cash": "Espèces",
+    "methodNote": "Chèque / mixte non pris en charge par ce guichet pour l'instant.",
+    "summary": {
+      "title": "Récapitulatif de l'opération",
+      "type": "Type",
+      "account": "N° de compte",
+      "holder": "Titulaire",
+      "amount": "Montant",
+      "feesNote": "Les frais éventuels sont appliqués lors de la comptabilisation."
+    },
+    "tips": {
+      "title": "Conseils caissier",
+      "t1": "Confirmez toujours le numéro de compte et le titulaire avant de valider.",
+      "t2": "Comptez les espèces et vérifiez le total.",
+      "t3": "Pour un retrait, vérifiez le spécimen de signature du titulaire."
+    },
+    "actions": {
+      "clear": "Effacer",
+      "preview": "Aperçu de l'opération"
+    },
+    "confirm": {
+      "title": "Confirmer l'opération",
+      "body": "Vérifiez les informations ci-dessous avant de valider l'opération de caisse."
+    },
+    "submit": {
+      "deposit": "Enregistrer le versement",
+      "withdrawal": "Enregistrer le retrait"
+    },
+    "txType": {
+      "deposit": "Versement",
+      "withdrawal": "Retrait"
+    },
+    "status": {
+      "posted": "Comptabilisée",
+      "reversed": "Extournée"
+    },
+    "recent": {
+      "title": "Opérations de cette session de travail",
+      "type": "Type",
+      "reference": "Référence",
+      "amount": "Montant",
+      "status": "Statut",
+      "actions": "Actions",
+      "reverse": "Extourner"
+    },
+    "reverseConfirm": {
+      "title": "Extourner cette opération ?",
+      "body": "Une écriture de contre-passation sera créée pour annuler cette opération de caisse."
+    },
+    "toast": {
+      "doneTitle": "Opération enregistrée",
+      "doneBody": "Montant : {amount}.",
+      "reversedTitle": "Opération extournée",
+      "reversedBody": "L'opération a été extournée.",
       "errorTitle": "Action impossible"
     }
   }

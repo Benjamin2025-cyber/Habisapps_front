@@ -7,18 +7,22 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { DataTable } from "@/components/ui/DataTable";
 import { Drawer } from "@/components/ui/Drawer";
+import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
 import {
   DropdownMenu,
   type DropdownMenuItem,
 } from "@/components/ui/DropdownMenu";
 import { MoreVerticalIcon } from "@/components/ui/icons";
+import { ImageUploadField } from "../../../_components/ImageUploadField";
 import {
+  createAccountSignature,
   fetchAccountSignatures,
   revokeAccountSignature,
   verifyAccountSignature,
   type CustomerAccountSignature,
   type SignatureStatus,
+  type SignatureType,
 } from "@/lib/api/account-signatures";
 import { localizeApiError, localizeApiMessage } from "@/lib/api/errors";
 import { useCan, useHasRole } from "@/lib/auth/permissions";
@@ -47,8 +51,10 @@ export function AccountSignaturesTab({ accountPublicId }: Props) {
   const isPlatformAdmin = useHasRole(["platform-admin"]);
   const canVerifyPerm = useCan("customer.account-signatures.verify");
   const canRevokePerm = useCan("customer.account-signatures.revoke");
+  const canCreatePerm = useCan("customer.account-signatures.create");
   const canVerify = isPlatformAdmin || canVerifyPerm;
   const canRevoke = isPlatformAdmin || canRevokePerm;
+  const canCreate = isPlatformAdmin || canCreatePerm;
 
   const [action, setAction] = useState<{
     signature: CustomerAccountSignature;
@@ -57,6 +63,53 @@ export function AccountSignaturesTab({ accountPublicId }: Props) {
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [drawerError, setDrawerError] = useState<string | null>(null);
+
+  // --- Create specimen ---
+  const [createOpen, setCreateOpen] = useState(false);
+  const [documentId, setDocumentId] = useState("");
+  const [sigType, setSigType] = useState<SignatureType>("primary_holder");
+  const [signerName, setSignerName] = useState("");
+  const [signerRole, setSignerRole] = useState("");
+  const [capturedOn, setCapturedOn] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  function openCreate() {
+    setDocumentId("");
+    setSigType("primary_holder");
+    setSignerName("");
+    setSignerRole("");
+    setCapturedOn("");
+    setCreateError(null);
+    setCreateOpen(true);
+  }
+
+  async function handleCreate(event: React.FormEvent) {
+    event.preventDefault();
+    if (!token) return;
+    if (!documentId) {
+      setCreateError(t("accountDetail.signatures.create.documentRequired"));
+      return;
+    }
+    setCreating(true);
+    setCreateError(null);
+    try {
+      await createAccountSignature(token, accountPublicId, {
+        document_public_id: documentId,
+        signature_type: sigType,
+        signer_name: signerName.trim() || null,
+        signer_role: signerRole.trim() || null,
+        captured_on: capturedOn || null,
+      });
+      toast.success(t("accountDetail.signatures.create.doneTitle"));
+      setCreateOpen(false);
+      refetch();
+    } catch (cause) {
+      setCreateError(localizeApiError(cause).generalMessage);
+    } finally {
+      setCreating(false);
+    }
+  }
 
   const fetcher = useCallback(
     async (signal: AbortSignal): Promise<CustomerAccountSignature[]> => {
@@ -209,6 +262,14 @@ export function AccountSignaturesTab({ accountPublicId }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
+      {canCreate ? (
+        <div className="flex justify-end">
+          <Button variant="primary" size="sm" onClick={openCreate}>
+            {t("accountDetail.signatures.create.cta")}
+          </Button>
+        </div>
+      ) : null}
+
       {error ? (
         <Alert
           variant="danger"
@@ -300,6 +361,83 @@ export function AccountSignaturesTab({ accountPublicId }: Props) {
               required
             />
           ) : null}
+        </form>
+      </Drawer>
+
+      {/* Add specimen */}
+      <Drawer
+        open={createOpen}
+        onClose={creating ? () => undefined : () => setCreateOpen(false)}
+        title={t("accountDetail.signatures.create.title")}
+        description={t("accountDetail.signatures.create.hint")}
+        widthClassName="sm:w-[30rem]"
+        footer={
+          <>
+            <Button
+              variant="ghost"
+              size="md"
+              type="button"
+              onClick={() => setCreateOpen(false)}
+              disabled={creating}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              type="submit"
+              form="signature-create-form"
+              disabled={creating}
+            >
+              {creating
+                ? t("common.loading")
+                : t("accountDetail.signatures.create.submit")}
+            </Button>
+          </>
+        }
+      >
+        {createError ? (
+          <p className="mb-4 rounded-[var(--radius-field)] border border-danger/20 bg-danger/10 px-3 py-2 text-xs text-danger">
+            {createError}
+          </p>
+        ) : null}
+        <form
+          id="signature-create-form"
+          onSubmit={handleCreate}
+          className="flex flex-col gap-4"
+          noValidate
+        >
+          <ImageUploadField
+            label={t("accountDetail.signatures.create.specimen")}
+            category="signature"
+            value={documentId}
+            onChange={setDocumentId}
+            hint={t("accountDetail.signatures.create.specimenHint")}
+          />
+          <Select
+            label={t("accountDetail.signatures.create.type")}
+            value={sigType}
+            options={(["primary_holder", "joint_holder", "thumbprint"] as const).map(
+              (v) => ({ value: v, label: t(`accountDetail.signatures.types.${v}`) }),
+            )}
+            onChange={(next) => setSigType(next as SignatureType)}
+          />
+          <TextField
+            label={t("accountDetail.signatures.create.signerName")}
+            value={signerName}
+            onChange={(event) => setSignerName(event.target.value)}
+          />
+          <TextField
+            label={t("accountDetail.signatures.create.signerRole")}
+            value={signerRole}
+            onChange={(event) => setSignerRole(event.target.value)}
+          />
+          <TextField
+            label={t("accountDetail.signatures.create.capturedOn")}
+            type="date"
+            value={capturedOn}
+            onChange={(event) => setCapturedOn(event.target.value)}
+          />
         </form>
       </Drawer>
     </div>

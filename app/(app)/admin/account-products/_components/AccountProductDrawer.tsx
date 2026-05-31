@@ -8,6 +8,7 @@ import { TextField } from "@/components/ui/TextField";
 import { localizeApiError } from "@/lib/api/errors";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import type { Agency } from "@/lib/api/agencies";
+import type { LedgerAccount } from "@/lib/api/ledger-accounts";
 import type {
   AccountFamily,
   AccountProduct,
@@ -21,6 +22,7 @@ type Props = {
   mode: AccountProductDrawerMode;
   initial?: AccountProduct | null;
   agencies: ReadonlyArray<Agency>;
+  ledgerAccounts: ReadonlyArray<LedgerAccount>;
   onClose: () => void;
   onSubmit: (payload: AccountProductWritePayload) => Promise<void>;
 };
@@ -62,6 +64,7 @@ export function AccountProductDrawer({
   mode,
   initial,
   agencies,
+  ledgerAccounts,
   onClose,
   onSubmit,
 }: Props) {
@@ -121,6 +124,24 @@ export function AccountProductDrawer({
         label: `${agency.code} — ${agency.name}`,
       })),
     [agencies],
+  );
+
+  // Active ledger accounts in the product's agency (or institutional).
+  const ledgerAgency = isEdit
+    ? (initial?.agency_public_id ?? null)
+    : form.agency_public_id || null;
+  const ledgerOptions = useMemo(
+    () =>
+      ledgerAccounts
+        .filter(
+          (a) =>
+            a.status === "active" &&
+            (a.agency_public_id === null ||
+              !ledgerAgency ||
+              a.agency_public_id === ledgerAgency),
+        )
+        .map((a) => ({ value: a.public_id, label: `${a.code} — ${a.name}` })),
+    [ledgerAccounts, ledgerAgency],
   );
 
   async function handleSubmit(event: React.FormEvent) {
@@ -290,14 +311,19 @@ export function AccountProductDrawer({
               error={errors.currency}
               hint={t("accountProducts.fields.currencyHint")}
             />
-            <TextField
+            <Select
               label={t("accountProducts.fields.ledgerAccount")}
               value={form.ledger_account_public_id}
-              onChange={(event) =>
-                set("ledger_account_public_id", event.target.value)
-              }
+              options={ledgerOptions}
+              placeholder={t("accountProducts.fields.ledgerAccountPlaceholder")}
+              isClearable
+              onChange={(next) => set("ledger_account_public_id", next)}
               error={errors.ledger_account_public_id}
-              hint={t("accountProducts.fields.ledgerAccountHint")}
+              hint={
+                ledgerOptions.length === 0
+                  ? t("accountProducts.fields.noLedgerAccounts")
+                  : t("accountProducts.fields.ledgerAccountHint")
+              }
               className="sm:col-span-2"
             />
             <TextField

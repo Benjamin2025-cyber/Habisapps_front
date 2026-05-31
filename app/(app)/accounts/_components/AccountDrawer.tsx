@@ -9,6 +9,7 @@ import { localizeApiError } from "@/lib/api/errors";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import { ClientPicker, type ClientOption } from "../../_components/ClientPicker";
 import type { Agency } from "@/lib/api/agencies";
+import type { LedgerAccount } from "@/lib/api/ledger-accounts";
 import type { Client } from "@/lib/api/clients";
 import type { AccountProduct } from "@/lib/api/account-products";
 import type {
@@ -26,6 +27,7 @@ type Props = {
   clients: ReadonlyArray<Client>;
   agencies: ReadonlyArray<Agency>;
   accountProducts: ReadonlyArray<AccountProduct>;
+  ledgerAccounts: ReadonlyArray<LedgerAccount>;
   onClose: () => void;
   onSubmit: (payload: CustomerAccountWritePayload) => Promise<void>;
 };
@@ -63,6 +65,7 @@ export function AccountDrawer({
   clients,
   agencies,
   accountProducts,
+  ledgerAccounts,
   onClose,
   onSubmit,
 }: Props) {
@@ -160,6 +163,26 @@ export function AccountDrawer({
         label: `${agency.code} — ${agency.name}`,
       })),
     [agencies],
+  );
+
+  // Active ledger accounts in the account's agency (or institutional). A client
+  // deposit account is typically a liability control account (e.g. dépôts).
+  const ledgerAgency = form.agency_public_id || null;
+  const ledgerOptions = useMemo(
+    () =>
+      ledgerAccounts
+        .filter(
+          (a) =>
+            a.status === "active" &&
+            (a.agency_public_id === null ||
+              !ledgerAgency ||
+              a.agency_public_id === ledgerAgency),
+        )
+        .map((a) => ({
+          value: a.public_id,
+          label: `${a.code} — ${a.name}`,
+        })),
+    [ledgerAccounts, ledgerAgency],
   );
 
   // The "type de compte" is really the linked account product. Only active
@@ -370,14 +393,19 @@ export function AccountDrawer({
         </Section>
 
         <Section title={t("accounts.drawer.sectionAccounting")}>
-          <TextField
+          <Select
             label={t("accounts.fields.ledgerAccount")}
             value={form.ledger_account_public_id}
-            onChange={(event) =>
-              set("ledger_account_public_id", event.target.value)
-            }
+            options={ledgerOptions}
+            placeholder={t("accounts.fields.ledgerAccountPlaceholder")}
+            isClearable
+            onChange={(next) => set("ledger_account_public_id", next)}
             error={errors.ledger_account_public_id}
-            hint={t("accounts.fields.ledgerAccountHint")}
+            hint={
+              ledgerOptions.length === 0
+                ? t("accounts.fields.noLedgerAccounts")
+                : t("accounts.fields.ledgerAccountHint")
+            }
           />
         </Section>
 

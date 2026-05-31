@@ -3,13 +3,15 @@
 import { useCallback } from "react";
 import {
   BanknoteIcon,
-  CashIcon,
+  LayersIcon,
   ShieldIcon,
   UsersIcon,
 } from "@/components/ui/icons";
 import { countClients, countLoans } from "@/lib/api/loans";
 import { listAuditEvents, type AuditEvent } from "@/lib/api/audit";
-import { useCan } from "@/lib/auth/permissions";
+import { fetchStaffUsers } from "@/lib/api/staff-users";
+import { fetchJournalEntries } from "@/lib/api/journal-entries";
+import { useCan, useHasRole } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useApi } from "@/lib/hooks/useApi";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
@@ -22,6 +24,8 @@ type FieldAggregate = {
   loansCount: number | null;
   clientsCount: number | null;
   kycPendingCount: number | null;
+  usersCount: number | null;
+  odPendingCount: number | null;
   recentEvents: AuditEvent[];
 };
 
@@ -40,33 +44,63 @@ export function DashboardFieldLayout() {
   const canSeeClients = useCan("crm.clients.view");
   const canSeeAudit = useCan("audit.view");
   const canReviewKyc = useCan("crm.kyc.review");
-  const canSeeTill = useCan("cash.sessions.view");
+  // Persona cards are gated by ROLE (reliable) rather than by the per-permission
+  // grants, which are currently being fixed on the backend.
+  const isUserAdmin = useHasRole(["user-admin", "platform-admin"]);
+  const isAccountant = useHasRole(["accountant", "platform-admin"]);
 
   const token = session.status === "authenticated" ? session.token : null;
 
   const fetcher = useCallback(
     async (signal: AbortSignal): Promise<FieldAggregate> => {
       if (!token) throw new Error("Missing session token");
-      const [loansCount, clientsCount, kycPendingCount, recentEvents] =
-        await Promise.all([
-          canSeeLoans ? safeNumber(() => countLoans(token, { status: "active" })) : null,
-          // Field roles default to agency scope on /clients — no scope=all here.
-          canSeeClients ? safeNumber(() => countClients(token, { status: "active" })) : null,
-          canReviewKyc
-            ? safeNumber(() =>
-                countClients(token, { kyc_status: "pending_verification" }),
-              )
-            : null,
-          canSeeAudit
-            ? safeArray(() =>
-                listAuditEvents(token, { perPage: 8 }).then((response) => response.data),
-              )
-            : [],
-        ]);
+      const [
+        loansCount,
+        clientsCount,
+        kycPendingCount,
+        usersCount,
+        odPendingCount,
+        recentEvents,
+      ] = await Promise.all([
+        canSeeLoans ? safeNumber(() => countLoans(token, { status: "active" })) : null,
+        // Field roles default to agency scope on /clients — no scope=all here.
+        canSeeClients ? safeNumber(() => countClients(token, { status: "active" })) : null,
+        canReviewKyc
+          ? safeNumber(() =>
+              countClients(token, { kyc_status: "pending_verification" }),
+            )
+          : null,
+        isUserAdmin
+          ? safeNumber(() =>
+              fetchStaffUsers(token, { perPage: 1 }).then(
+                (r) => r.meta.pagination.total,
+              ),
+            )
+          : null,
+        isAccountant
+          ? safeNumber(() =>
+              fetchJournalEntries(token, { perPage: 100 }).then(
+                (r) => r.data.filter((e) => e.status === "submitted").length,
+              ),
+            )
+          : null,
+        canSeeAudit
+          ? safeArray(() =>
+              listAuditEvents(token, { perPage: 8 }).then((response) => response.data),
+            )
+          : [],
+      ]);
       void signal;
-      return { loansCount, clientsCount, kycPendingCount, recentEvents };
+      return {
+        loansCount,
+        clientsCount,
+        kycPendingCount,
+        usersCount,
+        odPendingCount,
+        recentEvents,
+      };
     },
-    [token, canSeeLoans, canSeeClients, canSeeAudit, canReviewKyc],
+    [token, canSeeLoans, canSeeClients, canSeeAudit, canReviewKyc, isUserAdmin, isAccountant],
   );
 
   const { data, loading } = useApi(fetcher, [
@@ -75,6 +109,8 @@ export function DashboardFieldLayout() {
     canSeeClients,
     canSeeAudit,
     canReviewKyc,
+    isUserAdmin,
+    isAccountant,
   ]);
 
   if (session.status !== "authenticated") return null;
@@ -121,15 +157,26 @@ export function DashboardFieldLayout() {
       ),
     },
     {
-      key: "till",
-      visible: canSeeTill,
+      key: "users",
+      visible: isUserAdmin,
       node: (
         <DashboardKpiCard
-          icon={CashIcon}
-          tone="accent"
-          label={t("dashboard.field.todaySession")}
-          value={t("dashboard.field.todaySessionClosed")}
-          hint={t("dashboard.comingSoon")}
+          icon={UsersIcon}
+          tone="primary"
+          label={t("dashboard.field.usersCount")}
+          value={data?.usersCount ?? (loading ? "…" : "—")}
+        />
+      ),
+    },
+    {
+      key: "od",
+      visible: isAccountant,
+      node: (
+        <DashboardKpiCard
+          icon={LayersIcon}
+          tone="warning"
+          label={t("dashboard.field.odPendingCount")}
+          value={data?.odPendingCount ?? (loading ? "…" : "—")}
         />
       ),
     },

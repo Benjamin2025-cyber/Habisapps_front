@@ -5,6 +5,7 @@ import { useSession } from "@/lib/auth/SessionProvider";
 import { DashboardFieldLayout } from "./DashboardFieldLayout";
 import { DashboardManagementLayout } from "./DashboardManagementLayout";
 import { DashboardMinimalLayout } from "./DashboardMinimalLayout";
+import { DashboardTellerLayout } from "./DashboardTellerLayout";
 import { resolveDashboardPreset } from "./preset";
 
 /**
@@ -25,6 +26,7 @@ export function DashboardContent() {
   if (session.status !== "authenticated") return null;
 
   if (preset === "management") return <DashboardManagementLayout />;
+  if (preset === "teller") return <DashboardTellerLayout />;
   if (preset === "field") return <DashboardFieldLayout />;
   return <DashboardMinimalLayout />;
 }

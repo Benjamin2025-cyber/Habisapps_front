@@ -9,6 +9,11 @@ import {
   fetchCustomerAccounts,
   type CustomerAccount,
 } from "@/lib/api/customer-accounts";
+import {
+  fetchTellerSessions,
+  type TellerSession,
+} from "@/lib/api/teller-sessions";
+import { fetchTills, type Till } from "@/lib/api/tills";
 import { localizeApiError } from "@/lib/api/errors";
 import type {
   DisbursementChannel,
@@ -37,6 +42,8 @@ export function DisburseDrawer({ open, loan, onClose, onSubmit }: Props) {
   const [businessDate, setBusinessDate] = useState("");
   const [notes, setNotes] = useState("");
   const [accounts, setAccounts] = useState<CustomerAccount[]>([]);
+  const [sessions, setSessions] = useState<TellerSession[]>([]);
+  const [tills, setTills] = useState<Till[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
@@ -83,6 +90,41 @@ export function DisburseDrawer({ open, loan, onClose, onSubmit }: Props) {
     [accounts],
   );
 
+  // Cash disbursement runs through an OPEN teller session of the loan's agency.
+  useEffect(() => {
+    if (!open || !token) {
+      setSessions([]);
+      setTills([]);
+      return;
+    }
+    let cancelled = false;
+    Promise.all([
+      fetchTellerSessions(token, { perPage: 100 }).catch(() => ({ data: [] })),
+      fetchTills(token, { perPage: 100 }).catch(() => ({ data: [] })),
+    ]).then(([s, tl]) => {
+      if (cancelled) return;
+      setSessions((s.data as TellerSession[]).filter((x) => x.status === "open"));
+      setTills(tl.data as Till[]);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, token]);
+
+  const loanAgency = loan?.agency_public_id ?? null;
+  const sessionOptions = sessions
+    .filter((s) => !loanAgency || s.agency_public_id === loanAgency)
+    .map((s) => {
+      const till = tills.find((x) => x.public_id === s.till_public_id);
+      const tillLabel = till
+        ? `${till.code} — ${till.name}`
+        : (s.till_public_id ?? "—");
+      return {
+        value: s.public_id,
+        label: `${tillLabel}${s.business_date ? ` · ${s.business_date}` : ""}`,
+      };
+    });
+
   const amount =
     loan?.approved_principal_minor ?? loan?.requested_amount_minor ?? null;
 
@@ -99,7 +141,7 @@ export function DisburseDrawer({ open, loan, onClose, onSubmit }: Props) {
       transfer_account_public_id:
         channel === "transfer_account" ? transferAccountId || null : null,
       teller_session_public_id:
-        channel === "cash" ? tellerSessionId.trim() || null : null,
+        channel === "cash" ? tellerSessionId || null : null,
     };
 
     try {
@@ -205,13 +247,19 @@ export function DisburseDrawer({ open, loan, onClose, onSubmit }: Props) {
             }
           />
         ) : (
-          <TextField
+          <Select
             label={t("disbursement.fields.tellerSession")}
             value={tellerSessionId}
-            onChange={(event) => setTellerSessionId(event.target.value)}
+            options={sessionOptions}
+            placeholder={t("disbursement.fields.tellerSessionPlaceholder")}
+            onChange={setTellerSessionId}
             error={errors.teller_session_public_id}
             required
-            hint={t("disbursement.fields.tellerSessionHint")}
+            hint={
+              sessionOptions.length === 0
+                ? t("disbursement.fields.noOpenSessions")
+                : t("disbursement.fields.tellerSessionHint")
+            }
           />
         )}
 

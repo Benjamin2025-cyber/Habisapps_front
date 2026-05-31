@@ -141,7 +141,7 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "tellerTransactions",
         href: "/operations/transactions",
-        available: false,
+        available: true,
         permissions: ["cash.transactions.view"],
       },
       {

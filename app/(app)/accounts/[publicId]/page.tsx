@@ -5,6 +5,10 @@ import Link from "next/link";
 import { Alert } from "@/components/ui/Alert";
 import { Tabs, TabsPanel, type TabItem } from "@/components/ui/Tabs";
 import { fetchAgencies, type Agency } from "@/lib/api/agencies";
+import {
+  fetchLedgerAccounts,
+  type LedgerAccount,
+} from "@/lib/api/ledger-accounts";
 import { fetchClients, type Client } from "@/lib/api/clients";
 import {
   fetchAccountProducts,
@@ -89,6 +93,7 @@ export default function AccountDetailPage(props: {
   const [clients, setClients] = useState<Client[]>([]);
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [products, setProducts] = useState<AccountProduct[]>([]);
+  const [ledgerAccounts, setLedgerAccounts] = useState<LedgerAccount[]>([]);
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
@@ -99,11 +104,13 @@ export default function AccountDetailPage(props: {
       }).catch(() => null),
       fetchAgencies(token, { perPage: 100 }).catch(() => null),
       fetchAccountProducts(token, { perPage: 100 }).catch(() => null),
-    ]).then(([clientsResponse, agenciesResponse, productsResponse]) => {
+      fetchLedgerAccounts(token, { perPage: 100 }).catch(() => null),
+    ]).then(([clientsResponse, agenciesResponse, productsResponse, ledgerResponse]) => {
       if (cancelled) return;
       setClients(clientsResponse?.data ?? []);
       setAgencies(agenciesResponse?.data ?? []);
       setProducts(productsResponse?.data ?? []);
+      setLedgerAccounts(ledgerResponse?.data ?? []);
     });
     return () => {
       cancelled = true;
@@ -264,6 +271,7 @@ export default function AccountDetailPage(props: {
           clients={clients}
           agencies={agencies}
           accountProducts={products}
+          ledgerAccounts={ledgerAccounts}
           onClose={() => setDrawerOpen(false)}
           onSubmit={handleEditSubmit}
         />

@@ -77,6 +77,36 @@ export async function fetchAccountSignatures(
   return envelope.data?.signatures ?? [];
 }
 
+export type SignatureCreatePayload = {
+  /** public_id of an uploaded signature document (category signature/thumbprint…). */
+  document_public_id: string;
+  signature_type: SignatureType;
+  signer_name?: string | null;
+  signer_role?: string | null;
+  captured_on?: string | null;
+  /** Required for proxy/mandate signature types. */
+  client_proxy_public_id?: string | null;
+};
+
+/**
+ * Register a signature specimen on an account. Backed by an uploaded signature
+ * document. Created `active` immediately (usable for withdrawal verification).
+ */
+export async function createAccountSignature(
+  token: string,
+  accountPublicId: string,
+  payload: SignatureCreatePayload,
+): Promise<CustomerAccountSignature> {
+  const body: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(payload)) {
+    if (value !== undefined && value !== null && value !== "") body[key] = value;
+  }
+  return apiRequest<CustomerAccountSignature>(
+    `customer-accounts/${accountPublicId}/signatures`,
+    { method: "POST", token, body },
+  );
+}
+
 export async function verifyAccountSignature(
   token: string,
   accountPublicId: string,
