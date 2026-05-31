@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
+import { MoneyField } from "@/components/ui/MoneyField";
 import { localizeApiError } from "@/lib/api/errors";
 import type {
   Collateral,
@@ -196,9 +197,8 @@ export function CollateralDrawer({
             onChange={(event) => set("valuation_date", event.target.value)}
             error={errors.valuation_date}
           />
-          <TextField
+          <MoneyField
             label={t("guarantees.collateral.fields.declaredValue")}
-            type="number"
             value={form.declared_value}
             onChange={(event) => set("declared_value", event.target.value)}
             error={errors.declared_value_minor}

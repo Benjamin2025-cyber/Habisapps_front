@@ -22,6 +22,7 @@ import type {
 } from "@/lib/api/loans";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useFormatter, useTranslations } from "@/lib/i18n/I18nProvider";
+import { SetupChargesPanel } from "./SetupChargesPanel";
 
 type Props = {
   open: boolean;
@@ -47,6 +48,7 @@ export function DisburseDrawer({ open, loan, onClose, onSubmit }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
+  const [chargesSettled, setChargesSettled] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -184,7 +186,7 @@ export function DisburseDrawer({ open, loan, onClose, onSubmit }: Props) {
             size="md"
             type="submit"
             form="disburse-form"
-            disabled={submitting}
+            disabled={submitting || !chargesSettled}
           >
             {submitting ? t("common.loading") : t("disbursement.drawer.confirm")}
           </Button>
@@ -217,6 +219,15 @@ export function DisburseDrawer({ open, loan, onClose, onSubmit }: Props) {
             </span>
           </div>
         </div>
+
+        <SetupChargesPanel
+          loanPublicId={loan?.public_id ?? null}
+          active={open}
+          currency={loan?.currency ?? "XAF"}
+          accountOptions={accountOptions}
+          sessionOptions={sessionOptions}
+          onSettledChange={setChargesSettled}
+        />
 
         <Select
           label={t("disbursement.fields.channel")}

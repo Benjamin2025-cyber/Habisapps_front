@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
+import { MoneyField } from "@/components/ui/MoneyField";
 import { localizeApiError } from "@/lib/api/errors";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import type { Agency } from "@/lib/api/agencies";
@@ -326,9 +327,8 @@ export function AccountProductDrawer({
               }
               className="sm:col-span-2"
             />
-            <TextField
+            <MoneyField
               label={t("accountProducts.fields.minimumBalance")}
-              type="number"
               value={form.minimum_balance}
               onChange={(event) => set("minimum_balance", event.target.value)}
               error={errors.minimum_balance_minor}
@@ -362,9 +362,8 @@ export function AccountProductDrawer({
             />
           </div>
           {form.allows_overdraft ? (
-            <TextField
+            <MoneyField
               label={t("accountProducts.fields.overdraftLimit")}
-              type="number"
               value={form.overdraft_limit}
               onChange={(event) => set("overdraft_limit", event.target.value)}
               error={errors.overdraft_limit_minor}

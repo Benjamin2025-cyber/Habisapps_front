@@ -2262,6 +2262,46 @@
     "toast": {
       "doneTitle": "Disbursement completed",
       "doneBody": "Loan {number} has been disbursed."
+    },
+    "setupCharges": {
+      "title": "Setup charges",
+      "intro": "Disbursement is only possible once charges and the insurance premium are collected.",
+      "loading": "Loading charges…",
+      "assessError": "Could not load setup charges.",
+      "none": "No charge to collect for this product.",
+      "allSettled": "All charges are settled. You can disburse.",
+      "pending": "{count} charge(s) left to collect before disbursement.",
+      "amount": "Amount",
+      "settle": "Collect",
+      "settling": "Collecting…",
+      "waive": "Waive (direction)",
+      "waiveTitle": "Direction waiver",
+      "waiveComments": "Waiver reason",
+      "waiveConfirm": "Confirm waiver",
+      "waiveCancel": "Cancel",
+      "insurance": "Insurance premium",
+      "insuranceAccountOnly": "The insurance premium is collected from a customer account only.",
+      "paymentSource": "Payment source",
+      "sourceAccount": "Customer account",
+      "sourceCash": "Cash (till)",
+      "account": "Account to debit",
+      "accountPlaceholder": "Choose an account",
+      "session": "Cash session",
+      "sessionPlaceholder": "Choose an open session",
+      "noAccounts": "No customer account available.",
+      "noSessions": "No open cash session in the agency.",
+      "settledToast": "Charge collected",
+      "needSource": "Choose the payment source first.",
+      "types": {
+        "dossier_fee": "Dossier fee",
+        "dossier_fee_tax": "Dossier fee tax",
+        "guarantee_deposit": "Guarantee deposit"
+      },
+      "status": {
+        "assessed": "To collect",
+        "paid": "Collected",
+        "waived_by_direction": "Waived (direction)"
+      }
     }
   },
   "decision": {
@@ -2940,13 +2980,35 @@
       "difference": "Difference",
       "status": "Status",
       "empty": "No reconciliation for this session.",
-      "errorTitle": "Unable to load reconciliations"
+      "errorTitle": "Unable to load reconciliations",
+      "create": "New cash-up",
+      "createHint": "Count the cash; the cash-up is only recorded when actual = theoretical (zero difference).",
+      "submit": "Record cash-up",
+      "notes": "Notes (optional)",
+      "createdTitle": "Cash-up recorded",
+      "beforeCloseTitle": "Record a cash-up before closing",
+      "beforeCloseBody": "Closing the session does not save a cash-up: the final count would only live in the audit log. Record a cash-up here while the session is open to keep the counting document."
     },
-    "createNote": "Recording a cash-up (denomination count) requires the Denominations reference data (P25).",
+    "createNote": "The cash-up is only recorded when the counted actual balance equals the theoretical balance (zero difference).",
     "print": {
       "action": "Print cash-up",
       "fileName": "cash-up",
       "heading": "Cash-up statement"
+    },
+    "filters": {
+      "title": "Filters",
+      "from": "From",
+      "to": "To",
+      "till": "Till",
+      "tillAll": "All tills",
+      "teller": "Teller",
+      "tellerAll": "All tellers",
+      "status": "Status",
+      "statusAll": "All statuses",
+      "reset": "Reset",
+      "match": "{count} session(s)",
+      "none": "No session matches the filters.",
+      "truncated": "Too many sessions: only the {count} most recent are loaded (server-side filtering pending). Narrow by date."
     }
   },
   "cashDraft": {
@@ -3034,5 +3096,119 @@
       "fileName": "client-profile",
       "heading": "Global client view"
     }
+  },
+  "reports": {
+    "generate": "Generate a report",
+    "generateDisabled": "Generation requires the report-definitions list (backend endpoint pending). Already-generated reports remain viewable and printable.",
+    "unavailableType": "No matching report type is exposed by the API for this section.",
+    "errorTitle": "Unable to load reports",
+    "listTitle": "Generated reports",
+    "count": "{count} report(s)",
+    "empty": "No report generated for this type.",
+    "columns": {
+      "type": "Type",
+      "period": "Period",
+      "generatedAt": "Generated on",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "types": {
+      "trial_balance": "Trial balance",
+      "general_ledger": "General ledger",
+      "emf_trial_balance": "EMF trial balance (COBAC)",
+      "credit_portfolio_outstanding": "Loan portfolio outstanding",
+      "credit_par_delinquency": "Portfolio at risk (PAR)",
+      "credit_collection_performance": "Collection performance"
+    },
+    "preview": {
+      "open": "Preview",
+      "title": "Report preview",
+      "print": "Print / PDF",
+      "noData": "No data."
+    },
+    "print": {
+      "fileName": "report"
+    },
+    "scopes": {
+      "par": {
+        "title": "PAR — Portfolio at risk",
+        "description": "Portfolio-at-risk reports (delinquent receivables)."
+      },
+      "exigible": {
+        "title": "Loan outstanding / due",
+        "description": "Outstanding and due reports for the loan portfolio."
+      },
+      "release": {
+        "title": "Collateral release",
+        "description": "Collateral release reports."
+      },
+      "balance": {
+        "title": "Trial balance",
+        "description": "Trial balance, general ledger and EMF/COBAC balance."
+      }
+    }
+  },
+  "denominations": {
+    "pageTitle": "Cash denominations",
+    "pageDescription": "Reference data for cash denominations (banknotes and coins) and their value, used for cash counting.",
+    "errorTitle": "Unable to load denominations",
+    "listTitle": "Denominations",
+    "count": "{count} denomination(s)",
+    "empty": "No denomination.",
+    "columns": {
+      "label": "Label",
+      "value": "Value",
+      "code": "Code",
+      "type": "Type",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "type": {
+      "banknote": "Banknote",
+      "coin": "Coin"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "menu": "Actions",
+      "create": "New denomination",
+      "edit": "Edit",
+      "activate": "Activate",
+      "deactivate": "Deactivate"
+    },
+    "fields": {
+      "code": "Code",
+      "codeEditHint": "The code is immutable after creation.",
+      "label": "Label",
+      "value": "Value (main unit)",
+      "valueHint": "E.g. 10000 for a 10,000 FCFA banknote.",
+      "currency": "Currency",
+      "currencyEditHint": "The currency is immutable after creation.",
+      "type": "Type",
+      "status": "Status"
+    },
+    "drawer": {
+      "titleCreate": "New denomination",
+      "titleEdit": "Edit — {label}",
+      "hint": "Set the value and the type (banknote or coin).",
+      "create": "Create"
+    },
+    "toast": {
+      "createdTitle": "Denomination created",
+      "createdBody": "The denomination \"{label}\" has been created.",
+      "updatedTitle": "Denomination updated",
+      "updatedBody": "The denomination \"{label}\" has been updated.",
+      "statusTitle": "Status changed",
+      "statusBody": "\"{label}\" is now {status}.",
+      "errorTitle": "Action not allowed"
+    }
+  },
+  "denominationCounter": {
+    "title": "Cash breakdown",
+    "total": "Counted total",
+    "target": "expected: {target}",
+    "none": "No active denomination for this currency. Configure them in Cash denominations."
   }
 }

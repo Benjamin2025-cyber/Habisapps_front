@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
+import { MoneyField } from "@/components/ui/MoneyField";
 import { localizeApiError } from "@/lib/api/errors";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import { StaffUserPicker } from "../../_components/StaffUserPicker";
@@ -492,9 +493,8 @@ export function ClientDrawer({
               }
               error={errors.collection_frequency}
             />
-            <TextField
+            <MoneyField
               label={t("clients.fields.collectionTargetAmount")}
-              type="number"
               value={form.collection_target_amount}
               onChange={(event) =>
                 set("collection_target_amount", event.target.value)

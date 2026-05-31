@@ -243,6 +243,10 @@ export default function SessionsPage() {
           <CloseSessionDrawer
             open={closing !== null}
             session={closing}
+            requiresDenominations={
+              !!tills.find((x) => x.public_id === closing?.till_public_id)
+                ?.requires_denominations
+            }
             onClose={() => setClosing(null)}
             onSubmit={handleClose}
           />

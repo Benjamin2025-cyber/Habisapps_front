@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { DataTable } from "@/components/ui/DataTable";
 import { Drawer } from "@/components/ui/Drawer";
 import { TextField } from "@/components/ui/TextField";
+import { MoneyField } from "@/components/ui/MoneyField";
 import {
   createRecoveryAttempt,
   fetchRecoveryAttempts,
@@ -256,9 +257,8 @@ export function RecoveryAttemptsTab({ loan, recoverable }: Props) {
           </p>
         ) : null}
         <div className="flex flex-col gap-4">
-          <TextField
+          <MoneyField
             label={t("delinquencies.recovery.fields.amount")}
-            type="number"
             value={amount}
             onChange={(event) => setAmount(event.target.value)}
             required

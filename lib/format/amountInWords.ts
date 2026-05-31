@@ -75,3 +75,72 @@ export function amountInWordsFr(
   if (cents > 0) s += ` et ${toWords(cents)} centimes`;
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
+
+/* --------------------------- English number-to-words --------------------------- */
+
+const ONES_EN = [
+  "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+  "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+  "sixteen", "seventeen", "eighteen", "nineteen",
+];
+const TENS_EN = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+
+function below100En(n: number): string {
+  if (n < 20) return ONES_EN[n];
+  const t = Math.floor(n / 10);
+  const u = n % 10;
+  return u === 0 ? TENS_EN[t] : `${TENS_EN[t]}-${ONES_EN[u]}`;
+}
+
+function below1000En(n: number): string {
+  const h = Math.floor(n / 100);
+  const r = n % 100;
+  let s = "";
+  if (h > 0) s = `${ONES_EN[h]} hundred`;
+  if (r > 0) s = s ? `${s} and ${below100En(r)}` : below100En(r);
+  return s;
+}
+
+function toWordsEn(n: number): string {
+  if (n === 0) return "zero";
+  const parts: string[] = [];
+  const scales: Array<[string, number]> = [
+    ["billion", 1_000_000_000],
+    ["million", 1_000_000],
+    ["thousand", 1000],
+  ];
+  let rem = n;
+  for (const [name, val] of scales) {
+    const q = Math.floor(rem / val);
+    if (q > 0) {
+      parts.push(`${below1000En(q)} ${name}`);
+      rem %= val;
+    }
+  }
+  if (rem > 0) parts.push(below1000En(rem));
+  return parts.join(" ");
+}
+
+function currencyLabelEn(currency: string): string {
+  return currency === "XAF" ? "CFA francs" : currency;
+}
+
+export function amountInWordsEn(amountMinor: number, currency = "XAF"): string {
+  if (!Number.isFinite(amountMinor) || amountMinor <= 0) return "";
+  const whole = Math.floor(amountMinor / 100);
+  const cents = amountMinor % 100;
+  let s = `${toWordsEn(whole)} ${currencyLabelEn(currency)}`;
+  if (cents > 0) s += ` and ${toWordsEn(cents)} cents`;
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/** Locale-aware "amount in words" for cash receipts / form helpers. */
+export function amountInWords(
+  amountMinor: number,
+  currency = "XAF",
+  locale = "fr",
+): string {
+  return locale === "en"
+    ? amountInWordsEn(amountMinor, currency)
+    : amountInWordsFr(amountMinor, currency);
+}

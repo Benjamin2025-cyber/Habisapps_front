@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
+import { MoneyField } from "@/components/ui/MoneyField";
 import { localizeApiError } from "@/lib/api/errors";
 import { cn } from "@/lib/cn";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
@@ -443,17 +444,15 @@ export function LoanProductDrawer({
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <TextField
+            <MoneyField
               label={t("loanProducts.fields.minAmount")}
-              type="number"
               value={form.min_amount}
               onChange={(event) => set("min_amount", event.target.value)}
               error={errors.min_amount_minor}
               hint={t("loanProducts.fields.amountHint")}
             />
-            <TextField
+            <MoneyField
               label={t("loanProducts.fields.maxAmount")}
-              type="number"
               value={form.max_amount}
               onChange={(event) => set("max_amount", event.target.value)}
               error={errors.max_amount_minor}
@@ -520,17 +519,15 @@ export function LoanProductDrawer({
             />
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <TextField
+            <MoneyField
               label={t("loanProducts.fields.feeAmount")}
-              type="number"
               value={form.fee_amount}
               onChange={(event) => set("fee_amount", event.target.value)}
               error={errors.fee_amount_minor}
               hint={t("loanProducts.fields.amountHint")}
             />
-            <TextField
+            <MoneyField
               label={t("loanProducts.fields.floorAmount")}
-              type="number"
               value={form.floor_amount}
               onChange={(event) => set("floor_amount", event.target.value)}
               error={errors.floor_amount_minor}
@@ -547,9 +544,8 @@ export function LoanProductDrawer({
               }
               error={errors.guarantee_deposit_type}
             />
-            <TextField
+            <MoneyField
               label={t("loanProducts.fields.depositValue")}
-              type="number"
               value={form.guarantee_deposit_value}
               onChange={(event) =>
                 set("guarantee_deposit_value", event.target.value)

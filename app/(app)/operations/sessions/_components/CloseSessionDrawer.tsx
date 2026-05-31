@@ -4,25 +4,38 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { TextField } from "@/components/ui/TextField";
+import { MoneyField } from "@/components/ui/MoneyField";
 import { localizeApiError } from "@/lib/api/errors";
 import type {
   CloseTellerSessionPayload,
+  DenominationCount,
   TellerSession,
 } from "@/lib/api/teller-sessions";
 import { useFormatter, useTranslations } from "@/lib/i18n/I18nProvider";
+import { DenominationCounter } from "../../../_components/DenominationCounter";
 
 type Props = {
   open: boolean;
   session: TellerSession | null;
+  /** Whether the session's till requires a denomination count at close. */
+  requiresDenominations?: boolean;
   onClose: () => void;
   onSubmit: (payload: CloseTellerSessionPayload) => Promise<void>;
 };
 
-export function CloseSessionDrawer({ open, session, onClose, onSubmit }: Props) {
+export function CloseSessionDrawer({
+  open,
+  session,
+  requiresDenominations,
+  onClose,
+  onSubmit,
+}: Props) {
   const t = useTranslations();
   const format = useFormatter();
 
   const [closing, setClosing] = useState("");
+  const [denomCounts, setDenomCounts] = useState<DenominationCount[]>([]);
+  const [denomTotal, setDenomTotal] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
@@ -30,6 +43,8 @@ export function CloseSessionDrawer({ open, session, onClose, onSubmit }: Props) 
   useEffect(() => {
     if (!open) return;
     setClosing("");
+    setDenomCounts([]);
+    setDenomTotal(0);
     setErrors({});
     setGeneralError(null);
   }, [open]);
@@ -42,11 +57,16 @@ export function CloseSessionDrawer({ open, session, onClose, onSubmit }: Props) 
     setErrors({});
     setGeneralError(null);
 
-    const minor = Math.round(Number(closing.trim() || "0") * 100);
+    const manualMinor = Math.round(Number(closing.trim() || "0") * 100);
     try {
       await onSubmit({
-        closing_declaration_minor: Number.isFinite(minor) ? minor : 0,
+        closing_declaration_minor: requiresDenominations
+          ? denomTotal
+          : Number.isFinite(manualMinor)
+            ? manualMinor
+            : 0,
         currency,
+        denomination_counts: requiresDenominations ? denomCounts : undefined,
       });
     } catch (cause) {
       const { generalMessage, fieldErrors } = localizeApiError(cause, {
@@ -118,15 +138,24 @@ export function CloseSessionDrawer({ open, session, onClose, onSubmit }: Props) 
             </div>
           </div>
         ) : null}
-        <TextField
-          label={t("sessions.fields.closing")}
-          type="number"
-          value={closing}
-          onChange={(event) => setClosing(event.target.value)}
-          error={errors.closing_declaration_minor}
-          required
-          hint={t("sessions.fields.closingHint")}
-        />
+        {requiresDenominations ? (
+          <DenominationCounter
+            currency={currency}
+            onChange={(lines, total) => {
+              setDenomCounts(lines);
+              setDenomTotal(total);
+            }}
+          />
+        ) : (
+          <MoneyField
+            label={t("sessions.fields.closing")}
+            value={closing}
+            onChange={(event) => setClosing(event.target.value)}
+            error={errors.closing_declaration_minor}
+            required
+            hint={t("sessions.fields.closingHint")}
+          />
+        )}
       </form>
     </Drawer>
   );

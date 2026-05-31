@@ -4,23 +4,31 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { Drawer } from "@/components/ui/Drawer";
 import { Select } from "@/components/ui/Select";
+import { TextField } from "@/components/ui/TextField";
 import { fetchStaffUsers, type StaffUser } from "@/lib/api/staff-users";
 import {
-  fetchTellerSessions,
+  fetchAllTellerSessions,
   type TellerSession,
 } from "@/lib/api/teller-sessions";
 import { fetchTills, type Till } from "@/lib/api/tills";
 import {
+  createSessionReconciliation,
   fetchSessionReconciliations,
   type TillReconciliation,
 } from "@/lib/api/till-reconciliations";
-import { localizeApiMessage } from "@/lib/api/errors";
+import { localizeApiError, localizeApiMessage } from "@/lib/api/errors";
 import { useCanAny, useHasRole } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useFormatter, useTranslations } from "@/lib/i18n/I18nProvider";
+import { useToast } from "@/lib/toast/ToastProvider";
 import { openBrandedReport } from "@/lib/print/report";
 import { PageHeader } from "../../_components/PageHeader";
+import {
+  DenominationCounter,
+  type DenominationLine,
+} from "../../_components/DenominationCounter";
 
 /**
  * P22 — Caisse › Consultation caisse. Inspecte une session de caisse : détails,
@@ -34,11 +42,21 @@ export default function CashInspectionPage() {
   const session = useSession();
   const token = session.status === "authenticated" ? session.token : null;
 
+  const toast = useToast();
   const isPlatformAdmin = useHasRole(["platform-admin"]);
   const viewPerm = useCanAny(["cash.sessions.view"]);
+  const reconManagePerm = useCanAny(["cash.reconciliations.manage"]);
   const canView = isPlatformAdmin || viewPerm;
+  const canReconcile = isPlatformAdmin || reconManagePerm;
+
+  const [reconOpen, setReconOpen] = useState(false);
+  const [reconLines, setReconLines] = useState<DenominationLine[]>([]);
+  const [reconNotes, setReconNotes] = useState("");
+  const [reconSubmitting, setReconSubmitting] = useState(false);
+  const [reconError, setReconError] = useState<string | null>(null);
 
   const [sessions, setSessions] = useState<TellerSession[]>([]);
+  const [sessionsTruncated, setSessionsTruncated] = useState(false);
   const [tills, setTills] = useState<Till[]>([]);
   const [tellers, setTellers] = useState<StaffUser[]>([]);
   const [sessionId, setSessionId] = useState("");
@@ -46,16 +64,28 @@ export default function CashInspectionPage() {
   const [loadingRecons, setLoadingRecons] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Filters (client-side — the index exposes no server filter yet, back-issue #29).
+  const [fFrom, setFFrom] = useState("");
+  const [fTo, setFTo] = useState("");
+  const [fTill, setFTill] = useState("");
+  const [fTeller, setFTeller] = useState("");
+  const [fStatus, setFStatus] = useState("");
+
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
     Promise.all([
-      fetchTellerSessions(token, { perPage: 100 }).catch(() => ({ data: [] })),
+      fetchAllTellerSessions(token).catch(() => ({
+        rows: [] as TellerSession[],
+        total: 0,
+        truncated: false,
+      })),
       fetchTills(token, { perPage: 100 }).catch(() => ({ data: [] })),
       fetchStaffUsers(token, { perPage: 100 }).catch(() => ({ data: [] })),
     ]).then(([s, tl, st]) => {
       if (cancelled) return;
-      setSessions(s.data as TellerSession[]);
+      setSessions(s.rows);
+      setSessionsTruncated(s.truncated);
       setTills(tl.data as Till[]);
       setTellers(st.data as StaffUser[]);
     });
@@ -103,14 +133,54 @@ export default function CashInspectionPage() {
     };
   }, [token, sessionId]);
 
+  const filteredSessions = useMemo(
+    () =>
+      sessions.filter((s) => {
+        const d = s.business_date ?? "";
+        if (fFrom && d < fFrom) return false;
+        if (fTo && d > fTo) return false;
+        if (fTill && s.till_public_id !== fTill) return false;
+        if (fTeller && s.teller_user_public_id !== fTeller) return false;
+        if (fStatus && s.status !== fStatus) return false;
+        return true;
+      }),
+    [sessions, fFrom, fTo, fTill, fTeller, fStatus],
+  );
+
   const sessionOptions = useMemo(
     () =>
-      sessions.map((s) => ({
+      filteredSessions.map((s) => ({
         value: s.public_id,
-        label: `${tillLabelOf(s.till_public_id)} · ${s.business_date ?? "—"} · ${s.status}`,
+        label: `${tillLabelOf(s.till_public_id)} · ${s.business_date ?? "—"} · ${t(`cashInspection.status.${s.status}`)}`,
       })),
-    [sessions, tillLabelOf],
+    [filteredSessions, tillLabelOf, t],
   );
+
+  // Only tills/tellers that actually appear in the loaded sessions, so the
+  // filter dropdowns stay relevant (and agency-scoped server-side already).
+  const tillFilterOptions = useMemo(() => {
+    const ids = new Set(sessions.map((s) => s.till_public_id).filter(Boolean));
+    return tills
+      .filter((x) => ids.has(x.public_id))
+      .map((x) => ({ value: x.public_id, label: `${x.code} — ${x.name}` }));
+  }, [sessions, tills]);
+
+  const tellerFilterOptions = useMemo(() => {
+    const ids = new Set(sessions.map((s) => s.teller_user_public_id).filter(Boolean));
+    return tellers
+      .filter((u) => ids.has(u.public_id))
+      .map((u) => ({ value: u.public_id, label: u.name }));
+  }, [sessions, tellers]);
+
+  const filtersActive = !!(fFrom || fTo || fTill || fTeller || fStatus);
+
+  function resetFilters() {
+    setFFrom("");
+    setFTo("");
+    setFTill("");
+    setFTeller("");
+    setFStatus("");
+  }
 
   function money(minor: number | null | undefined): string {
     if (minor === null || minor === undefined) return "—";
@@ -151,6 +221,29 @@ export default function CashInspectionPage() {
     });
   }
 
+  async function submitRecon() {
+    if (!token || !sessionId) return;
+    setReconSubmitting(true);
+    setReconError(null);
+    try {
+      await createSessionReconciliation(token, sessionId, {
+        currency,
+        notes: reconNotes.trim() || null,
+        denomination_counts: reconLines,
+      });
+      toast.success(t("cashInspection.recon.createdTitle"));
+      setReconOpen(false);
+      setReconLines([]);
+      setReconNotes("");
+      const fresh = await fetchSessionReconciliations(token, sessionId);
+      setRecons(fresh);
+    } catch (cause) {
+      setReconError(localizeApiError(cause).generalMessage);
+    } finally {
+      setReconSubmitting(false);
+    }
+  }
+
   return (
     <>
       <PageHeader
@@ -158,27 +251,106 @@ export default function CashInspectionPage() {
         description={t("cashInspection.pageDescription")}
         actions={
           selected ? (
-            <Button variant="outline" size="md" onClick={handlePrint}>
-              {t("cashInspection.print.action")}
-            </Button>
+            <div className="flex gap-2">
+              {canReconcile && selected.status === "open" ? (
+                <Button variant="primary" size="md" onClick={() => { setReconLines([]); setReconNotes(""); setReconError(null); setReconOpen(true); }}>
+                  {t("cashInspection.recon.create")}
+                </Button>
+              ) : null}
+              <Button variant="outline" size="md" onClick={handlePrint}>
+                {t("cashInspection.print.action")}
+              </Button>
+            </div>
           ) : null
         }
       />
 
-      <section className="flex flex-col gap-2 rounded-[var(--radius-card)] border border-border bg-background p-4 sm:max-w-xl">
-        <label
-          htmlFor="inspect-session"
-          className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-        >
-          {t("cashInspection.sessionLabel")}
-        </label>
-        <Select
-          id="inspect-session"
-          value={sessionId}
-          options={sessionOptions}
-          placeholder={t("cashInspection.sessionPlaceholder")}
-          onChange={setSessionId}
-        />
+      <section className="flex flex-col gap-4 rounded-[var(--radius-card)] border border-border bg-background p-4">
+        {/* Filters */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {t("cashInspection.filters.title")}
+            </span>
+            {filtersActive ? (
+              <Button variant="ghost" size="sm" onClick={resetFilters}>
+                {t("cashInspection.filters.reset")}
+              </Button>
+            ) : null}
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <TextField
+              label={t("cashInspection.filters.from")}
+              type="date"
+              value={fFrom}
+              onChange={(e) => setFFrom(e.target.value)}
+            />
+            <TextField
+              label={t("cashInspection.filters.to")}
+              type="date"
+              value={fTo}
+              onChange={(e) => setFTo(e.target.value)}
+            />
+            <Select
+              label={t("cashInspection.filters.till")}
+              value={fTill}
+              options={tillFilterOptions}
+              placeholder={t("cashInspection.filters.tillAll")}
+              isClearable
+              onChange={setFTill}
+            />
+            <Select
+              label={t("cashInspection.filters.teller")}
+              value={fTeller}
+              options={tellerFilterOptions}
+              placeholder={t("cashInspection.filters.tellerAll")}
+              isClearable
+              onChange={setFTeller}
+            />
+            <Select
+              label={t("cashInspection.filters.status")}
+              value={fStatus}
+              options={[
+                { value: "open", label: t("cashInspection.status.open") },
+                { value: "closed", label: t("cashInspection.status.closed") },
+              ]}
+              placeholder={t("cashInspection.filters.statusAll")}
+              isClearable
+              onChange={setFStatus}
+            />
+          </div>
+          {sessionsTruncated ? (
+            <p className="text-xs text-warning">
+              {t("cashInspection.filters.truncated", { count: sessions.length })}
+            </p>
+          ) : null}
+        </div>
+
+        {/* Narrowed session picker */}
+        <div className="flex flex-col gap-2 border-t border-border pt-4">
+          <div className="flex items-center justify-between">
+            <label
+              htmlFor="inspect-session"
+              className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+            >
+              {t("cashInspection.sessionLabel")}
+            </label>
+            <span className="text-xs text-muted-foreground">
+              {t("cashInspection.filters.match", { count: filteredSessions.length })}
+            </span>
+          </div>
+          <Select
+            id="inspect-session"
+            value={sessionId}
+            options={sessionOptions}
+            placeholder={
+              filteredSessions.length === 0
+                ? t("cashInspection.filters.none")
+                : t("cashInspection.sessionPlaceholder")
+            }
+            onChange={setSessionId}
+          />
+        </div>
       </section>
 
       {selected ? (
@@ -205,6 +377,34 @@ export default function CashInspectionPage() {
           {error ? (
             <Alert variant="danger" title={t("cashInspection.recon.errorTitle")}>
               {localizeApiMessage(error)}
+            </Alert>
+          ) : null}
+
+          {/* Arrêté-before-close hint: the session is open and no balanced
+              cash-up has been recorded yet. Closing won't save one. */}
+          {selected.status === "open" &&
+          !recons.some((r) => r.difference_minor === 0) ? (
+            <Alert
+              variant="info"
+              title={t("cashInspection.recon.beforeCloseTitle")}
+              action={
+                canReconcile ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setReconLines([]);
+                      setReconNotes("");
+                      setReconError(null);
+                      setReconOpen(true);
+                    }}
+                  >
+                    {t("cashInspection.recon.create")}
+                  </Button>
+                ) : undefined
+              }
+            >
+              {t("cashInspection.recon.beforeCloseBody")}
             </Alert>
           ) : null}
 
@@ -259,6 +459,49 @@ export default function CashInspectionPage() {
           </p>
         </>
       ) : null}
+
+      {/* New cash-up / reconciliation (P25 denomination counting) */}
+      <Drawer
+        open={reconOpen}
+        onClose={reconSubmitting ? () => undefined : () => setReconOpen(false)}
+        title={t("cashInspection.recon.create")}
+        description={t("cashInspection.recon.createHint")}
+        widthClassName="sm:w-[34rem]"
+        footer={
+          <>
+            <Button variant="ghost" size="md" type="button" onClick={() => setReconOpen(false)} disabled={reconSubmitting}>
+              {t("common.cancel")}
+            </Button>
+            <Button variant="primary" size="md" type="button" onClick={submitRecon} disabled={reconSubmitting || reconLines.length === 0}>
+              {reconSubmitting ? t("common.loading") : t("cashInspection.recon.submit")}
+            </Button>
+          </>
+        }
+      >
+        {reconError ? (
+          <p className="mb-4 rounded-[var(--radius-field)] border border-danger/20 bg-danger/10 px-3 py-2 text-xs text-danger">
+            {reconError}
+          </p>
+        ) : null}
+        <div className="flex flex-col gap-4">
+          <DenominationCounter
+            currency={currency}
+            onChange={(lines) => setReconLines(lines)}
+          />
+          <label className="flex flex-col gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {t("cashInspection.recon.notes")}
+            </span>
+            <textarea
+              value={reconNotes}
+              onChange={(e) => setReconNotes(e.target.value)}
+              rows={2}
+              maxLength={2000}
+              className="rounded-[var(--radius-field)] border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring/20"
+            />
+          </label>
+        </div>
+      </Drawer>
     </>
   );
 }

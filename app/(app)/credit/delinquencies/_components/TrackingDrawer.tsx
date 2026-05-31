@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
+import { MoneyField } from "@/components/ui/MoneyField";
 import { localizeApiError } from "@/lib/api/errors";
 import type {
   DelinquencyTracking,
@@ -257,9 +258,8 @@ export function TrackingDrawer({
             onChange={(event) => set("appointment_date", event.target.value)}
             error={errors.appointment_date}
           />
-          <TextField
+          <MoneyField
             label={t("delinquencies.tracking.fields.promisedAmount")}
-            type="number"
             value={form.promised_amount}
             onChange={(event) => set("promised_amount", event.target.value)}
             error={errors.promised_amount_minor}

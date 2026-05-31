@@ -26,9 +26,9 @@ import {
 } from "@/lib/api/teller-transactions";
 import type { TellerSession } from "@/lib/api/teller-sessions";
 import { localizeApiError } from "@/lib/api/errors";
-import { amountInWordsFr } from "@/lib/format/amountInWords";
+import { amountInWords } from "@/lib/format/amountInWords";
 import { useSession } from "@/lib/auth/SessionProvider";
-import { useFormatter, useTranslations } from "@/lib/i18n/I18nProvider";
+import { useFormatter, useLocale, useTranslations } from "@/lib/i18n/I18nProvider";
 
 type Direction = "deposit" | "withdrawal";
 
@@ -55,6 +55,7 @@ const VERIFICATION_METHODS: SignatureVerificationMethod[] = [
 export function CashTransactionForm({ direction, session, onDone }: Props) {
   const t = useTranslations();
   const format = useFormatter();
+  const { locale } = useLocale();
   const sessionState = useSession();
   const token = sessionState.status === "authenticated" ? sessionState.token : null;
   const isWithdrawal = direction === "withdrawal";
@@ -146,7 +147,7 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
     return Number.isFinite(v) ? Math.round(v * 100) : 0;
   }, [amount]);
 
-  const amountWords = amountMinor > 0 ? amountInWordsFr(amountMinor, currency) : "";
+  const amountWords = amountMinor > 0 ? amountInWords(amountMinor, currency, locale) : "";
   const overAvailable =
     isWithdrawal &&
     available !== null &&

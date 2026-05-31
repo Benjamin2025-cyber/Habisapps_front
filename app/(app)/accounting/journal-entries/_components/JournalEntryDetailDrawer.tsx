@@ -7,6 +7,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Drawer } from "@/components/ui/Drawer";
 import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
+import { MoneyField } from "@/components/ui/MoneyField";
 import { localizeApiError, localizeApiMessage } from "@/lib/api/errors";
 import {
   addJournalLine,
@@ -419,9 +420,8 @@ export function JournalEntryDetailDrawer({
                   ]}
                   onChange={(next) => setSide(next as Side)}
                 />
-                <TextField
+                <MoneyField
                   label={t("journalEntries.detail.amount")}
-                  type="number"
                   value={amount}
                   onChange={(event) => setAmount(event.target.value)}
                   hint={t("journalEntries.detail.amountHint")}

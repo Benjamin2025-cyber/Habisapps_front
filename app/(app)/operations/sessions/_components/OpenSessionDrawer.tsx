@@ -5,11 +5,16 @@ import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
+import { MoneyField } from "@/components/ui/MoneyField";
 import { localizeApiError } from "@/lib/api/errors";
 import type { StaffUser } from "@/lib/api/staff-users";
-import type { OpenTellerSessionPayload } from "@/lib/api/teller-sessions";
+import type {
+  DenominationCount,
+  OpenTellerSessionPayload,
+} from "@/lib/api/teller-sessions";
 import type { Till } from "@/lib/api/tills";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
+import { DenominationCounter } from "../../../_components/DenominationCounter";
 
 type Props = {
   open: boolean;
@@ -33,6 +38,8 @@ export function OpenSessionDrawer({
   const [tellerId, setTellerId] = useState("");
   const [businessDate, setBusinessDate] = useState("");
   const [opening, setOpening] = useState("");
+  const [denomCounts, setDenomCounts] = useState<DenominationCount[]>([]);
+  const [denomTotal, setDenomTotal] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
@@ -43,6 +50,8 @@ export function OpenSessionDrawer({
     setTellerId("");
     setBusinessDate("");
     setOpening("");
+    setDenomCounts([]);
+    setDenomTotal(0);
     setErrors({});
     setGeneralError(null);
   }, [open]);
@@ -99,13 +108,19 @@ export function OpenSessionDrawer({
     setErrors({});
     setGeneralError(null);
 
-    const minor = Math.round(Number(opening.trim() || "0") * 100);
+    const requiresDenoms = !!selectedTill?.requires_denominations;
+    const manualMinor = Math.round(Number(opening.trim() || "0") * 100);
     const payload: OpenTellerSessionPayload = {
       till_public_id: tillId,
       teller_user_public_id: tellerId || null,
       business_date: businessDate,
-      opening_declaration_minor: Number.isFinite(minor) ? minor : 0,
+      opening_declaration_minor: requiresDenoms
+        ? denomTotal
+        : Number.isFinite(manualMinor)
+          ? manualMinor
+          : 0,
       currency: selectedTill?.currency ?? undefined,
+      denomination_counts: requiresDenoms ? denomCounts : undefined,
     };
 
     try {
@@ -207,15 +222,24 @@ export function OpenSessionDrawer({
           error={errors.business_date}
           required
         />
-        <TextField
-          label={t("sessions.fields.opening")}
-          type="number"
-          value={opening}
-          onChange={(event) => setOpening(event.target.value)}
-          error={errors.opening_declaration_minor}
-          required
-          hint={t("sessions.fields.openingHint")}
-        />
+        {selectedTill?.requires_denominations ? (
+          <DenominationCounter
+            currency={selectedTill.currency ?? "XAF"}
+            onChange={(lines, total) => {
+              setDenomCounts(lines);
+              setDenomTotal(total);
+            }}
+          />
+        ) : (
+          <MoneyField
+            label={t("sessions.fields.opening")}
+            value={opening}
+            onChange={(event) => setOpening(event.target.value)}
+            error={errors.opening_declaration_minor}
+            required
+            hint={t("sessions.fields.openingHint")}
+          />
+        )}
       </form>
     </Drawer>
   );

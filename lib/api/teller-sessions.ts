@@ -41,17 +41,25 @@ export type PaginatedTellerSessions = {
   meta: { pagination: Pagination };
 };
 
+export type DenominationCount = {
+  denomination_public_id: string;
+  count: number;
+};
+
 export type OpenTellerSessionPayload = {
   till_public_id: string;
   teller_user_public_id?: string | null;
   business_date: string;
   opening_declaration_minor: number;
   currency?: string;
+  /** Required when the till has `requires_denominations` (P25 cash counting). */
+  denomination_counts?: DenominationCount[];
 };
 
 export type CloseTellerSessionPayload = {
   closing_declaration_minor: number;
   currency?: string;
+  denomination_counts?: DenominationCount[];
 };
 
 export async function fetchTellerSessions(
@@ -100,6 +108,31 @@ export async function fetchTellerSessions(
       },
     },
   };
+}
+
+/**
+ * Récupère TOUTES les sessions en bouclant la pagination. Pis-aller tant que
+ * l'index n'expose pas de filtre serveur (back-issue #29) : on rapatrie tout
+ * pour pouvoir filtrer côté client. Plafond de sécurité pour éviter une boucle
+ * infinie / un rapatriement massif ; `truncated` signale si la limite a coupé.
+ */
+export async function fetchAllTellerSessions(
+  token: string,
+  { maxRows = 2000 }: { maxRows?: number } = {},
+): Promise<{ rows: TellerSession[]; total: number; truncated: boolean }> {
+  const perPage = 100;
+  const first = await fetchTellerSessions(token, { page: 1, perPage });
+  const rows = [...first.data];
+  const total = first.meta.pagination.total;
+  const lastPage = first.meta.pagination.last_page;
+
+  for (let page = 2; page <= lastPage && rows.length < maxRows; page += 1) {
+    const next = await fetchTellerSessions(token, { page, perPage });
+    rows.push(...next.data);
+  }
+
+  const truncated = rows.length < total;
+  return { rows: rows.slice(0, maxRows), total, truncated };
 }
 
 export async function getTellerSession(

@@ -2262,6 +2262,46 @@
     "toast": {
       "doneTitle": "Décaissement effectué",
       "doneBody": "Le prêt {number} a été décaissé."
+    },
+    "setupCharges": {
+      "title": "Frais de dossier",
+      "intro": "Le décaissement n’est possible qu’après collecte des frais et de la prime d’assurance.",
+      "loading": "Chargement des frais…",
+      "assessError": "Impossible de charger les frais de dossier.",
+      "none": "Aucun frais à régler pour ce produit.",
+      "allSettled": "Tous les frais sont réglés. Vous pouvez décaisser.",
+      "pending": "{count} frais restant(s) à régler avant le décaissement.",
+      "amount": "Montant",
+      "settle": "Régler",
+      "settling": "Règlement…",
+      "waive": "Dispenser (direction)",
+      "waiveTitle": "Dispense direction",
+      "waiveComments": "Motif de la dispense",
+      "waiveConfirm": "Confirmer la dispense",
+      "waiveCancel": "Annuler",
+      "insurance": "Prime d’assurance",
+      "insuranceAccountOnly": "La prime d’assurance se règle uniquement par compte client.",
+      "paymentSource": "Source de paiement",
+      "sourceAccount": "Compte client",
+      "sourceCash": "Espèces (caisse)",
+      "account": "Compte à débiter",
+      "accountPlaceholder": "Choisir un compte",
+      "session": "Session de caisse",
+      "sessionPlaceholder": "Choisir une session ouverte",
+      "noAccounts": "Aucun compte client disponible.",
+      "noSessions": "Aucune session de caisse ouverte dans l’agence.",
+      "settledToast": "Frais réglé",
+      "needSource": "Choisissez d’abord la source de paiement.",
+      "types": {
+        "dossier_fee": "Frais de dossier",
+        "dossier_fee_tax": "Taxe sur frais de dossier",
+        "guarantee_deposit": "Dépôt de garantie"
+      },
+      "status": {
+        "assessed": "À régler",
+        "paid": "Réglé",
+        "waived_by_direction": "Dispensé (direction)"
+      }
     }
   },
   "decision": {
@@ -2940,13 +2980,35 @@
       "difference": "Écart",
       "status": "Statut",
       "empty": "Aucun arrêté pour cette session.",
-      "errorTitle": "Impossible de charger les arrêtés"
+      "errorTitle": "Impossible de charger les arrêtés",
+      "create": "Nouvel arrêté",
+      "createHint": "Comptez les espèces ; l'arrêté n'est enregistré que si le réel = le théorique (écart nul).",
+      "submit": "Enregistrer l'arrêté",
+      "notes": "Notes (optionnel)",
+      "createdTitle": "Arrêté enregistré",
+      "beforeCloseTitle": "Pensez à l’arrêté avant la clôture",
+      "beforeCloseBody": "La clôture de la session n’enregistre pas d’arrêté : le comptage final ne resterait que dans le journal d’audit. Enregistrez un arrêté ici pendant que la session est ouverte pour conserver le document de comptage."
     },
-    "createNote": "La saisie d'un arrêté (comptage des coupures) nécessite le référentiel Type monnaie (P25).",
+    "createNote": "L'arrêté n'est enregistré que si le solde réel compté égale le solde théorique (écart nul).",
     "print": {
       "action": "Imprimer l'arrêté",
       "fileName": "arrete-caisse",
       "heading": "Arrêté de caisse"
+    },
+    "filters": {
+      "title": "Filtres",
+      "from": "Du",
+      "to": "Au",
+      "till": "Caisse",
+      "tillAll": "Toutes les caisses",
+      "teller": "Caissier",
+      "tellerAll": "Tous les caissiers",
+      "status": "Statut",
+      "statusAll": "Tous les statuts",
+      "reset": "Réinitialiser",
+      "match": "{count} session(s)",
+      "none": "Aucune session ne correspond aux filtres.",
+      "truncated": "Trop de sessions : seules les {count} plus récentes sont chargées (filtrage serveur à venir). Affinez par date."
     }
   },
   "cashDraft": {
@@ -3034,5 +3096,119 @@
       "fileName": "fiche-client",
       "heading": "Image globale client"
     }
+  },
+  "reports": {
+    "generate": "Générer un rapport",
+    "generateDisabled": "La génération nécessite la liste des définitions de rapport (endpoint backend à venir). Les rapports déjà générés restent consultables et imprimables.",
+    "unavailableType": "Aucun type de rapport correspondant n'est exposé par l'API pour cette rubrique.",
+    "errorTitle": "Impossible de charger les rapports",
+    "listTitle": "Rapports générés",
+    "count": "{count} rapport(s)",
+    "empty": "Aucun rapport généré pour ce type.",
+    "columns": {
+      "type": "Type",
+      "period": "Période",
+      "generatedAt": "Généré le",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "types": {
+      "trial_balance": "Balance des comptes",
+      "general_ledger": "Grand livre",
+      "emf_trial_balance": "Balance EMF (COBAC)",
+      "credit_portfolio_outstanding": "Encours de crédit",
+      "credit_par_delinquency": "Portefeuille à risque (PAR)",
+      "credit_collection_performance": "Performance de recouvrement"
+    },
+    "preview": {
+      "open": "Aperçu",
+      "title": "Aperçu du rapport",
+      "print": "Imprimer / PDF",
+      "noData": "Aucune donnée."
+    },
+    "print": {
+      "fileName": "rapport"
+    },
+    "scopes": {
+      "par": {
+        "title": "PAR — Portefeuille à risque",
+        "description": "Rapports de portefeuille à risque (créances en souffrance)."
+      },
+      "exigible": {
+        "title": "Exigible / encours crédit",
+        "description": "Rapports d'encours et d'exigible du portefeuille de crédit."
+      },
+      "release": {
+        "title": "Main levée",
+        "description": "Rapports de main levée de garantie."
+      },
+      "balance": {
+        "title": "Balance des comptes",
+        "description": "Balance, grand livre et balance EMF/COBAC."
+      }
+    }
+  },
+  "denominations": {
+    "pageTitle": "Type monnaie (coupures)",
+    "pageDescription": "Référentiel des coupures (billets et pièces) et de leur valeur, utilisé pour le comptage des espèces.",
+    "errorTitle": "Impossible de charger les coupures",
+    "listTitle": "Coupures",
+    "count": "{count} coupure(s)",
+    "empty": "Aucune coupure.",
+    "columns": {
+      "label": "Libellé",
+      "value": "Valeur",
+      "code": "Code",
+      "type": "Type",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "type": {
+      "banknote": "Billet",
+      "coin": "Pièce"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "menu": "Actions",
+      "create": "Nouvelle coupure",
+      "edit": "Modifier",
+      "activate": "Activer",
+      "deactivate": "Désactiver"
+    },
+    "fields": {
+      "code": "Code",
+      "codeEditHint": "Le code est immuable après création.",
+      "label": "Libellé",
+      "value": "Valeur (unité principale)",
+      "valueHint": "Ex. 10000 pour un billet de 10 000 FCFA.",
+      "currency": "Devise",
+      "currencyEditHint": "La devise est immuable après création.",
+      "type": "Type",
+      "status": "Statut"
+    },
+    "drawer": {
+      "titleCreate": "Nouvelle coupure",
+      "titleEdit": "Modifier — {label}",
+      "hint": "Définissez la valeur et le type (billet ou pièce).",
+      "create": "Créer"
+    },
+    "toast": {
+      "createdTitle": "Coupure créée",
+      "createdBody": "La coupure « {label} » a été créée.",
+      "updatedTitle": "Coupure mise à jour",
+      "updatedBody": "La coupure « {label} » a été mise à jour.",
+      "statusTitle": "Statut modifié",
+      "statusBody": "« {label} » est désormais {status}.",
+      "errorTitle": "Action impossible"
+    }
+  },
+  "denominationCounter": {
+    "title": "Détail des coupures",
+    "total": "Total compté",
+    "target": "attendu : {target}",
+    "none": "Aucune coupure active pour cette devise. Configurez-les dans Type monnaie."
   }
 }

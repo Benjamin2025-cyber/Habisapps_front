@@ -110,7 +110,7 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "denominations",
         href: "/settings/denominations",
-        available: false,
+        available: true,
         permissions: ["cash.denominations.view"],
       },
       {
@@ -186,18 +186,6 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
         href: "/admin/account-products",
         available: true,
         permissions: ["account.products.view"],
-      },
-      {
-        labelKey: "guarantors",
-        href: "/guarantors",
-        available: false,
-        permissions: ["crm.guarantors.view"],
-      },
-      {
-        labelKey: "proxies",
-        href: "/proxies",
-        available: false,
-        permissions: ["crm.proxies.view"],
       },
     ],
   },
@@ -295,8 +283,8 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "reportsPar",
         href: "/reports/par",
-        available: false,
-        permissions: ["loans.delinquency.manage", "ledger.accounts.view"],
+        available: true,
+        permissions: ["accounting.audit.view"],
       },
       {
         labelKey: "ledgerJournal",
@@ -313,20 +301,20 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "reportsExigible",
         href: "/reports/exigible",
-        available: false,
-        permissions: ["loans.delinquency.manage"],
+        available: true,
+        permissions: ["accounting.audit.view"],
       },
       {
         labelKey: "reportsRelease",
         href: "/reports/release",
-        available: false,
-        permissions: ["loans.collaterals.manage"],
+        available: true,
+        permissions: ["accounting.audit.view"],
       },
       {
         labelKey: "reportsBalance",
         href: "/reports/balance",
-        available: false,
-        permissions: ["ledger.accounts.view"],
+        available: true,
+        permissions: ["accounting.audit.view"],
       },
     ],
   },

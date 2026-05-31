@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
+import { MoneyField } from "@/components/ui/MoneyField";
 import { localizeApiError } from "@/lib/api/errors";
 import type { Agency } from "@/lib/api/agencies";
 import type { LedgerAccount } from "@/lib/api/ledger-accounts";
@@ -320,17 +321,15 @@ export function TillDrawer({
 
         <Section title={t("tills.drawer.sectionLimits")}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <TextField
+            <MoneyField
               label={t("tills.fields.maxBalance")}
-              type="number"
               value={form.max_balance_limit}
               onChange={(event) => set("max_balance_limit", event.target.value)}
               error={errors.max_balance_limit_minor}
               hint={t("tills.fields.amountHint")}
             />
-            <TextField
+            <MoneyField
               label={t("tills.fields.maxWithdrawal")}
-              type="number"
               value={form.max_withdrawal_limit}
               onChange={(event) => set("max_withdrawal_limit", event.target.value)}
               error={errors.max_withdrawal_limit_minor}

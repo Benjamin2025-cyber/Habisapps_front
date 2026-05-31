@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
+import { MoneyField } from "@/components/ui/MoneyField";
 import { localizeApiError } from "@/lib/api/errors";
 import type { ClientGuarantor } from "@/lib/api/client-guarantors";
 import type {
@@ -201,9 +202,8 @@ export function ObligationDrawer({
         />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <TextField
+          <MoneyField
             label={t("guarantees.obligation.fields.amount")}
-            type="number"
             value={form.obligation_amount}
             onChange={(event) => set("obligation_amount", event.target.value)}
             error={errors.obligation_amount_minor}

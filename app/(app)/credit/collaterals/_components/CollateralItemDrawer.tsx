@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { TextField } from "@/components/ui/TextField";
+import { MoneyField } from "@/components/ui/MoneyField";
 import { localizeApiError } from "@/lib/api/errors";
 import type {
   CollateralItem,
@@ -216,9 +217,8 @@ export function CollateralItemDrawer({
             onChange={(event) => set("reference", event.target.value)}
             error={errors.reference}
           />
-          <TextField
+          <MoneyField
             label={t("guarantees.item.fields.amount")}
-            type="number"
             value={form.amount}
             onChange={(event) => set("amount", event.target.value)}
             error={errors.amount_minor}

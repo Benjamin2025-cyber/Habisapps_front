@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
+import { MoneyField } from "@/components/ui/MoneyField";
 import { localizeApiError } from "@/lib/api/errors";
 import {
   fetchCustomerAccounts,
@@ -412,9 +413,8 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
         {/* Montant & échéancier */}
         <Section title={t("loans.drawer.sectionFinancial")}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <TextField
+            <MoneyField
               label={t("loans.fields.requestedAmount")}
-              type="number"
               value={form.requested_amount}
               onChange={(event) => set("requested_amount", event.target.value)}
               error={errors.requested_amount_minor}

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { DataTable } from "@/components/ui/DataTable";
 import { Drawer } from "@/components/ui/Drawer";
 import { TextField } from "@/components/ui/TextField";
+import { MoneyField } from "@/components/ui/MoneyField";
 import {
   DropdownMenu,
   type DropdownMenuItem,
@@ -430,9 +431,8 @@ function HoldDrawer({
         className="grid grid-cols-1 gap-4 sm:grid-cols-2"
         noValidate
       >
-        <TextField
+        <MoneyField
           label={t("accountDetail.holds.fields.amount")}
-          type="number"
           value={form.amount}
           onChange={(event) => set("amount", event.target.value)}
           error={errors.amount_minor}
