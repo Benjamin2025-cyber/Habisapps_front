@@ -2880,11 +2880,15 @@
       "withdrawal": "Enregistrer le retrait"
     },
     "txType": {
-      "deposit": "Versement",
-      "withdrawal": "Retrait"
+      "cash_deposit": "Versement",
+      "cash_withdrawal": "Retrait",
+      "cash_reversal": "Extourne",
+      "cash_manual_journal": "OD caisse"
     },
     "status": {
       "posted": "Comptabilisée",
+      "pending_review": "En attente",
+      "cancelled": "Annulée",
       "reversed": "Extournée"
     },
     "recent": {

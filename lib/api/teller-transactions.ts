@@ -72,15 +72,25 @@ export type CashWithdrawalPayload = {
   description?: string | null;
 };
 
+/**
+ * deposits / withdrawals / reverse all return the transaction nested under
+ * `data.teller_transaction` (alongside `data.journal_entry`), so unwrap it.
+ */
+type TransactionEnvelope = {
+  teller_transaction: TellerTransaction;
+  journal_entry?: unknown;
+};
+
 export async function storeCashDeposit(
   token: string,
   sessionPublicId: string,
   payload: CashDepositPayload,
 ): Promise<TellerTransaction> {
-  return apiRequest<TellerTransaction>(
+  const data = await apiRequest<TransactionEnvelope>(
     `teller-sessions/${sessionPublicId}/deposits`,
     { method: "POST", token, body: stripUndefined(payload) },
   );
+  return data.teller_transaction;
 }
 
 export async function storeCashWithdrawal(
@@ -88,20 +98,22 @@ export async function storeCashWithdrawal(
   sessionPublicId: string,
   payload: CashWithdrawalPayload,
 ): Promise<TellerTransaction> {
-  return apiRequest<TellerTransaction>(
+  const data = await apiRequest<TransactionEnvelope>(
     `teller-sessions/${sessionPublicId}/withdrawals`,
     { method: "POST", token, body: stripUndefined(payload) },
   );
+  return data.teller_transaction;
 }
 
 export async function reverseTellerTransaction(
   token: string,
   transactionPublicId: string,
 ): Promise<TellerTransaction> {
-  return apiRequest<TellerTransaction>(
+  const data = await apiRequest<TransactionEnvelope>(
     `teller-transactions/${transactionPublicId}/reverse`,
     { method: "POST", token },
   );
+  return data.teller_transaction;
 }
 
 function stripUndefined<T extends Record<string, unknown>>(input: T): Partial<T> {

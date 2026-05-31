@@ -254,7 +254,11 @@ export default function CashTransactionsPage() {
                     <tr key={tx.public_id}>
                       <td className="px-4 py-2.5">
                         <Badge
-                          tone={tx.transaction_type === "withdrawal" ? "warning" : "info"}
+                          tone={
+                            tx.transaction_type === "cash_withdrawal"
+                              ? "warning"
+                              : "info"
+                          }
                         >
                           {t(`cashTx.txType.${tx.transaction_type}`)}
                         </Badge>
