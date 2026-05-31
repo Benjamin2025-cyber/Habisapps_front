@@ -301,7 +301,7 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "ledgerJournal",
         href: "/reports/journal",
-        available: false,
+        available: true,
         permissions: ["journal.entries.view"],
       },
       {

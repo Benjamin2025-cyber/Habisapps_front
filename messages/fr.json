@@ -2493,5 +2493,55 @@
       },
       "errorTitle": "Action impossible"
     }
+  },
+  "journal": {
+    "pageTitle": "Journal des écritures",
+    "pageDescription": "Consultation du livre-journal : toutes les écritures comptables (manuelles ou générées par les opérations), avec le détail des lignes.",
+    "errorTitle": "Impossible de charger le journal",
+    "empty": "Aucune écriture pour ces filtres.",
+    "count": "{count} écriture(s)",
+    "filters": {
+      "searchLabel": "Recherche",
+      "searchPlaceholder": "Référence ou libellé…",
+      "statusLabel": "Statut",
+      "statusAll": "Tous",
+      "from": "Du",
+      "to": "Au"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "submitted": "Soumise",
+      "approved": "Approuvée",
+      "posted": "Comptabilisée",
+      "rejected": "Rejetée",
+      "cancelled": "Annulée",
+      "archived": "Archivée",
+      "reversed": "Extournée"
+    },
+    "columns": {
+      "date": "Date",
+      "reference": "Référence",
+      "description": "Libellé",
+      "status": "Statut",
+      "amount": "Montant"
+    },
+    "lineColumns": {
+      "account": "Compte",
+      "memo": "Libellé ligne",
+      "debit": "Débit",
+      "credit": "Crédit"
+    },
+    "pagination": {
+      "perPage": "Par page",
+      "pageOf": "Page {page} / {total}"
+    },
+    "print": {
+      "action": "Imprimer / PDF",
+      "fileName": "journal-ecritures",
+      "heading": "Journal des écritures",
+      "allPeriods": "Toutes périodes",
+      "entryCount": "Nombre d'écritures",
+      "totals": "TOTAUX"
+    }
   }
 }

@@ -157,9 +157,12 @@ export async function fetchLedgerAccounts(
     throw new Error(`Failed to fetch ledger accounts (HTTP ${response.status})`);
   }
 
+  // The ledger-accounts endpoint returns Laravel's default paginated shape:
+  // `{ data: { ledger_accounts: [...] }, meta: { current_page, per_page, total,
+  // last_page, ... } }` — a FLAT meta, unlike the app envelope's `meta.pagination`.
   const envelope = JSON.parse(text) as {
     data?: { ledger_accounts?: LedgerAccount[] } | LedgerAccount[];
-    meta?: PaginatedLedgerAccounts["meta"];
+    meta?: Partial<Pagination> & { pagination?: Partial<Pagination> };
   };
 
   const rows: LedgerAccount[] = Array.isArray(envelope.data)
@@ -168,14 +171,17 @@ export async function fetchLedgerAccounts(
       ? envelope.data!.ledger_accounts!
       : [];
 
+  // Accept either a nested `meta.pagination` (app envelope) or a flat `meta`.
+  const m = envelope.meta?.pagination ?? envelope.meta ?? {};
+
   return {
     data: rows,
-    meta: envelope.meta ?? {
+    meta: {
       pagination: {
-        current_page: 1,
-        per_page: rows.length || 25,
-        total: rows.length,
-        last_page: 1,
+        current_page: m.current_page ?? 1,
+        per_page: m.per_page ?? options.perPage ?? 25,
+        total: m.total ?? rows.length,
+        last_page: m.last_page ?? 1,
       },
     },
   };

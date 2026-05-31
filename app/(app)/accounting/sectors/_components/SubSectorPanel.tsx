@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import {
@@ -15,6 +16,8 @@ const STATUS_TONE: Record<SectorStatus, "success" | "neutral" | "danger"> = {
   inactive: "neutral",
   archived: "danger",
 };
+
+const PAGE_SIZES = [10, 25, 50, 100];
 
 type Props = {
   sector: Sector | null;
@@ -36,6 +39,19 @@ export function SubSectorPanel({
   onDelete,
 }: Props) {
   const t = useTranslations();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  // Reset to the first page whenever the selected sector changes.
+  useEffect(() => {
+    setPage(1);
+  }, [sector?.public_id]);
+
+  const total = subSectors.length;
+  const lastPage = Math.max(1, Math.ceil(total / pageSize));
+  const safePage = Math.min(page, lastPage);
+  const start = (safePage - 1) * pageSize;
+  const visible = subSectors.slice(start, start + pageSize);
 
   if (!sector) {
     return (
@@ -97,7 +113,7 @@ export function SubSectorPanel({
             </tr>
           </thead>
           <tbody>
-            {subSectors.map((sub) => {
+            {visible.map((sub) => {
               const items: DropdownMenuItem[] = [
                 {
                   label: t("sectors.actions.edit"),
@@ -146,6 +162,61 @@ export function SubSectorPanel({
           </tbody>
         </table>
       )}
+
+      {total > 0 ? (
+        <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-2.5 text-xs">
+          <label className="flex items-center gap-1.5 text-muted-foreground">
+            {t("dataTable.perPage")}
+            <select
+              value={pageSize}
+              onChange={(event) => {
+                setPageSize(Number(event.target.value));
+                setPage(1);
+              }}
+              aria-label={t("dataTable.perPage")}
+              className="h-8 rounded-[var(--radius-field)] border border-border bg-background px-2 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {PAGE_SIZES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
+            <span className="tabular-nums">
+              {t("dataTable.range", {
+                from: start + 1,
+                to: Math.min(start + pageSize, total),
+                total,
+              })}
+            </span>
+            {lastPage > 1 ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setPage(Math.max(1, safePage - 1))}
+                  disabled={safePage <= 1}
+                  className="inline-flex h-8 items-center rounded-[var(--radius-field)] border border-border bg-background px-3 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {t("common.previous")}
+                </button>
+                <span className="tabular-nums">
+                  {t("dataTable.pageOf", { current: safePage, total: lastPage })}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPage(Math.min(lastPage, safePage + 1))}
+                  disabled={safePage >= lastPage}
+                  className="inline-flex h-8 items-center rounded-[var(--radius-field)] border border-border bg-background px-3 font-medium text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {t("common.next")}
+                </button>
+              </>
+            ) : null}
+          </div>
+        </footer>
+      ) : null}
     </section>
   );
 }
