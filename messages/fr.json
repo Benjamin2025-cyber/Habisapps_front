@@ -2911,5 +2911,72 @@
       "reversedBody": "L'opération a été extournée.",
       "errorTitle": "Action impossible"
     }
+  },
+  "cashInspection": {
+    "pageTitle": "Consultation caisse",
+    "pageDescription": "Inspectez une session de caisse : détails, soldes théorique/réel, écart et arrêté imprimable.",
+    "sessionLabel": "Session de caisse",
+    "sessionPlaceholder": "Choisir une session",
+    "fields": {
+      "till": "Caisse",
+      "teller": "Caissier",
+      "businessDate": "Date",
+      "status": "Statut",
+      "opening": "Fonds d'ouverture",
+      "closing": "Fonds de clôture",
+      "openedAt": "Ouverte le",
+      "closedAt": "Clôturée le"
+    },
+    "status": {
+      "open": "Ouverte",
+      "closed": "Clôturée"
+    },
+    "recon": {
+      "title": "Arrêtés / réconciliations",
+      "count": "{count} arrêté(s)",
+      "countedAt": "Compté le",
+      "theoretical": "Solde théorique",
+      "actual": "Solde réel",
+      "difference": "Écart",
+      "status": "Statut",
+      "empty": "Aucun arrêté pour cette session.",
+      "errorTitle": "Impossible de charger les arrêtés"
+    },
+    "createNote": "La saisie d'un arrêté (comptage des coupures) nécessite le référentiel Type monnaie (P25).",
+    "print": {
+      "action": "Imprimer l'arrêté",
+      "fileName": "arrete-caisse",
+      "heading": "Arrêté de caisse"
+    }
+  },
+  "cashDraft": {
+    "pageTitle": "Brouillard de caisse",
+    "pageDescription": "Vue jour-par-jour des sessions de caisse : fonds d'ouverture/clôture et statut.",
+    "filters": {
+      "from": "Du",
+      "to": "Au"
+    },
+    "count": "{count} session(s)",
+    "columns": {
+      "date": "Date",
+      "till": "Caisse",
+      "teller": "Caissier",
+      "opening": "Fonds d'ouverture",
+      "closing": "Fonds de clôture",
+      "status": "Statut"
+    },
+    "status": {
+      "open": "Ouverte",
+      "closed": "Clôturée"
+    },
+    "empty": "Aucune session sur cette période.",
+    "lineLevelNote": "Le détail ligne-à-ligne des mouvements sera disponible une fois l'endpoint de liste des opérations de caisse livré.",
+    "print": {
+      "action": "Imprimer / PDF",
+      "fileName": "brouillard-caisse",
+      "heading": "Brouillard de caisse",
+      "allPeriods": "Toutes périodes",
+      "count": "Nombre de sessions"
+    }
   }
 }

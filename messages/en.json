@@ -1,0 +1,2982 @@
+{
+  "common": {
+    "brandName": "HabisLoan",
+    "back": "Back",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "submit": "Submit",
+    "close": "Close",
+    "loading": "Loading…",
+    "tryAgain": "Try again",
+    "yes": "Yes",
+    "no": "No",
+    "previous": "Previous",
+    "next": "Next",
+    "delete": "Delete",
+    "generatedOn": "Generated on",
+    "unknownError": "Unknown error",
+    "networkError": "Network error. Check your connection and try again.",
+    "retryIn": "Try again in {time}",
+    "passwordHint": "At least 8 characters. Mix letters, numbers and symbols.",
+    "language": {
+      "switcher": "Change language",
+      "comingSoon": "Coming soon",
+      "active": "Current language: {name}"
+    },
+    "rejectionReason": "Rejection reason: {reason}"
+  },
+  "duration": {
+    "seconds": "{count} s",
+    "minutesSeconds": "{minutes} min {seconds} s"
+  },
+  "auth": {
+    "topBar": {
+      "about": "About Habis"
+    },
+    "shared": {
+      "phoneLabel": "Phone number",
+      "phonePlaceholder": "+237 6 .. .. .. ..",
+      "passwordLabel": "Password",
+      "newPasswordLabel": "New password",
+      "newPasswordPlaceholder": "Choose a password",
+      "newPasswordPlaceholderReset": "Choose a new password",
+      "confirmPasswordLabel": "Confirm password",
+      "confirmPasswordPlaceholder": "Enter it again",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "passwordsDontMatch": "The two passwords do not match.",
+      "otpAriaLabelDefault": "Verification code",
+      "otpAriaLabelActivation": "6-digit verification code",
+      "otpAriaLabelReset": "6-digit reset code",
+      "otpDigitAriaLabel": "Digit {position}",
+      "otpNotReceived": "Didn't receive the code?",
+      "resendCode": "Resend code",
+      "resending": "Sending…",
+      "resendIn": "Resend in {seconds}s",
+      "rateLimitTitle": "Too many attempts",
+      "rateLimitBody": "For security reasons, please wait {time} before trying again.",
+      "resendToast": {
+        "successTitle": "Code resent",
+        "successBody": "Check your messages.",
+        "errorTitle": "Unable to resend"
+      }
+    },
+    "login": {
+      "pageTitle": "Sign in",
+      "heading": "Sign in",
+      "phonePlaceholder": "Enter your phone number",
+      "passwordPlaceholder": "Enter your password",
+      "forgotPassword": "Forgot?",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "firstLoginPrompt": "First time signing in?",
+      "activateLink": "Activate my account",
+      "errorTitle": "Unable to sign in",
+      "successToastTitle": "Signed in successfully",
+      "successToastBody": "Welcome, {name}.",
+      "resetSuccess": {
+        "title": "Password updated",
+        "body": "You can now sign in with your new password."
+      }
+    },
+    "activate": {
+      "pageTitle": "Activate my account",
+      "phoneStep": {
+        "heading": "Activate my account",
+        "intro": "Enter your phone number. You will receive a verification code by SMS to activate your account and choose your password.",
+        "submit": "Get the code",
+        "submitting": "Sending the code…",
+        "errorTitle": "Unable to send the code"
+      },
+      "verifyStep": {
+        "heading": "Verification",
+        "introWithPhone": "Enter the 6-digit code sent to {phone}, then choose your password.",
+        "changePhone": "Change number",
+        "submit": "Activate my account",
+        "submitting": "Activating…",
+        "errorTitle": "Unable to activate"
+      },
+      "success": {
+        "heading": "Account activated",
+        "body": "Your account is active. You can now sign in with your phone number and password.",
+        "cta": "Sign in"
+      }
+    },
+    "forgotPassword": {
+      "pageTitle": "Forgotten password",
+      "heading": "Forgotten password",
+      "intro": "Enter your phone number. If an active account is linked to it, you will receive a code by SMS to reset your password.",
+      "submit": "Get the code",
+      "submitting": "Sending the code…",
+      "errorTitle": "Unable to send the code"
+    },
+    "sessionExpired": {
+      "title": "Session expired",
+      "body": "Please sign in again to continue."
+    },
+    "resetPassword": {
+      "pageTitle": "Reset password",
+      "heading": "New password",
+      "introWithPhone": "Enter the code sent to {phone} and choose your new password.",
+      "introWithoutPhone": "Enter the code received by SMS and choose a new password.",
+      "submit": "Update password",
+      "submitting": "Updating…",
+      "errorTitle": "Unable to update"
+    }
+  },
+  "dashboard": {
+    "pageTitle": "Dashboard",
+    "welcome": {
+      "greeting": "Welcome {name}",
+      "role": "No role"
+    },
+    "filters": {
+      "title": "Financial Information",
+      "creditType": "Loan type",
+      "creditTypeAll": "All loans",
+      "period": "Period",
+      "periodToday": "Today",
+      "periodWeek": "This week",
+      "periodMonth": "This month",
+      "periodYear": "This year",
+      "agent": "Agent",
+      "agentAll": "All agents",
+      "agency": "Branch",
+      "agencyAll": "All branches",
+      "agencyLoading": "Loading branches…"
+    },
+    "freshness": {
+      "label": "Last updated {relative}",
+      "refresh": "Refresh",
+      "refreshing": "Refreshing…"
+    },
+    "errorTitle": "Unable to load the dashboard",
+    "forbiddenTitle": "Access denied",
+    "forbiddenBody": "Your profile does not have the rights required to view these indicators.",
+    "comingSoon": "Coming soon",
+    "comingSoonChart": "Chart coming soon — time-series endpoint under implementation.",
+    "viewMore": "View more",
+    "quickActions": {
+      "deposit": "Till deposit",
+      "loan": "Request a loan",
+      "client": "Create a client",
+      "user": "Add a user"
+    },
+    "kpi": {
+      "balance": {
+        "title": "Principal Balance",
+        "hint": "Total portfolio outstanding."
+      },
+      "todayCollection": {
+        "title": "Today's collection",
+        "hint": "Repayments collected today."
+      },
+      "activeLoans": {
+        "title": "Active loans",
+        "count": "{count} active loans",
+        "hint": "Total outstanding of active loans."
+      },
+      "delinquentLoans": {
+        "title": "Overdue loans",
+        "count": "{count} overdue loans",
+        "hint": "Outstanding at risk (PAR 30+60+90).",
+        "countUnavailable": "Counter coming soon."
+      },
+      "clientsCount": {
+        "title": "Clients",
+        "hint": "Clients registered within the scope."
+      }
+    },
+    "financialPerformance": {
+      "title": "Financial Performance",
+      "subtitle": "Trend of principal balance and collection over the period.",
+      "today": "Today",
+      "week": "Week",
+      "month": "Month",
+      "year": "Year",
+      "legendBalance": "Principal Balance",
+      "legendCollection": "Today's Collection"
+    },
+    "alerts": {
+      "title": "System Alerts",
+      "delinquentLoans": "Overdue loans",
+      "inactiveUsers": "Inactive users",
+      "lowCollection": "Low collection today",
+      "loading": "Loading alerts…"
+    },
+    "userManagement": {
+      "title": "User management",
+      "registered": "Registered Users",
+      "active": "Active Accounts",
+      "suspended": "Suspended accounts",
+      "addUser": "Add a user",
+      "createRole": "Create a role",
+      "countsUnavailable": "Detailed counts coming soon."
+    },
+    "loanTracking": {
+      "title": "Loan Tracking",
+      "filterAllAgencies": "All branches",
+      "granted": "Loans granted",
+      "delinquent": "Overdue loans",
+      "repaid": "Loans repaid"
+    },
+    "recentActivities": {
+      "title": "Recent activity",
+      "today": "Today",
+      "empty": "No recent activity.",
+      "loading": "Loading activity…"
+    },
+    "agenciesPerformance": {
+      "title": "Branch performance",
+      "thisMonth": "This month",
+      "columns": {
+        "agency": "Branch",
+        "collections": "Collections",
+        "topAgent": "Top Agent",
+        "loans": "Loans",
+        "delinquent": "Overdue"
+      },
+      "comingSoon": "Per-branch aggregation endpoint under implementation."
+    },
+    "field": {
+      "title": "Workspace",
+      "intro": "Your figures and your next actions for the day.",
+      "loansCount": "Loans tracked",
+      "clientsCount": "Clients tracked",
+      "todaySession": "Cash session",
+      "todaySessionOpen": "Till open",
+      "todaySessionClosed": "No open session",
+      "openSessionCta": "Open a session →",
+      "kycPendingCount": "KYC pending",
+      "usersCount": "Users",
+      "odPendingCount": "Journal entries to approve"
+    },
+    "teller": {
+      "greeting": "Hello {name} 👋",
+      "subtitle": "Teller dashboard",
+      "drawer": {
+        "title": "My till",
+        "open": "Open",
+        "closed": "Closed",
+        "till": "Till",
+        "date": "Opening date",
+        "opening": "Opening float",
+        "noneBody": "No cash session is open. Open your till to start the day.",
+        "openCta": "Open a session",
+        "closeCta": "Manage / close the till",
+        "liveNote": "The running balance and the cash difference are calculated at close."
+      },
+      "actionsTitle": "Quick actions",
+      "actions": {
+        "deposit": "Deposit",
+        "withdrawal": "Withdrawal",
+        "sessions": "Cash sessions",
+        "clients": "Clients",
+        "accounts": "Accounts"
+      },
+      "tipsTitle": "Teller tips",
+      "tips": {
+        "t1": "Confirm the account holder and account number before each transaction.",
+        "t2": "Count the cash and check the total before validating.",
+        "t3": "Check the signature specimen for every withdrawal."
+      },
+      "demo": "Demo",
+      "demoNote": "Demonstration data — will be connected to the backend once the endpoint is available.",
+      "customer": {
+        "title": "Current client",
+        "verified": "Verified",
+        "id": "Client ID",
+        "since": "Client since",
+        "kycCompleted": "KYC completed"
+      },
+      "accounts": {
+        "title": "Accounts overview",
+        "available": "Available balance",
+        "savings": "Savings account",
+        "current": "Current account",
+        "term": "Term deposit"
+      },
+      "recent": {
+        "title": "Recent transactions",
+        "date": "Date",
+        "type": "Type",
+        "account": "Account",
+        "amount": "Amount",
+        "channel": "Channel",
+        "types": {
+          "deposit": "Deposit",
+          "withdrawal": "Withdrawal",
+          "transfer": "Transfer",
+          "bill": "Bill"
+        },
+        "channels": {
+          "teller": "Counter",
+          "mobile": "Mobile",
+          "internet": "Internet"
+        }
+      },
+      "notifications": {
+        "title": "Notifications"
+      }
+    },
+    "minimal": {
+      "title": "Welcome {name}",
+      "body": "Your account is active. Your administrator will assign you a role to unlock the corresponding features.",
+      "contactAdmin": "Contact your administrator"
+    }
+  },
+  "shell": {
+    "loading": "Loading your workspace…",
+    "sidebar": {
+      "expand": "Expand the sidebar",
+      "collapse": "Collapse the sidebar",
+      "comingSoon": "Coming soon",
+      "signOut": "Sign out",
+      "groups": {
+        "administration": "Administration",
+        "database": "Database",
+        "settings": "Configuration",
+        "operations": "Day-to-day operations",
+        "referentiel": "Reference data",
+        "credit": "Loan",
+        "accounting": "Accounting",
+        "edition": "Reporting"
+      },
+      "items": {
+        "dashboard": "Dashboard",
+        "accountingDay": "Accounting Day",
+        "users": "User management",
+        "roles": "Roles & permissions",
+        "audit": "Audit log",
+        "databaseBackups": "Backups",
+        "denominations": "Currency denomination",
+        "batch": "Batch Procedure",
+        "tills": "Tills",
+        "tellerSessions": "Cash sessions",
+        "tellerTransactions": "Withdrawal / Deposit",
+        "tellerInspection": "Till inquiry",
+        "agencies": "Branch",
+        "managers": "Manager",
+        "clients": "Client",
+        "accounts": "Account",
+        "accountProducts": "Account product",
+        "guarantors": "Guarantor",
+        "proxies": "Proxy",
+        "loanProducts": "Loan products",
+        "loans": "Loan setup",
+        "collaterals": "Collateral",
+        "loanDisbursement": "Loan disbursement",
+        "loanDecision": "Decision / Cancellation",
+        "loanTransfers": "Transfer loan",
+        "delinquencies": "Receivables tracking",
+        "ledgerAccounts": "General ledger accounts",
+        "sectors": "Business sectors",
+        "journalEntries": "Miscellaneous entries",
+        "globalClientImage": "Global client image",
+        "reportsPar": "PAR",
+        "ledgerJournal": "Journal of entries",
+        "cashDraft": "Cash blotter",
+        "reportsExigible": "Loan receivables",
+        "reportsRelease": "Lien release",
+        "reportsBalance": "Trial balance"
+      }
+    },
+    "topBar": {
+      "toggleSidebar": "Show the sidebar",
+      "search": {
+        "placeholder": "Search (clients, loans, accounts…)",
+        "shortcut": "⌘K",
+        "comingSoon": "Global search is coming soon."
+      },
+      "notifications": {
+        "label": "Notifications",
+        "empty": "No notifications yet."
+      },
+      "accountingDay": {
+        "open": "Day open",
+        "closed": "Day closed",
+        "loading": "Day status…"
+      }
+    },
+    "userMenu": {
+      "open": "Open user menu",
+      "viewProfile": "My profile",
+      "preferences": "Preferences",
+      "signOut": "Sign out",
+      "noRole": "No role assigned",
+      "agencyFallback": "No branch"
+    },
+    "breadcrumbs": {
+      "home": "Home"
+    }
+  },
+  "toast": {
+    "dismissAriaLabel": "Dismiss notification"
+  },
+  "clients": {
+    "pageTitle": "Reference Data — Clients",
+    "pageDescription": "List of the institution's clients. Creation, editing, status and KYC workflow.",
+    "errorTitle": "Unable to load clients",
+    "filters": {
+      "searchLabel": "Search",
+      "searchPlaceholder": "Client code, name, phone, email…",
+      "statusLabel": "Status",
+      "statusAll": "All statuses",
+      "kycLabel": "KYC status",
+      "kycAll": "All KYC statuses"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "suspended": "Suspended",
+      "archived": "Archived"
+    },
+    "kyc": {
+      "draft": "Draft",
+      "pending_review": "Under review",
+      "verified": "Verified",
+      "rejected": "Rejected",
+      "suspended": "Suspended",
+      "archived": "Archived"
+    },
+    "gender": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
+    "frequency": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "custom": "Custom"
+    },
+    "columns": {
+      "reference": "Client code",
+      "fullName": "Full name",
+      "phone": "Phone",
+      "email": "Email",
+      "gender": "Gender",
+      "status": "Status",
+      "kyc": "KYC",
+      "onboardedOn": "Onboarded on",
+      "actions": "Actions"
+    },
+    "list": {
+      "titleHeader": "List of registered clients",
+      "count": "{count} client(s)",
+      "totalCaption": "{count} client(s) registered in total",
+      "empty": "No clients to display."
+    },
+    "actions": {
+      "create": "New client",
+      "menu": "Actions",
+      "edit": "Edit",
+      "changeStatus": "Change status",
+      "statusActive": "Mark as active",
+      "statusInactive": "Mark as inactive",
+      "statusSuspended": "Suspend",
+      "statusArchived": "Archive",
+      "kycSubmit": "Submit KYC",
+      "kycVerify": "Verify KYC",
+      "kycReject": "Reject KYC",
+      "kycSuspend": "Suspend KYC"
+    },
+    "drawer": {
+      "titleCreate": "New client",
+      "titleEdit": "Edit — {name}",
+      "createHint": "Enter the new client's information. KYC starts in \"Draft\" status and moves to review after submission.",
+      "editHint": "Client code {reference}",
+      "create": "Create client",
+      "sectionIdentity": "Identity",
+      "sectionContact": "Contact & address",
+      "sectionProfessional": "Professional activity",
+      "sectionAssignment": "Assignment",
+      "sectionCollection": "Collection terms"
+    },
+    "fields": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "middleName": "Middle name",
+      "fatherName": "Father's name",
+      "motherName": "Mother's name",
+      "dateOfBirth": "Date of birth",
+      "placeOfBirth": "Place of birth",
+      "gender": "Gender",
+      "genderPlaceholder": "Select…",
+      "phone": "Phone",
+      "homePhone": "Landline",
+      "email": "Email",
+      "addressLine1": "Address",
+      "addressLine2": "Address line 2",
+      "city": "City",
+      "region": "Region",
+      "occupation": "Occupation",
+      "employerName": "Employer",
+      "photo": "Client photo",
+      "photoHint": "JPG or PNG, 10 MB max.",
+      "agency": "Assigned branch",
+      "agencyPlaceholder": "Select a branch…",
+      "agencyEditHint": "The branch cannot be changed after creation.",
+      "prospector": "Prospector",
+      "prospectorPlaceholder": "Select an agent…",
+      "collectionAgent": "Collection agent",
+      "collectionAgentPlaceholder": "Select an agent…",
+      "collectionType": "Collection type",
+      "collectionFrequency": "Collection frequency",
+      "collectionFrequencyPlaceholder": "Select…",
+      "collectionTargetAmount": "Target amount (FCFA)",
+      "collectionTargetAmountHint": "Amount expected per installment."
+    },
+    "kycReason": {
+      "title": {
+        "submit": "Submit KYC",
+        "verify": "Verify KYC",
+        "reject": "Reject KYC",
+        "suspend": "Suspend KYC",
+        "archive": "Archive KYC"
+      },
+      "intro": {
+        "submit": "Confirm KYC submission for {name}?",
+        "verify": "Confirm KYC verification for {name}?",
+        "reject": "Reject {name}'s KYC. Enter the reason (required).",
+        "suspend": "Suspend {name}'s KYC?",
+        "archive": "Archive {name}'s KYC?"
+      },
+      "reasonLabel": "Reason for rejection",
+      "reasonPlaceholder": "Describe the reason for rejection (visible in audit log)…",
+      "reasonRequired": "A reason is required for a rejection.",
+      "commentLabel": "Comment (optional)",
+      "commentPlaceholder": "Additional information (visible in audit log)…"
+    },
+    "toast": {
+      "createdTitle": "Client created",
+      "createdBody": "Client {name} has been added.",
+      "updatedTitle": "Client updated",
+      "updatedBody": "Changes to {name} have been saved.",
+      "statusChangedTitle": "Status changed",
+      "statusChangedBody": "{name} is now: {status}.",
+      "statusErrorTitle": "Unable to change status",
+      "kycChangedTitle": "KYC updated",
+      "kycChangedBody": "Action \"{action}\" applied to {name}."
+    }
+  },
+  "clientDetail": {
+    "loading": "Loading…",
+    "untitled": "Client",
+    "referenceLabel": "Client code {reference}",
+    "backToList": "Back to list",
+    "errorTitle": "Unable to load client",
+    "tabsAriaLabel": "Client record sections",
+    "tabs": {
+      "identity": "Identity",
+      "identityDocs": "KYC documents",
+      "guarantors": "Guarantors",
+      "proxies": "Proxies",
+      "accounts": "Accounts",
+      "loans": "Loans"
+    },
+    "identity": {
+      "summaryLabel": "Client record",
+      "kycPrefix": "KYC: {status}",
+      "edit": "Edit"
+    },
+    "accounts": {
+      "title": "Client accounts",
+      "count": "{count} account(s)",
+      "empty": "No accounts for this client.",
+      "errorTitle": "Unable to load accounts",
+      "columns": {
+        "number": "Account number",
+        "product": "Type / Product",
+        "currency": "Currency",
+        "status": "Status",
+        "openedOn": "Opened on"
+      }
+    },
+    "loans": {
+      "title": "Client loans",
+      "comingSoon": "Client loans arrive with phase P11 (Credit — Origination)."
+    },
+    "action": {
+      "reasonLabel": "Reason",
+      "reasonPlaceholder": "Describe the reason (visible in audit log)…",
+      "reasonRequired": "A reason is required for this action.",
+      "commentLabel": "Comment (optional)",
+      "commentPlaceholder": "Additional information (visible in audit log)…"
+    },
+    "identityDocs": {
+      "title": "Identity documents",
+      "count": "{count} document(s)",
+      "empty": "No identity documents recorded.",
+      "status": {
+        "active": "Active",
+        "archived": "Archived"
+      },
+      "verificationStatus": {
+        "pending": "Pending",
+        "pending_review": "Under review",
+        "verified": "Verified",
+        "rejected": "Rejected"
+      },
+      "columns": {
+        "type": "Type",
+        "number": "Number",
+        "authority": "Issuing authority",
+        "issuedOn": "Issued on",
+        "expiresOn": "Expires on",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "actions": {
+        "menu": "Actions",
+        "create": "Add a document",
+        "edit": "Edit",
+        "submit": "Submit",
+        "verify": "Verify",
+        "reject": "Reject",
+        "archive": "Archive"
+      },
+      "action": {
+        "title": {
+          "submit": "Submit document",
+          "verify": "Verify document",
+          "reject": "Reject document",
+          "archive": "Archive document"
+        },
+        "intro": {
+          "submit": "Confirm submission of document {target}?",
+          "verify": "Confirm verification of document {target}?",
+          "reject": "Reject document {target}. Enter the reason (required).",
+          "archive": "Archive document {target}?"
+        }
+      },
+      "drawer": {
+        "titleCreate": "Add an identity document",
+        "titleEdit": "Edit document",
+        "hint": "Enter the document's information. It starts in \"Draft\" status."
+      },
+      "fields": {
+        "type": "Document type",
+        "typePlaceholder": "Select a document type…",
+        "number": "Number",
+        "authority": "Issuing authority",
+        "issuedOn": "Issue date",
+        "expiresOn": "Expiry date",
+        "document": "Supporting document (image)",
+        "documentHint": "Photo of the document. Required in order to verify the KYC document. A single image (front) — front/back is not yet supported by the API.",
+        "authorityHint": "Body that issued the document (e.g. DGSN for the national ID card). Optional.",
+        "expiredWarning": "⚠ This expiry date has passed — the document cannot be verified. Enter a future date."
+      },
+      "types": {
+        "legacyTag": "existing value",
+        "national_id_card": "National Identity Card (CNI)",
+        "national_id_receipt": "National ID receipt",
+        "passport": "Passport",
+        "residence_permit": "Residence permit",
+        "driver_license": "Driver's license",
+        "voter_card": "Voter card",
+        "consular_card": "Consular card",
+        "professional_card": "Professional card",
+        "civil_servant_card": "Civil servant card",
+        "military_id": "Military ID card",
+        "student_card": "Student card",
+        "pension_card": "Pensioner card",
+        "birth_certificate": "Birth certificate",
+        "marriage_certificate": "Marriage certificate",
+        "business_registry": "Trade Register (RCCM)",
+        "taxpayer_id": "Unique Taxpayer ID (NIU)",
+        "business_license": "Business license / Trader's card",
+        "company_bylaws": "Company bylaws",
+        "tax_clearance": "Tax clearance certificate"
+      },
+      "toast": {
+        "createdTitle": "Document added",
+        "createdBody": "The document has been saved as a draft.",
+        "updatedTitle": "Document updated",
+        "updatedBody": "Changes have been saved.",
+        "statusChangedTitle": "Status changed",
+        "statusChangedBody": "Action \"{action}\" applied."
+      }
+    },
+    "guarantors": {
+      "title": "Guarantors",
+      "count": "{count} guarantor(s)",
+      "empty": "No guarantors recorded.",
+      "status": {
+        "active": "Active",
+        "inactive": "Deactivated",
+        "archived": "Archived"
+      },
+      "verificationStatus": {
+        "pending": "Pending",
+        "pending_review": "Under review",
+        "verified": "Verified",
+        "rejected": "Rejected"
+      },
+      "columns": {
+        "name": "Guarantor name",
+        "relationship": "Relationship",
+        "phone": "Phone",
+        "startsOn": "Starts on",
+        "endsOn": "Ends on",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "actions": {
+        "menu": "Actions",
+        "create": "Add a guarantor",
+        "edit": "Edit",
+        "submit": "Submit",
+        "verify": "Verify",
+        "reject": "Reject",
+        "deactivate": "Deactivate",
+        "archive": "Archive"
+      },
+      "action": {
+        "title": {
+          "submit": "Submit guarantor",
+          "verify": "Verify guarantor",
+          "reject": "Reject guarantor",
+          "deactivate": "Deactivate guarantor",
+          "archive": "Archive guarantor"
+        },
+        "intro": {
+          "submit": "Confirm submission of guarantor {target}?",
+          "verify": "Confirm verification of guarantor {target}?",
+          "reject": "Reject guarantor {target}. Enter the reason (required).",
+          "deactivate": "Deactivate guarantor {target}?",
+          "archive": "Archive guarantor {target}?"
+        }
+      },
+      "drawer": {
+        "titleCreate": "Add a guarantor",
+        "titleEdit": "Edit guarantor",
+        "hint": "Enter the guarantor's information."
+      },
+      "fields": {
+        "name": "Full name",
+        "phone": "Phone",
+        "relationship": "Relationship",
+        "relationshipHint": "The guarantor's relationship to the client.",
+        "relationshipPlaceholder": "Select the relationship…",
+        "startsOn": "Starts on",
+        "endsOn": "Ends on",
+        "document": "Guarantor's KYC document",
+        "documentHint": "Guarantor's identity document (image). Required in order to verify the guarantor."
+      },
+      "relationships": {
+        "legacyTag": "existing value",
+        "father": "Father",
+        "mother": "Mother",
+        "spouse": "Spouse",
+        "sibling": "Sibling",
+        "child": "Son / Daughter",
+        "uncle_aunt": "Uncle / Aunt",
+        "cousin": "Cousin",
+        "grandparent": "Grandparent",
+        "parent_in_law": "Parent-in-law",
+        "friend": "Friend",
+        "neighbor": "Neighbor",
+        "colleague": "Colleague",
+        "employer": "Employer",
+        "employee": "Employee",
+        "business_partner": "Business partner",
+        "tontine_member": "Tontine member",
+        "traditional_chief": "Traditional chief",
+        "religious_leader": "Religious leader",
+        "legal_guardian": "Legal guardian",
+        "other": "Other"
+      },
+      "toast": {
+        "createdTitle": "Guarantor added",
+        "createdBody": "The guarantor has been saved as a draft.",
+        "updatedTitle": "Guarantor updated",
+        "updatedBody": "Changes have been saved.",
+        "statusChangedTitle": "Status changed",
+        "statusChangedBody": "Action \"{action}\" applied."
+      }
+    },
+    "proxies": {
+      "title": "Proxies",
+      "count": "{count} proxy(ies)",
+      "empty": "No proxies recorded.",
+      "status": {
+        "active": "Active",
+        "inactive": "Deactivated",
+        "expired": "Expired",
+        "archived": "Archived"
+      },
+      "verificationStatus": {
+        "pending": "Pending",
+        "pending_review": "Under review",
+        "verified": "Verified",
+        "rejected": "Rejected"
+      },
+      "columns": {
+        "name": "Proxy name",
+        "mandate": "Mandate type",
+        "phone": "Phone",
+        "startsOn": "Starts on",
+        "endsOn": "Ends on",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "actions": {
+        "menu": "Actions",
+        "create": "Add a proxy",
+        "edit": "Edit",
+        "submit": "Submit",
+        "verify": "Verify",
+        "reject": "Reject",
+        "deactivate": "Deactivate",
+        "expire": "Mark as expired",
+        "archive": "Archive"
+      },
+      "action": {
+        "title": {
+          "submit": "Submit proxy",
+          "verify": "Verify proxy",
+          "reject": "Reject proxy",
+          "deactivate": "Deactivate proxy",
+          "expire": "Mark as expired",
+          "archive": "Archive proxy"
+        },
+        "intro": {
+          "submit": "Confirm submission of proxy {target}?",
+          "verify": "Confirm verification of proxy {target}?",
+          "reject": "Reject proxy {target}. Enter the reason (required).",
+          "deactivate": "Deactivate proxy {target}?",
+          "expire": "Mark proxy {target} as expired?",
+          "archive": "Archive proxy {target}?"
+        }
+      },
+      "drawer": {
+        "titleCreate": "Add a proxy",
+        "titleEdit": "Edit proxy",
+        "hint": "Enter the proxy's information and the mandate terms."
+      },
+      "fields": {
+        "name": "Full name",
+        "phone": "Phone",
+        "email": "Email",
+        "idType": "Identity document type",
+        "idTypePlaceholder": "Select a document type…",
+        "idNumber": "Identity document number",
+        "mandateType": "Mandate type",
+        "mandateTypeHint": "General power of attorney, specific operations, etc.",
+        "startsOn": "Starts on",
+        "endsOn": "Ends on",
+        "document": "Proxy's KYC document (image)",
+        "documentHint": "Proxy's identity document (image). Required in order to verify the proxy."
+      },
+      "toast": {
+        "createdTitle": "Proxy added",
+        "createdBody": "The proxy has been saved as a draft.",
+        "updatedTitle": "Proxy updated",
+        "updatedBody": "Changes have been saved.",
+        "statusChangedTitle": "Status changed",
+        "statusChangedBody": "Action \"{action}\" applied."
+      }
+    }
+  },
+  "rolesPage": {
+    "pageTitle": "Roles & permissions",
+    "pageDescription": "Select a role to view and edit its permissions. Changes are saved only after you click \"Save\".",
+    "errorTitle": "Unable to load roles",
+    "emptySelection": "Select a role from the list on the left to view and edit its permissions.",
+    "list": {
+      "title": "Roles",
+      "count": "{count} role(s)",
+      "permissionsCount": "{count} permission(s)",
+      "protectedBadge": "Protected"
+    },
+    "editor": {
+      "title": "Permissions for {name}",
+      "count": "{active} active of {total}",
+      "save": "Save",
+      "reset": "Discard changes",
+      "searchPlaceholder": "Filter permissions (e.g. crm.clients)…",
+      "empty": "No permission matches the filter.",
+      "toggleAll": "Select all",
+      "confirmDiscard": "Unsaved changes will be lost. Continue?",
+      "errorTitle": "Change rejected",
+      "protectedRoleTitle": "Protected role",
+      "protectedRoleBody": "This role is marked as protected: some permissions cannot be removed or added. The API will reject any change that violates these constraints."
+    },
+    "toast": {
+      "savedTitle": "Permissions updated",
+      "savedBody": "Permissions for role {name} have been saved.",
+      "errorTitle": "Unable to save"
+    }
+  },
+  "dataTable": {
+    "empty": "No rows to display.",
+    "pageOf": "Page {current} / {total}",
+    "range": "{from}–{to} of {total}",
+    "perPage": "Per page"
+  },
+  "staffUsers": {
+    "pageTitle": "User management",
+    "pageDescription": "Create and edit users, assign roles, and manage the status of the institution's users.",
+    "errorTitle": "Unable to load users",
+    "filters": {
+      "searchLabel": "Search",
+      "searchPlaceholder": "Name, phone, staff ID, email…",
+      "statusLabel": "Status",
+      "statusAll": "All statuses",
+      "agencyLabel": "Branch",
+      "agencyAll": "All branches",
+      "roleLabel": "Role",
+      "roleAll": "All roles"
+    },
+    "status": {
+      "active": "Active",
+      "pending_verification": "Pending activation",
+      "suspended": "Suspended",
+      "deactivated": "Deactivated"
+    },
+    "gender": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
+    "columns": {
+      "matricule": "Staff ID",
+      "name": "Full name",
+      "phone": "Phone",
+      "email": "Email",
+      "roles": "Roles",
+      "agency": "Branch",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "list": {
+      "titleHeader": "List of registered users",
+      "count": "{count} user(s)",
+      "totalCaption": "{count} user(s) registered in total",
+      "empty": "No users to display."
+    },
+    "actions": {
+      "create": "New user",
+      "menu": "Actions",
+      "edit": "Edit",
+      "manageRoles": "Manage roles",
+      "changeStatus": "Change status",
+      "statusActive": "Reactivate",
+      "statusSuspended": "Suspend",
+      "statusDeactivated": "Deactivate"
+    },
+    "drawer": {
+      "titleCreate": "New user",
+      "titleEdit": "Edit — {name}",
+      "createHint": "Enter the new user's details and select their roles; they will receive an activation SMS to complete their registration.",
+      "editHint": "The phone number cannot be changed from this screen.",
+      "create": "Create user",
+      "sectionIdentity": "Identity",
+      "sectionAssignment": "Assignment",
+      "sectionProfile": "Profile (optional)",
+      "sectionRoles": "Roles",
+      "rolesPlaceholder": "No role selected",
+      "rolesHint": "Roles are assigned immediately after creation.",
+      "activationNotice": "The account will be created with status \"Pending activation\". An activation SMS will be sent to the user, who will choose their password while completing registration."
+    },
+    "fields": {
+      "name": "Full name",
+      "phone": "Phone",
+      "phoneEditHint": "Editable only through a phone number change workflow.",
+      "email": "Email",
+      "matricule": "Staff ID",
+      "matriculeHint": "Internal identifier of the institution.",
+      "jobTitle": "Job title",
+      "gender": "Gender",
+      "genderPlaceholder": "Select…",
+      "birthDate": "Date of birth",
+      "birthPlace": "Place of birth",
+      "serviceName": "Department",
+      "portfolioCode": "Portfolio code",
+      "agency": "Assigned branch",
+      "agencyPlaceholder": "Select a branch…",
+      "roles": "Roles"
+    },
+    "rolesDrawer": {
+      "title": "User roles",
+      "subtitle": "User: {name}",
+      "currentLabel": "Current roles:",
+      "fieldLabel": "Roles",
+      "atLeastOne": "Select at least one role.",
+      "permissionsCount": "{count} permission(s)",
+      "empty": "No assignable role available."
+    },
+    "toast": {
+      "createdTitle": "User created",
+      "createdBody": "{name} has been created. An activation SMS has been sent to them.",
+      "createdWithRolesBody": "{name} has been created with {count} role(s). An activation SMS has been sent to them.",
+      "createdRolesFailedTitle": "User created but roles not assigned",
+      "createdRolesFailedBody": "{name} has been created, but role assignment failed: {error}. You can fix this via \"Manage roles\".",
+      "updatedTitle": "User updated",
+      "updatedBody": "Changes to {name} have been saved.",
+      "statusChangedTitle": "Status changed",
+      "statusChangedBody": "{name} is now: {status}.",
+      "statusErrorTitle": "Unable to change status",
+      "rolesChangedTitle": "Roles updated",
+      "rolesChangedBody": "Roles for {name} have been updated."
+    }
+  },
+  "agencies": {
+    "pageTitle": "Reference data — Branches",
+    "pageDescription": "List of the institution's branches. Creation, editing, status and manager.",
+    "errorTitle": "Unable to load branches",
+    "filters": {
+      "searchLabel": "Search",
+      "searchPlaceholder": "Code, name, city, region, manager…",
+      "statusLabel": "Status",
+      "statusAll": "All statuses"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "suspended": "Suspended",
+      "archived": "Archived"
+    },
+    "columns": {
+      "code": "Code",
+      "name": "Branch name",
+      "region": "Region",
+      "city": "City",
+      "poBox": "P.O. Box",
+      "phone": "Phone",
+      "fax": "Fax",
+      "status": "Status",
+      "manager": "Manager",
+      "actions": "Actions"
+    },
+    "list": {
+      "titleHeader": "List of registered branches",
+      "count": "{count} branch(es)",
+      "totalCaption": "{count} branch(es) registered in total",
+      "empty": "No branches to display.",
+      "pageOf": "Page {current} / {total}"
+    },
+    "actions": {
+      "create": "New branch",
+      "menu": "Actions",
+      "edit": "Edit",
+      "transferManager": "Transfer management",
+      "changeStatus": "Change status",
+      "statusActive": "Mark active",
+      "statusInactive": "Mark inactive",
+      "statusSuspended": "Suspend",
+      "statusArchived": "Archive"
+    },
+    "drawer": {
+      "titleCreate": "New branch",
+      "titleEdit": "Edit — {name}",
+      "createHint": "Enter the details of the new branch.",
+      "editHint": "Branch code {code} — cannot be changed",
+      "create": "Create branch"
+    },
+    "fields": {
+      "code": "Branch code",
+      "name": "Branch name",
+      "region": "Region",
+      "city": "City",
+      "branchName": "Sub-unit",
+      "branchType": "Sub-unit type",
+      "phone": "Phone",
+      "fax": "Fax",
+      "email": "Email",
+      "addressLine1": "Address",
+      "addressLine2": "Address line 2",
+      "poBox": "P.O. Box",
+      "creationDate": "Creation date",
+      "status": "Status",
+      "geographic": "Geographic location",
+      "geographicPlaceholder": "Describe the location, landmarks, neighborhood…"
+    },
+    "managerDrawer": {
+      "title": "Transfer management",
+      "subtitle": "Branch {code} — {name}",
+      "currentManager": "Current manager: {name}",
+      "noManager": "No manager assigned yet.",
+      "publicIdLabel": "User identifier (public_id)",
+      "publicIdHint": "The manager selector will arrive with the Managers reference data phase.",
+      "roleAtAgencyLabel": "Role at branch (optional)",
+      "roleAtAgencyHint": "Default: agency-manager."
+    },
+    "toast": {
+      "createdTitle": "Branch created",
+      "createdBody": "Branch {name} has been added to the list.",
+      "updatedTitle": "Branch updated",
+      "updatedBody": "Changes to {name} have been saved.",
+      "statusChangedTitle": "Status changed",
+      "statusChangedBody": "{name} is now: {status}.",
+      "statusErrorTitle": "Unable to change status",
+      "managerChangedTitle": "Manager changed",
+      "managerChangedBody": "Management of {name} has been updated."
+    }
+  },
+  "accounts": {
+    "pageTitle": "Reference data — Customer accounts",
+    "pageDescription": "Branch customer accounts: balances, transactions and lifecycle.",
+    "errorTitle": "Unable to load accounts",
+    "filters": {
+      "searchLabel": "Search",
+      "searchPlaceholder": "Account number, title or holder…",
+      "statusLabel": "Status",
+      "statusAll": "All statuses"
+    },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended",
+      "closed": "Closed",
+      "archived": "Archived"
+    },
+    "types": {
+      "savings": "Savings",
+      "current": "Current account",
+      "term_deposit": "Term deposit",
+      "wallet": "Wallet"
+    },
+    "columns": {
+      "number": "Account number",
+      "title": "Title",
+      "holder": "Holder",
+      "type": "Type",
+      "currency": "Currency",
+      "status": "Status",
+      "openedOn": "Opened on",
+      "actions": "Actions"
+    },
+    "list": {
+      "titleHeader": "List of customer accounts",
+      "count": "{count} account(s)",
+      "totalCaption": "{count} account(s) registered in total",
+      "empty": "No accounts to display."
+    },
+    "actions": {
+      "create": "New account",
+      "menu": "Actions",
+      "edit": "Edit",
+      "changeStatus": "Change status",
+      "statusActive": "Mark active",
+      "statusSuspended": "Suspend",
+      "statusClosed": "Close",
+      "archive": "Archive"
+    },
+    "drawer": {
+      "titleCreate": "New customer account",
+      "titleEdit": "Edit — {number}",
+      "createHint": "Enter the holder and account details.",
+      "editHint": "The holder and account number cannot be changed.",
+      "create": "Create account",
+      "sectionHolder": "Holder & assignment",
+      "sectionAccount": "Account",
+      "sectionAccounting": "Accounting (optional)",
+      "sectionLifecycle": "Lifecycle"
+    },
+    "fields": {
+      "client": "Holder (customer)",
+      "clientPlaceholder": "Search for a customer…",
+      "agency": "Branch",
+      "agencyPlaceholder": "Select a branch…",
+      "agencyEditHint": "The branch cannot be changed after creation.",
+      "number": "Account number",
+      "currency": "Currency",
+      "currencyHint": "3-letter ISO code (e.g. XAF).",
+      "title": "Account title",
+      "titleHint": "Defaults to the holder's name. Editable (joint account, company, group…).",
+      "product": "Account type / product",
+      "productPlaceholder": "Select a product…",
+      "productHint": "Catalog managed in \"Account products\".",
+      "legacyType": "Type (free text)",
+      "ledgerAccount": "Ledger account",
+      "ledgerAccountPlaceholder": "Inherit from product",
+      "ledgerAccountHint": "Optional — if left blank, the account inherits the product's ledger account.",
+      "noLedgerAccounts": "No active ledger account in this branch. Create one in Ledger accounts.",
+      "accountProduct": "Account product (public_id)",
+      "accountProductHint": "Optional — to be entered manually for now.",
+      "openedOn": "Opening date",
+      "closedOn": "Closing date",
+      "status": "Status",
+      "statusPlaceholder": "Select a status…"
+    },
+    "toast": {
+      "createdTitle": "Account created",
+      "createdBody": "Account {number} has been created.",
+      "updatedTitle": "Account updated",
+      "updatedBody": "Account {number} has been updated.",
+      "statusChangedTitle": "Status changed",
+      "statusChangedBody": "Account {number} is now: {status}.",
+      "statusErrorTitle": "Action not possible",
+      "archivedTitle": "Account archived",
+      "archivedBody": "Account {number} has been archived."
+    }
+  },
+  "accountDetail": {
+    "loading": "Loading account…",
+    "referenceLabel": "Account No. {number}",
+    "backToList": "Back to list",
+    "errorTitle": "Unable to load account",
+    "tabsAriaLabel": "Account sections",
+    "summaryLabel": "Customer account",
+    "edit": "Edit",
+    "tabs": {
+      "infos": "Info",
+      "proxies": "Proxies",
+      "balances": "Balances",
+      "statement": "Statement",
+      "signatures": "Signatures",
+      "holds": "Holds"
+    },
+    "balances": {
+      "errorTitle": "Unable to load balances",
+      "accounting": "Ledger balance",
+      "available": "Available balance",
+      "activeHolds": "Active holds",
+      "minimum": "Minimum balance",
+      "unavailable": "Amount unavailable",
+      "accountingFloor": "Ledger basis",
+      "movementsTitle": "Transaction totals",
+      "totalDebit": "Total debits",
+      "totalCredit": "Total credits",
+      "currencyNote": "Amounts expressed in {currency}."
+    },
+    "statement": {
+      "errorTitle": "Unable to load statement",
+      "from": "From",
+      "to": "To",
+      "opening": "Opening balance",
+      "totalDebit": "Total debits",
+      "totalCredit": "Total credits",
+      "closing": "Closing balance",
+      "title": "Account transactions",
+      "count": "{count} transaction(s)",
+      "empty": "No transactions for the period.",
+      "columns": {
+        "date": "Date",
+        "reference": "Reference",
+        "memo": "Description",
+        "debit": "Debit",
+        "credit": "Credit"
+      }
+    },
+    "proxies": {
+      "title": "Account proxies",
+      "count": "{count} proxy(ies)",
+      "empty": "No proxy linked to this account.",
+      "errorTitle": "Unable to load proxies",
+      "manageHint": "Proxies are managed from the customer's profile.",
+      "manageLink": "Open customer profile",
+      "columns": {
+        "name": "Name",
+        "phone": "Phone",
+        "mandate": "Mandate type",
+        "status": "Status",
+        "period": "Period"
+      }
+    },
+    "signatures": {
+      "title": "Signature specimens",
+      "count": "{count} signature(s)",
+      "empty": "No signature on file.",
+      "errorTitle": "Unable to load signatures",
+      "addHint": "Upload the specimen image (signature or fingerprint) and save it; it becomes active and usable for withdrawals.",
+      "reasonRequired": "A reason is required.",
+      "create": {
+        "cta": "Add a specimen",
+        "title": "New signature specimen",
+        "hint": "Upload the signature/fingerprint image and enter the signatory.",
+        "specimen": "Specimen image",
+        "specimenHint": "Photo or scan of the signature (or fingerprint) — PNG/JPEG.",
+        "type": "Specimen type",
+        "signerName": "Signatory name",
+        "signerRole": "Role (optional)",
+        "capturedOn": "Capture date (optional)",
+        "submit": "Save specimen",
+        "documentRequired": "Upload the specimen image first.",
+        "doneTitle": "Specimen saved"
+      },
+      "verifiedTitle": "Signature verified",
+      "revokedTitle": "Signature revoked",
+      "verifyTitle": "Verify signature",
+      "revokeTitle": "Revoke signature",
+      "verifyIntro": "Confirm verification of {signer}'s signature?",
+      "revokeIntro": "Revoke {signer}'s signature. Enter the reason (required).",
+      "reasonLabel": "Revocation reason",
+      "columns": {
+        "type": "Type",
+        "signer": "Signatory",
+        "role": "Role",
+        "status": "Status",
+        "verified": "Verified on",
+        "actions": "Actions"
+      },
+      "types": {
+        "primary_holder": "Primary holder",
+        "joint_holder": "Joint holder",
+        "proxy": "Proxy",
+        "mandate": "Mandate",
+        "thumbprint": "Fingerprint"
+      },
+      "status": {
+        "active": "Active",
+        "superseded": "Superseded",
+        "revoked": "Revoked",
+        "archived": "Archived"
+      },
+      "actions": {
+        "menu": "Actions",
+        "verify": "Verify",
+        "revoke": "Revoke"
+      }
+    },
+    "holds": {
+      "title": "Holds",
+      "count": "{count} hold(s)",
+      "empty": "No holds on this account.",
+      "errorTitle": "Action not possible",
+      "createdTitle": "Hold created",
+      "updatedTitle": "Hold updated",
+      "releasedTitle": "Hold released",
+      "archivedTitle": "Hold archived",
+      "createTitle": "New hold",
+      "editTitle": "Edit hold",
+      "releaseTitle": "Release hold",
+      "releaseIntro": "Release the held funds for this account?",
+      "columns": {
+        "amount": "Amount",
+        "reason": "Reason",
+        "status": "Status",
+        "placedAt": "Placed on",
+        "expiresAt": "Expires on",
+        "reference": "Reference",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "released": "Released",
+        "cancelled": "Cancelled",
+        "archived": "Archived"
+      },
+      "actions": {
+        "menu": "Actions",
+        "create": "New hold",
+        "edit": "Edit",
+        "release": "Release",
+        "archive": "Archive"
+      },
+      "fields": {
+        "amount": "Amount to hold",
+        "amountHint": "Amount in the account's currency.",
+        "currency": "Currency",
+        "reason": "Hold reason",
+        "reasonHint": "Free text (e.g. court seizure, pending transaction).",
+        "sourceType": "Source type",
+        "sourceId": "Source identifier",
+        "expiresAt": "Expiry date",
+        "reference": "Reference",
+        "releaseReason": "Release reason",
+        "releaseReasonHint": "Optional."
+      }
+    }
+  },
+  "clientPicker": {
+    "noResults": "No client found.",
+    "searching": "Searching…"
+  },
+  "imageUpload": {
+    "choose": "Choose an image",
+    "replace": "Replace",
+    "remove": "Remove",
+    "hint": "JPG or PNG.",
+    "linked": "Linked image (preview unavailable)."
+  },
+  "guarantees": {
+    "pageTitle": "Loan — Collateral",
+    "pageDescription": "Guarantors (sureties) and collateral items attached to a loan.",
+    "selectLoanPrompt": "Select a loan to manage its collateral.",
+    "tabsAriaLabel": "Collateral tabs",
+    "tabs": {
+      "guarantors": "Guarantors",
+      "objects": "Collateral items"
+    },
+    "loanSelector": {
+      "label": "Loan",
+      "placeholder": "Select a loan…",
+      "viewClient": "View client",
+      "releaseHint": "Collateral can only be released after the loan is closed.",
+      "needClient": "Select a client first."
+    },
+    "collateralType": {
+      "real_estate": "Real estate",
+      "movable": "Movable property",
+      "personal_guarantee": "Personal surety"
+    },
+    "obligation": {
+      "intro": "Guarantors committed to this loan (sureties). The guarantor must be a verified guarantor of the client.",
+      "title": "Guarantors",
+      "count": "{count} guarantor(s)",
+      "empty": "No guarantor attached to this loan.",
+      "errorTitle": "Unable to load guarantors",
+      "status": {
+        "active": "Active",
+        "released": "Released",
+        "cancelled": "Cancelled"
+      },
+      "columns": {
+        "guarantor": "Guarantor",
+        "coverage": "Coverage",
+        "status": "Status",
+        "period": "Period",
+        "actions": "Actions"
+      },
+      "actions": {
+        "create": "Add a guarantor",
+        "menu": "Actions",
+        "edit": "Edit",
+        "cancel": "Cancel obligation",
+        "release": "Release"
+      },
+      "fields": {
+        "guarantor": "Guarantor",
+        "guarantorPlaceholder": "Select a guarantor…",
+        "noGuarantors": "No verified guarantor for this client. Add one from the client profile.",
+        "amount": "Guaranteed amount",
+        "amountHint": "Amount in currency. Leave empty if the guarantee is a percentage.",
+        "percentage": "Guaranteed percentage",
+        "percentageHint": "0 to 100.",
+        "currency": "Currency",
+        "currencyHint": "3-letter ISO code (e.g. XAF).",
+        "startsOn": "Start",
+        "endsOn": "End",
+        "releaseCondition": "Release condition",
+        "releaseConditionHint": "When the surety ends. The release takes effect when the loan is closed.",
+        "releaseConditionOptions": {
+          "loanClosed": "On loan closure"
+        }
+      },
+      "drawer": {
+        "titleCreate": "Add a guarantor",
+        "titleEdit": "Edit guarantor obligation",
+        "hint": "Attach a verified guarantor and specify the coverage.",
+        "create": "Add"
+      },
+      "toast": {
+        "createdTitle": "Guarantor added",
+        "createdBody": "The guarantor obligation has been created.",
+        "updatedTitle": "Obligation updated",
+        "updatedBody": "The guarantor obligation has been updated.",
+        "cancelledTitle": "Obligation cancelled",
+        "cancelledBody": "The guarantor obligation has been cancelled.",
+        "releasedTitle": "Guarantor released",
+        "releasedBody": "The guarantor obligation has been released.",
+        "errorTitle": "Action failed"
+      }
+    },
+    "collateral": {
+      "intro": "Items pledged as loan collateral (real estate, movable property…). Each collateral can contain several items.",
+      "untitled": "Collateral without description",
+      "ownerLine": "Owner: {owner}",
+      "valueLine": "Declared value: {value}",
+      "empty": "No collateral item for this loan.",
+      "errorTitle": "Unable to load collateral",
+      "status": {
+        "active": "Active",
+        "released": "Released",
+        "archived": "Archived"
+      },
+      "actions": {
+        "create": "Add collateral",
+        "menu": "Actions",
+        "edit": "Edit",
+        "addItem": "Add an item",
+        "release": "Release"
+      },
+      "fields": {
+        "type": "Collateral type",
+        "typePlaceholder": "Select a type…",
+        "description": "Description",
+        "owner": "Owner",
+        "valuationDate": "Valuation date",
+        "declaredValue": "Declared value",
+        "amountHint": "Amount in currency.",
+        "currency": "Currency",
+        "currencyHint": "3-letter ISO code (e.g. XAF)."
+      },
+      "drawer": {
+        "titleCreate": "New collateral",
+        "titleEdit": "Edit collateral",
+        "hint": "The type determines the fields of the items added afterwards.",
+        "create": "Create collateral"
+      },
+      "toast": {
+        "createdTitle": "Collateral created",
+        "createdBody": "The collateral has been created.",
+        "updatedTitle": "Collateral updated",
+        "updatedBody": "The collateral has been updated.",
+        "releasedTitle": "Collateral released",
+        "releasedBody": "The collateral has been released.",
+        "errorTitle": "Action failed"
+      }
+    },
+    "item": {
+      "empty": "No item. Use \"Add an item\".",
+      "columns": {
+        "description": "Item",
+        "quantity": "Qty",
+        "details": "Details",
+        "amount": "Value",
+        "actions": "Actions"
+      },
+      "actions": {
+        "edit": "Edit"
+      },
+      "groups": {
+        "movable": "Movable property details",
+        "realEstate": "Real estate details"
+      },
+      "fields": {
+        "description": "Designation",
+        "quantity": "Quantity",
+        "reference": "Reference",
+        "amount": "Value",
+        "amountHint": "Amount in currency.",
+        "currency": "Currency",
+        "chassis": "Chassis no.",
+        "registration": "Registration",
+        "brand": "Make",
+        "model": "Model",
+        "titleDeed": "Land title no.",
+        "lot": "Lot no.",
+        "location": "Location"
+      },
+      "drawer": {
+        "titleCreate": "New item",
+        "titleEdit": "Edit item",
+        "create": "Add item",
+        "hint": {
+          "real_estate": "Enter the land registry references of the property.",
+          "movable": "Enter the property identifiers (chassis, registration…).",
+          "personal_guarantee": "Describe the object of the surety."
+        }
+      },
+      "toast": {
+        "createdTitle": "Item added",
+        "createdBody": "The item has been added to the collateral.",
+        "updatedTitle": "Item updated",
+        "updatedBody": "The item has been updated."
+      }
+    },
+    "clientSelector": {
+      "label": "Client",
+      "placeholder": "Search a client by name…",
+      "hint": "Select the client first to filter their loans."
+    },
+    "selectClientPrompt": "Select a client to display their loans."
+  },
+  "loanTransfers": {
+    "pageTitle": "Loan — Loan transfer",
+    "pageDescription": "Reassign the manager of several loans to a new manager.",
+    "errorTitle": "Unable to load loans",
+    "selectAgencyPrompt": "Select the branch on which to perform the transfer.",
+    "reasonRequired": "The transfer reason is required.",
+    "needTarget": "Select a target manager to confirm.",
+    "preview": "You are about to transfer {count} loan(s) — total outstanding {total} — to {manager}.",
+    "previewNoTarget": "{count} loan(s) selected — total outstanding {total}. Choose a target manager.",
+    "fields": {
+      "agency": "Branch",
+      "agencyPlaceholder": "Select a branch…",
+      "agencyHint": "Determines the managers and loans offered.",
+      "targetManager": "Target manager",
+      "targetManagerPlaceholder": "Select the new manager…",
+      "targetManagerHint": "Managers (loan officer / supervisor) of the selected branch.",
+      "currentManager": "Filter by current manager",
+      "currentManagerAll": "All current managers",
+      "reason": "Transfer reason",
+      "reasonHint": "Required — retained in the audit trail (max 255).",
+      "transferDate": "Transfer date",
+      "transferDateHint": "Default: today."
+    },
+    "list": {
+      "title": "Transferable loans — branch {agency}",
+      "count": "{count} loan(s)",
+      "empty": "No transferable loan for this manager (branch, status, or already managed by them).",
+      "selectAll": "Select all"
+    },
+    "columns": {
+      "number": "Loan no.",
+      "currentManager": "Current manager",
+      "amount": "Outstanding (principal)",
+      "status": "Status"
+    },
+    "actions": {
+      "confirm": "Confirm transfer",
+      "clear": "Clear selection"
+    },
+    "confirmDialog": {
+      "title": "Confirm transfer",
+      "description": "You are about to transfer {count} loan(s) to {manager}. This action reassigns the manager of each selected loan.",
+      "loans": "Loans concerned",
+      "total": "Total outstanding",
+      "target": "New manager"
+    },
+    "results": {
+      "title": "Transfer result",
+      "ok": "OK",
+      "failed": "Failed"
+    },
+    "toast": {
+      "doneTitle": "Transfer completed",
+      "doneBody": "{count} loan(s) transferred successfully.",
+      "partialTitle": "Partial transfer",
+      "partialBody": "{ok} succeeded, {fail} failed."
+    },
+    "managers": {
+      "title": "Managers",
+      "searchPlaceholder": "Search a manager…",
+      "all": "All managers",
+      "empty": "No manager for this branch."
+    }
+  },
+  "loans": {
+    "pageTitle": "Loan — Loan setup",
+    "pageDescription": "Creation and tracking of loans: origination, approvals, repayment schedule generation.",
+    "errorTitle": "Unable to load loans",
+    "status": {
+      "application": "Draft",
+      "in_review": "Under review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "disbursed": "Disbursed",
+      "active": "Active",
+      "rescheduled": "Rescheduled",
+      "closed": "Closed",
+      "written_off": "Written off"
+    },
+    "filters": {
+      "searchLabel": "Search",
+      "searchPlaceholder": "Loan number…",
+      "statusLabel": "Status",
+      "statusAll": "All statuses"
+    },
+    "columns": {
+      "number": "Loan no.",
+      "product": "Product",
+      "amount": "Requested amount",
+      "status": "Status",
+      "appliedOn": "Applied on"
+    },
+    "list": {
+      "titleHeader": "Loans",
+      "count": "{count} loan(s)",
+      "totalCaption": "{count} loan(s) in total",
+      "empty": "No loan to display."
+    },
+    "actions": {
+      "create": "New loan"
+    },
+    "drawer": {
+      "titleCreate": "New loan",
+      "titleEdit": "Edit — {number}",
+      "createHint": "Enter the client, product and amount. The loan is created as a draft.",
+      "editHint": "The client and product cannot be changed after creation. Editing is possible while the loan is a draft.",
+      "create": "Create loan",
+      "sectionLinkage": "Linkage",
+      "sectionFinancial": "Amount & repayment schedule",
+      "sectionAccounts": "Linked accounts",
+      "sectionActivity": "Financed activity"
+    },
+    "fields": {
+      "client": "Holder (client)",
+      "clientEditHint": "The client cannot be changed after creation.",
+      "product": "Loan product",
+      "productPlaceholder": "Select a product…",
+      "productEditHint": "The product cannot be changed after creation.",
+      "creditAgent": "Loan officer",
+      "creditAgentPlaceholder": "Select an officer…",
+      "appliedOn": "Application date",
+      "appliedOnHint": "Default: today.",
+      "requestedAmount": "Requested amount",
+      "amountHint": "Amount in currency (XAF). Must comply with the product limits.",
+      "currency": "Currency",
+      "currencyHint": "3-letter ISO code (e.g. XAF).",
+      "installments": "Number of installments",
+      "firstInstallment": "1st installment",
+      "trancheDuration": "Frequency (days)",
+      "daysHint": "In days.",
+      "gracePeriod": "Grace period (days)",
+      "totalDuration": "Total term (days)",
+      "amortizationAccount": "Amortization account",
+      "unpaidAccount": "Overdue account",
+      "recoveryAccount": "Recovery account",
+      "transferAccount": "Transfer account",
+      "accountPlaceholder": "Select an account…",
+      "accountsNeedClient": "Select a client first to link their accounts.",
+      "purpose": "Loan purpose",
+      "sector": "Sector of activity",
+      "sectorPlaceholder": "Select a sector…",
+      "subSector": "Sub-sector",
+      "subSectorPlaceholder": "Select a sub-sector…",
+      "financedActivityCode": "Financed activity code",
+      "activityAddress": "Activity address",
+      "entrepreneurAddress": "Entrepreneur address"
+    },
+    "toast": {
+      "createdTitle": "Loan created",
+      "createdBody": "Loan {number} has been created as a draft.",
+      "updatedTitle": "Loan updated",
+      "updatedBody": "Loan {number} has been updated."
+    }
+  },
+  "loanDetail": {
+    "loading": "Loading loan…",
+    "untitled": "Loan",
+    "appliedLabel": "Applied on {date}",
+    "backToList": "Back to loans",
+    "errorTitle": "Unable to load loan",
+    "statusLabel": "Status",
+    "tabsAriaLabel": "Loan record tabs",
+    "edit": "Edit",
+    "tabs": {
+      "infos": "General info",
+      "financial": "Financials",
+      "schedule": "Amortization"
+    },
+    "sections": {
+      "general": "General information",
+      "activity": "Financed activity",
+      "lifecycle": "Lifecycle",
+      "amounts": "Amounts & repayment schedule",
+      "fees": "Fees, taxes & collateral",
+      "accounts": "Linked accounts"
+    },
+    "feesHint": "Amounts computed by the engine (product snapshot at origination). Read-only.",
+    "fields": {
+      "approvedOn": "Approved on",
+      "disbursedOn": "Disbursed on",
+      "closedOn": "Closed on",
+      "approvedPrincipal": "Approved principal",
+      "dossierFees": "Processing fees",
+      "dossierFeesTax": "Tax on processing fees",
+      "guaranteeDeposit": "Guarantee deposit",
+      "insurance": "Insurance premium"
+    },
+    "schedule": {
+      "title": "Repayment schedule",
+      "subtitle": "Generate the repayment schedule from the loan and product terms.",
+      "notEligible": "The schedule can only be generated on an approved or rescheduled loan.",
+      "generate": "Generate schedule",
+      "regenerate": "Regenerate",
+      "persistenceNote": "The schedule is not (yet) retrievable via the API after a reload — it is only displayed after generation (see back-issues #15). Regenerate it if needed.",
+      "empty": "No schedule generated. Click \"Generate schedule\".",
+      "emptyNotEligible": "Schedule unavailable: the loan must first be approved.",
+      "generatedTitle": "Schedule generated",
+      "generatedBody": "{count} installment(s) computed.",
+      "errorTitle": "Generation failed",
+      "columns": {
+        "number": "#",
+        "dueDate": "Due date",
+        "principal": "Principal",
+        "interest": "Interest",
+        "fees": "Fees",
+        "insurance": "Insurance",
+        "tax": "Tax",
+        "total": "Total",
+        "remaining": "Outstanding principal"
+      }
+    },
+    "visa": {
+      "title": "Approval workflow",
+      "historyNote": "The approval history is not reloaded from the API (no GET — see back-issues #15). Decisions made here are displayed until reload; the loan status reflects the actual progress.",
+      "actedLine": "Approval: {decision} on {at}",
+      "steps": {
+        "montage": "Origination",
+        "comptabilite": "Accounting",
+        "controle": "Control",
+        "direction": "Management"
+      },
+      "stepHint": {
+        "montage": "Review of the file and documents by the loan officer.",
+        "comptabilite": "Accounting and financial verification.",
+        "controle": "Compliance control.",
+        "direction": "Final approval by management."
+      },
+      "state": {
+        "approved": "Approved",
+        "pending": "Pending",
+        "rejected": "Rejected",
+        "idle": "—"
+      },
+      "decision": {
+        "approved": "Approve",
+        "rejected": "Reject",
+        "returned": "Return for correction"
+      },
+      "actions": {
+        "approve": "Approve",
+        "return": "Return",
+        "reject": "Reject"
+      },
+      "drawer": {
+        "title": "{step} — {decision}",
+        "hint": "Add a comment (optional) then confirm the decision.",
+        "confirm": "Confirm approval",
+        "commentsLabel": "Comment",
+        "commentsPlaceholder": "Reason, reservation, observation…"
+      },
+      "toast": {
+        "doneTitle": "Approval recorded",
+        "doneBody": "{step}: {decision}.",
+        "errorTitle": "Approval failed"
+      }
+    },
+    "transition": {
+      "to": {
+        "in_review": "Submit for review",
+        "application": "Return to draft",
+        "rejected": "Reject",
+        "disbursed": "Mark disbursed",
+        "active": "Activate",
+        "rescheduled": "Reschedule",
+        "closed": "Close",
+        "written_off": "Write off"
+      },
+      "drawer": {
+        "title": "Change status → {status}",
+        "hint": "Optional reason and notes, retained in the audit trail.",
+        "confirm": "Confirm",
+        "reasonLabel": "Reason",
+        "reasonHint": "Short reason (optional).",
+        "notesLabel": "Notes"
+      },
+      "toast": {
+        "doneTitle": "Status changed",
+        "doneBody": "The loan is now: {status}.",
+        "errorTitle": "Transition failed"
+      }
+    }
+  },
+  "loanProducts": {
+    "pageTitle": "Credit — Loan products",
+    "pageDescription": "Loan product catalogue: limits, frequencies, rates, fees, penalties and ledger accounts.",
+    "errorTitle": "Unable to load loan products",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "archived": "Archived"
+    },
+    "termUnit": {
+      "day": "day(s)",
+      "week": "week(s)",
+      "month": "month(s)"
+    },
+    "frequency": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "custom": "Custom"
+    },
+    "depositType": {
+      "percentage": "Percentage",
+      "fixed": "Fixed amount"
+    },
+    "filters": {
+      "searchLabel": "Search",
+      "searchPlaceholder": "Product code or name…",
+      "statusLabel": "Status",
+      "statusAll": "All statuses"
+    },
+    "columns": {
+      "code": "Code",
+      "name": "Name",
+      "term": "Term",
+      "amountRange": "Amount",
+      "interestRate": "Interest rate",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "list": {
+      "titleHeader": "Loan product catalogue",
+      "count": "{count} product(s)",
+      "totalCaption": "{count} product(s) on record in total",
+      "empty": "No loan products to display."
+    },
+    "actions": {
+      "create": "New product",
+      "menu": "Actions",
+      "edit": "Edit",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "archive": "Archive"
+    },
+    "drawer": {
+      "titleCreate": "New loan product",
+      "titleEdit": "Edit — {name}",
+      "createHint": "Define the loan type and its parameters.",
+      "editHint": "The code cannot be changed after creation.",
+      "create": "Create product",
+      "sectionIdentity": "Identity",
+      "sectionLimits": "Limits",
+      "sectionFees": "Fees & rates",
+      "sectionPenalty": "Penalty",
+      "sectionAccounting": "Accounting",
+      "sectionStatus": "Status"
+    },
+    "fields": {
+      "code": "Code",
+      "codeEditHint": "The code cannot be changed after creation.",
+      "name": "Product name",
+      "requiresGuarantor": "Guarantor required",
+      "requiresCollateral": "Collateral (asset) required",
+      "minTerm": "Minimum term",
+      "maxTerm": "Maximum term",
+      "termUnit": "Term unit",
+      "termUnitPlaceholder": "Select…",
+      "repaymentFrequencies": "Allowed repayment frequencies",
+      "minAmount": "Minimum amount",
+      "maxAmount": "Maximum amount",
+      "amountHint": "Amount in currency (XAF).",
+      "dueDateDay": "Due date day",
+      "dueDateDayHint": "Day of the month (1–31).",
+      "minGrace": "Min. grace period (days)",
+      "maxGrace": "Max. grace period (days)",
+      "interestRate": "Interest rate",
+      "taxRate": "Tax rate",
+      "insuranceRate": "Insurance rate",
+      "rateHint": "Decimal value (per the API convention).",
+      "feeAmount": "Processing fee",
+      "floorAmount": "Floor amount",
+      "depositType": "Guarantee deposit type",
+      "depositTypePlaceholder": "Select…",
+      "depositValue": "Guarantee deposit value",
+      "depositValueHint": "Percentage or amount depending on the selected type.",
+      "penaltyGraceDays": "Grace days before penalty",
+      "penaltyGraceDaysHint": "Period (in days) after the due date before a penalty is applied. The field actually used by the engine.",
+      "penaltyDisabledNote": "Disabled fields: they are saved and copied onto the loan but are not yet used by the penalty engine (which relies on grace days + a global policy). Pending the back end — see back-issues.md #14.",
+      "penaltyValue": "Penalty value",
+      "penaltyValueType": "Penalty value type",
+      "penaltyFormulaType": "Penalty formula type",
+      "penaltyFormulaBase": "Penalty formula base",
+      "ledgerAccount": "Default ledger account (public_id)",
+      "ledgerAccountHint": "Ledger account inherited by default by loans created with this product (P16 selector coming soon).",
+      "policiesLabel": "Attached calculation policies",
+      "policiesHint": "Enables a named calculation policy (a formula configured on the back end). Leave unchecked if not used.",
+      "policyInterest": "Interest policy",
+      "policyPenalty": "Penalty & arrears policy",
+      "policyPenaltyDisabledHint": "Unavailable: this policy is not approved on the back end (attaching it causes loan creation to fail). See back-issues #16.",
+      "policyRepaymentAllocation": "Repayment allocation order",
+      "policyFee": "Fee policy",
+      "policyTax": "Tax policy",
+      "policyInsurance": "Insurance policy",
+      "policyGuaranteeDeposit": "Guarantee deposit policy",
+      "status": "Status",
+      "statusPlaceholder": "Default status (active)…",
+      "statusHint": "Archiving is done via the \"Archive\" action."
+    },
+    "toast": {
+      "createdTitle": "Product created",
+      "createdBody": "Product {name} has been created.",
+      "updatedTitle": "Product updated",
+      "updatedBody": "Product {name} has been updated.",
+      "statusChangedTitle": "Status changed",
+      "statusChangedBody": "Product {name} is now: {status}.",
+      "archivedTitle": "Product archived",
+      "archivedBody": "Product {name} has been archived.",
+      "errorTitle": "Action not allowed"
+    }
+  },
+  "accountProducts": {
+    "pageTitle": "Configuration — Account products",
+    "pageDescription": "Customer account product catalogue: family, minimum balance, overdraft policy.",
+    "errorTitle": "Unable to load products",
+    "family": {
+      "savings": "Savings",
+      "current": "Current account",
+      "recovery": "Recovery",
+      "islamic": "Islamic"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "archived": "Archived"
+    },
+    "filters": {
+      "searchLabel": "Search",
+      "searchPlaceholder": "Product code or name…",
+      "familyLabel": "Family",
+      "familyAll": "All families",
+      "statusLabel": "Status",
+      "statusAll": "All statuses"
+    },
+    "columns": {
+      "code": "Code",
+      "name": "Name",
+      "family": "Family",
+      "minimumBalance": "Minimum balance",
+      "currency": "Currency",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "list": {
+      "titleHeader": "Account product catalogue",
+      "count": "{count} product(s)",
+      "totalCaption": "{count} product(s) on record in total",
+      "empty": "No products to display."
+    },
+    "actions": {
+      "create": "New product",
+      "menu": "Actions",
+      "edit": "Edit",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "archive": "Archive"
+    },
+    "drawer": {
+      "titleCreate": "New account product",
+      "titleEdit": "Edit — {name}",
+      "createHint": "Define the account type and its rules.",
+      "editHint": "The code and agency cannot be changed.",
+      "create": "Create product",
+      "sectionIdentity": "Identity",
+      "sectionAccounting": "Accounting",
+      "sectionRules": "Rules",
+      "sectionStatus": "Status"
+    },
+    "fields": {
+      "code": "Code",
+      "codeEditHint": "The code cannot be changed after creation.",
+      "name": "Product name",
+      "family": "Family",
+      "familyPlaceholder": "Select a family…",
+      "agency": "Agency",
+      "agencyPlaceholder": "All agencies",
+      "agencyEditHint": "The agency cannot be changed after creation.",
+      "currency": "Currency",
+      "currencyHint": "Three-letter ISO code (e.g. XAF).",
+      "ledgerAccount": "Default ledger account",
+      "ledgerAccountPlaceholder": "Choose an account",
+      "ledgerAccountHint": "Ledger account inherited by default by accounts created with this product.",
+      "noLedgerAccounts": "No active ledger account in this agency. Create one under General accounts.",
+      "minimumBalance": "Minimum balance",
+      "amountHint": "Amount in the product currency.",
+      "isOrdinarySavings": "Ordinary savings",
+      "isRecoveryAccount": "Recovery account",
+      "allowsRecoveryDebit": "Allows recovery debit",
+      "allowsOverdraft": "Allows overdraft",
+      "overdraftLimit": "Overdraft limit",
+      "status": "Status",
+      "statusPlaceholder": "Default status (active)…",
+      "statusHint": "Archiving is done via the \"Archive\" action."
+    },
+    "toast": {
+      "createdTitle": "Product created",
+      "createdBody": "Product {name} has been created.",
+      "updatedTitle": "Product updated",
+      "updatedBody": "Product {name} has been updated.",
+      "statusChangedTitle": "Status changed",
+      "statusChangedBody": "Product {name} is now: {status}.",
+      "archivedTitle": "Product archived",
+      "archivedBody": "Product {name} has been archived.",
+      "errorTitle": "Action not allowed"
+    }
+  },
+  "delinquencies": {
+    "pageTitle": "Credit — Delinquency tracking",
+    "pageDescription": "Tracking of follow-ups and recovery attempts on a loan.",
+    "selectLoanPrompt": "Select a loan to manage its tracking and recoveries.",
+    "tabsAriaLabel": "Delinquency tracking tabs",
+    "tabs": {
+      "trackings": "Follow-ups",
+      "recoveries": "Recoveries"
+    },
+    "loanSelector": {
+      "label": "Loan",
+      "placeholder": "Select a loan…",
+      "viewClient": "View client",
+      "notRecoverable": "Recovery is only possible on a disbursed / active / rescheduled loan.",
+      "needClient": "Select a client first."
+    },
+    "tracking": {
+      "intro": "Follow-ups, appointments and payment promises recorded on this loan.",
+      "title": "Follow-ups",
+      "count": "{count} follow-up(s)",
+      "empty": "No follow-ups recorded for this loan.",
+      "errorTitle": "Unable to load follow-ups",
+      "columns": {
+        "date": "Date",
+        "reason": "Reason",
+        "appointment": "Appointment",
+        "promised": "Promised amount",
+        "actions": "Actions"
+      },
+      "actions": {
+        "create": "New follow-up",
+        "edit": "Edit",
+        "print": "Print / Export PDF"
+      },
+      "fields": {
+        "date": "Follow-up date",
+        "dateHint": "Defaults to today.",
+        "reason": "Reason",
+        "reasonPlaceholder": "Select a reason…",
+        "appointmentType": "Appointment type",
+        "appointmentTypePlaceholder": "Select…",
+        "appointmentDate": "Appointment date",
+        "promisedAmount": "Promised amount",
+        "amountHint": "Amount in currency (XAF).",
+        "currency": "Currency",
+        "comments": "Comments"
+      },
+      "reason": {
+        "forgot_due_date": "Forgot the due date",
+        "cash_flow_issue": "Cash flow issue",
+        "business_downturn": "Business downturn",
+        "illness": "Illness",
+        "travel": "Travel",
+        "dispute": "Dispute",
+        "refusal_to_pay": "Refusal to pay",
+        "unreachable": "Unreachable",
+        "diverted_funds": "Diverted funds",
+        "other": "Other"
+      },
+      "appointment": {
+        "phone_call": "Phone call",
+        "field_visit": "Field visit",
+        "office_meeting": "Branch meeting",
+        "sms": "SMS",
+        "letter": "Letter",
+        "third_party": "Third party / guarantor"
+      },
+      "drawer": {
+        "titleCreate": "New follow-up",
+        "titleEdit": "Edit follow-up",
+        "hint": "Record the follow-up and any payment promise.",
+        "create": "Save"
+      },
+      "toast": {
+        "createdTitle": "Follow-up recorded",
+        "createdBody": "The follow-up has been added.",
+        "updatedTitle": "Follow-up updated",
+        "updatedBody": "The follow-up has been updated."
+      },
+      "report": {
+        "heading": "Delinquency tracking — Follow-ups",
+        "generated": "Generated on",
+        "loan": "Loan",
+        "status": "Status",
+        "count": "Number of follow-ups",
+        "popupBlockedTitle": "Window blocked",
+        "popupBlockedBody": "Allow pop-ups for this site to print or export to PDF."
+      }
+    },
+    "recovery": {
+      "intro": "Attempts to recover the requested amount by debiting the client accounts linked to the loan.",
+      "notRecoverable": "Recovery is only possible on a disbursed / active / rescheduled loan.",
+      "title": "Recovery attempts",
+      "count": "{count} attempt(s)",
+      "empty": "No recovery attempts.",
+      "errorTitle": "Unable to load attempts",
+      "amountInvalid": "Enter a valid amount (greater than 0).",
+      "columns": {
+        "date": "Date",
+        "requested": "Requested",
+        "recovered": "Recovered",
+        "status": "Status"
+      },
+      "status": {
+        "succeeded": "Succeeded",
+        "failed": "Failed"
+      },
+      "actions": {
+        "attempt": "New attempt"
+      },
+      "fields": {
+        "amount": "Amount to recover",
+        "amountHint": "Amount in currency (XAF).",
+        "recoveredOn": "Recovery date",
+        "recoveredOnHint": "Defaults to today."
+      },
+      "drawer": {
+        "title": "Recovery attempt",
+        "hint": "The engine debits the client accounts linked to the loan up to the requested amount.",
+        "confirm": "Start recovery"
+      },
+      "toast": {
+        "doneTitle": "Recovery completed",
+        "doneBody": "Recovered: {recovered}. Remaining: {remaining}.",
+        "nothingTitle": "No amount recovered",
+        "nothingBody": "No available balance on the linked accounts."
+      }
+    },
+    "clientSelector": {
+      "label": "Client",
+      "placeholder": "Search a client by name…",
+      "hint": "Select the client first to filter their loans."
+    },
+    "selectClientPrompt": "Select a client to display their loans."
+  },
+  "disbursement": {
+    "pageTitle": "Credit — Disbursement",
+    "pageDescription": "Approved loans ready to be disbursed.",
+    "errorTitle": "Unable to load loans",
+    "empty": "No approved loans to disburse.",
+    "list": {
+      "title": "Loans to disburse",
+      "count": "{count} loan(s)"
+    },
+    "columns": {
+      "number": "Loan no.",
+      "product": "Product",
+      "amount": "Approved amount",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "actions": {
+      "disburse": "Disburse"
+    },
+    "channel": {
+      "transfer_account": "Transfer to account",
+      "cash": "Cash (till)"
+    },
+    "fields": {
+      "channel": "Disbursement channel",
+      "transferAccount": "Transfer account",
+      "transferAccountPlaceholder": "Select a client account…",
+      "transferAccountHint": "Client account credited with the loan amount.",
+      "noAccounts": "This client has no account. Create one first.",
+      "tellerSession": "Till session",
+      "tellerSessionPlaceholder": "Choose an open session",
+      "tellerSessionHint": "Open till session for the loan agency.",
+      "noOpenSessions": "No open till session in the loan agency. Open one first.",
+      "businessDate": "Business date",
+      "businessDateHint": "Defaults to today.",
+      "notes": "Notes"
+    },
+    "drawer": {
+      "title": "Disburse — {number}",
+      "hint": "Disbursement creates a ledger entry (requires ledger accounts — P16).",
+      "amount": "Amount to disburse",
+      "confirm": "Confirm disbursement"
+    },
+    "toast": {
+      "doneTitle": "Disbursement completed",
+      "doneBody": "Loan {number} has been disbursed."
+    }
+  },
+  "decision": {
+    "pageTitle": "Credit — Decision / Cancellation",
+    "pageDescription": "Loans under decision: submit, return, reject. Detailed approvals are done on the loan file.",
+    "errorTitle": "Unable to load loans",
+    "empty": "No loans in this status.",
+    "filterLabel": "Status",
+    "list": {
+      "title": "Loans",
+      "count": "{count} loan(s)"
+    },
+    "columns": {
+      "number": "Loan no.",
+      "product": "Product",
+      "amount": "Amount",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "actions": {
+      "menu": "Actions",
+      "openFile": "Open file"
+    }
+  },
+  "ledgerAccounts": {
+    "pageTitle": "Accounting — General ledger accounts",
+    "pageDescription": "Institution's chart of accounts: directory of general ledger accounts, their balance and movements.",
+    "errorTitle": "Unable to load accounts",
+    "filters": {
+      "searchLabel": "Search",
+      "searchPlaceholder": "Code or name…",
+      "classLabel": "Class",
+      "classAll": "All classes",
+      "statusLabel": "Status",
+      "statusAll": "All statuses"
+    },
+    "columns": {
+      "code": "Code",
+      "name": "Name",
+      "class": "Class",
+      "normalSide": "Normal balance side",
+      "type": "Type",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "class": {
+      "asset": "Asset",
+      "liability": "Liability",
+      "equity": "Equity",
+      "revenue": "Revenue",
+      "expense": "Expense"
+    },
+    "side": {
+      "debit": "Debit",
+      "credit": "Credit"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "suspended": "Suspended",
+      "archived": "Archived"
+    },
+    "list": {
+      "titleHeader": "General ledger accounts",
+      "count": "{count} account(s)",
+      "empty": "No general ledger account."
+    },
+    "actions": {
+      "menu": "Actions",
+      "create": "New account",
+      "view": "Balance & movements",
+      "edit": "Edit",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "archive": "Archive"
+    },
+    "fields": {
+      "code": "Code",
+      "codeEditHint": "The code is immutable after creation.",
+      "name": "Name",
+      "class": "Class",
+      "classPlaceholder": "Choose a class",
+      "classEditHint": "The class is immutable after creation.",
+      "type": "Type (optional)",
+      "typeHint": "Free-form sub-categorisation, e.g. \"cash\", \"bank\".",
+      "agency": "Agency",
+      "agencyPlaceholder": "Assigned agency",
+      "agencyHint": "Leave empty for an institutional account (all agencies).",
+      "parent": "Parent account",
+      "parentPlaceholder": "None (root account)",
+      "parentHint": "Links this account to a higher-level account.",
+      "normalSide": "Normal balance side",
+      "normalSidePlaceholder": "Debit or credit",
+      "normalSideHint": "Side that increases the account. Pre-filled based on the class.",
+      "status": "Status",
+      "statusPlaceholder": "Status",
+      "statusHint": "An inactive account can no longer be posted to."
+    },
+    "drawer": {
+      "titleCreate": "New general ledger account",
+      "titleEdit": "Edit — {name}",
+      "createHint": "Set the code, class and normal balance side of the account.",
+      "editHint": "The code, class and agency cannot be modified.",
+      "sectionIdentity": "Identity",
+      "sectionStructure": "Structure",
+      "sectionAccounting": "Accounting",
+      "create": "Create"
+    },
+    "archive": {
+      "title": "Archive this account?",
+      "body": "The account \"{name}\" will be archived and can no longer be posted to. This action can be reversed by reactivating it.",
+      "confirm": "Archive"
+    },
+    "toast": {
+      "createdTitle": "Account created",
+      "createdBody": "The account \"{name}\" has been created.",
+      "updatedTitle": "Account updated",
+      "updatedBody": "The account \"{name}\" has been updated.",
+      "statusChangedTitle": "Status changed",
+      "statusChangedBody": "\"{name}\" is now {status}.",
+      "archivedTitle": "Account archived",
+      "archivedBody": "The account \"{name}\" has been archived.",
+      "errorTitle": "Action not allowed"
+    },
+    "detail": {
+      "title": "Account {code} — Balance & movements",
+      "currency": "Currency",
+      "from": "From",
+      "to": "To",
+      "period": "Period",
+      "allPeriods": "All periods",
+      "print": "Print / PDF",
+      "openingBalance": "Opening balance",
+      "closingBalance": "Closing balance",
+      "totalDebit": "Total debit",
+      "totalCredit": "Total credit",
+      "empty": "No movement for this period.",
+      "pageOf": "Page {page} / {total}",
+      "printFilePrefix": "ledger-account-statement",
+      "printHeading": "General ledger account statement",
+      "columns": {
+        "date": "Date",
+        "reference": "Reference",
+        "memo": "Description",
+        "debit": "Debit",
+        "credit": "Credit"
+      }
+    }
+  },
+  "sectors": {
+    "pageTitle": "Accounting — Business sectors",
+    "pageDescription": "Directory of clients' economic business sectors and sub-sectors. Select a sector on the left to manage its sub-sectors.",
+    "errorTitle": "Unable to load sectors",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "archived": "Archived"
+    },
+    "actions": {
+      "menu": "Actions",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "fields": {
+      "code": "Code",
+      "codeEditHint": "The code is immutable after creation.",
+      "name": "Name",
+      "sector": "Sector",
+      "sectorPlaceholder": "Choose a sector",
+      "status": "Status",
+      "statusPlaceholder": "Status"
+    },
+    "master": {
+      "title": "Sectors",
+      "create": "New sector",
+      "searchPlaceholder": "Search for a sector…",
+      "empty": "No sector. Create one to get started.",
+      "subCount": "{count} sub-sector(s)"
+    },
+    "detail": {
+      "noSelection": "Select a sector to view its sub-sectors.",
+      "title": "Sub-sectors — {name}",
+      "subtitle": "{code} · {count} sub-sector(s)",
+      "create": "New sub-sector",
+      "empty": "No sub-sector for this sector.",
+      "columns": {
+        "code": "Code",
+        "name": "Name",
+        "status": "Status",
+        "actions": "Actions"
+      }
+    },
+    "sectorDrawer": {
+      "titleCreate": "New sector",
+      "titleEdit": "Edit — {name}",
+      "hint": "Code, name and status of the business sector.",
+      "create": "Create"
+    },
+    "subSectorDrawer": {
+      "titleCreate": "New sub-sector",
+      "titleEdit": "Edit — {name}",
+      "hint": "Link the sub-sector to a parent sector.",
+      "create": "Create"
+    },
+    "delete": {
+      "sectorTitle": "Delete this sector?",
+      "sectorBody": "The sector \"{name}\" will be permanently deleted.",
+      "sectorBodyWithChildren": "The sector \"{name}\" contains {count} sub-sector(s). Delete them first, otherwise the deletion will be rejected by the server.",
+      "subTitle": "Delete this sub-sector?",
+      "subBody": "The sub-sector \"{name}\" will be permanently deleted.",
+      "confirm": "Delete"
+    },
+    "toast": {
+      "sectorCreatedTitle": "Sector created",
+      "sectorCreatedBody": "The sector \"{name}\" has been created.",
+      "sectorUpdatedTitle": "Sector updated",
+      "sectorUpdatedBody": "The sector \"{name}\" has been updated.",
+      "sectorDeletedTitle": "Sector deleted",
+      "sectorDeletedBody": "The sector \"{name}\" has been deleted.",
+      "subCreatedTitle": "Sub-sector created",
+      "subCreatedBody": "The sub-sector \"{name}\" has been created.",
+      "subUpdatedTitle": "Sub-sector updated",
+      "subUpdatedBody": "The sub-sector \"{name}\" has been updated.",
+      "subDeletedTitle": "Sub-sector deleted",
+      "subDeletedBody": "The sub-sector \"{name}\" has been deleted.",
+      "errorTitle": "Action not allowed"
+    }
+  },
+  "journalEntries": {
+    "pageTitle": "Accounting — Miscellaneous entries (ME)",
+    "pageDescription": "Manual journal entries: capture, approval and posting. An entry moves through draft → submitted → approved → posted.",
+    "errorTitle": "Unable to load entries",
+    "filterLabel": "Status",
+    "filterAll": "All statuses",
+    "status": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "approved": "Approved",
+      "posted": "Posted",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled",
+      "archived": "Archived",
+      "reversed": "Reversed"
+    },
+    "columns": {
+      "reference": "Reference",
+      "date": "Date",
+      "description": "Description",
+      "amount": "Amount",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "list": {
+      "titleHeader": "Miscellaneous entries",
+      "count": "{count} entry(ies)",
+      "empty": "No entry."
+    },
+    "actions": {
+      "create": "New ME",
+      "open": "Open",
+      "submit": "Submit",
+      "approve": "Approve",
+      "reject": "Reject",
+      "post": "Post",
+      "reverse": "Reverse"
+    },
+    "fields": {
+      "reference": "Reference",
+      "referenceHint": "Unique identifier of the entry (e.g. ME-2026-001).",
+      "date": "Accounting date",
+      "agency": "Agency",
+      "agencyPlaceholder": "Entry agency",
+      "description": "Description"
+    },
+    "createDrawer": {
+      "title": "New miscellaneous entry",
+      "hint": "Create the header; you will add the lines afterwards.",
+      "create": "Create draft",
+      "afterHint": "After creation, add at least two balanced lines before submitting."
+    },
+    "detail": {
+      "title": "ME {reference}",
+      "noDescription": "No description",
+      "rejectionReason": "Rejection reason",
+      "lineAccount": "Account",
+      "lineAccountPlaceholder": "Choose an account",
+      "noAccounts": "No active account for this agency. Create one in General ledger accounts.",
+      "memo": "Line description",
+      "debit": "Debit",
+      "credit": "Credit",
+      "side": "Side",
+      "amount": "Amount",
+      "amountHint": "Amount in main unit (will be converted).",
+      "totals": "Totals",
+      "noLines": "No line. Add lines to balance the entry.",
+      "balanced": "Entry balanced (Σ debits = Σ credits).",
+      "unbalanced": "Entry unbalanced — difference of {diff}.",
+      "addLine": "Add a line",
+      "addLineConfirm": "Add line",
+      "addLineInvalid": "Select an account and enter a positive amount.",
+      "rejectReasonLabel": "Rejection reason (required)",
+      "makerCheckerHint": "You captured this entry: its approval requires a different reviewer (segregation of duties)."
+    },
+    "confirm": {
+      "postTitle": "Post this entry?",
+      "postBody": "The entry will be posted and recorded in the general ledger. It will become immutable (only reversal will be possible).",
+      "reverseTitle": "Reverse this entry?",
+      "reverseBody": "A reversing entry will be created to cancel the effects of this posted entry."
+    },
+    "toast": {
+      "createdTitle": "Draft created",
+      "createdBody": "The ME \"{reference}\" has been created. Add its lines.",
+      "actionDoneTitle": "Action completed",
+      "action": {
+        "submit": "Entry submitted for approval.",
+        "approve": "Entry approved.",
+        "reject": "Entry rejected.",
+        "post": "Entry posted.",
+        "reverse": "Reversing entry created."
+      },
+      "errorTitle": "Action not allowed"
+    }
+  },
+  "journal": {
+    "pageTitle": "Journal",
+    "pageDescription": "View the journal: all accounting entries (manual or generated by operations), with the detail of their lines.",
+    "errorTitle": "Unable to load the journal",
+    "empty": "No entry for these filters.",
+    "count": "{count} entry(ies)",
+    "filters": {
+      "searchLabel": "Search",
+      "searchPlaceholder": "Reference or description…",
+      "statusLabel": "Status",
+      "statusAll": "All",
+      "from": "From",
+      "to": "To"
+    },
+    "status": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "approved": "Approved",
+      "posted": "Posted",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled",
+      "archived": "Archived",
+      "reversed": "Reversed"
+    },
+    "columns": {
+      "date": "Date",
+      "reference": "Reference",
+      "description": "Description",
+      "status": "Status",
+      "amount": "Amount"
+    },
+    "lineColumns": {
+      "account": "Account",
+      "memo": "Line description",
+      "debit": "Debit",
+      "credit": "Credit"
+    },
+    "pagination": {
+      "perPage": "Per page",
+      "pageOf": "Page {page} / {total}"
+    },
+    "print": {
+      "action": "Print / PDF",
+      "fileName": "journal-entries",
+      "heading": "Journal",
+      "allPeriods": "All periods",
+      "entryCount": "Number of entries",
+      "totals": "TOTALS"
+    }
+  },
+  "tills": {
+    "pageTitle": "Tills",
+    "pageDescription": "Directory of the agency's till positions. The daily state (open/closed) is driven by the cash sessions.",
+    "errorTitle": "Unable to load tills",
+    "filters": {
+      "searchLabel": "Search",
+      "searchPlaceholder": "Code or name…",
+      "statusLabel": "Status",
+      "statusAll": "All"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "dailyState": {
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "columns": {
+      "code": "Code",
+      "name": "Name",
+      "teller": "Teller",
+      "currency": "Currency",
+      "dailyState": "Daily state",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "list": {
+      "titleHeader": "Agency tills",
+      "count": "{count} till(s)",
+      "empty": "No till."
+    },
+    "actions": {
+      "menu": "Actions",
+      "create": "New till",
+      "edit": "Edit",
+      "activate": "Activate",
+      "deactivate": "Deactivate"
+    },
+    "fields": {
+      "code": "Code",
+      "codeEditHint": "The code is immutable after creation.",
+      "name": "Name",
+      "agency": "Agency",
+      "agencyPlaceholder": "Assigned agency",
+      "agencyHint": "Required for an administrator without an agency.",
+      "currency": "Currency",
+      "teller": "Assigned teller",
+      "tellerPlaceholder": "None",
+      "tellerHint": "Tellers (teller role) of the agency. A teller holds only one active till at a time.",
+      "noTellers": "No teller (\"teller\" role) in this agency. Leave empty or create/assign a teller first.",
+      "ledgerAccount": "Ledger account",
+      "ledgerAccountPlaceholder": "Active asset account",
+      "ledgerAccountHint": "Active asset account of the agency (cash).",
+      "maxBalance": "Balance limit",
+      "maxWithdrawal": "Withdrawal limit",
+      "nature": "Nature (optional)",
+      "isCentral": "Central till",
+      "requiresDenominations": "Require denomination breakdown",
+      "status": "Status",
+      "amountHint": "Amount in main unit (will be converted)."
+    },
+    "drawer": {
+      "titleCreate": "New till",
+      "titleEdit": "Edit — {name}",
+      "hint": "Set the code, teller and limits of the till.",
+      "create": "Create",
+      "sectionIdentity": "Identity",
+      "sectionAssignment": "Assignment & accounting",
+      "sectionLimits": "Limits & nature",
+      "sectionStatus": "Status"
+    },
+    "toast": {
+      "createdTitle": "Till created",
+      "createdBody": "The till \"{name}\" has been created.",
+      "updatedTitle": "Till updated",
+      "updatedBody": "The till \"{name}\" has been updated.",
+      "statusChangedTitle": "Status changed",
+      "statusChangedBody": "\"{name}\" is now {status}.",
+      "errorTitle": "Action not allowed"
+    }
+  },
+  "sessions": {
+    "pageTitle": "Cash sessions",
+    "pageDescription": "Opening and closing of cash sessions. A session opens a till for a day with a declared fund.",
+    "errorTitle": "Unable to load sessions",
+    "filters": {
+      "statusLabel": "Status",
+      "statusAll": "All"
+    },
+    "status": {
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "columns": {
+      "till": "Till",
+      "teller": "Teller",
+      "businessDate": "Date",
+      "opening": "Opening fund",
+      "closing": "Closing fund",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "list": {
+      "titleHeader": "Cash sessions",
+      "count": "{count} session(s)",
+      "empty": "No session."
+    },
+    "actions": {
+      "open": "Open a session",
+      "close": "Close"
+    },
+    "fields": {
+      "till": "Till",
+      "tillPlaceholder": "Choose a till",
+      "tillHint": "Only active and closed tills can receive a session.",
+      "noEligibleTills": "No eligible till (active and closed).",
+      "teller": "Teller",
+      "tellerPlaceholder": "Yourself by default",
+      "tellerHint": "Tellers (teller role) of the till's agency.",
+      "tellerSelectTillFirst": "Select a till first.",
+      "tellerLocked": "Teller assigned to this till — not editable.",
+      "noTellersAgency": "No teller (\"teller\" role) in this till's agency.",
+      "businessDate": "Accounting date",
+      "opening": "Declared opening fund",
+      "openingHint": "Amount in main unit (will be converted).",
+      "closing": "Declared closing fund",
+      "closingHint": "Amount in main unit (will be converted)."
+    },
+    "openDrawer": {
+      "title": "Open a cash session",
+      "hint": "Select the till and declare the opening fund.",
+      "confirm": "Open session"
+    },
+    "closeDrawer": {
+      "title": "Close the session",
+      "hint": "Declare the cash fund actually counted at closing.",
+      "confirm": "Close",
+      "openingLabel": "Opening fund"
+    },
+    "toast": {
+      "openedTitle": "Session opened",
+      "openedBody": "Session opened on {till}.",
+      "closedTitle": "Session closed",
+      "closedBody": "Session closed on {till}.",
+      "errorTitle": "Action not allowed"
+    }
+  },
+  "cashTx": {
+    "pageTitle": "Withdrawal / Deposit",
+    "pageDescription": "Cash movements (deposits and withdrawals) on an open till session.",
+    "sessionLabel": "Till session",
+    "noSession": {
+      "title": "No open session",
+      "body": "Cash transactions require an open session. Open your till first.",
+      "link": "Go to till sessions →"
+    },
+    "readOnly": {
+      "title": "View only",
+      "body": "You do not have permission to record cash transactions."
+    },
+    "direction": {
+      "deposit": "Deposit",
+      "withdrawal": "Withdrawal"
+    },
+    "fields": {
+      "client": "Client",
+      "clientPlaceholder": "Search a client…",
+      "account": "Client account",
+      "accountPlaceholder": "Choose an account",
+      "noAccounts": "No active account for this client in this agency.",
+      "amount": "Amount ({currency})",
+      "amountHint": "Amount in the main unit (will be converted).",
+      "initiator": "Initiator",
+      "depositorName": "Depositor name (optional)",
+      "depositorAddress": "Depositor address (optional)",
+      "signature": "Signature specimen",
+      "signaturePlaceholder": "Choose a signature",
+      "noSignatures": "No active signature specimen on this account — required for a withdrawal.",
+      "method": "Verification method",
+      "description": "Memo / note"
+    },
+    "initiator": {
+      "holder": "Holder",
+      "proxy": "Proxy",
+      "staff_on_behalf": "Staff (on behalf of)",
+      "system": "System"
+    },
+    "method": {
+      "visual_match": "Visual match",
+      "thumbprint_match": "Thumbprint match",
+      "verified_proxy_mandate": "Verified proxy mandate",
+      "exception_override": "Exception override"
+    },
+    "signatureType": {
+      "primary_holder": "Primary holder",
+      "joint_holder": "Joint holder",
+      "proxy": "Proxy",
+      "mandate": "Mandate",
+      "thumbprint": "Thumbprint"
+    },
+    "availableBalance": "Available balance",
+    "overAvailable": "The amount exceeds the account's available balance.",
+    "section": {
+      "customer": "1. Client & account",
+      "details": "2. Transaction details",
+      "depositInfo": "3. Depositor information",
+      "withdrawalControls": "3. Withdrawal verification"
+    },
+    "account": {
+      "holder": "Holder",
+      "number": "Account no.",
+      "type": "Type",
+      "status": "Status",
+      "available": "Available balance"
+    },
+    "method_cash": "Cash",
+    "methodNote": "Cheque / mixed not supported by this till for now.",
+    "summary": {
+      "title": "Transaction summary",
+      "type": "Type",
+      "account": "Account no.",
+      "holder": "Holder",
+      "amount": "Amount",
+      "feesNote": "Any fees are applied when the transaction is posted."
+    },
+    "tips": {
+      "title": "Teller tips",
+      "t1": "Always confirm the account number and holder before submitting.",
+      "t2": "Count the cash and verify the total.",
+      "t3": "For a withdrawal, verify the holder's signature specimen."
+    },
+    "actions": {
+      "clear": "Clear",
+      "preview": "Transaction preview"
+    },
+    "confirm": {
+      "title": "Confirm transaction",
+      "body": "Review the information below before submitting the cash transaction."
+    },
+    "submit": {
+      "deposit": "Record deposit",
+      "withdrawal": "Record withdrawal"
+    },
+    "txType": {
+      "cash_deposit": "Deposit",
+      "cash_withdrawal": "Withdrawal",
+      "cash_reversal": "Reversal",
+      "cash_manual_journal": "Cash journal entry"
+    },
+    "status": {
+      "posted": "Posted",
+      "pending_review": "Pending",
+      "cancelled": "Cancelled",
+      "reversed": "Reversed"
+    },
+    "recent": {
+      "title": "Transactions in this work session",
+      "type": "Type",
+      "reference": "Reference",
+      "amount": "Amount",
+      "status": "Status",
+      "actions": "Actions",
+      "reverse": "Reverse"
+    },
+    "reverseConfirm": {
+      "title": "Reverse this transaction?",
+      "body": "A reversing entry will be created to cancel this cash transaction."
+    },
+    "toast": {
+      "doneTitle": "Transaction recorded",
+      "doneBody": "Amount: {amount}.",
+      "reversedTitle": "Transaction reversed",
+      "reversedBody": "The transaction has been reversed.",
+      "errorTitle": "Action not allowed"
+    }
+  },
+  "cashInspection": {
+    "pageTitle": "Till inspection",
+    "pageDescription": "Inspect a cash session: details, theoretical/actual balances, difference and a printable cash-up.",
+    "sessionLabel": "Cash session",
+    "sessionPlaceholder": "Choose a session",
+    "fields": {
+      "till": "Till",
+      "teller": "Teller",
+      "businessDate": "Date",
+      "status": "Status",
+      "opening": "Opening fund",
+      "closing": "Closing fund",
+      "openedAt": "Opened on",
+      "closedAt": "Closed on"
+    },
+    "status": {
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "recon": {
+      "title": "Cash-ups / reconciliations",
+      "count": "{count} reconciliation(s)",
+      "countedAt": "Counted on",
+      "theoretical": "Theoretical balance",
+      "actual": "Actual balance",
+      "difference": "Difference",
+      "status": "Status",
+      "empty": "No reconciliation for this session.",
+      "errorTitle": "Unable to load reconciliations"
+    },
+    "createNote": "Recording a cash-up (denomination count) requires the Denominations reference data (P25).",
+    "print": {
+      "action": "Print cash-up",
+      "fileName": "cash-up",
+      "heading": "Cash-up statement"
+    }
+  },
+  "cashDraft": {
+    "pageTitle": "Cash blotter",
+    "pageDescription": "Day-by-day view of cash sessions: opening/closing fund and status.",
+    "filters": {
+      "from": "From",
+      "to": "To"
+    },
+    "count": "{count} session(s)",
+    "columns": {
+      "date": "Date",
+      "till": "Till",
+      "teller": "Teller",
+      "opening": "Opening fund",
+      "closing": "Closing fund",
+      "status": "Status"
+    },
+    "status": {
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "empty": "No session for this period.",
+    "lineLevelNote": "Line-by-line cash movements will be available once the teller-transactions list endpoint is delivered.",
+    "print": {
+      "action": "Print / PDF",
+      "fileName": "cash-blotter",
+      "heading": "Cash blotter",
+      "allPeriods": "All periods",
+      "count": "Session count"
+    }
+  }
+}

@@ -147,7 +147,7 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "tellerInspection",
         href: "/operations/inspection",
-        available: false,
+        available: true,
         permissions: ["cash.sessions.view"],
       },
     ],
@@ -307,7 +307,7 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "cashDraft",
         href: "/reports/cash-draft",
-        available: false,
+        available: true,
         permissions: ["cash.reconciliations.view"],
       },
       {

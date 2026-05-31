@@ -11,6 +11,7 @@ import {
   type Locale,
 } from "@/lib/i18n/locales";
 import frMessages from "@/messages/fr.json";
+import enMessages from "@/messages/en.json";
 import "./globals.css";
 
 const sans = Plus_Jakarta_Sans({
@@ -28,6 +29,7 @@ export const metadata: Metadata = {
 
 const MESSAGES_BY_LOCALE = {
   fr: frMessages,
+  en: enMessages,
 };
 
 export default async function RootLayout({

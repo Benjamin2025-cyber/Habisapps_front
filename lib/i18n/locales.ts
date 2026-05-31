@@ -18,7 +18,7 @@ export const LOCALES: ReadonlyArray<{
   available: boolean;
 }> = [
   { code: "fr", label: "Français", intlLocale: "fr-FR", available: true },
-  { code: "en", label: "English", intlLocale: "en-GB", available: false },
+  { code: "en", label: "English", intlLocale: "en-GB", available: true },
 ];
 
 export function isLocale(value: string | null | undefined): value is Locale {

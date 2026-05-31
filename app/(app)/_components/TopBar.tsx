@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { BellIcon, MenuIcon, SearchIcon } from "@/components/ui/icons";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { cn } from "@/lib/cn";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import { useToast } from "@/lib/toast/ToastProvider";
@@ -64,6 +65,8 @@ export function TopBar({ user, onToggleSidebar }: Props) {
 
       <div className="ml-auto flex items-center gap-2 sm:gap-3">
         <AccountingDayChip />
+
+        <LanguageSwitcher />
 
         <button
           type="button"

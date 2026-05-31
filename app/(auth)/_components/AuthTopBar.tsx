@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { InfoIcon } from "@/components/ui/icons";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
-import { LanguageSwitcher } from "./LanguageSwitcher";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 
 type AuthTopBarProps = {
   /** When true, shows a back arrow before the "À propos" link. */

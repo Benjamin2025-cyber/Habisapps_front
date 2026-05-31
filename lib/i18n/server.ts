@@ -1,10 +1,12 @@
 import { cookies } from "next/headers";
 import frMessages from "@/messages/fr.json";
+import enMessages from "@/messages/en.json";
 import { interpolate, lookup, type Messages } from "./dict";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, type Locale } from "./locales";
 
 const SERVER_MESSAGES_BY_LOCALE: Partial<Record<Locale, Messages>> = {
   fr: frMessages as Messages,
+  en: enMessages as Messages,
 };
 
 /**
