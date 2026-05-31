@@ -129,13 +129,13 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "tills",
         href: "/operations/tills",
-        available: false,
+        available: true,
         permissions: ["cash.tills.view"],
       },
       {
         labelKey: "tellerSessions",
         href: "/operations/sessions",
-        available: false,
+        available: true,
         permissions: ["cash.sessions.view"],
       },
       {

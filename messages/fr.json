@@ -2543,5 +2543,153 @@
       "entryCount": "Nombre d'écritures",
       "totals": "TOTAUX"
     }
+  },
+  "tills": {
+    "pageTitle": "Caisses",
+    "pageDescription": "Référentiel des postes de caisse de l'agence. L'état journalier (ouverte/fermée) est piloté par les sessions de caisse.",
+    "errorTitle": "Impossible de charger les caisses",
+    "filters": {
+      "searchLabel": "Recherche",
+      "searchPlaceholder": "Code ou nom…",
+      "statusLabel": "Statut",
+      "statusAll": "Tous"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "dailyState": {
+      "open": "Ouverte",
+      "closed": "Fermée"
+    },
+    "columns": {
+      "code": "Code",
+      "name": "Nom",
+      "teller": "Caissier",
+      "currency": "Devise",
+      "dailyState": "État du jour",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "list": {
+      "titleHeader": "Caisses de l'agence",
+      "count": "{count} caisse(s)",
+      "empty": "Aucune caisse."
+    },
+    "actions": {
+      "menu": "Actions",
+      "create": "Nouvelle caisse",
+      "edit": "Modifier",
+      "activate": "Activer",
+      "deactivate": "Désactiver"
+    },
+    "fields": {
+      "code": "Code",
+      "codeEditHint": "Le code est immuable après création.",
+      "name": "Nom",
+      "agency": "Agence",
+      "agencyPlaceholder": "Agence de rattachement",
+      "agencyHint": "Requise pour un administrateur sans agence.",
+      "currency": "Devise",
+      "teller": "Caissier assigné",
+      "tellerPlaceholder": "Aucun",
+      "tellerHint": "Caissiers (rôle teller) de l'agence. Un caissier ne tient qu'une caisse active à la fois.",
+      "noTellers": "Aucun caissier (rôle « teller ») dans cette agence. Laissez vide ou créez/affectez un caissier d'abord.",
+      "ledgerAccount": "Compte comptable",
+      "ledgerAccountPlaceholder": "Compte d'actif actif",
+      "ledgerAccountHint": "Compte d'actif actif de l'agence (caisse).",
+      "maxBalance": "Plafond de solde",
+      "maxWithdrawal": "Plafond de retrait",
+      "nature": "Nature (optionnel)",
+      "isCentral": "Caisse centrale",
+      "requiresDenominations": "Exige le détail des coupures",
+      "status": "Statut",
+      "amountHint": "Montant en unité principale (sera converti)."
+    },
+    "drawer": {
+      "titleCreate": "Nouvelle caisse",
+      "titleEdit": "Modifier — {name}",
+      "hint": "Définissez le code, le caissier et les plafonds de la caisse.",
+      "create": "Créer",
+      "sectionIdentity": "Identité",
+      "sectionAssignment": "Affectation & comptabilité",
+      "sectionLimits": "Plafonds & nature",
+      "sectionStatus": "Statut"
+    },
+    "toast": {
+      "createdTitle": "Caisse créée",
+      "createdBody": "La caisse « {name} » a été créée.",
+      "updatedTitle": "Caisse mise à jour",
+      "updatedBody": "La caisse « {name} » a été mise à jour.",
+      "statusChangedTitle": "Statut modifié",
+      "statusChangedBody": "« {name} » est désormais {status}.",
+      "errorTitle": "Action impossible"
+    }
+  },
+  "sessions": {
+    "pageTitle": "Sessions de caisse",
+    "pageDescription": "Ouverture et clôture des sessions de caisse. Une session ouvre une caisse pour une journée avec un fonds déclaré.",
+    "errorTitle": "Impossible de charger les sessions",
+    "filters": {
+      "statusLabel": "Statut",
+      "statusAll": "Tous"
+    },
+    "status": {
+      "open": "Ouverte",
+      "closed": "Clôturée"
+    },
+    "columns": {
+      "till": "Caisse",
+      "teller": "Caissier",
+      "businessDate": "Date",
+      "opening": "Fonds d'ouverture",
+      "closing": "Fonds de clôture",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "list": {
+      "titleHeader": "Sessions de caisse",
+      "count": "{count} session(s)",
+      "empty": "Aucune session."
+    },
+    "actions": {
+      "open": "Ouvrir une session",
+      "close": "Clôturer"
+    },
+    "fields": {
+      "till": "Caisse",
+      "tillPlaceholder": "Choisir une caisse",
+      "tillHint": "Seules les caisses actives et fermées peuvent recevoir une session.",
+      "noEligibleTills": "Aucune caisse éligible (active et fermée).",
+      "teller": "Caissier",
+      "tellerPlaceholder": "Vous-même par défaut",
+      "tellerHint": "Caissiers (rôle teller) de l'agence de la caisse.",
+      "tellerSelectTillFirst": "Sélectionnez d'abord une caisse.",
+      "tellerLocked": "Caissier assigné à cette caisse — non modifiable.",
+      "noTellersAgency": "Aucun caissier (rôle « teller ») dans l'agence de cette caisse.",
+      "businessDate": "Date comptable",
+      "opening": "Fonds d'ouverture déclaré",
+      "openingHint": "Montant en unité principale (sera converti).",
+      "closing": "Fonds de clôture déclaré",
+      "closingHint": "Montant en unité principale (sera converti)."
+    },
+    "openDrawer": {
+      "title": "Ouvrir une session de caisse",
+      "hint": "Sélectionnez la caisse et déclarez le fonds d'ouverture.",
+      "confirm": "Ouvrir la session"
+    },
+    "closeDrawer": {
+      "title": "Clôturer la session",
+      "hint": "Déclarez le fonds de caisse réellement compté à la clôture.",
+      "confirm": "Clôturer",
+      "openingLabel": "Fonds d'ouverture"
+    },
+    "toast": {
+      "openedTitle": "Session ouverte",
+      "openedBody": "Session ouverte sur {till}.",
+      "closedTitle": "Session clôturée",
+      "closedBody": "Session clôturée sur {till}.",
+      "errorTitle": "Action impossible"
+    }
   }
 }
