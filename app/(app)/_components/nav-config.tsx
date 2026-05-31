@@ -227,13 +227,13 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "loanDisbursement",
         href: "/credit/disbursement",
-        available: false,
+        available: true,
         permissions: ["loans.disburse"],
       },
       {
         labelKey: "loanDecision",
         href: "/credit/decision",
-        available: false,
+        available: true,
         permissions: [
           "loans.approvals.montage",
           "loans.approvals.comptabilite",
@@ -261,6 +261,24 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     icon: LayersIcon,
     defaultExpanded: true,
     items: [
+      {
+        labelKey: "ledgerAccounts",
+        href: "/accounting/ledger-accounts",
+        available: true,
+        permissions: ["ledger.accounts.view"],
+      },
+      {
+        labelKey: "sectors",
+        href: "/accounting/sectors",
+        available: true,
+        permissions: ["sectors.view", "sub-sectors.view"],
+      },
+      {
+        labelKey: "journalEntries",
+        href: "/accounting/journal-entries",
+        available: true,
+        permissions: ["journal.entries.view"],
+      },
       {
         labelKey: "globalClientImage",
         href: "/accounting/global-client-image",

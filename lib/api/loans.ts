@@ -313,6 +313,46 @@ export async function getLoan(token: string, publicId: string): Promise<Loan> {
   return apiRequest<Loan>(`loans/${publicId}`, { method: "GET", token });
 }
 
+/* ---- P15 — Déblocage (disbursement) ---- */
+
+export type DisbursementChannel = "transfer_account" | "cash";
+
+export type LoanDisbursement = {
+  public_id: string;
+  principal_amount_minor: number | null;
+  currency: string | null;
+  disbursement_channel: DisbursementChannel | string;
+  status: string;
+  transfer_account_public_id?: string | null;
+  posted_by_user_public_id?: string | null;
+  posted_at?: string | null;
+};
+
+export type LoanDisbursePayload = {
+  disbursement_channel?: DisbursementChannel;
+  transfer_account_public_id?: string | null;
+  teller_session_public_id?: string | null;
+  business_date?: string | null;
+  notes?: string | null;
+};
+
+/**
+ * Disburse an approved loan. Requires the loan to be `approved`, and the loan
+ * product + (for transfer channel) the transfer account to have active ledger
+ * mappings — otherwise the API returns a clear "ledger mapping required" error
+ * (the chart of accounts is P16). Returns the loan + the disbursement record.
+ */
+export async function disburseLoan(
+  token: string,
+  publicId: string,
+  payload: LoanDisbursePayload,
+): Promise<{ loan: Loan; disbursement: LoanDisbursement }> {
+  return apiRequest<{ loan: Loan; disbursement: LoanDisbursement }>(
+    `loans/${publicId}/disburse`,
+    { method: "POST", token, body: stripUndefinedLoan(payload) },
+  );
+}
+
 export async function createLoan(
   token: string,
   payload: LoanWritePayload,

@@ -13,6 +13,8 @@
     "no": "Non",
     "previous": "Précédent",
     "next": "Suivant",
+    "delete": "Supprimer",
+    "generatedOn": "Généré le",
     "unknownError": "Erreur inconnue",
     "networkError": "Erreur réseau. Vérifiez votre connexion et réessayez.",
     "retryIn": "Réessayez dans {time}",
@@ -297,6 +299,9 @@
         "loanDecision": "Décision / Annulation",
         "loanTransfers": "Muter prêt",
         "delinquencies": "Suivi des exigibles",
+        "ledgerAccounts": "Comptes généraux",
+        "sectors": "Secteurs d'activité",
+        "journalEntries": "Opérations diverses",
         "globalClientImage": "Image globale client",
         "reportsPar": "PAR",
         "ledgerJournal": "Journal des écritures",
@@ -2121,5 +2126,372 @@
       "hint": "Sélectionnez d'abord le client pour filtrer ses prêts."
     },
     "selectClientPrompt": "Sélectionnez un client pour afficher ses prêts."
+  },
+  "disbursement": {
+    "pageTitle": "Crédit — Déblocage",
+    "pageDescription": "Prêts approuvés prêts à être décaissés.",
+    "errorTitle": "Impossible de charger les prêts",
+    "empty": "Aucun prêt approuvé à décaisser.",
+    "list": {
+      "title": "Prêts à décaisser",
+      "count": "{count} prêt(s)"
+    },
+    "columns": {
+      "number": "N° prêt",
+      "product": "Produit",
+      "amount": "Montant approuvé",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "actions": {
+      "disburse": "Décaisser"
+    },
+    "channel": {
+      "transfer_account": "Virement sur compte",
+      "cash": "Espèces (caisse)"
+    },
+    "fields": {
+      "channel": "Canal de décaissement",
+      "transferAccount": "Compte de virement",
+      "transferAccountPlaceholder": "Sélectionner un compte du client…",
+      "transferAccountHint": "Compte du client crédité du montant du prêt.",
+      "noAccounts": "Ce client n'a aucun compte. Créez-en un d'abord.",
+      "tellerSession": "Session de caisse (public_id)",
+      "tellerSessionHint": "Nécessite une session de caisse ouverte (module Caisse — P20).",
+      "businessDate": "Date comptable",
+      "businessDateHint": "Par défaut : aujourd'hui.",
+      "notes": "Notes"
+    },
+    "drawer": {
+      "title": "Décaisser — {number}",
+      "hint": "Le décaissement crée une écriture comptable (nécessite les comptes comptables — P16).",
+      "amount": "Montant à décaisser",
+      "confirm": "Confirmer le décaissement"
+    },
+    "toast": {
+      "doneTitle": "Décaissement effectué",
+      "doneBody": "Le prêt {number} a été décaissé."
+    }
+  },
+  "decision": {
+    "pageTitle": "Crédit — Décision / Annulation",
+    "pageDescription": "Prêts en cours de décision : soumettre, renvoyer, rejeter. Les visas détaillés se font sur la fiche prêt.",
+    "errorTitle": "Impossible de charger les prêts",
+    "empty": "Aucun prêt dans ce statut.",
+    "filterLabel": "Statut",
+    "list": {
+      "title": "Prêts",
+      "count": "{count} prêt(s)"
+    },
+    "columns": {
+      "number": "N° prêt",
+      "product": "Produit",
+      "amount": "Montant",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "actions": {
+      "menu": "Actions",
+      "openFile": "Ouvrir la fiche"
+    }
+  },
+  "ledgerAccounts": {
+    "pageTitle": "Comptabilité — Comptes généraux",
+    "pageDescription": "Plan comptable de l'établissement : référentiel des comptes du grand livre, leur solde et leurs mouvements.",
+    "errorTitle": "Impossible de charger les comptes",
+    "filters": {
+      "searchLabel": "Recherche",
+      "searchPlaceholder": "Code ou intitulé…",
+      "classLabel": "Classe",
+      "classAll": "Toutes les classes",
+      "statusLabel": "Statut",
+      "statusAll": "Tous les statuts"
+    },
+    "columns": {
+      "code": "Code",
+      "name": "Intitulé",
+      "class": "Classe",
+      "normalSide": "Sens normal",
+      "type": "Type",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "class": {
+      "asset": "Actif",
+      "liability": "Passif",
+      "equity": "Capitaux propres",
+      "revenue": "Produit",
+      "expense": "Charge"
+    },
+    "side": {
+      "debit": "Débit",
+      "credit": "Crédit"
+    },
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif",
+      "suspended": "Suspendu",
+      "archived": "Archivé"
+    },
+    "list": {
+      "titleHeader": "Comptes généraux",
+      "count": "{count} compte(s)",
+      "empty": "Aucun compte général."
+    },
+    "actions": {
+      "menu": "Actions",
+      "create": "Nouveau compte",
+      "view": "Solde & mouvements",
+      "edit": "Modifier",
+      "activate": "Activer",
+      "deactivate": "Désactiver",
+      "archive": "Archiver"
+    },
+    "fields": {
+      "code": "Code",
+      "codeEditHint": "Le code est immuable après création.",
+      "name": "Intitulé",
+      "class": "Classe",
+      "classPlaceholder": "Choisir une classe",
+      "classEditHint": "La classe est immuable après création.",
+      "type": "Type (optionnel)",
+      "typeHint": "Sous-catégorisation libre, ex. « caisse », « banque ».",
+      "agency": "Agence",
+      "agencyPlaceholder": "Agence de rattachement",
+      "agencyHint": "Laissez vide pour un compte institutionnel (toutes agences).",
+      "parent": "Compte parent",
+      "parentPlaceholder": "Aucun (compte racine)",
+      "parentHint": "Rattache ce compte à un compte de niveau supérieur.",
+      "normalSide": "Sens normal",
+      "normalSidePlaceholder": "Débit ou crédit",
+      "normalSideHint": "Sens d'augmentation du compte. Pré-rempli selon la classe.",
+      "status": "Statut",
+      "statusPlaceholder": "Statut",
+      "statusHint": "Un compte inactif ne peut plus être imputé."
+    },
+    "drawer": {
+      "titleCreate": "Nouveau compte général",
+      "titleEdit": "Modifier — {name}",
+      "createHint": "Définissez le code, la classe et le sens normal du compte.",
+      "editHint": "Le code, la classe et l'agence ne sont pas modifiables.",
+      "sectionIdentity": "Identité",
+      "sectionStructure": "Structure",
+      "sectionAccounting": "Comptabilité",
+      "create": "Créer"
+    },
+    "archive": {
+      "title": "Archiver ce compte ?",
+      "body": "Le compte « {name} » sera archivé et ne pourra plus être imputé. Cette action est réversible par réactivation.",
+      "confirm": "Archiver"
+    },
+    "toast": {
+      "createdTitle": "Compte créé",
+      "createdBody": "Le compte « {name} » a été créé.",
+      "updatedTitle": "Compte mis à jour",
+      "updatedBody": "Le compte « {name} » a été mis à jour.",
+      "statusChangedTitle": "Statut modifié",
+      "statusChangedBody": "« {name} » est désormais {status}.",
+      "archivedTitle": "Compte archivé",
+      "archivedBody": "Le compte « {name} » a été archivé.",
+      "errorTitle": "Action impossible"
+    },
+    "detail": {
+      "title": "Compte {code} — Solde & mouvements",
+      "currency": "Devise",
+      "from": "Du",
+      "to": "Au",
+      "period": "Période",
+      "allPeriods": "Toutes périodes",
+      "print": "Imprimer / PDF",
+      "openingBalance": "Solde d'ouverture",
+      "closingBalance": "Solde de clôture",
+      "totalDebit": "Total débit",
+      "totalCredit": "Total crédit",
+      "empty": "Aucun mouvement sur cette période.",
+      "pageOf": "Page {page} / {total}",
+      "printFilePrefix": "releve-compte",
+      "printHeading": "Relevé de compte général",
+      "columns": {
+        "date": "Date",
+        "reference": "Référence",
+        "memo": "Libellé",
+        "debit": "Débit",
+        "credit": "Crédit"
+      }
+    }
+  },
+  "sectors": {
+    "pageTitle": "Comptabilité — Secteurs d'activité",
+    "pageDescription": "Référentiel des secteurs et sous-secteurs d'activité économique des clients. Sélectionnez un secteur à gauche pour gérer ses sous-secteurs.",
+    "errorTitle": "Impossible de charger les secteurs",
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif",
+      "archived": "Archivé"
+    },
+    "actions": {
+      "menu": "Actions",
+      "edit": "Modifier",
+      "delete": "Supprimer"
+    },
+    "fields": {
+      "code": "Code",
+      "codeEditHint": "Le code est immuable après création.",
+      "name": "Intitulé",
+      "sector": "Secteur",
+      "sectorPlaceholder": "Choisir un secteur",
+      "status": "Statut",
+      "statusPlaceholder": "Statut"
+    },
+    "master": {
+      "title": "Secteurs",
+      "create": "Nouveau secteur",
+      "searchPlaceholder": "Rechercher un secteur…",
+      "empty": "Aucun secteur. Créez-en un pour commencer.",
+      "subCount": "{count} sous-secteur(s)"
+    },
+    "detail": {
+      "noSelection": "Sélectionnez un secteur pour voir ses sous-secteurs.",
+      "title": "Sous-secteurs — {name}",
+      "subtitle": "{code} · {count} sous-secteur(s)",
+      "create": "Nouveau sous-secteur",
+      "empty": "Aucun sous-secteur pour ce secteur.",
+      "columns": {
+        "code": "Code",
+        "name": "Intitulé",
+        "status": "Statut",
+        "actions": "Actions"
+      }
+    },
+    "sectorDrawer": {
+      "titleCreate": "Nouveau secteur",
+      "titleEdit": "Modifier — {name}",
+      "hint": "Code, intitulé et statut du secteur d'activité.",
+      "create": "Créer"
+    },
+    "subSectorDrawer": {
+      "titleCreate": "Nouveau sous-secteur",
+      "titleEdit": "Modifier — {name}",
+      "hint": "Rattachez le sous-secteur à un secteur parent.",
+      "create": "Créer"
+    },
+    "delete": {
+      "sectorTitle": "Supprimer ce secteur ?",
+      "sectorBody": "Le secteur « {name} » sera supprimé définitivement.",
+      "sectorBodyWithChildren": "Le secteur « {name} » contient {count} sous-secteur(s). Supprimez-les d'abord, sinon la suppression sera refusée par le serveur.",
+      "subTitle": "Supprimer ce sous-secteur ?",
+      "subBody": "Le sous-secteur « {name} » sera supprimé définitivement.",
+      "confirm": "Supprimer"
+    },
+    "toast": {
+      "sectorCreatedTitle": "Secteur créé",
+      "sectorCreatedBody": "Le secteur « {name} » a été créé.",
+      "sectorUpdatedTitle": "Secteur mis à jour",
+      "sectorUpdatedBody": "Le secteur « {name} » a été mis à jour.",
+      "sectorDeletedTitle": "Secteur supprimé",
+      "sectorDeletedBody": "Le secteur « {name} » a été supprimé.",
+      "subCreatedTitle": "Sous-secteur créé",
+      "subCreatedBody": "Le sous-secteur « {name} » a été créé.",
+      "subUpdatedTitle": "Sous-secteur mis à jour",
+      "subUpdatedBody": "Le sous-secteur « {name} » a été mis à jour.",
+      "subDeletedTitle": "Sous-secteur supprimé",
+      "subDeletedBody": "Le sous-secteur « {name} » a été supprimé.",
+      "errorTitle": "Action impossible"
+    }
+  },
+  "journalEntries": {
+    "pageTitle": "Comptabilité — Opérations diverses (OD)",
+    "pageDescription": "Écritures de journal manuelles : saisie, validation et comptabilisation. Une écriture passe par brouillon → soumise → approuvée → comptabilisée.",
+    "errorTitle": "Impossible de charger les écritures",
+    "filterLabel": "Statut",
+    "filterAll": "Tous les statuts",
+    "status": {
+      "draft": "Brouillon",
+      "submitted": "Soumise",
+      "approved": "Approuvée",
+      "posted": "Comptabilisée",
+      "rejected": "Rejetée",
+      "cancelled": "Annulée",
+      "archived": "Archivée",
+      "reversed": "Extournée"
+    },
+    "columns": {
+      "reference": "Référence",
+      "date": "Date",
+      "description": "Libellé",
+      "amount": "Montant",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "list": {
+      "titleHeader": "Opérations diverses",
+      "count": "{count} écriture(s)",
+      "empty": "Aucune écriture."
+    },
+    "actions": {
+      "create": "Nouvelle OD",
+      "open": "Ouvrir",
+      "submit": "Soumettre",
+      "approve": "Approuver",
+      "reject": "Rejeter",
+      "post": "Comptabiliser",
+      "reverse": "Extourner"
+    },
+    "fields": {
+      "reference": "Référence",
+      "referenceHint": "Identifiant unique de l'écriture (ex. OD-2026-001).",
+      "date": "Date comptable",
+      "agency": "Agence",
+      "agencyPlaceholder": "Agence de l'écriture",
+      "description": "Libellé"
+    },
+    "createDrawer": {
+      "title": "Nouvelle opération diverse",
+      "hint": "Créez l'en-tête ; vous ajouterez les lignes ensuite.",
+      "create": "Créer le brouillon",
+      "afterHint": "Après création, ajoutez au moins deux lignes équilibrées avant de soumettre."
+    },
+    "detail": {
+      "title": "OD {reference}",
+      "noDescription": "Sans libellé",
+      "rejectionReason": "Motif de rejet",
+      "lineAccount": "Compte",
+      "lineAccountPlaceholder": "Choisir un compte",
+      "noAccounts": "Aucun compte actif pour cette agence. Créez-en dans Comptes généraux.",
+      "memo": "Libellé ligne",
+      "debit": "Débit",
+      "credit": "Crédit",
+      "side": "Sens",
+      "amount": "Montant",
+      "amountHint": "Montant en unité principale (sera converti).",
+      "totals": "Totaux",
+      "noLines": "Aucune ligne. Ajoutez-en pour équilibrer l'écriture.",
+      "balanced": "Écriture équilibrée (Σ débits = Σ crédits).",
+      "unbalanced": "Écriture déséquilibrée — écart de {diff}.",
+      "addLine": "Ajouter une ligne",
+      "addLineConfirm": "Ajouter la ligne",
+      "addLineInvalid": "Sélectionnez un compte et saisissez un montant positif.",
+      "rejectReasonLabel": "Motif de rejet (obligatoire)",
+      "makerCheckerHint": "Vous avez saisi cette écriture : sa validation requiert un réviseur différent (séparation des tâches)."
+    },
+    "confirm": {
+      "postTitle": "Comptabiliser cette écriture ?",
+      "postBody": "L'écriture sera comptabilisée et imputée au grand livre. Elle deviendra immuable (seule l'extourne sera possible).",
+      "reverseTitle": "Extourner cette écriture ?",
+      "reverseBody": "Une écriture d'extourne (contre-passation) sera créée pour annuler les effets de cette écriture comptabilisée."
+    },
+    "toast": {
+      "createdTitle": "Brouillon créé",
+      "createdBody": "L'OD « {reference} » a été créée. Ajoutez ses lignes.",
+      "actionDoneTitle": "Action effectuée",
+      "action": {
+        "submit": "Écriture soumise pour validation.",
+        "approve": "Écriture approuvée.",
+        "reject": "Écriture rejetée.",
+        "post": "Écriture comptabilisée.",
+        "reverse": "Écriture d'extourne créée."
+      },
+      "errorTitle": "Action impossible"
+    }
   }
 }

@@ -1,4 +1,6 @@
-import { notifyAuthExpired } from "./client";
+import { apiRequest, notifyAuthExpired } from "./client";
+
+export type SectorStatus = "active" | "inactive" | "archived";
 
 /**
  * Secteurs / sous-secteurs d'activité économique (référentiel P17). Utilisés
@@ -75,4 +77,94 @@ export async function fetchSubSectors(
     "sub_sectors",
     options.perPage ?? 100,
   );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Write operations (platform-admin only, per the API policy).                */
+/* `code` is immutable after creation — the update endpoints ignore it.       */
+/* `destroy` is a hard delete (not an archive).                               */
+/* -------------------------------------------------------------------------- */
+
+export type SectorCreatePayload = {
+  code: string;
+  name: string;
+  status?: SectorStatus;
+};
+
+export type SectorUpdatePayload = {
+  name?: string;
+  status?: SectorStatus;
+};
+
+export type SubSectorCreatePayload = {
+  sector_public_id: string;
+  code: string;
+  name: string;
+  status?: SectorStatus;
+};
+
+export type SubSectorUpdatePayload = {
+  /** Move the sub-sector under a different sector. */
+  sector_public_id?: string;
+  name?: string;
+  status?: SectorStatus;
+};
+
+export async function createSector(
+  token: string,
+  payload: SectorCreatePayload,
+): Promise<Sector> {
+  return apiRequest<Sector>("sectors", { method: "POST", token, body: payload });
+}
+
+export async function updateSector(
+  token: string,
+  publicId: string,
+  payload: SectorUpdatePayload,
+): Promise<Sector> {
+  return apiRequest<Sector>(`sectors/${publicId}`, {
+    method: "PATCH",
+    token,
+    body: payload,
+  });
+}
+
+export async function deleteSector(
+  token: string,
+  publicId: string,
+): Promise<null> {
+  return apiRequest<null>(`sectors/${publicId}`, { method: "DELETE", token });
+}
+
+export async function createSubSector(
+  token: string,
+  payload: SubSectorCreatePayload,
+): Promise<SubSector> {
+  return apiRequest<SubSector>("sub-sectors", {
+    method: "POST",
+    token,
+    body: payload,
+  });
+}
+
+export async function updateSubSector(
+  token: string,
+  publicId: string,
+  payload: SubSectorUpdatePayload,
+): Promise<SubSector> {
+  return apiRequest<SubSector>(`sub-sectors/${publicId}`, {
+    method: "PATCH",
+    token,
+    body: payload,
+  });
+}
+
+export async function deleteSubSector(
+  token: string,
+  publicId: string,
+): Promise<null> {
+  return apiRequest<null>(`sub-sectors/${publicId}`, {
+    method: "DELETE",
+    token,
+  });
 }
