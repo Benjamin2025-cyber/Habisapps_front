@@ -282,7 +282,7 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "globalClientImage",
         href: "/accounting/global-client-image",
-        available: false,
+        available: true,
         permissions: ["crm.clients.view"],
       },
     ],

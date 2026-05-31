@@ -2978,5 +2978,61 @@
       "allPeriods": "Toutes périodes",
       "count": "Nombre de sessions"
     }
+  },
+  "globalClientImage": {
+    "pageTitle": "Image globale client",
+    "pageDescription": "Vue 360° en lecture seule d'un client : fiche, comptes, prêts, garants, mandataires et pièces d'identité.",
+    "searchLabel": "Client",
+    "searchPlaceholder": "Rechercher (nom, téléphone, référence…)",
+    "selectPrompt": "Recherchez et sélectionnez un client pour afficher son image globale.",
+    "errorTitle": "Impossible de charger le client",
+    "viewFullProfile": "Voir la fiche complète",
+    "identity": {
+      "reference": "Référence client",
+      "phone": "Téléphone",
+      "email": "E-mail",
+      "kyc": "KYC",
+      "status": "Statut"
+    },
+    "accounts": {
+      "title": "Comptes",
+      "empty": "Aucun compte.",
+      "number": "N° de compte",
+      "type": "Type",
+      "status": "Statut",
+      "balance": "Solde disponible"
+    },
+    "loans": {
+      "title": "Prêts",
+      "empty": "Aucun prêt.",
+      "number": "N° prêt",
+      "product": "Produit",
+      "amount": "Montant",
+      "status": "Statut",
+      "note": "Liste filtrée côté client sur les prêts chargés (un filtre serveur par client est attendu)."
+    },
+    "guarantors": {
+      "title": "Garants",
+      "empty": "Aucun garant.",
+      "name": "Nom",
+      "status": "Statut"
+    },
+    "proxies": {
+      "title": "Mandataires",
+      "empty": "Aucun mandataire.",
+      "name": "Nom",
+      "status": "Statut"
+    },
+    "idDocs": {
+      "title": "Pièces d'identité",
+      "empty": "Aucune pièce.",
+      "type": "Type",
+      "status": "Statut"
+    },
+    "print": {
+      "action": "Imprimer la fiche",
+      "fileName": "fiche-client",
+      "heading": "Image globale client"
+    }
   }
 }

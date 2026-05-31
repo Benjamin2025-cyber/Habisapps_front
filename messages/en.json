@@ -2978,5 +2978,61 @@
       "allPeriods": "All periods",
       "count": "Session count"
     }
+  },
+  "globalClientImage": {
+    "pageTitle": "Global client view",
+    "pageDescription": "Read-only 360° view of a client: profile, accounts, loans, guarantors, proxies and identity documents.",
+    "searchLabel": "Client",
+    "searchPlaceholder": "Search (name, phone, reference…)",
+    "selectPrompt": "Search and select a client to display their global view.",
+    "errorTitle": "Unable to load the client",
+    "viewFullProfile": "View full profile",
+    "identity": {
+      "reference": "Client reference",
+      "phone": "Phone",
+      "email": "Email",
+      "kyc": "KYC",
+      "status": "Status"
+    },
+    "accounts": {
+      "title": "Accounts",
+      "empty": "No account.",
+      "number": "Account no.",
+      "type": "Type",
+      "status": "Status",
+      "balance": "Available balance"
+    },
+    "loans": {
+      "title": "Loans",
+      "empty": "No loan.",
+      "number": "Loan no.",
+      "product": "Product",
+      "amount": "Amount",
+      "status": "Status",
+      "note": "Filtered client-side over loaded loans (a server-side per-client filter is expected)."
+    },
+    "guarantors": {
+      "title": "Guarantors",
+      "empty": "No guarantor.",
+      "name": "Name",
+      "status": "Status"
+    },
+    "proxies": {
+      "title": "Proxies",
+      "empty": "No proxy.",
+      "name": "Name",
+      "status": "Status"
+    },
+    "idDocs": {
+      "title": "Identity documents",
+      "empty": "No document.",
+      "type": "Type",
+      "status": "Status"
+    },
+    "print": {
+      "action": "Print profile",
+      "fileName": "client-profile",
+      "heading": "Global client view"
+    }
   }
 }
