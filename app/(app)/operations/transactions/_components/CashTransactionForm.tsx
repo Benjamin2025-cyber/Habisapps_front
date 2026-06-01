@@ -73,6 +73,10 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
   const [signatureId, setSignatureId] = useState("");
   const [method, setMethod] = useState<SignatureVerificationMethod>("visual_match");
   const [available, setAvailable] = useState<AccountAvailableBalance | null>(null);
+  // True when the balance endpoint refused/failed (e.g. teller lacks the
+  // permission — back-issue A6). Lets us tell the user the over-withdraw guard
+  // is inactive rather than silently showing a blank balance.
+  const [balanceUnavailable, setBalanceUnavailable] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -112,17 +116,22 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
       setSignatures([]);
       setSignatureId("");
       setAvailable(null);
+      setBalanceUnavailable(false);
       return;
     }
     let cancelled = false;
+    setBalanceUnavailable(false);
     Promise.all([
-      fetchAccountAvailableBalance(token, accountId, { currency }).catch(() => null),
+      fetchAccountAvailableBalance(token, accountId, { currency })
+        .then((b) => ({ ok: true as const, balance: b }))
+        .catch(() => ({ ok: false as const, balance: null })),
       isWithdrawal
         ? fetchAccountSignatures(token, accountId, { perPage: 50 }).catch(() => [])
         : Promise.resolve<CustomerAccountSignature[]>([]),
-    ]).then(([bal, sigs]) => {
+    ]).then(([balResult, sigs]) => {
       if (cancelled) return;
-      setAvailable(bal);
+      setAvailable(balResult.balance);
+      setBalanceUnavailable(!balResult.ok);
       setSignatures(sigs.filter((s) => s.status === "active"));
     });
     return () => {
@@ -287,8 +296,15 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
                     ? format.currencyMinor(available.available_balance_minor, {
                         currency,
                       })
-                    : "…"}
+                    : balanceUnavailable
+                      ? "—"
+                      : "…"}
                 </span>
+                {balanceUnavailable ? (
+                  <span className="text-[0.7rem] text-warning">
+                    {t("cashTx.account.balanceUnavailable")}
+                  </span>
+                ) : null}
               </div>
             </div>
           ) : null}

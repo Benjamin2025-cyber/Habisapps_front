@@ -1747,6 +1747,7 @@
       "productEditHint": "Le produit n'est pas modifiable après création.",
       "creditAgent": "Agent de crédit",
       "creditAgentPlaceholder": "Sélectionner un agent…",
+      "creditAgentHint": "Seuls les utilisateurs ayant le rôle « loan-officer » (agent de crédit) sont proposés. Attribuez d'abord ce rôle si besoin.",
       "appliedOn": "Date de demande",
       "appliedOnHint": "Par défaut : aujourd'hui.",
       "requestedAmount": "Montant demandé",
@@ -2961,7 +2962,8 @@
       "number": "N° de compte",
       "type": "Type",
       "status": "Statut",
-      "available": "Solde disponible"
+      "available": "Solde disponible",
+      "balanceUnavailable": "Solde indisponible (permission requise) — le contrôle de dépassement est inactif."
     },
     "method_cash": "Espèces",
     "methodNote": "Chèque / mixte non pris en charge par ce guichet pour l'instant.",

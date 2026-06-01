@@ -398,6 +398,8 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
               value={form.credit_agent_public_id}
               onChange={(id) => set("credit_agent_public_id", id)}
               placeholder={t("loans.fields.creditAgentPlaceholder")}
+              hint={t("loans.fields.creditAgentHint")}
+              filterRoles={["loan-officer"]}
             />
             <TextField
               label={t("loans.fields.appliedOn")}

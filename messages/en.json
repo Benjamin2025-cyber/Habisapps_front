@@ -1747,6 +1747,7 @@
       "productEditHint": "The product cannot be changed after creation.",
       "creditAgent": "Loan officer",
       "creditAgentPlaceholder": "Select an officer…",
+      "creditAgentHint": "Only users with the “loan-officer” (credit agent) role are listed. Grant that role first if needed.",
       "appliedOn": "Application date",
       "appliedOnHint": "Default: today.",
       "requestedAmount": "Requested amount",
@@ -2961,7 +2962,8 @@
       "number": "Account no.",
       "type": "Type",
       "status": "Status",
-      "available": "Available balance"
+      "available": "Available balance",
+      "balanceUnavailable": "Balance unavailable (permission required) — the over-withdrawal check is inactive."
     },
     "method_cash": "Cash",
     "methodNote": "Cheque / mixed not supported by this till for now.",

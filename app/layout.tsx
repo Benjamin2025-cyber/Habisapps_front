@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Manrope } from "next/font/google";
 import { cookies } from "next/headers";
 import { SessionProvider } from "@/lib/auth/SessionProvider";
 import { ToastProvider } from "@/lib/toast/ToastProvider";
@@ -14,9 +14,13 @@ import frMessages from "@/messages/fr.json";
 import enMessages from "@/messages/en.json";
 import "./globals.css";
 
-const sans = Plus_Jakarta_Sans({
+// Manrope: a modern, professional sans with excellent tabular figures — well
+// suited to a finance dashboard. Variable font (200–800) covers every Tailwind
+// weight used in the app. Exposed as `--font-sans` (see globals.css).
+const sans = Manrope({
   variable: "--font-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
