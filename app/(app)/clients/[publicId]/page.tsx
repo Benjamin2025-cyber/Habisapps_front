@@ -195,6 +195,12 @@ export default function ClientDetailPage(props: {
         </Alert>
       ) : null}
 
+      {client?.pii_redacted ? (
+        <Alert variant="info" title={t("clientDetail.piiRedactedTitle")}>
+          {t("clientDetail.piiRedactedBody")}
+        </Alert>
+      ) : null}
+
       {loading && !client ? (
         <div className="rounded-[var(--radius-card)] border border-dashed border-border bg-background p-10 text-center text-sm text-muted-foreground">
           {t("common.loading")}
@@ -222,6 +228,7 @@ export default function ClientDetailPage(props: {
             <TabsPanel id="identity-docs">
               <IdentityDocumentsTab
                 clientPublicId={client.public_id}
+                agencyPublicId={client.agency_public_id}
                 onCountChange={setDocsCount}
               />
             </TabsPanel>

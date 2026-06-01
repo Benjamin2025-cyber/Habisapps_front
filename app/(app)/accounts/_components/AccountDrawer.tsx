@@ -234,7 +234,9 @@ export function AccountDrawer({
         }
       : {
           client_public_id: form.client_public_id,
-          account_number: form.account_number.trim(),
+          // Optional now (back-issue #8): blank → backend reserves the next
+          // ACC######## sequence. Omit when empty so we don't send "".
+          account_number: nullable(form.account_number) ?? undefined,
           account_title: nullable(form.account_title),
           account_product_public_id: nullable(form.account_product_public_id),
           currency: nullable(form.currency)?.toUpperCase(),
@@ -369,7 +371,7 @@ export function AccountDrawer({
               onChange={(event) => set("account_number", event.target.value)}
               error={errors.account_number}
               disabled={isEdit}
-              required={!isEdit}
+              hint={isEdit ? undefined : t("accounts.fields.numberAutoHint")}
             />
             <TextField
               label={t("accounts.fields.currency")}

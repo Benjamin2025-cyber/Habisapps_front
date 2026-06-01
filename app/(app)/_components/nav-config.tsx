@@ -176,6 +176,18 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
         permissions: ["crm.clients.view"],
       },
       {
+        labelKey: "guarantors",
+        href: "/guarantors",
+        available: true,
+        permissions: ["crm.guarantors.view"],
+      },
+      {
+        labelKey: "proxies",
+        href: "/proxies",
+        available: true,
+        permissions: ["crm.proxies.view"],
+      },
+      {
         labelKey: "accounts",
         href: "/accounts",
         available: true,

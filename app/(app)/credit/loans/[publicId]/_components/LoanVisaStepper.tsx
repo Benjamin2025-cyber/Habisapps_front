@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import {
   APPROVAL_STEPS,
   decideLoanApproval,
+  fetchLoanApprovals,
   type ApprovalDecision,
   type ApprovalStep,
   type Loan,
@@ -57,10 +58,30 @@ export function LoanVisaStepper({ loan, onActed }: Props) {
     direction: isPlatformAdmin || canDirection,
   };
 
-  // Ephemeral results from actions taken this session (no GET to hydrate them).
+  // Real visa history, hydrated from GET /loans/{id}/approvals (back-issue #15).
+  // Keyed by step; the last approval wins so a "returned → approved" sequence
+  // shows the latest decision. Re-hydrates whenever the loan refreshes.
   const [results, setResults] = useState<
     Partial<Record<ApprovalStep, LoanApprovalResult>>
   >({});
+
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    fetchLoanApprovals(token, loan.public_id)
+      .then((list) => {
+        if (cancelled) return;
+        const byStep: Partial<Record<ApprovalStep, LoanApprovalResult>> = {};
+        for (const approval of list) byStep[approval.step] = approval;
+        setResults(byStep);
+      })
+      .catch(() => {
+        /* leave status-derived visuals as the fallback */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token, loan.public_id, loan.updated_at]);
   const [pending, setPending] = useState<{
     step: ApprovalStep;
     decision: ApprovalDecision;
@@ -134,7 +155,7 @@ export function LoanVisaStepper({ loan, onActed }: Props) {
       </header>
 
       <div className="flex flex-col gap-1 p-4">
-        <p className="mb-2 rounded-[var(--radius-field)] border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-foreground">
+        <p className="mb-2 rounded-[var(--radius-field)] border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
           {t("loanDetail.visa.historyNote")}
         </p>
 

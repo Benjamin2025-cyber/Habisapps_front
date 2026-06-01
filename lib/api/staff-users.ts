@@ -63,15 +63,23 @@ export type StaffUserWritePayload = {
   agency_name?: string | null;
 };
 
-/** Paginated list. Reads the envelope directly so we get `meta.pagination`. */
+/**
+ * Paginated list. Reads the envelope directly so we get `meta.pagination`.
+ * Server-side `search` covers name/phone/email/matricule/job_title/agency;
+ * status/agency/role have no server filter yet, so the call site narrows
+ * those client-side on the returned page.
+ */
 export async function fetchStaffUsers(
   token: string,
-  options: { page?: number; perPage?: number } = {},
+  options: { page?: number; perPage?: number; search?: string } = {},
 ): Promise<PaginatedStaffUsers> {
   const query = new URLSearchParams();
   query.set("per_page", String(options.perPage ?? 100));
   if (options.page && options.page > 0) {
     query.set("page", String(options.page));
+  }
+  if (options.search && options.search.trim().length > 0) {
+    query.set("search", options.search.trim());
   }
 
   const response = await fetch(`/api/v1/staff-users?${query.toString()}`, {

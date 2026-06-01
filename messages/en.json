@@ -414,6 +414,41 @@
   "toast": {
     "dismissAriaLabel": "Dismiss notification"
   },
+  "directory": {
+    "errorTitle": "Unable to load the list",
+    "count": "{count} record(s)",
+    "openClient": "View client",
+    "filters": {
+      "search": "Search",
+      "searchPlaceholder": "Name, phone…",
+      "status": "Status",
+      "statusAll": "All statuses",
+      "verification": "Verification",
+      "verificationAll": "All"
+    },
+    "guarantors": {
+      "pageTitle": "Guarantors",
+      "pageDescription": "Read-only, institution-wide view of all guarantors. Management happens on the client record.",
+      "columns": {
+        "name": "Guarantor",
+        "phone": "Phone",
+        "relationship": "Relationship",
+        "status": "Status",
+        "client": "Client"
+      }
+    },
+    "proxies": {
+      "pageTitle": "Proxies",
+      "pageDescription": "Read-only, institution-wide view of all proxies. Management happens on the client record.",
+      "columns": {
+        "name": "Proxy",
+        "phone": "Phone",
+        "mandate": "Mandate type",
+        "status": "Status",
+        "client": "Client"
+      }
+    }
+  },
   "clients": {
     "pageTitle": "Reference Data — Clients",
     "pageDescription": "List of the institution's clients. Creation, editing, status and KYC workflow.",
@@ -547,7 +582,10 @@
       "reasonPlaceholder": "Describe the reason for rejection (visible in audit log)…",
       "reasonRequired": "A reason is required for a rejection.",
       "commentLabel": "Comment (optional)",
-      "commentPlaceholder": "Additional information (visible in audit log)…"
+      "commentPlaceholder": "Additional information (visible in audit log)…",
+      "selfVerifyLabel": "Self-verify (I submitted this KYC)",
+      "selfVerifyHint": "Tick only if you submitted this KYC. Requires a reason and the “self-verify override” permission — otherwise the operation is refused (403).",
+      "selfVerifyReasonRequired": "A reason is required for self-verification."
     },
     "toast": {
       "createdTitle": "Client created",
@@ -567,6 +605,8 @@
     "referenceLabel": "Client code {reference}",
     "backToList": "Back to list",
     "errorTitle": "Unable to load client",
+    "piiRedactedTitle": "Personal data masked",
+    "piiRedactedBody": "You lack the “crm.pii.view” permission. Personal fields (name, phone, email, address…) are masked — an empty field may therefore be masked rather than absent.",
     "tabsAriaLabel": "Client record sections",
     "tabs": {
       "identity": "Identity",
@@ -603,7 +643,10 @@
       "reasonPlaceholder": "Describe the reason (visible in audit log)…",
       "reasonRequired": "A reason is required for this action.",
       "commentLabel": "Comment (optional)",
-      "commentPlaceholder": "Additional information (visible in audit log)…"
+      "commentPlaceholder": "Additional information (visible in audit log)…",
+      "selfVerifyLabel": "Self-verify (I created this record)",
+      "selfVerifyHint": "Tick only if you submitted this record. Requires a reason and the “self-verify override” permission — otherwise the operation is refused.",
+      "selfVerifyReasonRequired": "A reason is required for self-verification."
     },
     "identityDocs": {
       "title": "Identity documents",
@@ -663,13 +706,18 @@
         "authority": "Issuing authority",
         "issuedOn": "Issue date",
         "expiresOn": "Expiry date",
-        "document": "Supporting document (image)",
-        "documentHint": "Photo of the document. Required in order to verify the KYC document. A single image (front) — front/back is not yet supported by the API.",
+        "document": "Supporting document — front (image)",
+        "documentHint": "Photo of the document (front). Required in order to verify the KYC document.",
+        "documentBack": "Supporting document — back (image)",
+        "documentBackHint": "Photo of the back. Required for this type before verification.",
+        "expiryRequiredHint": "Required for this type before verification.",
         "authorityHint": "Body that issued the document (e.g. DGSN for the national ID card). Optional.",
         "expiredWarning": "⚠ This expiry date has passed — the document cannot be verified. Enter a future date."
       },
       "types": {
         "legacyTag": "existing value",
+        "national_id": "National Identity Card (CNI)",
+        "drivers_license": "Driver's License",
         "national_id_card": "National Identity Card (CNI)",
         "national_id_receipt": "National ID receipt",
         "passport": "Passport",
@@ -902,11 +950,14 @@
       "confirmDiscard": "Unsaved changes will be lost. Continue?",
       "errorTitle": "Change rejected",
       "protectedRoleTitle": "Protected role",
-      "protectedRoleBody": "This role is marked as protected: some permissions cannot be removed or added. The API will reject any change that violates these constraints."
+      "protectedRoleBody": "This role is marked as protected: some permissions cannot be removed or added. The API will reject any change that violates these constraints.",
+      "protectedTag": "Protected",
+      "protectedLockHint": "Protected permission: not grantable to this role (platform-admin only, or delegation disabled on the back end).",
+      "staleConflict": "This role's permissions changed since they were loaded. The list was reloaded — review, then reapply your selection."
     },
     "toast": {
       "savedTitle": "Permissions updated",
-      "savedBody": "Permissions for role {name} have been saved.",
+      "savedBody": "Role {name} permissions saved ({added} added, {removed} removed).",
       "errorTitle": "Unable to save"
     }
   },
@@ -1099,10 +1150,10 @@
       "subtitle": "Branch {code} — {name}",
       "currentManager": "Current manager: {name}",
       "noManager": "No manager assigned yet.",
-      "publicIdLabel": "User identifier (public_id)",
-      "publicIdHint": "The manager selector will arrive with the Managers reference data phase.",
-      "roleAtAgencyLabel": "Role at branch (optional)",
-      "roleAtAgencyHint": "Default: agency-manager."
+      "publicIdLabel": "Manager",
+      "publicIdHint": "Only users who already hold the “agency-manager” role are listed. To promote a teller, grant them that role first in User management.",
+      "roleAtAgencyLabel": "Position at branch (optional)",
+      "roleAtAgencyHint": "Job title held WITHIN this branch (e.g. agency-manager) — distinct from the system permission roles. Leave “agency-manager” by default."
     },
     "toast": {
       "createdTitle": "Branch created",
@@ -1182,6 +1233,7 @@
       "agencyPlaceholder": "Select a branch…",
       "agencyEditHint": "The branch cannot be changed after creation.",
       "number": "Account number",
+      "numberAutoHint": "Leave blank to auto-generate (ACC…).",
       "currency": "Currency",
       "currencyHint": "3-letter ISO code (e.g. XAF).",
       "title": "Account title",
@@ -1749,10 +1801,29 @@
       "lifecycle": "Lifecycle",
       "amounts": "Amounts & repayment schedule",
       "fees": "Fees, taxes & collateral",
-      "accounts": "Linked accounts"
+      "accounts": "Linked accounts",
+      "outstanding": "Outstanding & repayments"
     },
     "feesHint": "Amounts computed by the engine (product snapshot at origination). Read-only.",
+    "outstandingHint": "Computed by the API from the schedule and repayments. “—” means no outstanding is projected yet.",
+    "linkedAccounts": {
+      "edit": "Edit accounts",
+      "title": "Linked accounts",
+      "hint": "Update the recovery / unpaid / amortization / transfer accounts. The account must belong to the loan's client and agency, and be active.",
+      "placeholder": "No account",
+      "noAccounts": "This client has no linkable account. Create a customer account first.",
+      "toast": {
+        "savedTitle": "Linked accounts updated",
+        "savedBody": "{count} account(s) changed."
+      }
+    },
     "fields": {
+      "outstandingPrincipal": "Outstanding principal",
+      "globalOutstanding": "Global outstanding",
+      "totalUnpaid": "Total unpaid",
+      "dueAmount": "Amount due",
+      "nextRepayment": "Next repayment",
+      "lastRepayment": "Last repayment",
       "approvedOn": "Approved on",
       "disbursedOn": "Disbursed on",
       "closedOn": "Closed on",
@@ -1768,7 +1839,7 @@
       "notEligible": "The schedule can only be generated on an approved or rescheduled loan.",
       "generate": "Generate schedule",
       "regenerate": "Regenerate",
-      "persistenceNote": "The schedule is not (yet) retrievable via the API after a reload — it is only displayed after generation (see back-issues #15). Regenerate it if needed.",
+      "persistenceNote": "Active amortization schedule loaded from the API; it stays available after a reload. “Regenerate” replaces the active snapshot.",
       "empty": "No schedule generated. Click \"Generate schedule\".",
       "emptyNotEligible": "Schedule unavailable: the loan must first be approved.",
       "generatedTitle": "Schedule generated",
@@ -1788,7 +1859,7 @@
     },
     "visa": {
       "title": "Approval workflow",
-      "historyNote": "The approval history is not reloaded from the API (no GET — see back-issues #15). Decisions made here are displayed until reload; the loan status reflects the actual progress.",
+      "historyNote": "Approval history loaded from the API: who signed off, when, and the decision, for each of the 4 steps.",
       "actedLine": "Approval: {decision} on {at}",
       "steps": {
         "montage": "Origination",
@@ -1965,6 +2036,7 @@
       "policyInterest": "Interest policy",
       "policyPenalty": "Penalty & arrears policy",
       "policyPenaltyDisabledHint": "Unavailable: this policy is not approved on the back end (attaching it causes loan creation to fail). See back-issues #16.",
+      "policyUnapprovedHint": "Unavailable: policy not approved on the back end (formula-policies catalog). Attaching it causes loan creation to fail.",
       "policyRepaymentAllocation": "Repayment allocation order",
       "policyFee": "Fee policy",
       "policyTax": "Tax policy",

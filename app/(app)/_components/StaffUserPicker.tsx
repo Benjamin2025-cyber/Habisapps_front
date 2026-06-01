@@ -15,6 +15,12 @@ type Props = {
   error?: string | null;
   hint?: string;
   disabled?: boolean;
+  /**
+   * When set, only list users holding at least one of these RBAC roles. Use to
+   * gate a slot to eligible users — e.g. only `agency-manager`s can be assigned
+   * as an agency manager, so a teller must be granted the role first.
+   */
+  filterRoles?: ReadonlyArray<string>;
 };
 
 /**
@@ -31,6 +37,7 @@ export function StaffUserPicker({
   error,
   hint,
   disabled,
+  filterRoles,
 }: Props) {
   const session = useSession();
   const token = session.status === "authenticated" ? session.token : null;
@@ -52,7 +59,12 @@ export function StaffUserPicker({
   }, [token]);
 
   const options = useMemo(() => {
-    const list = users.map((user) => ({
+    const eligible = filterRoles?.length
+      ? users.filter((user) =>
+          user.roles.some((role) => filterRoles.includes(role)),
+        )
+      : users;
+    const list = eligible.map((user) => ({
       value: user.public_id,
       label: user.agency_name ? `${user.name} — ${user.agency_name}` : user.name,
     }));
@@ -62,7 +74,7 @@ export function StaffUserPicker({
       list.push({ value, label: value });
     }
     return list;
-  }, [users, value]);
+  }, [users, value, filterRoles]);
 
   return (
     <Select

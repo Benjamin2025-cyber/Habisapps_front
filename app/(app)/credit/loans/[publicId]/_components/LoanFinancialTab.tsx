@@ -1,18 +1,30 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { Button } from "@/components/ui/Button";
 import { useFormatter, useTranslations } from "@/lib/i18n/I18nProvider";
 import type { Loan } from "@/lib/api/loans";
 import { Field, Grid, PlainField, Section } from "./display";
+import { LoanLinkedAccountsDrawer } from "./LoanLinkedAccountsDrawer";
 
 type Props = {
   loan: Loan;
+  /** Whether the actor may edit linked accounts (loans.update). */
+  canEdit?: boolean;
+  /** Refetch the loan after a linked-accounts save. */
+  onUpdated?: () => void;
 };
 
-export function LoanFinancialTab({ loan }: Props) {
+/** Linked accounts can be edited everywhere except terminal states. */
+const LINKED_ACCOUNTS_LOCKED = new Set(["closed", "rejected", "written_off"]);
+
+export function LoanFinancialTab({ loan, canEdit, onUpdated }: Props) {
   const t = useTranslations();
   const format = useFormatter();
   const currency = loan.currency ?? "XAF";
+  const [accountsDrawerOpen, setAccountsDrawerOpen] = useState(false);
+  const canEditAccounts = !!canEdit && !LINKED_ACCOUNTS_LOCKED.has(loan.status);
 
   const money = (minor: number | null): string =>
     minor === null || minor === undefined
@@ -60,6 +72,40 @@ export function LoanFinancialTab({ loan }: Props) {
         </Grid>
       </Section>
 
+      <Section title={t("loanDetail.sections.outstanding")}>
+        <p className="mb-3 text-xs text-muted-foreground">
+          {t("loanDetail.outstandingHint")}
+        </p>
+        <Grid>
+          <PlainField
+            label={t("loanDetail.fields.outstandingPrincipal")}
+            value={money(loan.outstanding_principal_minor)}
+          />
+          <PlainField
+            label={t("loanDetail.fields.globalOutstanding")}
+            value={money(loan.global_outstanding_amount_minor)}
+          />
+          <PlainField
+            label={t("loanDetail.fields.totalUnpaid")}
+            value={money(loan.total_unpaid_amount_minor)}
+          />
+          <PlainField
+            label={t("loanDetail.fields.dueAmount")}
+            value={money(loan.due_amount_minor)}
+          />
+          <PlainField
+            label={t("loanDetail.fields.nextRepayment")}
+            value={loan.next_repayment_date}
+            mono
+          />
+          <PlainField
+            label={t("loanDetail.fields.lastRepayment")}
+            value={loan.last_repayment_date}
+            mono
+          />
+        </Grid>
+      </Section>
+
       <Section title={t("loanDetail.sections.fees")}>
         <p className="mb-3 text-xs text-muted-foreground">
           {t("loanDetail.feesHint")}
@@ -84,7 +130,20 @@ export function LoanFinancialTab({ loan }: Props) {
         </Grid>
       </Section>
 
-      <Section title={t("loanDetail.sections.accounts")}>
+      <Section
+        title={t("loanDetail.sections.accounts")}
+        action={
+          canEditAccounts ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setAccountsDrawerOpen(true)}
+            >
+              {t("loanDetail.linkedAccounts.edit")}
+            </Button>
+          ) : undefined
+        }
+      >
         <Grid>
           <AccountField
             label={t("loans.fields.amortizationAccount")}
@@ -104,6 +163,15 @@ export function LoanFinancialTab({ loan }: Props) {
           />
         </Grid>
       </Section>
+
+      {canEditAccounts ? (
+        <LoanLinkedAccountsDrawer
+          open={accountsDrawerOpen}
+          loan={loan}
+          onClose={() => setAccountsDrawerOpen(false)}
+          onSaved={() => onUpdated?.()}
+        />
+      ) : null}
     </div>
   );
 }

@@ -18,6 +18,12 @@ export type ClientCollectionFrequency =
 
 export type Client = {
   public_id: string;
+  /**
+   * True when PII fields (names, phone, email, address…) are MASKED because
+   * the actor lacks `crm.pii.view` — distinguishes masked from genuinely empty
+   * (back-issue #7). Absent on older payloads, so treat undefined as false.
+   */
+  pii_redacted?: boolean;
   agency_public_id: string | null;
   profile_photo_document_public_id: string | null;
   prospector_public_id: string | null;

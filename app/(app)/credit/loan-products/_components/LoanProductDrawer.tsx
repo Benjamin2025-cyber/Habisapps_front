@@ -7,11 +7,14 @@ import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
 import { MoneyField } from "@/components/ui/MoneyField";
 import { localizeApiError } from "@/lib/api/errors";
+import { fetchFormulaPolicies } from "@/lib/api/reference";
 import { cn } from "@/lib/cn";
+import { useSession } from "@/lib/auth/SessionProvider";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import {
   FEE_POLICY_VALUE,
   INTEREST_POLICY_VALUE,
+  PENALTY_POLICY_VALUE,
   REPAYMENT_ALLOCATION_POLICY_VALUE,
   type GuaranteeDepositType,
   type LoanProduct,
@@ -124,10 +127,40 @@ export function LoanProductDrawer({
   onSubmit,
 }: Props) {
   const t = useTranslations();
+  const session = useSession();
+  const token = session.status === "authenticated" ? session.token : null;
   const [form, setForm] = useState<FormState>(EMPTY);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
+
+  // Formula-policy catalog (back-issue #20): drives which policy toggles are
+  // selectable. Unapproved policies (e.g. penalties_and_arrears) are disabled
+  // here instead of being hardcoded, and never submitted.
+  const [policyApproved, setPolicyApproved] = useState<Map<string, boolean>>(
+    new Map(),
+  );
+  useEffect(() => {
+    if (!open || !token) return;
+    let cancelled = false;
+    fetchFormulaPolicies(token)
+      .then((policies) => {
+        if (!cancelled) {
+          setPolicyApproved(
+            new Map(policies.map((p) => [p.key, p.approved])),
+          );
+        }
+      })
+      .catch(() => {
+        /* leave empty — toggles stay enabled until we know otherwise */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, token]);
+
+  // A policy is selectable unless the catalog explicitly marks it unapproved.
+  const policyEnabled = (key: string): boolean => policyApproved.get(key) !== false;
 
   const isEdit = mode === "edit";
 
@@ -242,20 +275,39 @@ export function LoanProductDrawer({
       penalty_value_type: nullable(form.penalty_value_type),
       penalty_value: toNum(form.penalty_value),
       ledger_account_public_id: nullable(form.ledger_account_public_id),
-      interest_policy_key: form.policy_interest ? INTEREST_POLICY_VALUE : null,
-      // `penalties_and_arrears` is approved=false in the backend formula config,
-      // and attaching it makes loan creation 500 (back-issues #16). Always clear
-      // it from this form until the backend approves it.
-      penalty_policy_key: null,
-      repayment_allocation_policy_key: form.policy_repayment_allocation
-        ? REPAYMENT_ALLOCATION_POLICY_VALUE
-        : null,
-      fee_policy_key: form.policy_fee ? FEE_POLICY_VALUE : null,
-      tax_policy_key: form.policy_tax ? FEE_POLICY_VALUE : null,
-      insurance_policy_key: form.policy_insurance ? FEE_POLICY_VALUE : null,
-      guarantee_deposit_policy_key: form.policy_guarantee_deposit
-        ? FEE_POLICY_VALUE
-        : null,
+      interest_policy_key:
+        form.policy_interest && policyEnabled(INTEREST_POLICY_VALUE)
+          ? INTEREST_POLICY_VALUE
+          : null,
+      // Only attach a policy the catalog reports as approved — attaching an
+      // unapproved one (e.g. penalties_and_arrears) makes loan creation 422
+      // (back-issues #16/#20). penalties_and_arrears is approved=false, so this
+      // stays null until the backend approves it.
+      penalty_policy_key:
+        form.policy_penalty && policyEnabled(PENALTY_POLICY_VALUE)
+          ? PENALTY_POLICY_VALUE
+          : null,
+      repayment_allocation_policy_key:
+        form.policy_repayment_allocation &&
+        policyEnabled(REPAYMENT_ALLOCATION_POLICY_VALUE)
+          ? REPAYMENT_ALLOCATION_POLICY_VALUE
+          : null,
+      fee_policy_key:
+        form.policy_fee && policyEnabled(FEE_POLICY_VALUE)
+          ? FEE_POLICY_VALUE
+          : null,
+      tax_policy_key:
+        form.policy_tax && policyEnabled(FEE_POLICY_VALUE)
+          ? FEE_POLICY_VALUE
+          : null,
+      insurance_policy_key:
+        form.policy_insurance && policyEnabled(FEE_POLICY_VALUE)
+          ? FEE_POLICY_VALUE
+          : null,
+      guarantee_deposit_policy_key:
+        form.policy_guarantee_deposit && policyEnabled(FEE_POLICY_VALUE)
+          ? FEE_POLICY_VALUE
+          : null,
       status: form.status || undefined,
     };
 
@@ -639,13 +691,23 @@ export function LoanProductDrawer({
                 label={t("loanProducts.fields.policyInterest")}
                 checked={form.policy_interest}
                 onChange={(checked) => set("policy_interest", checked)}
+                disabled={!policyEnabled(INTEREST_POLICY_VALUE)}
+                hint={
+                  policyEnabled(INTEREST_POLICY_VALUE)
+                    ? undefined
+                    : t("loanProducts.fields.policyUnapprovedHint")
+                }
               />
               <CheckboxField
                 label={t("loanProducts.fields.policyPenalty")}
-                checked={form.policy_penalty}
+                checked={form.policy_penalty && policyEnabled(PENALTY_POLICY_VALUE)}
                 onChange={(checked) => set("policy_penalty", checked)}
-                disabled
-                hint={t("loanProducts.fields.policyPenaltyDisabledHint")}
+                disabled={!policyEnabled(PENALTY_POLICY_VALUE)}
+                hint={
+                  policyEnabled(PENALTY_POLICY_VALUE)
+                    ? undefined
+                    : t("loanProducts.fields.policyUnapprovedHint")
+                }
               />
               <CheckboxField
                 label={t("loanProducts.fields.policyRepaymentAllocation")}
@@ -653,21 +715,30 @@ export function LoanProductDrawer({
                 onChange={(checked) =>
                   set("policy_repayment_allocation", checked)
                 }
+                disabled={!policyEnabled(REPAYMENT_ALLOCATION_POLICY_VALUE)}
+                hint={
+                  policyEnabled(REPAYMENT_ALLOCATION_POLICY_VALUE)
+                    ? undefined
+                    : t("loanProducts.fields.policyUnapprovedHint")
+                }
               />
               <CheckboxField
                 label={t("loanProducts.fields.policyFee")}
                 checked={form.policy_fee}
                 onChange={(checked) => set("policy_fee", checked)}
+                disabled={!policyEnabled(FEE_POLICY_VALUE)}
               />
               <CheckboxField
                 label={t("loanProducts.fields.policyTax")}
                 checked={form.policy_tax}
                 onChange={(checked) => set("policy_tax", checked)}
+                disabled={!policyEnabled(FEE_POLICY_VALUE)}
               />
               <CheckboxField
                 label={t("loanProducts.fields.policyInsurance")}
                 checked={form.policy_insurance}
                 onChange={(checked) => set("policy_insurance", checked)}
+                disabled={!policyEnabled(FEE_POLICY_VALUE)}
               />
               <CheckboxField
                 label={t("loanProducts.fields.policyGuaranteeDeposit")}
@@ -675,6 +746,7 @@ export function LoanProductDrawer({
                 onChange={(checked) =>
                   set("policy_guarantee_deposit", checked)
                 }
+                disabled={!policyEnabled(FEE_POLICY_VALUE)}
               />
             </div>
           </div>

@@ -148,6 +148,7 @@ export function GuarantorsTab({ clientPublicId, onCountChange }: Props) {
     action: GuarantorAction;
     reason: string | null;
     comment: string | null;
+    allow_self_verify: boolean;
   }) {
     if (!token || !actionDrawer) return;
     await updateGuarantorStatus(

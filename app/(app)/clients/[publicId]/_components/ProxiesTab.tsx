@@ -114,6 +114,7 @@ export function ProxiesTab({ clientPublicId, onCountChange }: Props) {
     action: ProxyAction;
     reason: string | null;
     comment: string | null;
+    allow_self_verify: boolean;
   }) {
     if (!token || !actionDrawer) return;
     await updateProxyStatus(

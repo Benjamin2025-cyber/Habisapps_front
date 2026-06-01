@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import {
+  fetchLoanSchedule,
   generateLoanSchedule,
   type LoanScheduleSnapshot,
   type LoanStatus,
@@ -36,6 +37,23 @@ export function LoanScheduleTab({
 
   const [snapshot, setSnapshot] = useState<LoanScheduleSnapshot | null>(null);
   const [generating, setGenerating] = useState(false);
+
+  // Hydrate the active schedule from GET /loans/{id}/schedule (back-issue #15):
+  // the table now survives a refresh instead of needing regeneration.
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    fetchLoanSchedule(token, loanPublicId)
+      .then((result) => {
+        if (!cancelled && result) setSnapshot(result);
+      })
+      .catch(() => {
+        /* no active schedule yet — fall through to the empty state */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token, loanPublicId]);
 
   const ccy = currency ?? "XAF";
   const eligible = GENERATABLE.includes(status);
@@ -90,9 +108,7 @@ export function LoanScheduleTab({
         ) : null}
       </div>
 
-      {/* No GET endpoint for the schedule (back-issues #15): it only lives in
-          this session after a generate. */}
-      <p className="rounded-[var(--radius-field)] border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-foreground">
+      <p className="rounded-[var(--radius-field)] border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
         {t("loanDetail.schedule.persistenceNote")}
       </p>
 

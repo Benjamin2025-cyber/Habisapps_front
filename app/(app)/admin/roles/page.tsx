@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
+import { ApiError } from "@/lib/api/client";
 import { localizeApiError, localizeApiMessage } from "@/lib/api/errors";
 import {
   fetchRoles,
@@ -94,7 +95,26 @@ export default function RolesPage() {
     setEditorError(null);
   }
 
+  // A permission is locked when the API would reject granting it to this role:
+  // a protected/non-delegable permission that isn't already granted on a
+  // non-platform role (back-issues #5/#21). Platform-admin may hold anything.
+  const isPermissionLocked = useCallback(
+    (permission: string): boolean => {
+      if (!selectedRole || !data) return false;
+      if (!selectedRole.assignable) return false; // platform-admin
+      if (selectedRole.permissions.includes(permission)) return false; // retain
+      const policy = data.permissionPolicy;
+      if (policy.non_delegable.includes(permission)) return true;
+      if (policy.protected.includes(permission) && !policy.delegation_enabled) {
+        return true;
+      }
+      return false;
+    },
+    [selectedRole, data],
+  );
+
   function togglePermission(permission: string) {
+    if (isPermissionLocked(permission)) return;
     setWorkingPermissions((current) => {
       const next = new Set(current);
       if (next.has(permission)) next.delete(permission);
@@ -109,7 +129,10 @@ export default function RolesPage() {
     setWorkingPermissions((current) => {
       const next = new Set(current);
       if (nextState) {
-        for (const permission of modulePermissions) next.add(permission);
+        // Skip locked permissions so "select all" can't trigger a 422.
+        for (const permission of modulePermissions) {
+          if (!isPermissionLocked(permission)) next.add(permission);
+        }
       } else {
         for (const permission of modulePermissions) next.delete(permission);
       }
@@ -128,22 +151,41 @@ export default function RolesPage() {
     setSaving(true);
     setEditorError(null);
     try {
-      await updateRolePermissions(
+      const { role } = await updateRolePermissions(
         token,
         selectedRole.name,
         Array.from(workingPermissions),
+        selectedRole.permissions_version,
       );
+      // Resync the working set to the server's authoritative result so dirty
+      // resets and the next save carries a fresh version (after refetch).
+      setWorkingPermissions(new Set(role.permissions));
       toast.success(
         t("rolesPage.toast.savedTitle"),
-        t("rolesPage.toast.savedBody", { name: selectedRole.display_name }),
+        t("rolesPage.toast.savedBody", {
+          name: selectedRole.display_name,
+          added: role.added_permissions.length,
+          removed: role.removed_permissions.length,
+        }),
       );
-      // Refetch the catalog so the role's permission count + the list reflect
-      // the new state. We keep the selection on the same role.
       refetch();
     } catch (cause) {
-      const { generalMessage } = localizeApiError(cause);
-      setEditorError(generalMessage);
-      toast.error(t("rolesPage.toast.errorTitle"), generalMessage);
+      // 409 = our baseline was stale (someone else changed the role). Reload
+      // the fresh state and ask the user to reapply (back-issues #5/#21).
+      if (cause instanceof ApiError && cause.status === 409) {
+        setEditorError(t("rolesPage.editor.staleConflict"));
+        toast.error(
+          t("rolesPage.toast.errorTitle"),
+          t("rolesPage.editor.staleConflict"),
+        );
+        refetch();
+        const fresh = data?.roles.find((r) => r.name === selectedRole.name);
+        if (fresh) setWorkingPermissions(new Set(fresh.permissions));
+      } else {
+        const { generalMessage } = localizeApiError(cause);
+        setEditorError(generalMessage);
+        toast.error(t("rolesPage.toast.errorTitle"), generalMessage);
+      }
     } finally {
       setSaving(false);
     }
@@ -193,6 +235,7 @@ export default function RolesPage() {
             role={selectedRole}
             permissionCatalog={data.permissions}
             selectedPermissions={Array.from(workingPermissions)}
+            isPermissionLocked={isPermissionLocked}
             onTogglePermission={togglePermission}
             onToggleModule={toggleModule}
             onSave={saveEditor}

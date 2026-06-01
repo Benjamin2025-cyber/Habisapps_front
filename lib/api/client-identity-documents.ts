@@ -28,6 +28,8 @@ export type ClientIdentityDocument = {
   public_id: string;
   client_public_id: string | null;
   document_public_id: string | null;
+  /** Back-face evidence (recto/verso) for 2-face types — back-issue #17. */
+  back_document_public_id: string | null;
   document_type: string;
   document_number: string;
   issuing_authority: string | null;
@@ -51,6 +53,7 @@ export type IdentityDocumentWritePayload = {
   issued_on?: string | null;
   expires_on?: string | null;
   document_public_id?: string | null;
+  back_document_public_id?: string | null;
 };
 
 export type IdentityDocumentStatusPayload = {

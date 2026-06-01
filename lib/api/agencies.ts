@@ -61,17 +61,29 @@ export type AgencyWritePayload = {
  * pagination meta as a sibling of `data`), so we read the raw envelope here
  * instead of going through `apiRequest` which would only surface `data`.
  *
- * Server-side filtering isn't supported by this endpoint yet, so
- * status/text filtering is applied client-side at the call site.
+ * Server-side `search` (code/name/city/region/branch_name/email/phone) and
+ * `status` filters are supported by the index — pass them through so the
+ * paginated total reflects the filtered set.
  */
 export async function fetchAgencies(
   token: string,
-  options: { page?: number; perPage?: number } = {},
+  options: {
+    page?: number;
+    perPage?: number;
+    search?: string;
+    status?: AgencyStatus;
+  } = {},
 ): Promise<PaginatedAgencies> {
   const query = new URLSearchParams();
   query.set("per_page", String(options.perPage ?? 100));
   if (options.page && options.page > 0) {
     query.set("page", String(options.page));
+  }
+  if (options.search && options.search.trim().length > 0) {
+    query.set("search", options.search.trim());
+  }
+  if (options.status) {
+    query.set("status", options.status);
   }
 
   const response = await fetch(`/api/v1/agencies?${query.toString()}`, {

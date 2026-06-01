@@ -308,6 +308,7 @@ export function ClientDrawer({
             label={t("clients.fields.photo")}
             value={form.profile_photo_document_public_id}
             category="client_profile_photo"
+            agencyPublicId={form.agency_public_id || undefined}
             onChange={(next) => set("profile_photo_document_public_id", next)}
             error={errors.profile_photo_document_public_id}
             hint={t("clients.fields.photoHint")}

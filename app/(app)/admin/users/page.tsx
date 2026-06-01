@@ -21,6 +21,7 @@ import { useCan } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { usePermissionGuard } from "@/lib/auth/usePermissionGuard";
 import { useApi } from "@/lib/hooks/useApi";
+import { useDebouncedValue } from "@/lib/hooks/useDebouncedValue";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import { useToast } from "@/lib/toast/ToastProvider";
 import { PageHeader } from "../../_components/PageHeader";
@@ -66,21 +67,31 @@ export default function StaffUsersPage() {
 
   const token = session.status === "authenticated" ? session.token : null;
 
-  // List + agencies + roles all share the same auth dependency. We could split
-  // them, but a single fan-out keeps the orchestration shallow.
+  // Free-text search is server-side (debounced); status/agency/role stay
+  // client-side because the index has no server filter for them yet.
+  const debouncedQuery = useDebouncedValue(filters.query.trim(), 300);
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQuery]);
+
   const fetcher = useCallback(
     async (signal: AbortSignal): Promise<PaginatedStaffUsers> => {
       if (!token) throw new Error("Missing session token");
       void signal;
-      return fetchStaffUsers(token, { page, perPage: pageSize });
+      return fetchStaffUsers(token, {
+        page,
+        perPage: pageSize,
+        search: debouncedQuery || undefined,
+      });
     },
-    [token, page, pageSize],
+    [token, page, pageSize, debouncedQuery],
   );
 
   const { data, loading, error, refetch } = useApi(fetcher, [
     token,
     page,
     pageSize,
+    debouncedQuery,
   ]);
 
   const [agencies, setAgencies] = useState<Agency[]>([]);
@@ -115,11 +126,10 @@ export default function StaffUsersPage() {
     }, {});
   }, [roles]);
 
-  // Filtering happens client-side because the index endpoint doesn't expose
-  // query-builder filters today.
+  // Free-text search is server-side; status/agency/role are narrowed
+  // client-side on the returned page (the index has no server filter for them).
   const visibleStaffUsers = useMemo(() => {
     if (!data) return [];
-    const needle = filters.query.trim().toLowerCase();
     return data.data.filter((user) => {
       if (filters.status && user.status !== filters.status) return false;
       if (
@@ -129,13 +139,7 @@ export default function StaffUsersPage() {
         return false;
       }
       if (filters.role && !user.roles.includes(filters.role)) return false;
-      if (needle.length === 0) return true;
-      return (
-        user.name.toLowerCase().includes(needle) ||
-        user.phone_number.toLowerCase().includes(needle) ||
-        (user.matricule ?? "").toLowerCase().includes(needle) ||
-        (user.email ?? "").toLowerCase().includes(needle)
-      );
+      return true;
     });
   }, [data, filters]);
 

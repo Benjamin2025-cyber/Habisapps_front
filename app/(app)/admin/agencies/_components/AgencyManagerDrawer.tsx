@@ -7,6 +7,10 @@ import { TextField } from "@/components/ui/TextField";
 import { localizeApiError } from "@/lib/api/errors";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import type { Agency } from "@/lib/api/agencies";
+import { StaffUserPicker } from "../../../_components/StaffUserPicker";
+
+/** Default position label for a freshly-assigned manager (matches the API default). */
+const DEFAULT_ROLE_AT_AGENCY = "agency-manager";
 
 type Props = {
   open: boolean;
@@ -21,21 +25,22 @@ type Props = {
 /**
  * Lightweight drawer to assign / replace / clear an agency's manager.
  *
- * We accept a raw `manager_public_id` for now — a proper staff-user picker
- * will land with P5 (Référentiel Gestionnaires). The current manager (if any)
- * is shown so the user can compare.
+ * The manager is chosen with a staff-user picker. `role_at_agency` is the
+ * position label held WITHIN this agency (pivot `staff_agency_assignments`),
+ * NOT a system permission role — it defaults to `agency-manager`. The current
+ * manager (if any) is shown so the user can compare.
  */
 export function AgencyManagerDrawer({ open, agency, onClose, onSubmit }: Props) {
   const t = useTranslations();
   const [publicId, setPublicId] = useState("");
-  const [roleAtAgency, setRoleAtAgency] = useState("");
+  const [roleAtAgency, setRoleAtAgency] = useState(DEFAULT_ROLE_AT_AGENCY);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
     setPublicId(agency?.manager_public_id ?? "");
-    setRoleAtAgency("");
+    setRoleAtAgency(DEFAULT_ROLE_AT_AGENCY);
     setError(null);
   }, [open, agency]);
 
@@ -117,12 +122,12 @@ export function AgencyManagerDrawer({ open, agency, onClose, onSubmit }: Props) 
           </p>
         ) : null}
 
-        <TextField
+        <StaffUserPicker
           label={t("agencies.managerDrawer.publicIdLabel")}
           value={publicId}
-          onChange={(event) => setPublicId(event.target.value)}
+          onChange={setPublicId}
           hint={t("agencies.managerDrawer.publicIdHint")}
-          placeholder="usr_..."
+          filterRoles={["agency-manager"]}
         />
 
         <TextField

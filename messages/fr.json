@@ -414,6 +414,41 @@
   "toast": {
     "dismissAriaLabel": "Fermer la notification"
   },
+  "directory": {
+    "errorTitle": "Impossible de charger la liste",
+    "count": "{count} enregistrement(s)",
+    "openClient": "Voir le client",
+    "filters": {
+      "search": "Recherche",
+      "searchPlaceholder": "Nom, téléphone…",
+      "status": "Statut",
+      "statusAll": "Tous les statuts",
+      "verification": "Vérification",
+      "verificationAll": "Toutes"
+    },
+    "guarantors": {
+      "pageTitle": "Garants",
+      "pageDescription": "Vue transversale, lecture seule, de tous les garants. La gestion se fait sur la fiche du client.",
+      "columns": {
+        "name": "Garant",
+        "phone": "Téléphone",
+        "relationship": "Lien",
+        "status": "Statut",
+        "client": "Client"
+      }
+    },
+    "proxies": {
+      "pageTitle": "Mandataires",
+      "pageDescription": "Vue transversale, lecture seule, de tous les mandataires. La gestion se fait sur la fiche du client.",
+      "columns": {
+        "name": "Mandataire",
+        "phone": "Téléphone",
+        "mandate": "Type de mandat",
+        "status": "Statut",
+        "client": "Client"
+      }
+    }
+  },
   "clients": {
     "pageTitle": "Référentiel — Clients",
     "pageDescription": "Liste des clients de l'institution. Création, modification, statut et workflow KYC.",
@@ -547,7 +582,10 @@
       "reasonPlaceholder": "Décrire le motif du rejet (visible côté audit)…",
       "reasonRequired": "Le motif est obligatoire pour un rejet.",
       "commentLabel": "Commentaire (optionnel)",
-      "commentPlaceholder": "Information complémentaire (visible côté audit)…"
+      "commentPlaceholder": "Information complémentaire (visible côté audit)…",
+      "selfVerifyLabel": "Auto-vérification (j'ai soumis ce KYC)",
+      "selfVerifyHint": "À cocher seulement si vous avez soumis ce KYC. Requiert un motif et la permission « override auto-vérification » — sinon l'opération est refusée (403).",
+      "selfVerifyReasonRequired": "Un motif est obligatoire pour l'auto-vérification."
     },
     "toast": {
       "createdTitle": "Client créé",
@@ -567,6 +605,8 @@
     "referenceLabel": "Code client {reference}",
     "backToList": "Retour à la liste",
     "errorTitle": "Impossible de charger le client",
+    "piiRedactedTitle": "Données personnelles masquées",
+    "piiRedactedBody": "Vous n'avez pas la permission « crm.pii.view ». Les champs personnels (nom, téléphone, e-mail, adresse…) sont masqués — un champ vide peut donc être masqué plutôt qu'absent.",
     "tabsAriaLabel": "Sections de la fiche client",
     "tabs": {
       "identity": "Identité",
@@ -603,7 +643,10 @@
       "reasonPlaceholder": "Décrire le motif (visible côté audit)…",
       "reasonRequired": "Le motif est obligatoire pour cette action.",
       "commentLabel": "Commentaire (optionnel)",
-      "commentPlaceholder": "Information complémentaire (visible côté audit)…"
+      "commentPlaceholder": "Information complémentaire (visible côté audit)…",
+      "selfVerifyLabel": "Auto-vérification (j'ai monté ce dossier)",
+      "selfVerifyHint": "À cocher seulement si vous avez soumis ce dossier. Requiert un motif et la permission « override auto-vérification » — sinon l'opération est refusée.",
+      "selfVerifyReasonRequired": "Un motif est obligatoire pour l'auto-vérification."
     },
     "identityDocs": {
       "title": "Documents d'identité",
@@ -663,13 +706,18 @@
         "authority": "Autorité émettrice",
         "issuedOn": "Date d'émission",
         "expiresOn": "Date d'expiration",
-        "document": "Pièce justificative (image)",
-        "documentHint": "Photo de la pièce. Obligatoire pour pouvoir vérifier le document KYC. Une seule image (recto) — le recto/verso n'est pas encore géré par l'API.",
+        "document": "Pièce justificative — recto (image)",
+        "documentHint": "Photo de la pièce (recto). Obligatoire pour pouvoir vérifier le document KYC.",
+        "documentBack": "Pièce justificative — verso (image)",
+        "documentBackHint": "Photo du verso. Requise pour ce type avant la vérification.",
+        "expiryRequiredHint": "Obligatoire pour ce type avant la vérification.",
         "authorityHint": "Organisme ayant délivré la pièce (ex. DGSN pour la CNI). Optionnel.",
         "expiredWarning": "⚠ Cette date d'expiration est dépassée — le document ne pourra pas être vérifié. Saisissez une date future."
       },
       "types": {
         "legacyTag": "valeur existante",
+        "national_id": "Carte Nationale d'Identité (CNI)",
+        "drivers_license": "Permis de conduire",
         "national_id_card": "Carte Nationale d'Identité (CNI)",
         "national_id_receipt": "Récépissé de CNI",
         "passport": "Passeport",
@@ -902,11 +950,14 @@
       "confirmDiscard": "Des modifications non enregistrées seront perdues. Continuer ?",
       "errorTitle": "Modification refusée",
       "protectedRoleTitle": "Rôle protégé",
-      "protectedRoleBody": "Ce rôle est marqué comme protégé : certaines permissions ne peuvent pas être retirées ou ajoutées. L'API refusera toute modification qui viole ces contraintes."
+      "protectedRoleBody": "Ce rôle est marqué comme protégé : certaines permissions ne peuvent pas être retirées ou ajoutées. L'API refusera toute modification qui viole ces contraintes.",
+      "protectedTag": "Protégée",
+      "protectedLockHint": "Permission protégée : non attribuable à ce rôle (réservée au platform-admin, ou délégation désactivée côté back).",
+      "staleConflict": "Les permissions de ce rôle ont changé depuis leur chargement. La liste a été rechargée — vérifiez puis réappliquez votre sélection."
     },
     "toast": {
       "savedTitle": "Permissions mises à jour",
-      "savedBody": "Les permissions du rôle {name} ont été enregistrées.",
+      "savedBody": "Permissions du rôle {name} enregistrées ({added} ajoutée(s), {removed} retirée(s)).",
       "errorTitle": "Enregistrement impossible"
     }
   },
@@ -1099,10 +1150,10 @@
       "subtitle": "Agence {code} — {name}",
       "currentManager": "Responsable actuel : {name}",
       "noManager": "Aucun responsable assigné pour l'instant.",
-      "publicIdLabel": "Identifiant utilisateur (public_id)",
-      "publicIdHint": "Le sélecteur de gestionnaire arrive avec la phase Référentiel Gestionnaires.",
-      "roleAtAgencyLabel": "Rôle à l'agence (optionnel)",
-      "roleAtAgencyHint": "Par défaut : agency-manager."
+      "publicIdLabel": "Gestionnaire",
+      "publicIdHint": "Seuls les utilisateurs ayant déjà le rôle « agency-manager » sont proposés. Pour promouvoir un caissier, attribuez-lui d'abord ce rôle dans Gestion des utilisateurs.",
+      "roleAtAgencyLabel": "Poste à l'agence (optionnel)",
+      "roleAtAgencyHint": "Intitulé du poste occupé DANS cette agence (ex. agency-manager) — distinct des rôles de permissions du système. Laisser « agency-manager » par défaut."
     },
     "toast": {
       "createdTitle": "Agence créée",
@@ -1182,6 +1233,7 @@
       "agencyPlaceholder": "Sélectionner une agence…",
       "agencyEditHint": "L'agence n'est pas modifiable après création.",
       "number": "Numéro de compte",
+      "numberAutoHint": "Laisser vide pour une génération automatique (ACC…).",
       "currency": "Devise",
       "currencyHint": "Code ISO à 3 lettres (ex. XAF).",
       "title": "Intitulé du compte",
@@ -1749,10 +1801,29 @@
       "lifecycle": "Cycle de vie",
       "amounts": "Montants & échéancier",
       "fees": "Frais, taxes & garantie",
-      "accounts": "Comptes rattachés"
+      "accounts": "Comptes rattachés",
+      "outstanding": "Encours & remboursements"
     },
     "feesHint": "Montants calculés par le moteur (snapshot du produit au montage). Lecture seule.",
+    "outstandingHint": "Calculé par l'API à partir de l'échéancier et des remboursements. « — » signifie qu'aucun encours n'est encore projeté.",
+    "linkedAccounts": {
+      "edit": "Modifier les comptes",
+      "title": "Comptes liés",
+      "hint": "Mettre à jour les comptes de recouvrement / impayés / amortissement / transfert. Le compte doit appartenir au client et à l'agence du prêt, et être actif.",
+      "placeholder": "Aucun compte",
+      "noAccounts": "Ce client n'a aucun compte rattachable. Créez d'abord un compte client.",
+      "toast": {
+        "savedTitle": "Comptes liés mis à jour",
+        "savedBody": "{count} compte(s) modifié(s)."
+      }
+    },
     "fields": {
+      "outstandingPrincipal": "Encours principal",
+      "globalOutstanding": "Encours global",
+      "totalUnpaid": "Total impayé",
+      "dueAmount": "Échéance due",
+      "nextRepayment": "Prochaine échéance",
+      "lastRepayment": "Dernier remboursement",
       "approvedOn": "Approuvé le",
       "disbursedOn": "Décaissé le",
       "closedOn": "Clôturé le",
@@ -1768,7 +1839,7 @@
       "notEligible": "Le tableau ne peut être généré que sur un prêt approuvé ou rééchelonné.",
       "generate": "Générer le tableau",
       "regenerate": "Régénérer",
-      "persistenceNote": "Le tableau n'est pas (encore) consultable via l'API après un rechargement — il s'affiche uniquement après génération (voir back-issues #15). Régénérez-le si besoin.",
+      "persistenceNote": "Tableau d'amortissement actif chargé depuis l'API ; il reste consultable après rechargement. « Régénérer » remplace le snapshot actif.",
       "empty": "Aucun tableau généré. Cliquez sur « Générer le tableau ».",
       "emptyNotEligible": "Tableau indisponible : le prêt doit d'abord être approuvé.",
       "generatedTitle": "Tableau généré",
@@ -1788,7 +1859,7 @@
     },
     "visa": {
       "title": "Circuit de visa",
-      "historyNote": "L'historique des visas n'est pas rechargé depuis l'API (aucun GET — voir back-issues #15). Les décisions prises ici s'affichent jusqu'au rechargement ; le statut du prêt reflète l'avancement réel.",
+      "historyNote": "Historique des visas chargé depuis l'API : qui a visé, quand et la décision, pour chacune des 4 étapes.",
       "actedLine": "Visa : {decision} le {at}",
       "steps": {
         "montage": "Montage",
@@ -1965,6 +2036,7 @@
       "policyInterest": "Politique d'intérêt",
       "policyPenalty": "Politique de pénalités & arriérés",
       "policyPenaltyDisabledHint": "Non disponible : cette politique n'est pas approuvée côté back (la rattacher fait échouer la création de prêt). Voir back-issues #16.",
+      "policyUnapprovedHint": "Non disponible : politique non approuvée côté back (catalogue formula-policies). La rattacher fait échouer la création de prêt.",
       "policyRepaymentAllocation": "Ordre d'imputation des remboursements",
       "policyFee": "Politique de frais",
       "policyTax": "Politique de taxe",

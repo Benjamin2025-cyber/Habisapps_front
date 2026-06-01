@@ -1,4 +1,4 @@
-import { apiRequest, notifyAuthExpired } from "./client";
+import { ApiError, apiRequest, notifyAuthExpired } from "./client";
 
 /**
  * Lightweight count helper. Calls `GET /loans` with `per_page=1` and reads
@@ -85,8 +85,9 @@ export { apiRequest };
  *   - actions → objets nommés sous `data` (`data.loan` + `data.approval` /
  *     `data.transition` / `data.snapshot`).
  *
- * ⚠️ L'API n'expose AUCUN GET pour les visas ni pour le tableau d'amortissement
- * (voir back-issues.md #15) — disponibles seulement dans la réponse de l'action.
+ * Les visas et le tableau d'amortissement sont désormais rechargeables via
+ * `GET /loans/{id}/approvals` et `GET /loans/{id}/schedule` (back-issue #15
+ * livré) — voir `fetchLoanApprovals` / `fetchLoanSchedule` ci-dessous.
  * ------------------------------------------------------------------ */
 
 export type LoanStatus =
@@ -163,6 +164,20 @@ export type Loan = {
   dossier_fees_tax_minor: number | null;
   guarantee_deposit_amount_minor: number | null;
   insurance_amount_minor: number | null;
+  // Real outstanding/projection columns (LoanResource, back-issue #19). Null
+  // until the loan has a schedule/repayments — never fall back to approved/
+  // requested principal for these.
+  outstanding_principal_minor: number | null;
+  installment_amount_minor: number | null;
+  total_unpaid_amount_minor: number | null;
+  due_amount_minor: number | null;
+  global_outstanding_amount_minor: number | null;
+  total_principal_repaid_minor: number | null;
+  total_interest_repaid_minor: number | null;
+  total_penalties_paid_minor: number | null;
+  installments_repaid_count: number | null;
+  last_repayment_date: string | null;
+  next_repayment_date: string | null;
   formula_policy_snapshot: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
@@ -255,19 +270,32 @@ export type LoanTransitionResult = {
   transitioned_at: string | null;
 };
 
-/** Paginated list. Server filter is `status`; search is client-side. */
+/**
+ * Paginated list. Server filters: `status`, `filter[client_public_id]`
+ * (back-issue #23), and free-text `search` (loan_number/status/purpose/client
+ * name/phone/reference). Pass `clientPublicId` to load ALL of a client's loans
+ * across pages instead of filtering a single page client-side.
+ */
 export async function fetchLoans(
   token: string,
   options: {
     page?: number;
     perPage?: number;
     status?: LoanStatus;
+    clientPublicId?: string;
+    search?: string;
   } = {},
 ): Promise<PaginatedLoans> {
   const query = new URLSearchParams();
   query.set("per_page", String(options.perPage ?? 100));
   if (options.page && options.page > 0) query.set("page", String(options.page));
   if (options.status) query.set("status", options.status);
+  if (options.clientPublicId) {
+    query.set("filter[client_public_id]", options.clientPublicId);
+  }
+  if (options.search && options.search.trim().length > 0) {
+    query.set("search", options.search.trim());
+  }
 
   const response = await fetch(`/api/v1/loans?${query.toString()}`, {
     method: "GET",
@@ -311,6 +339,97 @@ export async function fetchLoans(
 
 export async function getLoan(token: string, publicId: string): Promise<Loan> {
   return apiRequest<Loan>(`loans/${publicId}`, { method: "GET", token });
+}
+
+/**
+ * Recharge l'état des 4 visas (back-issue #15). Renvoie la liste des
+ * approbations agies (vide tant qu'aucune étape n'a été visée).
+ */
+export async function fetchLoanApprovals(
+  token: string,
+  publicId: string,
+): Promise<LoanApprovalResult[]> {
+  const data = await apiRequest<{ approvals?: LoanApprovalResult[] }>(
+    `loans/${publicId}/approvals`,
+    { method: "GET", token },
+  );
+  return data.approvals ?? [];
+}
+
+/**
+ * Recharge le tableau d'amortissement actif (back-issue #15). Renvoie `null`
+ * quand aucun snapshot actif n'existe (404) — pas une erreur, juste « à générer ».
+ */
+export async function fetchLoanSchedule(
+  token: string,
+  publicId: string,
+): Promise<LoanScheduleSnapshot | null> {
+  try {
+    const data = await apiRequest<{ snapshot: LoanScheduleSnapshot }>(
+      `loans/${publicId}/schedule`,
+      { method: "GET", token },
+    );
+    return data.snapshot ?? null;
+  } catch (cause) {
+    if (cause instanceof ApiError && cause.status === 404) return null;
+    throw cause;
+  }
+}
+
+/* ---- #22 — Comptes liés (modifiables post-brouillon) ---- */
+
+export type LoanLinkedAccountsPayload = {
+  amortization_account_public_id?: string | null;
+  unpaid_account_public_id?: string | null;
+  recovery_account_public_id?: string | null;
+  transfer_account_public_id?: string | null;
+};
+
+/**
+ * Met à jour les comptes liés (recouvrement / impayés / amortissement /
+ * transfert) sur un prêt actif/décaissé — `PATCH /loans/{id}/linked-accounts`.
+ * Refusé sur `closed`/`rejected`/`written_off`. L'API rejette un payload vide
+ * ou des clés inconnues (422). Renvoie le prêt + `changed_fields` (lu dans
+ * `meta`, que `apiRequest` n'expose pas — d'où le fetch brut).
+ */
+export async function updateLoanLinkedAccounts(
+  token: string,
+  publicId: string,
+  payload: LoanLinkedAccountsPayload,
+): Promise<{ loan: Loan; changed_fields: string[] }> {
+  const response = await fetch(`/api/v1/loans/${publicId}/linked-accounts`, {
+    method: "PATCH",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      "X-API-Version": process.env.NEXT_PUBLIC_API_VERSION ?? "1",
+      Authorization: `Bearer ${token}`,
+    },
+    credentials: "omit",
+    body: JSON.stringify(stripUndefinedLoan(payload)),
+  });
+
+  const text = await response.text();
+  const envelope = (text.length > 0 ? JSON.parse(text) : {}) as {
+    data?: Loan;
+    meta?: { changed_fields?: string[] };
+    message?: string;
+    errors?: Record<string, string[]>;
+  };
+
+  if (!response.ok) {
+    if (response.status === 401) notifyAuthExpired();
+    throw new ApiError(
+      envelope.message ?? `Failed to update linked accounts (HTTP ${response.status})`,
+      response.status,
+      envelope.errors ?? null,
+    );
+  }
+
+  return {
+    loan: envelope.data as Loan,
+    changed_fields: envelope.meta?.changed_fields ?? [],
+  };
 }
 
 /* ---- P15 — Déblocage (disbursement) ---- */

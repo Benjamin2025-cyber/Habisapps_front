@@ -9,7 +9,7 @@ import { SearchIcon } from "@/components/ui/icons";
 import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
 import { fetchAgencies, type Agency } from "@/lib/api/agencies";
-import { fetchLoans, type PaginatedLoans } from "@/lib/api/loans";
+import { fetchLoans, type Loan, type PaginatedLoans } from "@/lib/api/loans";
 import { createLoanTransfer } from "@/lib/api/loan-transfers";
 import { fetchStaffUsers, type StaffUser } from "@/lib/api/staff-users";
 import { localizeApiError, localizeApiMessage } from "@/lib/api/errors";
@@ -159,8 +159,7 @@ export default function LoanTransfersPage() {
   );
 
   const totalMinor = selectedLoans.reduce(
-    (sum, loan) =>
-      sum + (loan.approved_principal_minor ?? loan.requested_amount_minor ?? 0),
+    (sum, loan) => sum + loanOutstandingMinor(loan),
     0,
   );
 
@@ -499,12 +498,9 @@ export default function LoanTransfersPage() {
                           {managerName(loan.credit_agent_public_id)}
                         </td>
                         <td className="px-3 py-2 text-right tabular-nums text-foreground">
-                          {format.currencyMinor(
-                            loan.approved_principal_minor ??
-                              loan.requested_amount_minor ??
-                              0,
-                            { currency: loan.currency ?? "XAF" },
-                          )}
+                          {format.currencyMinor(loanOutstandingMinor(loan), {
+                            currency: loan.currency ?? "XAF",
+                          })}
                         </td>
                         <td className="px-3 py-2">
                           <Badge tone={LOAN_STATUS_TONE[loan.status]}>
@@ -703,5 +699,20 @@ export default function LoanTransfersPage() {
         </div>
       </ConfirmDialog>
     </>
+  );
+}
+
+/**
+ * Real outstanding for the mutation list/total (back-issue #19). Prefer the
+ * global outstanding, then principal outstanding; only fall back to approved/
+ * requested principal when the projection columns are still null (no schedule).
+ */
+function loanOutstandingMinor(loan: Loan): number {
+  return (
+    loan.global_outstanding_amount_minor ??
+    loan.outstanding_principal_minor ??
+    loan.approved_principal_minor ??
+    loan.requested_amount_minor ??
+    0
   );
 }

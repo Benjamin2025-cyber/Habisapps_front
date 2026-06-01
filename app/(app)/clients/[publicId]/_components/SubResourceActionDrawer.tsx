@@ -27,6 +27,7 @@ type Props<A extends ActionKey> = {
     action: A;
     reason: string | null;
     comment: string | null;
+    allow_self_verify: boolean;
   }) => Promise<void>;
 };
 
@@ -46,6 +47,7 @@ export function SubResourceActionDrawer<A extends ActionKey>({
   const t = useTranslations();
   const [reason, setReason] = useState("");
   const [comment, setComment] = useState("");
+  const [selfVerify, setSelfVerify] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,14 +55,24 @@ export function SubResourceActionDrawer<A extends ActionKey>({
     if (!open) return;
     setReason("");
     setComment("");
+    setSelfVerify(false);
     setError(null);
   }, [open]);
+
+  // A justification is required for a rejection and for a self-verification
+  // override (the API expects a reason alongside allow_self_verify).
+  const needsReason =
+    action === "reject" || (action === "verify" && selfVerify);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!action) return;
-    if (action === "reject" && reason.trim().length === 0) {
-      setError(t("clientDetail.action.reasonRequired"));
+    if (needsReason && reason.trim().length === 0) {
+      setError(
+        action === "verify"
+          ? t("clientDetail.action.selfVerifyReasonRequired")
+          : t("clientDetail.action.reasonRequired"),
+      );
       return;
     }
     setSubmitting(true);
@@ -68,8 +80,9 @@ export function SubResourceActionDrawer<A extends ActionKey>({
     try {
       await onSubmit({
         action,
-        reason: action === "reject" ? reason.trim() : null,
+        reason: needsReason ? reason.trim() : null,
         comment: comment.trim().length === 0 ? null : comment.trim(),
+        allow_self_verify: action === "verify" && selfVerify,
       });
     } catch (cause) {
       const { generalMessage } = localizeApiError(cause, {
@@ -129,7 +142,26 @@ export function SubResourceActionDrawer<A extends ActionKey>({
         className="flex flex-col gap-4"
         noValidate
       >
-        {action === "reject" ? (
+        {action === "verify" ? (
+          <label className="flex items-start gap-2 rounded-[var(--radius-field)] border border-border bg-muted/30 px-3 py-2">
+            <input
+              type="checkbox"
+              checked={selfVerify}
+              onChange={(event) => setSelfVerify(event.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-input text-accent focus:ring-2 focus:ring-ring/20"
+            />
+            <span className="flex flex-col gap-0.5">
+              <span className="text-sm font-medium text-foreground">
+                {t("clientDetail.action.selfVerifyLabel")}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {t("clientDetail.action.selfVerifyHint")}
+              </span>
+            </span>
+          </label>
+        ) : null}
+
+        {needsReason ? (
           <div>
             <label
               htmlFor="sub-resource-reason"

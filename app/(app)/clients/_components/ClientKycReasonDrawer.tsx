@@ -17,6 +17,7 @@ type Props = {
     action: KycAction;
     reason: string | null;
     comment: string | null;
+    allow_self_verify: boolean;
   }) => Promise<void>;
 };
 
@@ -35,6 +36,7 @@ export function ClientKycReasonDrawer({
   const t = useTranslations();
   const [reason, setReason] = useState("");
   const [comment, setComment] = useState("");
+  const [selfVerify, setSelfVerify] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,14 +44,24 @@ export function ClientKycReasonDrawer({
     if (!open) return;
     setReason("");
     setComment("");
+    setSelfVerify(false);
     setError(null);
   }, [open]);
+
+  // A justification is required for a rejection and for a self-verification
+  // override (the API expects a reason alongside allow_self_verify).
+  const needsReason =
+    action === "reject" || (action === "verify" && selfVerify);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!action) return;
-    if (action === "reject" && reason.trim().length === 0) {
-      setError(t("clients.kycReason.reasonRequired"));
+    if (needsReason && reason.trim().length === 0) {
+      setError(
+        action === "verify"
+          ? t("clients.kycReason.selfVerifyReasonRequired")
+          : t("clients.kycReason.reasonRequired"),
+      );
       return;
     }
     setSubmitting(true);
@@ -57,8 +69,9 @@ export function ClientKycReasonDrawer({
     try {
       await onSubmit({
         action,
-        reason: action === "reject" ? reason.trim() : null,
+        reason: needsReason ? reason.trim() : null,
         comment: comment.trim().length === 0 ? null : comment.trim(),
+        allow_self_verify: action === "verify" && selfVerify,
       });
     } catch (cause) {
       const { generalMessage } = localizeApiError(cause, {
@@ -125,7 +138,26 @@ export function ClientKycReasonDrawer({
         className="flex flex-col gap-4"
         noValidate
       >
-        {action === "reject" ? (
+        {action === "verify" ? (
+          <label className="flex items-start gap-2 rounded-[var(--radius-field)] border border-border bg-muted/30 px-3 py-2">
+            <input
+              type="checkbox"
+              checked={selfVerify}
+              onChange={(event) => setSelfVerify(event.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-input text-accent focus:ring-2 focus:ring-ring/20"
+            />
+            <span className="flex flex-col gap-0.5">
+              <span className="text-sm font-medium text-foreground">
+                {t("clients.kycReason.selfVerifyLabel")}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {t("clients.kycReason.selfVerifyHint")}
+              </span>
+            </span>
+          </label>
+        ) : null}
+
+        {needsReason ? (
           <div>
             <label
               htmlFor="client-kyc-reason"

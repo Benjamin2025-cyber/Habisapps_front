@@ -52,10 +52,18 @@ export default function DelinquenciesPage() {
     canDelinquency ? "trackings" : "recoveries",
   );
 
+  // Load ALL of the selected client's loans server-side (back-issue #23 —
+  // `filter[client_public_id]`), so loans beyond the 100 most-recent
+  // institution-wide are no longer missed.
   useEffect(() => {
-    if (!token) return;
+    if (!token || !client) {
+      setLoans([]);
+      setLoansError(null);
+      return;
+    }
     let cancelled = false;
-    fetchLoans(token, { perPage: 100 })
+    setLoansError(null);
+    fetchLoans(token, { clientPublicId: client.value, perPage: 100 })
       .then((response) => {
         if (!cancelled) setLoans(response.data);
       })
@@ -68,23 +76,15 @@ export default function DelinquenciesPage() {
     return () => {
       cancelled = true;
     };
-  }, [token]);
-
-  // Loans of the selected client only (the loans index has no client filter —
-  // see back-issues; filtered client-side from the loaded set).
-  const clientLoans = useMemo(
-    () =>
-      client ? loans.filter((l) => l.client_public_id === client.value) : [],
-    [loans, client],
-  );
+  }, [token, client]);
 
   const loanOptions = useMemo(
     () =>
-      clientLoans.map((loan) => ({
+      loans.map((loan) => ({
         value: loan.public_id,
         label: `${loan.loan_number ?? loan.public_id} — ${t(`loans.status.${loan.status}`)}`,
       })),
-    [clientLoans, t],
+    [loans, t],
   );
 
   function changeClient(option: ClientOption | null) {

@@ -6,6 +6,7 @@ import { uploadDocument } from "@/lib/api/documents";
 import { localizeApiError } from "@/lib/api/errors";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
+import { AuthenticatedImage } from "./AuthenticatedImage";
 
 type Props = {
   /** Linked document public_id ("" = none). */
@@ -13,6 +14,12 @@ type Props = {
   onChange: (documentPublicId: string) => void;
   /** Document category sent on upload (e.g. "client_profile_photo"). */
   category: string;
+  /**
+   * Target agency for the uploaded document. Required for platform/institution
+   * actors with no current agency, and must match the linked entity's agency
+   * (back-issue #11).
+   */
+  agencyPublicId?: string | null;
   label?: string;
   hint?: string;
   error?: string | null;
@@ -21,16 +28,15 @@ type Props = {
 
 /**
  * Image upload field backed by `POST /documents`. Uploads on file select and
- * reports the resulting document public_id via `onChange`.
- *
- * NOTE: the API does not serve file content back, so a previously-linked image
- * (edit mode) can't be rendered — we show a "linked" placeholder instead. The
- * local preview only exists for a file chosen in the current session.
+ * reports the resulting document public_id via `onChange`. A previously-linked
+ * image (edit mode) is rendered via `AuthenticatedImage` using the
+ * `GET /documents/{id}/file` endpoint (back-issues #10/#11).
  */
 export function ImageUploadField({
   value,
   onChange,
   category,
+  agencyPublicId,
   label,
   hint,
   error,
@@ -64,6 +70,7 @@ export function ImageUploadField({
       const doc = await uploadDocument(token, file, {
         category,
         title: file.name,
+        agencyPublicId,
       });
       onChange(doc.public_id);
     } catch (cause) {
@@ -83,8 +90,7 @@ export function ImageUploadField({
     if (inputRef.current) inputRef.current.value = "";
   }
 
-  // Edit mode: a document is linked but we have no local preview and the API
-  // won't serve it.
+  // Edit mode: a document is linked but no local preview from this session.
   const linkedWithoutPreview = !!value && !previewUrl;
 
   return (
@@ -101,6 +107,13 @@ export function ImageUploadField({
               src={previewUrl}
               alt={fileName ?? ""}
               className="h-full w-full object-cover"
+            />
+          ) : value ? (
+            <AuthenticatedImage
+              documentPublicId={value}
+              alt={label ?? ""}
+              className="h-full w-full object-cover"
+              fallback={<PhotoIcon className="h-7 w-7 text-muted-foreground/60" />}
             />
           ) : (
             <PhotoIcon className="h-7 w-7 text-muted-foreground/60" />

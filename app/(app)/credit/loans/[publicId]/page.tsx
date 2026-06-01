@@ -231,7 +231,11 @@ export default function LoanDetailPage(props: {
 
           {activeTab === "financial" ? (
             <TabsPanel id="financial">
-              <LoanFinancialTab loan={loan} />
+              <LoanFinancialTab
+                loan={loan}
+                canEdit={canUpdate || isPlatformAdmin}
+                onUpdated={refetch}
+              />
             </TabsPanel>
           ) : null}
 

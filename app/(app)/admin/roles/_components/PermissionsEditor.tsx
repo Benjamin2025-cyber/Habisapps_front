@@ -12,6 +12,8 @@ type Props = {
   role: Role;
   permissionCatalog: Record<string, string[]>;
   selectedPermissions: ReadonlyArray<string>;
+  /** Returns true when a permission can't be granted to this role (disabled). */
+  isPermissionLocked?: (permission: string) => boolean;
   onTogglePermission: (permission: string) => void;
   onToggleModule: (module: string, next: boolean) => void;
   onSave: () => void;
@@ -42,6 +44,7 @@ export function PermissionsEditor({
   role,
   permissionCatalog,
   selectedPermissions,
+  isPermissionLocked,
   onTogglePermission,
   onToggleModule,
   onSave,
@@ -221,27 +224,40 @@ export function PermissionsEditor({
                   <ul className="divide-y divide-border">
                     {permissions.map((permission) => {
                       const checked = selectedSet.has(permission);
+                      const locked = isPermissionLocked?.(permission) ?? false;
+                      const disabled = !canSave || locked;
                       return (
                         <li key={permission}>
                           <label
                             className={cn(
                               "flex items-center gap-3 px-3 py-2 text-sm transition-colors",
-                              canSave && "cursor-pointer",
+                              !disabled && "cursor-pointer",
                               checked
                                 ? "bg-accent/5"
-                                : canSave && "hover:bg-muted/30",
+                                : !disabled && "hover:bg-muted/30",
+                              locked && "opacity-60",
                             )}
+                            title={
+                              locked
+                                ? t("rolesPage.editor.protectedLockHint")
+                                : undefined
+                            }
                           >
                             <input
                               type="checkbox"
                               className="h-4 w-4 accent-accent"
                               checked={checked}
-                              disabled={!canSave}
+                              disabled={disabled}
                               onChange={() => onTogglePermission(permission)}
                             />
                             <span className="font-mono text-xs text-foreground">
                               {permission}
                             </span>
+                            {locked ? (
+                              <span className="ml-auto rounded-full border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                                {t("rolesPage.editor.protectedTag")}
+                              </span>
+                            ) : null}
                           </label>
                         </li>
                       );

@@ -200,6 +200,7 @@ export default function ClientsPage() {
     action: KycAction;
     reason: string | null;
     comment: string | null;
+    allow_self_verify: boolean;
   }) {
     if (!token || !kycDrawer) return;
     await updateClientKycStatus(token, kycDrawer.client.public_id, payload);

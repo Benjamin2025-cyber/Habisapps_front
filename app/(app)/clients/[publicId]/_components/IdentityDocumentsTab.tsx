@@ -30,17 +30,38 @@ import {
 } from "@/lib/api/client-identity-documents";
 import { localizeApiError } from "@/lib/api/errors";
 import {
-  IDENTITY_DOCUMENT_TYPE_SLUGS,
-  isKnownIdentityDocumentType,
-} from "@/lib/catalogs/identity-document-types";
+  fetchIdentityDocumentTypes,
+  type IdentityDocumentType,
+} from "@/lib/api/reference";
+import { isKnownIdentityDocumentType } from "@/lib/catalogs/identity-document-types";
 import { ImageUploadField } from "../../../_components/ImageUploadField";
 import { SubResourceActionDrawer } from "./SubResourceActionDrawer";
 
 type Props = {
   clientPublicId: string;
+  /** Client's agency — sent on document upload (back-issue #11). */
+  agencyPublicId?: string | null;
   /** Hoisted so the parent can show a badge count next to the tab. */
   onCountChange?: (count: number) => void;
 };
+
+/**
+ * Backend keys that are NOT in the legacy local slug catalog but DO have a
+ * French i18n label. Together with `isKnownIdentityDocumentType` they tell us
+ * when to prefer an i18n label over the server-provided (English) one.
+ */
+const I18N_BACKEND_TYPE_KEYS = new Set(["national_id", "drivers_license"]);
+
+function identityTypeLabel(
+  key: string,
+  t: (k: string) => string,
+  catalogByKey: Map<string, IdentityDocumentType>,
+): string {
+  if (isKnownIdentityDocumentType(key) || I18N_BACKEND_TYPE_KEYS.has(key)) {
+    return t(`clientDetail.identityDocs.types.${key}`);
+  }
+  return catalogByKey.get(key)?.label ?? key ?? "—";
+}
 
 /**
  * Common Cameroon issuing authorities offered as autocomplete suggestions on
@@ -74,6 +95,7 @@ const VERIFICATION_TONE: Record<
 
 export function IdentityDocumentsTab({
   clientPublicId,
+  agencyPublicId,
   onCountChange,
 }: Props) {
   const t = useTranslations();
@@ -106,6 +128,29 @@ export function IdentityDocumentsTab({
   );
 
   const { data, loading, refetch } = useApi(fetcher, [token, clientPublicId]);
+
+  // Accepted document-type catalog (back-issue #3). Drives the type select +
+  // recto/verso & expiry requirements, and the column label resolution.
+  const [docTypes, setDocTypes] = useState<IdentityDocumentType[]>([]);
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    fetchIdentityDocumentTypes(token)
+      .then((types) => {
+        if (!cancelled) setDocTypes(types);
+      })
+      .catch(() => {
+        if (!cancelled) setDocTypes([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
+  const typeByKey = useMemo(
+    () => new Map(docTypes.map((type) => [type.key, type])),
+    [docTypes],
+  );
 
   // Surface row count back up so the tab badge stays accurate.
   useEffect(() => {
@@ -145,6 +190,7 @@ export function IdentityDocumentsTab({
     action: IdentityDocumentAction;
     reason: string | null;
     comment: string | null;
+    allow_self_verify: boolean;
   }) {
     if (!token || !actionDrawer) return;
     await updateIdentityDocumentStatus(
@@ -170,9 +216,7 @@ export function IdentityDocumentsTab({
         header: t("clientDetail.identityDocs.columns.type"),
         cell: ({ getValue }) => {
           const raw = String(getValue() ?? "");
-          const label = isKnownIdentityDocumentType(raw)
-            ? t(`clientDetail.identityDocs.types.${raw}`)
-            : raw || "—";
+          const label = raw ? identityTypeLabel(raw, t, typeByKey) : "—";
           return <span className="font-semibold text-foreground">{label}</span>;
         },
       },
@@ -318,7 +362,7 @@ export function IdentityDocumentsTab({
           ]
         : []),
     ],
-    [t, canEdit, canSubmit, canVerify, canReject, canArchive],
+    [t, typeByKey, canEdit, canSubmit, canVerify, canReject, canArchive],
   );
 
   return (
@@ -344,6 +388,8 @@ export function IdentityDocumentsTab({
       <IdentityDocumentDrawer
         open={drawerOpen}
         editing={editing}
+        docTypes={docTypes}
+        agencyPublicId={agencyPublicId}
         onClose={() => {
           setDrawerOpen(false);
           setEditing(null);
@@ -370,11 +416,15 @@ export function IdentityDocumentsTab({
 function IdentityDocumentDrawer({
   open,
   editing,
+  docTypes,
+  agencyPublicId,
   onClose,
   onSubmit,
 }: {
   open: boolean;
   editing: ClientIdentityDocument | null;
+  docTypes: IdentityDocumentType[];
+  agencyPublicId?: string | null;
   onClose: () => void;
   onSubmit: (payload: IdentityDocumentWritePayload) => Promise<void>;
 }) {
@@ -386,6 +436,7 @@ function IdentityDocumentDrawer({
     issued_on: "",
     expires_on: "",
     document_public_id: "",
+    back_document_public_id: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -403,6 +454,7 @@ function IdentityDocumentDrawer({
         issued_on: editing.issued_on ? editing.issued_on.slice(0, 10) : "",
         expires_on: editing.expires_on ? editing.expires_on.slice(0, 10) : "",
         document_public_id: editing.document_public_id ?? "",
+        back_document_public_id: editing.back_document_public_id ?? "",
       });
     } else {
       setForm({
@@ -412,6 +464,7 @@ function IdentityDocumentDrawer({
         issued_on: "",
         expires_on: "",
         document_public_id: "",
+        back_document_public_id: "",
       });
     }
   }, [open, editing]);
@@ -419,12 +472,17 @@ function IdentityDocumentDrawer({
   const documentTypeOptions = useMemo<
     Array<{ value: string; label: string }>
   >(() => {
-    const options: Array<{ value: string; label: string }> =
-      IDENTITY_DOCUMENT_TYPE_SLUGS.map((slug) => ({
-        value: slug,
-        label: t(`clientDetail.identityDocs.types.${slug}`),
-      }));
-    // If editing a record whose type isn't in our catalog (legacy free text),
+    const options: Array<{ value: string; label: string }> = docTypes.map(
+      (type) => ({
+        value: type.key,
+        label:
+          isKnownIdentityDocumentType(type.key) ||
+          I18N_BACKEND_TYPE_KEYS.has(type.key)
+            ? t(`clientDetail.identityDocs.types.${type.key}`)
+            : type.label,
+      }),
+    );
+    // If editing a record whose type isn't in the catalog (legacy free text),
     // surface it as an additional option so the form doesn't silently clear.
     const currentValue = editing?.document_type;
     if (
@@ -437,7 +495,23 @@ function IdentityDocumentDrawer({
       });
     }
     return options;
-  }, [editing, t]);
+  }, [docTypes, editing, t]);
+
+  const selectedType = docTypes.find((type) => type.key === form.document_type);
+  const requiresBackFace = (selectedType?.required_faces ?? 1) >= 2;
+  const requiresExpiry = selectedType?.requires_expiry ?? false;
+
+  function changeType(next: string) {
+    const nextType = docTypes.find((type) => type.key === next);
+    const nextRequiresBack = (nextType?.required_faces ?? 1) >= 2;
+    setForm((c) => ({
+      ...c,
+      document_type: next,
+      // Drop a previously-captured verso when switching to a single-face type
+      // so we never submit a stale back document.
+      back_document_public_id: nextRequiresBack ? c.back_document_public_id : "",
+    }));
+  }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -452,6 +526,9 @@ function IdentityDocumentDrawer({
         issued_on: nullable(form.issued_on),
         expires_on: nullable(form.expires_on),
         document_public_id: nullable(form.document_public_id),
+        back_document_public_id: requiresBackFace
+          ? nullable(form.back_document_public_id)
+          : null,
       });
     } catch (cause) {
       const { generalMessage, fieldErrors } = localizeApiError(cause, {
@@ -460,6 +537,8 @@ function IdentityDocumentDrawer({
         issuing_authority: t("clientDetail.identityDocs.fields.authority"),
         issued_on: t("clientDetail.identityDocs.fields.issuedOn"),
         expires_on: t("clientDetail.identityDocs.fields.expiresOn"),
+        document_public_id: t("clientDetail.identityDocs.fields.document"),
+        back_document_public_id: t("clientDetail.identityDocs.fields.documentBack"),
       });
       setErrors(fieldErrors);
       setGeneralError(generalMessage);
@@ -511,7 +590,7 @@ function IdentityDocumentDrawer({
           value={form.document_type}
           options={documentTypeOptions}
           placeholder={t("clientDetail.identityDocs.fields.typePlaceholder")}
-          onChange={(next) => setForm((c) => ({ ...c, document_type: next }))}
+          onChange={changeType}
           error={errors.document_type}
         />
         <TextField
@@ -548,6 +627,11 @@ function IdentityDocumentDrawer({
             value={form.expires_on}
             onChange={(event) => setForm((c) => ({ ...c, expires_on: event.target.value }))}
             error={errors.expires_on}
+            hint={
+              requiresExpiry
+                ? t("clientDetail.identityDocs.fields.expiryRequiredHint")
+                : undefined
+            }
           />
         </div>
         {/* An expired (or same-day) document can't be verified by the API
@@ -561,11 +645,25 @@ function IdentityDocumentDrawer({
         <ImageUploadField
           category="identity"
           value={form.document_public_id}
+          agencyPublicId={agencyPublicId}
           onChange={(id) => setForm((c) => ({ ...c, document_public_id: id }))}
           label={t("clientDetail.identityDocs.fields.document")}
           hint={t("clientDetail.identityDocs.fields.documentHint")}
           error={errors.document_public_id}
         />
+        {requiresBackFace ? (
+          <ImageUploadField
+            category="identity"
+            value={form.back_document_public_id}
+            agencyPublicId={agencyPublicId}
+            onChange={(id) =>
+              setForm((c) => ({ ...c, back_document_public_id: id }))
+            }
+            label={t("clientDetail.identityDocs.fields.documentBack")}
+            hint={t("clientDetail.identityDocs.fields.documentBackHint")}
+            error={errors.back_document_public_id}
+          />
+        ) : null}
       </form>
     </Drawer>
   );

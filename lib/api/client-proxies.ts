@@ -80,6 +80,8 @@ export type ProxyStatusPayload = {
   action: ProxyAction;
   reason?: string | null;
   comment?: string | null;
+  /** Maker-checker self-verification override (back-issue #6). */
+  allow_self_verify?: boolean;
 };
 
 export async function fetchProxies(
@@ -115,6 +117,87 @@ export async function fetchProxies(
   };
   if (Array.isArray(envelope.data)) return envelope.data;
   return envelope.data?.proxies ?? [];
+}
+
+export type PaginatedProxies = {
+  data: ClientProxy[];
+  meta: {
+    pagination: {
+      current_page: number;
+      per_page: number;
+      total: number;
+      last_page: number;
+    };
+  };
+};
+
+/**
+ * Institution-wide proxy directory — `GET /proxies` (back-issue #13).
+ * Transversal read-only view across clients. `scope: "all"` broadens beyond the
+ * current agency (needs `crm.scope.institution.read`); otherwise agency-scoped.
+ * Each row carries `client_public_id` to link back to the owning client.
+ */
+export async function fetchProxiesDirectory(
+  token: string,
+  options: {
+    page?: number;
+    perPage?: number;
+    scope?: "all";
+    status?: ProxyStatus;
+    verificationStatus?: ProxyVerificationStatus;
+    agencyPublicId?: string;
+    search?: string;
+  } = {},
+): Promise<PaginatedProxies> {
+  const query = new URLSearchParams();
+  query.set("per_page", String(options.perPage ?? 25));
+  if (options.page && options.page > 0) query.set("page", String(options.page));
+  if (options.scope) query.set("scope", options.scope);
+  if (options.status) query.set("filter[status]", options.status);
+  if (options.verificationStatus) {
+    query.set("filter[verification_status]", options.verificationStatus);
+  }
+  if (options.agencyPublicId) {
+    query.set("filter[agency_public_id]", options.agencyPublicId);
+  }
+  if (options.search && options.search.trim().length > 0) {
+    query.set("search", options.search.trim());
+  }
+
+  const response = await fetch(`/api/v1/proxies?${query.toString()}`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      "X-API-Version": process.env.NEXT_PUBLIC_API_VERSION ?? "1",
+      Authorization: `Bearer ${token}`,
+    },
+    credentials: "omit",
+  });
+
+  const text = await response.text();
+  if (!response.ok || text.length === 0) {
+    if (response.status === 401) notifyAuthExpired();
+    throw new Error(`Failed to fetch proxies (HTTP ${response.status})`);
+  }
+
+  const envelope = JSON.parse(text) as {
+    data?: { proxies?: ClientProxy[] } | ClientProxy[];
+    meta?: PaginatedProxies["meta"];
+  };
+  const rows = Array.isArray(envelope.data)
+    ? envelope.data
+    : (envelope.data?.proxies ?? []);
+  return {
+    data: rows,
+    meta: envelope.meta ?? {
+      pagination: {
+        current_page: 1,
+        per_page: rows.length || 25,
+        total: rows.length,
+        last_page: 1,
+      },
+    },
+  };
 }
 
 export async function createProxy(

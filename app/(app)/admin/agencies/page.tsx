@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import {
@@ -20,6 +20,7 @@ import { useCan } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { usePermissionGuard } from "@/lib/auth/usePermissionGuard";
 import { useApi } from "@/lib/hooks/useApi";
+import { useDebouncedValue } from "@/lib/hooks/useDebouncedValue";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import { useToast } from "@/lib/toast/ToastProvider";
 import { PageHeader } from "../../_components/PageHeader";
@@ -62,43 +63,35 @@ export default function AgenciesPage() {
 
   const token = session.status === "authenticated" ? session.token : null;
 
+  // Search/status are now filtered server-side; debounce the text box so we
+  // don't fire a request per keystroke. Reset to page 1 whenever the filter
+  // narrows so the user isn't stranded on an out-of-range page.
+  const debouncedQuery = useDebouncedValue(filters.query.trim(), 300);
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQuery, filters.status]);
+
   const fetcher = useCallback(
     async (signal: AbortSignal): Promise<PaginatedAgencies> => {
       if (!token) throw new Error("Missing session token");
       void signal;
-      // The API doesn't expose query-builder filters on this endpoint, so we
-      // fetch up to one page (max 100 rows) and filter/search client-side.
-      // For typical EMF agency counts (< 100) that's a single round-trip; if
-      // an institution outgrows it, we'll wire `?filter[...]` server-side
-      // once the backend ships it.
-      return fetchAgencies(token, { page, perPage: pageSize });
+      return fetchAgencies(token, {
+        page,
+        perPage: pageSize,
+        search: debouncedQuery || undefined,
+        status: filters.status || undefined,
+      });
     },
-    [token, page, pageSize],
+    [token, page, pageSize, debouncedQuery, filters.status],
   );
 
   const { data, loading, error, refetch } = useApi(fetcher, [
     token,
     page,
     pageSize,
+    debouncedQuery,
+    filters.status,
   ]);
-
-  // Filter client-side because the index endpoint doesn't expose query-builder
-  // filters yet. Switch to server-side filters when the backend adds them.
-  const visibleAgencies = useMemo(() => {
-    if (!data) return [];
-    const needle = filters.query.trim().toLowerCase();
-    return data.data.filter((agency) => {
-      if (filters.status && agency.status !== filters.status) return false;
-      if (needle.length === 0) return true;
-      return (
-        agency.code.toLowerCase().includes(needle) ||
-        agency.name.toLowerCase().includes(needle) ||
-        (agency.city ?? "").toLowerCase().includes(needle) ||
-        (agency.region ?? "").toLowerCase().includes(needle) ||
-        (agency.manager_name ?? "").toLowerCase().includes(needle)
-      );
-    });
-  }, [data, filters]);
 
   if (session.status !== "authenticated" || !allowed) return null;
 
@@ -216,7 +209,7 @@ export default function AgenciesPage() {
       ) : null}
 
       <AgenciesTable
-        rows={visibleAgencies}
+        rows={data?.data ?? []}
         loading={loading && !data}
         canManage={canManage}
         pagination={
