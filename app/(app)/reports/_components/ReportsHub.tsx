@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -10,13 +10,19 @@ import {
   type PaginatedReportRuns,
   type ReportRun,
 } from "@/lib/api/report-runs";
+import {
+  fetchReportDefinitions,
+  type ReportDefinition,
+} from "@/lib/api/report-definitions";
 import { localizeApiMessage } from "@/lib/api/errors";
 import { useCanAny, useHasRole } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useApi } from "@/lib/hooks/useApi";
 import { useFormatter, useTranslations } from "@/lib/i18n/I18nProvider";
+import { useToast } from "@/lib/toast/ToastProvider";
 import { openBrandedReport } from "@/lib/print/report";
 import { PageHeader } from "../../_components/PageHeader";
+import { GenerateReportDrawer } from "./GenerateReportDrawer";
 
 type Props = {
   /** Report types this hub surfaces. Empty = none supported by the API (note). */
@@ -37,6 +43,7 @@ export function ReportsHub({ types, title, description }: Props) {
   const t = useTranslations();
   const format = useFormatter();
   const session = useSession();
+  const toast = useToast();
   const token = session.status === "authenticated" ? session.token : null;
 
   const isPlatformAdmin = useHasRole(["platform-admin"]);
@@ -44,6 +51,8 @@ export function ReportsHub({ types, title, description }: Props) {
   const canView = isPlatformAdmin || viewPerm;
 
   const [preview, setPreview] = useState<ReportRun | null>(null);
+  const [definitions, setDefinitions] = useState<ReportDefinition[]>([]);
+  const [genOpen, setGenOpen] = useState(false);
 
   const fetcher = useCallback(
     async (signal: AbortSignal): Promise<PaginatedReportRuns> => {
@@ -54,6 +63,29 @@ export function ReportsHub({ types, title, description }: Props) {
     [token],
   );
   const { data, loading, error, refetch } = useApi(fetcher, [token]);
+
+  // Report definitions drive generation: a page can generate any definition
+  // whose report_type it surfaces.
+  useEffect(() => {
+    if (!token || types.length === 0) return;
+    let cancelled = false;
+    fetchReportDefinitions(token, { status: "active" })
+      .then((defs) => {
+        if (!cancelled) setDefinitions(defs);
+      })
+      .catch(() => {
+        if (!cancelled) setDefinitions([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token, types]);
+
+  const matchingDefinitions = useMemo(
+    () => definitions.filter((d) => types.includes(d.report_type)),
+    [definitions, types],
+  );
+  const canGenerate = matchingDefinitions.length > 0;
 
   const rows = useMemo(() => {
     const all = data?.data ?? [];
@@ -116,15 +148,23 @@ export function ReportsHub({ types, title, description }: Props) {
         title={title}
         description={description}
         actions={
-          <Button variant="primary" size="md" disabled title={t("reports.generateDisabled")}>
+          <Button
+            variant="primary"
+            size="md"
+            disabled={!canGenerate}
+            title={canGenerate ? undefined : t("reports.generateDisabled")}
+            onClick={() => setGenOpen(true)}
+          >
             {t("reports.generate")}
           </Button>
         }
       />
 
-      <p className="rounded-[var(--radius-field)] border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-warning">
-        {t("reports.generateDisabled")}
-      </p>
+      {!canGenerate && types.length > 0 ? (
+        <p className="rounded-[var(--radius-field)] border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-warning">
+          {t("reports.generateDisabled")}
+        </p>
+      ) : null}
 
       {types.length === 0 ? (
         <div className="rounded-[var(--radius-card)] border border-dashed border-border bg-background px-4 py-10 text-center text-sm text-muted-foreground">
@@ -218,6 +258,21 @@ export function ReportsHub({ types, title, description }: Props) {
       >
         {preview ? <SummaryView run={preview} fmt={fmt} scalars={summaryScalars} /> : null}
       </Drawer>
+
+      <GenerateReportDrawer
+        open={genOpen}
+        onClose={() => setGenOpen(false)}
+        definitions={matchingDefinitions}
+        onGenerated={(run) => {
+          toast.success(
+            t("reports.generateDrawer.successTitle"),
+            t("reports.generateDrawer.successBody"),
+          );
+          setGenOpen(false);
+          refetch();
+          setPreview(run);
+        }}
+      />
     </>
   );
 }

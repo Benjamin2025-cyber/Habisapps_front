@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BellIcon, MenuIcon, SearchIcon } from "@/components/ui/icons";
+import { MenuIcon, SearchIcon } from "@/components/ui/icons";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { cn } from "@/lib/cn";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import { useToast } from "@/lib/toast/ToastProvider";
 import type { StaffUser } from "@/lib/api/types";
 import { AccountingDayChip } from "./AccountingDayChip";
+import { NotificationBell } from "./NotificationBell";
 import { UserMenu } from "./UserMenu";
 
 type Props = {
@@ -68,22 +69,7 @@ export function TopBar({ user, onToggleSidebar }: Props) {
 
         <LanguageSwitcher />
 
-        <button
-          type="button"
-          onClick={() =>
-            toast.info(
-              t("shell.topBar.notifications.label"),
-              t("shell.topBar.notifications.empty"),
-            )
-          }
-          aria-label={t("shell.topBar.notifications.label")}
-          className={cn(
-            "relative flex h-10 w-10 items-center justify-center rounded-[var(--radius-field)] text-muted-foreground",
-            "hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          )}
-        >
-          <BellIcon className="h-5 w-5" />
-        </button>
+        <NotificationBell />
 
         <UserMenu user={user} />
       </div>

@@ -13,6 +13,22 @@ import { apiRequest, notifyAuthExpired } from "./client";
  */
 export type TellerSessionStatus = "open" | "closed";
 
+/**
+ * Per-session aggregates exposed on `TellerSessionResource.summary` (#24b).
+ * Totals are in minor units; counts are integers.
+ */
+export type TellerSessionSummary = {
+  deposits_total_minor: number;
+  withdrawals_total_minor: number;
+  manual_journals_total_minor: number;
+  reversals_total_minor: number;
+  transaction_count: number;
+  posted_transaction_count: number;
+  pending_transaction_count: number;
+  expected_cash_balance_minor: number;
+  last_transaction_at: string | null;
+};
+
 export type TellerSession = {
   public_id: string;
   agency_public_id: string | null;
@@ -25,8 +41,28 @@ export type TellerSession = {
   closing_declaration_minor: number | null;
   currency: string | null;
   status: TellerSessionStatus;
+  summary?: TellerSessionSummary | null;
   created_at: string;
   updated_at: string;
+};
+
+/**
+ * Server-side filters for the teller-sessions index (#29). Mirrors the backend
+ * `filter[...]` params + `sort`. All optional; omit/empty = no constraint.
+ */
+export type TellerSessionFilters = {
+  page?: number;
+  perPage?: number;
+  status?: string;
+  businessDate?: string;
+  businessDateFrom?: string;
+  businessDateTo?: string;
+  tillPublicId?: string;
+  tellerUserPublicId?: string;
+  /** Platform-admin only — scope to one agency. */
+  agencyPublicId?: string;
+  /** e.g. "-opened_at" (default), "business_date", "-business_date", "status". */
+  sort?: string;
 };
 
 export type Pagination = {
@@ -64,11 +100,24 @@ export type CloseTellerSessionPayload = {
 
 export async function fetchTellerSessions(
   token: string,
-  options: { page?: number; perPage?: number } = {},
+  options: TellerSessionFilters = {},
 ): Promise<PaginatedTellerSessions> {
   const query = new URLSearchParams();
   query.set("per_page", String(options.perPage ?? 25));
   if (options.page && options.page > 0) query.set("page", String(options.page));
+  if (options.sort) query.set("sort", options.sort);
+  const filters: Array<[string, string | undefined]> = [
+    ["status", options.status],
+    ["business_date", options.businessDate],
+    ["business_date_from", options.businessDateFrom],
+    ["business_date_to", options.businessDateTo],
+    ["till_public_id", options.tillPublicId],
+    ["teller_user_public_id", options.tellerUserPublicId],
+    ["agency_public_id", options.agencyPublicId],
+  ];
+  for (const [key, value] of filters) {
+    if (value) query.set(`filter[${key}]`, value);
+  }
 
   const response = await fetch(`/api/v1/teller-sessions?${query.toString()}`, {
     method: "GET",
@@ -108,31 +157,6 @@ export async function fetchTellerSessions(
       },
     },
   };
-}
-
-/**
- * Récupère TOUTES les sessions en bouclant la pagination. Pis-aller tant que
- * l'index n'expose pas de filtre serveur (back-issue #29) : on rapatrie tout
- * pour pouvoir filtrer côté client. Plafond de sécurité pour éviter une boucle
- * infinie / un rapatriement massif ; `truncated` signale si la limite a coupé.
- */
-export async function fetchAllTellerSessions(
-  token: string,
-  { maxRows = 2000 }: { maxRows?: number } = {},
-): Promise<{ rows: TellerSession[]; total: number; truncated: boolean }> {
-  const perPage = 100;
-  const first = await fetchTellerSessions(token, { page: 1, perPage });
-  const rows = [...first.data];
-  const total = first.meta.pagination.total;
-  const lastPage = first.meta.pagination.last_page;
-
-  for (let page = 2; page <= lastPage && rows.length < maxRows; page += 1) {
-    const next = await fetchTellerSessions(token, { page, perPage });
-    rows.push(...next.data);
-  }
-
-  const truncated = rows.length < total;
-  return { rows: rows.slice(0, maxRows), total, truncated };
 }
 
 export async function getTellerSession(

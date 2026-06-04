@@ -13,16 +13,15 @@ import { PageHeader } from "../../_components/PageHeader";
 import { DashboardActionGrid, type DashboardAction } from "./DashboardActionGrid";
 import { DashboardCashDrawerCard } from "./DashboardCashDrawerCard";
 import {
-  DashboardAccountsOverview,
-  DashboardCustomerFocusCard,
   DashboardNotificationsCard,
   DashboardRecentTransactions,
-} from "./DashboardTellerPlaceholders";
+} from "./DashboardTellerSections";
 
 /**
  * Dedicated cash-desk dashboard for the `teller` role: a real cash-drawer /
- * session summary + cash quick-actions + tips. Recent-transactions and live
- * balance are deferred (no teller-transactions list endpoint — back-issue #24).
+ * session summary, the teller's recent transactions (GET /teller-transactions),
+ * the live notification feed, cash quick-actions and tips — all wired to real
+ * endpoints.
  */
 export function DashboardTellerLayout() {
   const t = useTranslations();
@@ -77,10 +76,8 @@ export function DashboardTellerLayout() {
       />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_22rem]">
-        {/* Main column — customer context + activity (placeholder where no API yet) */}
+        {/* Main column — the teller's recent cash activity (live). */}
         <div className="flex flex-col gap-4">
-          <DashboardCustomerFocusCard />
-          <DashboardAccountsOverview />
           <DashboardRecentTransactions />
         </div>
 

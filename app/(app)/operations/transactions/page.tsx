@@ -4,15 +4,16 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Select } from "@/components/ui/Select";
 import {
   fetchTellerSessions,
+  getTellerSession,
   type TellerSession,
 } from "@/lib/api/teller-sessions";
 import { fetchTills, type Till } from "@/lib/api/tills";
 import {
+  fetchTellerTransactions,
   reverseTellerTransaction,
   type TellerTransaction,
 } from "@/lib/api/teller-transactions";
@@ -83,6 +84,49 @@ export default function CashTransactionsPage() {
     void loadSessions();
   }, [loadSessions]);
 
+  // Real per-session transaction history from the server (#24a) — replaces the
+  // previous browser-session-only list.
+  const loadTransactions = useCallback(
+    async (sid: string) => {
+      if (!token || !sid) {
+        setTransactions([]);
+        return;
+      }
+      try {
+        const res = await fetchTellerTransactions(token, {
+          tellerSessionPublicId: sid,
+          perPage: 100,
+        });
+        setTransactions(res.data);
+      } catch {
+        setTransactions([]);
+      }
+    },
+    [token],
+  );
+
+  useEffect(() => {
+    void loadTransactions(sessionId);
+  }, [loadTransactions, sessionId]);
+
+  // Refresh one session's summary totals without the full-list loading flash.
+  const refreshSummary = useCallback(
+    async (sid: string) => {
+      if (!token || !sid) return;
+      try {
+        const fresh = await getTellerSession(token, sid);
+        setOpenSessions((cur) =>
+          cur.map((s) =>
+            s.public_id === sid ? { ...s, summary: fresh.summary } : s,
+          ),
+        );
+      } catch {
+        // non-fatal — the summary strip just stays as-is
+      }
+    },
+    [token],
+  );
+
   const tillLabelOf = useCallback(
     (publicId: string | null) => {
       if (!publicId) return "—";
@@ -106,7 +150,7 @@ export default function CashTransactionsPage() {
   if (session.status !== "authenticated" || !canView) return null;
 
   function handleDone(tx: TellerTransaction) {
-    setTransactions((current) => [tx, ...current]);
+    setTransactions((current) => [tx, ...current]); // optimistic
     toast.success(
       t("cashTx.toast.doneTitle"),
       t("cashTx.toast.doneBody", {
@@ -115,6 +159,8 @@ export default function CashTransactionsPage() {
         }),
       }),
     );
+    void loadTransactions(sessionId); // reconcile with server
+    void refreshSummary(sessionId);
   }
 
   async function confirmReverse() {
@@ -122,15 +168,10 @@ export default function CashTransactionsPage() {
     setReversing(true);
     try {
       await reverseTellerTransaction(token, reverseTarget.public_id);
-      setTransactions((current) =>
-        current.map((tx) =>
-          tx.public_id === reverseTarget.public_id
-            ? { ...tx, status: "reversed" }
-            : tx,
-        ),
-      );
       toast.success(t("cashTx.toast.reversedTitle"), t("cashTx.toast.reversedBody"));
       setReverseTarget(null);
+      void loadTransactions(sessionId);
+      void refreshSummary(sessionId);
     } catch (cause) {
       const { generalMessage } = localizeApiError(cause);
       toast.error(t("cashTx.toast.errorTitle"), generalMessage);
@@ -179,6 +220,36 @@ export default function CashTransactionsPage() {
               onChange={setSessionId}
             />
           </section>
+
+          {activeSession?.summary ? (
+            <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <Stat
+                label={t("cashTx.sessionSummary.deposits")}
+                value={format.currencyMinor(activeSession.summary.deposits_total_minor, {
+                  currency: activeSession.currency ?? "XAF",
+                })}
+                tone="success"
+              />
+              <Stat
+                label={t("cashTx.sessionSummary.withdrawals")}
+                value={format.currencyMinor(activeSession.summary.withdrawals_total_minor, {
+                  currency: activeSession.currency ?? "XAF",
+                })}
+                tone="warning"
+              />
+              <Stat
+                label={t("cashTx.sessionSummary.expected")}
+                value={format.currencyMinor(
+                  activeSession.summary.expected_cash_balance_minor,
+                  { currency: activeSession.currency ?? "XAF" },
+                )}
+              />
+              <Stat
+                label={t("cashTx.sessionSummary.count")}
+                value={String(activeSession.summary.transaction_count)}
+              />
+            </section>
+          ) : null}
 
           {canManage && activeSession ? (
             <>
@@ -311,5 +382,32 @@ export default function CashTransactionsPage() {
         onClose={() => (reversing ? undefined : setReverseTarget(null))}
       />
     </>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: "success" | "warning";
+}) {
+  const valueClass =
+    tone === "success"
+      ? "text-success"
+      : tone === "warning"
+        ? "text-warning"
+        : "text-foreground";
+  return (
+    <div className="flex flex-col gap-0.5 rounded-[var(--radius-field)] border border-border bg-background px-4 py-3">
+      <span className="text-[0.7rem] uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+      <span className={`text-base font-semibold tabular-nums ${valueClass}`}>
+        {value}
+      </span>
+    </div>
   );
 }

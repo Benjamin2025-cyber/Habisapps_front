@@ -16,7 +16,7 @@ import {
   type TellerSessionStatus,
 } from "@/lib/api/teller-sessions";
 import { fetchTills, type Till } from "@/lib/api/tills";
-import { localizeApiError, localizeApiMessage } from "@/lib/api/errors";
+import { localizeApiMessage } from "@/lib/api/errors";
 import { useCanAny, useHasRole } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useApi } from "@/lib/hooks/useApi";
@@ -55,15 +55,20 @@ export default function SessionsPage() {
     async (signal: AbortSignal): Promise<PaginatedTellerSessions> => {
       if (!token) throw new Error("Missing session token");
       void signal;
-      return fetchTellerSessions(token, { page, perPage: pageSize });
+      return fetchTellerSessions(token, {
+        page,
+        perPage: pageSize,
+        status: statusFilter || undefined,
+      });
     },
-    [token, page, pageSize],
+    [token, page, pageSize, statusFilter],
   );
 
   const { data, loading, error, refetch } = useApi(fetcher, [
     token,
     page,
     pageSize,
+    statusFilter,
   ]);
 
   const [tills, setTills] = useState<Till[]>([]);
@@ -114,11 +119,7 @@ export default function SessionsPage() {
     [tills],
   );
 
-  const visible = useMemo(() => {
-    const rows = data?.data ?? [];
-    if (!statusFilter) return rows;
-    return rows.filter((s) => s.status === statusFilter);
-  }, [data, statusFilter]);
+  const visible = data?.data ?? [];
 
   if (session.status !== "authenticated" || !canView) return null;
 
@@ -185,7 +186,10 @@ export default function SessionsPage() {
           ]}
           placeholder={t("sessions.filters.statusAll")}
           isClearable
-          onChange={(next) => setStatusFilter(next as TellerSessionStatus | "")}
+          onChange={(next) => {
+            setStatusFilter(next as TellerSessionStatus | "");
+            setPage(1);
+          }}
         />
       </section>
 

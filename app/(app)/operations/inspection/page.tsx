@@ -9,9 +9,10 @@ import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
 import { fetchStaffUsers, type StaffUser } from "@/lib/api/staff-users";
 import {
-  fetchAllTellerSessions,
+  fetchTellerSessions,
   type TellerSession,
 } from "@/lib/api/teller-sessions";
+import { useDebouncedValue } from "@/lib/hooks/useDebouncedValue";
 import { fetchTills, type Till } from "@/lib/api/tills";
 import {
   createSessionReconciliation,
@@ -56,7 +57,8 @@ export default function CashInspectionPage() {
   const [reconError, setReconError] = useState<string | null>(null);
 
   const [sessions, setSessions] = useState<TellerSession[]>([]);
-  const [sessionsTruncated, setSessionsTruncated] = useState(false);
+  const [sessionsTotal, setSessionsTotal] = useState(0);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
   const [tills, setTills] = useState<Till[]>([]);
   const [tellers, setTellers] = useState<StaffUser[]>([]);
   const [sessionId, setSessionId] = useState("");
@@ -64,28 +66,24 @@ export default function CashInspectionPage() {
   const [loadingRecons, setLoadingRecons] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Filters (client-side — the index exposes no server filter yet, back-issue #29).
+  // Server-side filters (#29) — the index now exposes filter[...] params.
   const [fFrom, setFFrom] = useState("");
   const [fTo, setFTo] = useState("");
   const [fTill, setFTill] = useState("");
   const [fTeller, setFTeller] = useState("");
   const [fStatus, setFStatus] = useState("");
+  const debFrom = useDebouncedValue(fFrom, 400);
+  const debTo = useDebouncedValue(fTo, 400);
 
+  // Bounded referentials for labels + filter dropdowns (loaded once).
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
     Promise.all([
-      fetchAllTellerSessions(token).catch(() => ({
-        rows: [] as TellerSession[],
-        total: 0,
-        truncated: false,
-      })),
       fetchTills(token, { perPage: 100 }).catch(() => ({ data: [] })),
       fetchStaffUsers(token, { perPage: 100 }).catch(() => ({ data: [] })),
-    ]).then(([s, tl, st]) => {
+    ]).then(([tl, st]) => {
       if (cancelled) return;
-      setSessions(s.rows);
-      setSessionsTruncated(s.truncated);
       setTills(tl.data as Till[]);
       setTellers(st.data as StaffUser[]);
     });
@@ -93,6 +91,39 @@ export default function CashInspectionPage() {
       cancelled = true;
     };
   }, [token]);
+
+  // Sessions are fetched server-side from the current filters (#29) — no more
+  // load-all. Re-runs whenever a filter changes (dates debounced).
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    setSessionsLoading(true);
+    fetchTellerSessions(token, {
+      perPage: 100,
+      sort: "-business_date",
+      status: fStatus || undefined,
+      businessDateFrom: debFrom || undefined,
+      businessDateTo: debTo || undefined,
+      tillPublicId: fTill || undefined,
+      tellerUserPublicId: fTeller || undefined,
+    })
+      .then((res) => {
+        if (cancelled) return;
+        setSessions(res.data);
+        setSessionsTotal(res.meta.pagination.total);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setSessions([]);
+        setSessionsTotal(0);
+      })
+      .finally(() => {
+        if (!cancelled) setSessionsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token, fStatus, debFrom, debTo, fTill, fTeller]);
 
   const tillLabelOf = useCallback(
     (id: string | null) => {
@@ -133,44 +164,25 @@ export default function CashInspectionPage() {
     };
   }, [token, sessionId]);
 
-  const filteredSessions = useMemo(
-    () =>
-      sessions.filter((s) => {
-        const d = s.business_date ?? "";
-        if (fFrom && d < fFrom) return false;
-        if (fTo && d > fTo) return false;
-        if (fTill && s.till_public_id !== fTill) return false;
-        if (fTeller && s.teller_user_public_id !== fTeller) return false;
-        if (fStatus && s.status !== fStatus) return false;
-        return true;
-      }),
-    [sessions, fFrom, fTo, fTill, fTeller, fStatus],
-  );
-
   const sessionOptions = useMemo(
     () =>
-      filteredSessions.map((s) => ({
+      sessions.map((s) => ({
         value: s.public_id,
         label: `${tillLabelOf(s.till_public_id)} · ${s.business_date ?? "—"} · ${t(`cashInspection.status.${s.status}`)}`,
       })),
-    [filteredSessions, tillLabelOf, t],
+    [sessions, tillLabelOf, t],
   );
 
-  // Only tills/tellers that actually appear in the loaded sessions, so the
-  // filter dropdowns stay relevant (and agency-scoped server-side already).
-  const tillFilterOptions = useMemo(() => {
-    const ids = new Set(sessions.map((s) => s.till_public_id).filter(Boolean));
-    return tills
-      .filter((x) => ids.has(x.public_id))
-      .map((x) => ({ value: x.public_id, label: `${x.code} — ${x.name}` }));
-  }, [sessions, tills]);
+  // Filter dropdowns come from the bounded tills/tellers referentials.
+  const tillFilterOptions = useMemo(
+    () => tills.map((x) => ({ value: x.public_id, label: `${x.code} — ${x.name}` })),
+    [tills],
+  );
 
-  const tellerFilterOptions = useMemo(() => {
-    const ids = new Set(sessions.map((s) => s.teller_user_public_id).filter(Boolean));
-    return tellers
-      .filter((u) => ids.has(u.public_id))
-      .map((u) => ({ value: u.public_id, label: u.name }));
-  }, [sessions, tellers]);
+  const tellerFilterOptions = useMemo(
+    () => tellers.map((u) => ({ value: u.public_id, label: u.name })),
+    [tellers],
+  );
 
   const filtersActive = !!(fFrom || fTo || fTill || fTeller || fStatus);
 
@@ -319,9 +331,12 @@ export default function CashInspectionPage() {
               onChange={setFStatus}
             />
           </div>
-          {sessionsTruncated ? (
+          {sessionsTotal > sessions.length ? (
             <p className="text-xs text-warning">
-              {t("cashInspection.filters.truncated", { count: sessions.length })}
+              {t("cashInspection.filters.tooMany", {
+                shown: sessions.length,
+                total: sessionsTotal,
+              })}
             </p>
           ) : null}
         </div>
@@ -336,7 +351,7 @@ export default function CashInspectionPage() {
               {t("cashInspection.sessionLabel")}
             </label>
             <span className="text-xs text-muted-foreground">
-              {t("cashInspection.filters.match", { count: filteredSessions.length })}
+              {t("cashInspection.filters.match", { count: sessions.length })}
             </span>
           </div>
           <Select
@@ -344,9 +359,11 @@ export default function CashInspectionPage() {
             value={sessionId}
             options={sessionOptions}
             placeholder={
-              filteredSessions.length === 0
-                ? t("cashInspection.filters.none")
-                : t("cashInspection.sessionPlaceholder")
+              sessionsLoading
+                ? t("common.loading")
+                : sessions.length === 0
+                  ? t("cashInspection.filters.none")
+                  : t("cashInspection.sessionPlaceholder")
             }
             onChange={setSessionId}
           />

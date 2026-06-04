@@ -25,8 +25,13 @@ import {
   type TellerTransaction,
 } from "@/lib/api/teller-transactions";
 import type { TellerSession } from "@/lib/api/teller-sessions";
+import { getTill } from "@/lib/api/tills";
 import { localizeApiError } from "@/lib/api/errors";
 import { amountInWords } from "@/lib/format/amountInWords";
+import {
+  DenominationCounter,
+  type DenominationLine,
+} from "../../../_components/DenominationCounter";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useFormatter, useLocale, useTranslations } from "@/lib/i18n/I18nProvider";
 
@@ -77,6 +82,15 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
   // permission — back-issue A6). Lets us tell the user the over-withdraw guard
   // is inactive rather than silently showing a blank balance.
   const [balanceUnavailable, setBalanceUnavailable] = useState(false);
+  // The till may require a denomination breakdown for cash; when it does, the
+  // deposit/withdrawal payload must carry `denomination_counts` summing exactly
+  // to the amount, else the backend rejects with "Denomination counts are
+  // required for the cash component".
+  const [requiresDenominations, setRequiresDenominations] = useState(false);
+  const [denomLines, setDenomLines] = useState<DenominationLine[]>([]);
+  const [denomTotalMinor, setDenomTotalMinor] = useState(0);
+  // Bump to remount the counter (clearing its internal inputs) after a tx.
+  const [denomResetKey, setDenomResetKey] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -108,6 +122,25 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
       cancelled = true;
     };
   }, [token, client, session.agency_public_id]);
+
+  // Does this session's till require a cash denomination breakdown?
+  useEffect(() => {
+    if (!token || !session.till_public_id) {
+      setRequiresDenominations(false);
+      return;
+    }
+    let cancelled = false;
+    getTill(token, session.till_public_id)
+      .then((till) => {
+        if (!cancelled) setRequiresDenominations(till.requires_denominations === true);
+      })
+      .catch(() => {
+        if (!cancelled) setRequiresDenominations(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token, session.till_public_id]);
 
   // Whenever an account is selected: load its available balance (both flows for
   // the info card) and, for withdrawals, its active signatures.
@@ -162,10 +195,15 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
     available !== null &&
     amountMinor > available.available_balance_minor;
 
+  // When the till requires a breakdown, the counted total must match the amount.
+  const denomComplete =
+    !requiresDenominations || (amountMinor > 0 && denomTotalMinor === amountMinor);
+
   const canSubmit =
     !!accountId &&
     amountMinor > 0 &&
     (!isWithdrawal || !!signatureId) &&
+    denomComplete &&
     !submitting;
 
   function resetAfterDone() {
@@ -174,6 +212,9 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
     setDepositorName("");
     setDepositorAddress("");
     setSignatureId("");
+    setDenomLines([]);
+    setDenomTotalMinor(0);
+    setDenomResetKey((k) => k + 1);
   }
 
   async function doSubmit() {
@@ -192,6 +233,7 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
           signature_public_id: signatureId,
           signature_verification_method: method,
           description: description.trim() || null,
+          denomination_counts: requiresDenominations ? denomLines : undefined,
         });
       } else {
         tx = await storeCashDeposit(token, session.public_id, {
@@ -202,6 +244,7 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
           depositor_name: depositorName.trim() || null,
           depositor_address: depositorAddress.trim() || null,
           description: description.trim() || null,
+          denomination_counts: requiresDenominations ? denomLines : undefined,
         });
       }
       setConfirmOpen(false);
@@ -362,6 +405,34 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
             />
           </label>
         </section>
+
+        {/* 2b. Cash denomination breakdown — only when the till requires it */}
+        {requiresDenominations ? (
+          <section className="flex flex-col gap-4 rounded-[var(--radius-card)] border border-border bg-background p-5">
+            <div className="flex flex-col gap-1">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {t("cashTx.section.denominations")}
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                {t("cashTx.denominations.hint")}
+              </p>
+            </div>
+            <DenominationCounter
+              key={denomResetKey}
+              currency={currency}
+              targetMinor={amountMinor > 0 ? amountMinor : null}
+              onChange={(lines, total) => {
+                setDenomLines(lines);
+                setDenomTotalMinor(total);
+              }}
+            />
+            {amountMinor > 0 && denomTotalMinor !== amountMinor ? (
+              <p className="text-xs text-warning">
+                {t("cashTx.denominations.mismatch")}
+              </p>
+            ) : null}
+          </section>
+        ) : null}
 
         {/* 3. Direction-specific */}
         <section className="flex flex-col gap-4 rounded-[var(--radius-card)] border border-border bg-background p-5">

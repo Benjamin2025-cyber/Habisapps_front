@@ -64,8 +64,8 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "accountingDay",
         href: "/admin/accounting-day",
-        available: false,
-        permissions: ["accounting.audit.view"],
+        available: true,
+        permissions: ["accounting.days.view"],
       },
       {
         labelKey: "users",

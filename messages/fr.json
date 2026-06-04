@@ -304,6 +304,9 @@
         "account": "Compte",
         "amount": "Montant",
         "channel": "Canal",
+        "status": "Statut",
+        "empty": "Aucune opération récente.",
+        "loadError": "Impossible de charger les opérations.",
         "types": {
           "deposit": "Versement",
           "withdrawal": "Retrait",
@@ -317,7 +320,9 @@
         }
       },
       "notifications": {
-        "title": "Notifications"
+        "title": "Notifications",
+        "empty": "Aucune notification.",
+        "loadError": "Impossible de charger les notifications."
       }
     },
     "minimal": {
@@ -391,12 +396,20 @@
       },
       "notifications": {
         "label": "Notifications",
-        "empty": "Aucune notification pour l'instant."
+        "empty": "Aucune notification pour l'instant.",
+        "markAllRead": "Tout marquer lu",
+        "loadError": "Impossible de charger les notifications."
       },
       "accountingDay": {
         "open": "Journée ouverte",
+        "reopened": "Journée rouverte",
+        "closing": "Clôture en cours",
         "closed": "Journée fermée",
-        "loading": "Statut journée…"
+        "planned": "Journée planifiée",
+        "cancelled": "Journée annulée",
+        "none": "Aucune journée ouverte",
+        "loading": "Statut journée…",
+        "ariaLabel": "Voir la journée comptable"
       }
     },
     "userMenu": {
@@ -2954,8 +2967,13 @@
     "section": {
       "customer": "1. Client & compte",
       "details": "2. Détails de l'opération",
+      "denominations": "2b. Décompte des espèces",
       "depositInfo": "3. Informations déposant",
       "withdrawalControls": "3. Vérification du retrait"
+    },
+    "denominations": {
+      "hint": "Ce guichet exige le détail des coupures. Le total compté doit être égal au montant de l'opération.",
+      "mismatch": "Le total des coupures doit être égal au montant de l'opération."
     },
     "account": {
       "holder": "Titulaire",
@@ -3006,13 +3024,19 @@
       "reversed": "Extournée"
     },
     "recent": {
-      "title": "Opérations de cette session de travail",
+      "title": "Opérations de la session",
       "type": "Type",
       "reference": "Référence",
       "amount": "Montant",
       "status": "Statut",
       "actions": "Actions",
       "reverse": "Extourner"
+    },
+    "sessionSummary": {
+      "deposits": "Versements",
+      "withdrawals": "Retraits",
+      "expected": "Solde théorique",
+      "count": "Opérations"
     },
     "reverseConfirm": {
       "title": "Extourner cette opération ?",
@@ -3082,7 +3106,8 @@
       "reset": "Réinitialiser",
       "match": "{count} session(s)",
       "none": "Aucune session ne correspond aux filtres.",
-      "truncated": "Trop de sessions : seules les {count} plus récentes sont chargées (filtrage serveur à venir). Affinez par date."
+      "truncated": "Trop de sessions : seules les {count} plus récentes sont chargées (filtrage serveur à venir). Affinez par date.",
+      "tooMany": "{shown} sessions affichées sur {total}. Affinez les filtres pour voir les autres."
     }
   },
   "cashDraft": {
@@ -3173,7 +3198,23 @@
   },
   "reports": {
     "generate": "Générer un rapport",
-    "generateDisabled": "La génération nécessite la liste des définitions de rapport (endpoint backend à venir). Les rapports déjà générés restent consultables et imprimables.",
+    "generateDisabled": "Aucune définition de rapport n'est disponible pour ce type. Les rapports déjà générés restent consultables et imprimables.",
+    "generateDrawer": {
+      "title": "Générer un rapport",
+      "description": "Choisissez le rapport et ses paramètres ; le résultat est calculé immédiatement.",
+      "definition": "Rapport",
+      "agency": "Agence",
+      "agencyPlaceholder": "Sélectionner une agence",
+      "currency": "Devise",
+      "currencyHint": "Code ISO à 3 lettres (ex. XAF).",
+      "periodStart": "Début de période",
+      "periodEnd": "Fin de période",
+      "submit": "Générer",
+      "submitting": "Génération…",
+      "errorTitle": "Échec de la génération",
+      "successTitle": "Rapport généré",
+      "successBody": "Le rapport a été calculé et ajouté à la liste."
+    },
     "unavailableType": "Aucun type de rapport correspondant n'est exposé par l'API pour cette rubrique.",
     "errorTitle": "Impossible de charger les rapports",
     "listTitle": "Rapports générés",
@@ -3284,5 +3325,112 @@
     "total": "Total compté",
     "target": "attendu : {target}",
     "none": "Aucune coupure active pour cette devise. Configurez-les dans Type monnaie."
+  },
+  "accountingDay": {
+    "pageTitle": "Journée comptable",
+    "pageDescription": "Ouvrez, clôturez et rouvrez la journée comptable de l'établissement. Une fois la journée fermée, le système passe en consultation seule et tout enregistrement est bloqué jusqu'à l'ouverture de la journée suivante.",
+    "scope": {
+      "agency": "Agence",
+      "institution": "Établissement"
+    },
+    "scopePicker": {
+      "label": "Périmètre consulté",
+      "hint": "Choisissez l'établissement ou une agence pour voir et gérer sa journée comptable."
+    },
+    "status": {
+      "planned": "Planifiée",
+      "open": "Ouverte",
+      "closing": "Clôture en cours",
+      "closed": "Fermée",
+      "reopened": "Rouverte",
+      "cancelled": "Annulée"
+    },
+    "actions": {
+      "open": "Ouvrir une journée",
+      "openNext": "Ouvrir la journée suivante",
+      "startClose": "Démarrer la clôture",
+      "startClosing": "Démarrage…",
+      "close": "Clôturer la journée",
+      "closing": "Clôture…",
+      "reopen": "Rouvrir"
+    },
+    "current": {
+      "noneBadge": "Consultation seule",
+      "noneTitle": "Aucune journée comptable ouverte",
+      "noneBody": "Aucune journée n'est ouverte pour votre périmètre. Le système est en consultation seule : tout enregistrement d'opération est bloqué tant qu'une journée n'est pas ouverte.",
+      "registrationOpen": "Enregistrements actifs",
+      "registrationLocked": "Enregistrements bloqués",
+      "holiday": "Jour férié",
+      "closingTitle": "Clôture en cours",
+      "closingBody": "Les contrôles de clôture s'exécutent. Les enregistrements sont bloqués jusqu'à la finalisation. Finalisez la clôture une fois les contrôles réussis.",
+      "openSessionsTitle": "{count} session(s) de caisse encore ouverte(s)",
+      "openSessionsBody": "Fermez toutes les sessions de caisse avant de démarrer la clôture. Sinon la journée reste bloquée en clôture (les sessions ne peuvent plus être fermées une fois la clôture lancée).",
+      "openSessionsLink": "Aller aux sessions de caisse →",
+      "openSessionsBlock": "Fermez d'abord les sessions de caisse ouvertes.",
+      "errorTitle": "Impossible de charger la journée comptable"
+    },
+    "fields": {
+      "openedAt": "Ouverte le",
+      "closedAt": "Fermée le"
+    },
+    "table": {
+      "title": "Historique des journées",
+      "count": "{count} journée(s)",
+      "businessDate": "Date comptable",
+      "scope": "Périmètre",
+      "status": "Statut",
+      "openedAt": "Ouverture",
+      "closedAt": "Clôture",
+      "empty": "Aucune journée comptable enregistrée.",
+      "errorTitle": "Impossible de charger l'historique"
+    },
+    "open": {
+      "title": "Ouvrir une journée comptable",
+      "description": "Démarre une nouvelle journée comptable et réactive les enregistrements pour le périmètre choisi.",
+      "scopeLabel": "Périmètre",
+      "scopeHint": "Une journée d'établissement couvre toutes les agences ; une journée d'agence ne couvre qu'une agence.",
+      "agencyLabel": "Agence",
+      "agencyPlaceholder": "Sélectionner une agence",
+      "agencyHint": "Laissez vide pour utiliser votre agence de rattachement.",
+      "dateLabel": "Date comptable",
+      "dateHint": "Laissez vide pour déduire automatiquement la prochaine date ouvrée.",
+      "submit": "Ouvrir la journée",
+      "submitting": "Ouverture…",
+      "errorTitle": "Échec de l'ouverture"
+    },
+    "reopen": {
+      "title": "Rouvrir la journée comptable",
+      "description": "Rouvre la journée comptable du {date}. Les enregistrements redeviennent possibles pour cette journée.",
+      "descriptionNoDate": "Rouvre la journée comptable fermée. Les enregistrements redeviennent possibles pour cette journée.",
+      "warningTitle": "Action exceptionnelle",
+      "warningBody": "La réouverture d'une journée fermée est une opération sensible et auditée. Elle ne devrait servir qu'à corriger une erreur de clôture.",
+      "errorTitle": "Échec de la réouverture",
+      "reasonLabel": "Motif de la réouverture",
+      "reasonPlaceholder": "Expliquez pourquoi cette journée doit être rouverte…",
+      "reasonError": "Le motif doit comporter au moins {min} caractères.",
+      "reasonHint": "Au moins {min} caractères. Ce motif est conservé dans le journal d'audit.",
+      "submit": "Rouvrir la journée",
+      "submitting": "Réouverture…"
+    },
+    "startClose": {
+      "title": "Démarrer la clôture ?",
+      "body": "Le démarrage de la clôture exécute les contrôles de fin de journée et bloque les nouveaux enregistrements. Vous finaliserez ensuite la clôture une fois les contrôles réussis."
+    },
+    "close": {
+      "title": "Clôturer la journée ?",
+      "body": "La clôture finalise la journée comptable. Le système passe en consultation seule jusqu'à l'ouverture de la journée suivante. Cette action ne peut aboutir que si tous les contrôles de clôture sont réussis."
+    },
+    "toast": {
+      "openedTitle": "Journée ouverte",
+      "openedBody": "La journée comptable du {date} est ouverte.",
+      "reopenedTitle": "Journée rouverte",
+      "reopenedBody": "La journée comptable du {date} a été rouverte.",
+      "startClosedTitle": "Clôture démarrée",
+      "startClosedBody": "Les contrôles de clôture s'exécutent. Les enregistrements sont désormais bloqués.",
+      "closedTitle": "Journée clôturée",
+      "closedBody": "La journée comptable a été clôturée avec succès.",
+      "closeBlockedTitle": "Clôture impossible",
+      "errorTitle": "Action impossible"
+    }
   }
 }

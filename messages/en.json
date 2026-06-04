@@ -304,6 +304,9 @@
         "account": "Account",
         "amount": "Amount",
         "channel": "Channel",
+        "status": "Status",
+        "empty": "No recent transactions.",
+        "loadError": "Could not load transactions.",
         "types": {
           "deposit": "Deposit",
           "withdrawal": "Withdrawal",
@@ -317,7 +320,9 @@
         }
       },
       "notifications": {
-        "title": "Notifications"
+        "title": "Notifications",
+        "empty": "No notifications.",
+        "loadError": "Could not load notifications."
       }
     },
     "minimal": {
@@ -391,12 +396,20 @@
       },
       "notifications": {
         "label": "Notifications",
-        "empty": "No notifications yet."
+        "empty": "No notifications yet.",
+        "markAllRead": "Mark all read",
+        "loadError": "Could not load notifications."
       },
       "accountingDay": {
         "open": "Day open",
+        "reopened": "Day reopened",
+        "closing": "Closing in progress",
         "closed": "Day closed",
-        "loading": "Day status…"
+        "planned": "Day planned",
+        "cancelled": "Day cancelled",
+        "none": "No open day",
+        "loading": "Day status…",
+        "ariaLabel": "View accounting day"
       }
     },
     "userMenu": {
@@ -2954,8 +2967,13 @@
     "section": {
       "customer": "1. Client & account",
       "details": "2. Transaction details",
+      "denominations": "2b. Cash breakdown",
       "depositInfo": "3. Depositor information",
       "withdrawalControls": "3. Withdrawal verification"
+    },
+    "denominations": {
+      "hint": "This till requires a denomination breakdown. The counted total must equal the transaction amount.",
+      "mismatch": "The denomination total must equal the transaction amount."
     },
     "account": {
       "holder": "Holder",
@@ -3006,13 +3024,19 @@
       "reversed": "Reversed"
     },
     "recent": {
-      "title": "Transactions in this work session",
+      "title": "Session transactions",
       "type": "Type",
       "reference": "Reference",
       "amount": "Amount",
       "status": "Status",
       "actions": "Actions",
       "reverse": "Reverse"
+    },
+    "sessionSummary": {
+      "deposits": "Deposits",
+      "withdrawals": "Withdrawals",
+      "expected": "Expected balance",
+      "count": "Transactions"
     },
     "reverseConfirm": {
       "title": "Reverse this transaction?",
@@ -3082,7 +3106,8 @@
       "reset": "Reset",
       "match": "{count} session(s)",
       "none": "No session matches the filters.",
-      "truncated": "Too many sessions: only the {count} most recent are loaded (server-side filtering pending). Narrow by date."
+      "truncated": "Too many sessions: only the {count} most recent are loaded (server-side filtering pending). Narrow by date.",
+      "tooMany": "Showing {shown} of {total} sessions. Narrow the filters to see the rest."
     }
   },
   "cashDraft": {
@@ -3173,7 +3198,23 @@
   },
   "reports": {
     "generate": "Generate a report",
-    "generateDisabled": "Generation requires the report-definitions list (backend endpoint pending). Already-generated reports remain viewable and printable.",
+    "generateDisabled": "No report definition is available for this type. Already-generated reports remain viewable and printable.",
+    "generateDrawer": {
+      "title": "Generate a report",
+      "description": "Pick the report and its parameters; the result is computed immediately.",
+      "definition": "Report",
+      "agency": "Agency",
+      "agencyPlaceholder": "Select an agency",
+      "currency": "Currency",
+      "currencyHint": "3-letter ISO code (e.g. XAF).",
+      "periodStart": "Period start",
+      "periodEnd": "Period end",
+      "submit": "Generate",
+      "submitting": "Generating…",
+      "errorTitle": "Generation failed",
+      "successTitle": "Report generated",
+      "successBody": "The report was computed and added to the list."
+    },
     "unavailableType": "No matching report type is exposed by the API for this section.",
     "errorTitle": "Unable to load reports",
     "listTitle": "Generated reports",
@@ -3284,5 +3325,112 @@
     "total": "Counted total",
     "target": "expected: {target}",
     "none": "No active denomination for this currency. Configure them in Cash denominations."
+  },
+  "accountingDay": {
+    "pageTitle": "Accounting day",
+    "pageDescription": "Open, close and reopen the institution's accounting day. Once the day is closed the system switches to consultation-only mode and all registration is blocked until the next day is opened.",
+    "scope": {
+      "agency": "Agency",
+      "institution": "Institution"
+    },
+    "scopePicker": {
+      "label": "Viewing scope",
+      "hint": "Choose the institution or an agency to view and manage its accounting day."
+    },
+    "status": {
+      "planned": "Planned",
+      "open": "Open",
+      "closing": "Closing",
+      "closed": "Closed",
+      "reopened": "Reopened",
+      "cancelled": "Cancelled"
+    },
+    "actions": {
+      "open": "Open a day",
+      "openNext": "Open next day",
+      "startClose": "Start closing",
+      "startClosing": "Starting…",
+      "close": "Close the day",
+      "closing": "Closing…",
+      "reopen": "Reopen"
+    },
+    "current": {
+      "noneBadge": "Consultation only",
+      "noneTitle": "No accounting day is open",
+      "noneBody": "No day is open for your scope. The system is in consultation-only mode: registering any operation is blocked until a day is opened.",
+      "registrationOpen": "Registration active",
+      "registrationLocked": "Registration locked",
+      "holiday": "Holiday",
+      "closingTitle": "Closing in progress",
+      "closingBody": "Close controls are running. Registration is blocked until the day is finalised. Finalise the close once the controls pass.",
+      "openSessionsTitle": "{count} teller session(s) still open",
+      "openSessionsBody": "Close every teller session before starting the day-close. Otherwise the day stays stuck in closing (sessions can no longer be closed once the close has started).",
+      "openSessionsLink": "Go to teller sessions →",
+      "openSessionsBlock": "Close the open teller sessions first.",
+      "errorTitle": "Could not load the accounting day"
+    },
+    "fields": {
+      "openedAt": "Opened at",
+      "closedAt": "Closed at"
+    },
+    "table": {
+      "title": "Day history",
+      "count": "{count} day(s)",
+      "businessDate": "Business date",
+      "scope": "Scope",
+      "status": "Status",
+      "openedAt": "Opened",
+      "closedAt": "Closed",
+      "empty": "No accounting day recorded.",
+      "errorTitle": "Could not load the history"
+    },
+    "open": {
+      "title": "Open an accounting day",
+      "description": "Starts a new accounting day and re-enables registration for the chosen scope.",
+      "scopeLabel": "Scope",
+      "scopeHint": "An institution day covers every agency; an agency day covers a single agency.",
+      "agencyLabel": "Agency",
+      "agencyPlaceholder": "Select an agency",
+      "agencyHint": "Leave empty to use your home agency.",
+      "dateLabel": "Business date",
+      "dateHint": "Leave empty to derive the next business date automatically.",
+      "submit": "Open the day",
+      "submitting": "Opening…",
+      "errorTitle": "Could not open the day"
+    },
+    "reopen": {
+      "title": "Reopen the accounting day",
+      "description": "Reopens the accounting day of {date}. Registration becomes possible again for that day.",
+      "descriptionNoDate": "Reopens the closed accounting day. Registration becomes possible again for that day.",
+      "warningTitle": "Exceptional action",
+      "warningBody": "Reopening a closed day is a sensitive, audited operation. It should only be used to correct a closing mistake.",
+      "errorTitle": "Could not reopen the day",
+      "reasonLabel": "Reason for reopening",
+      "reasonPlaceholder": "Explain why this day must be reopened…",
+      "reasonError": "The reason must be at least {min} characters long.",
+      "reasonHint": "At least {min} characters. This reason is kept in the audit log.",
+      "submit": "Reopen the day",
+      "submitting": "Reopening…"
+    },
+    "startClose": {
+      "title": "Start closing?",
+      "body": "Starting the close runs the end-of-day controls and blocks new registrations. You will then finalise the close once the controls pass."
+    },
+    "close": {
+      "title": "Close the day?",
+      "body": "Closing finalises the accounting day. The system switches to consultation-only mode until the next day is opened. This can only succeed once every close control passes."
+    },
+    "toast": {
+      "openedTitle": "Day opened",
+      "openedBody": "The accounting day of {date} is open.",
+      "reopenedTitle": "Day reopened",
+      "reopenedBody": "The accounting day of {date} has been reopened.",
+      "startClosedTitle": "Close started",
+      "startClosedBody": "Close controls are running. Registration is now blocked.",
+      "closedTitle": "Day closed",
+      "closedBody": "The accounting day was closed successfully.",
+      "closeBlockedTitle": "Close not possible",
+      "errorTitle": "Action not possible"
+    }
   }
 }
