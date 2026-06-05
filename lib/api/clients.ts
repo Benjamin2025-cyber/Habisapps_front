@@ -26,6 +26,14 @@ export type Client = {
   pii_redacted?: boolean;
   agency_public_id: string | null;
   profile_photo_document_public_id: string | null;
+  /**
+   * Short-lived signed thumbnail URL for the profile photo (issue #6). Loadable
+   * by a plain `<img src>` — no Authorization header. Null when the actor lacks
+   * `crm.clients.identity.view`, or there is no active profile photo; in that
+   * case fall back to the authenticated blob fetch on
+   * `profile_photo_document_public_id`.
+   */
+  profile_photo_thumbnail_url?: string | null;
   prospector_public_id: string | null;
   collection_agent_public_id: string | null;
   sector_public_id: string | null;

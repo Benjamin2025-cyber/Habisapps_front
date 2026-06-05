@@ -38,6 +38,8 @@ export type ClientProxy = {
   client_public_id: string | null;
   customer_account_public_id: string | null;
   document_public_id: string | null;
+  /** Verso/back face of the mandataire's ID document (issue #4). */
+  back_document_public_id: string | null;
   proxy_full_name: string | null;
   proxy_phone_number: string | null;
   proxy_email: string | null;
@@ -74,6 +76,7 @@ export type ProxyWritePayload = {
   starts_on?: string | null;
   ends_on?: string | null;
   document_public_id?: string | null;
+  back_document_public_id?: string | null;
 };
 
 export type ProxyStatusPayload = {

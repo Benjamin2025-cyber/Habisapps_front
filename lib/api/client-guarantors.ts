@@ -29,7 +29,11 @@ export type ClientGuarantor = {
   public_id: string;
   client_public_id: string | null;
   guarantor_client_public_id: string | null;
+  /** Identity-document type key from the backend catalog (issue #4). */
+  document_type: string | null;
   document_public_id: string | null;
+  /** Verso/back face of the guarantor's ID document (issue #4). */
+  back_document_public_id: string | null;
   guarantor_full_name: string | null;
   guarantor_phone_number: string | null;
   relationship_type: string | null;
@@ -53,7 +57,9 @@ export type GuarantorWritePayload = {
   relationship_type?: string | null;
   starts_on?: string | null;
   ends_on?: string | null;
+  document_type?: string | null;
   document_public_id?: string | null;
+  back_document_public_id?: string | null;
 };
 
 export type GuarantorStatusPayload = {

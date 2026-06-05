@@ -107,6 +107,7 @@ export function ClientsTable({
               <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
                 <AuthenticatedImage
                   documentPublicId={client.profile_photo_document_public_id}
+                  srcUrl={client.profile_photo_thumbnail_url}
                   alt={name}
                   className="h-full w-full object-cover"
                   fallback={

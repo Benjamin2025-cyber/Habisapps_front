@@ -823,8 +823,13 @@
         "relationshipPlaceholder": "Select the relationship…",
         "startsOn": "Starts on",
         "endsOn": "Ends on",
-        "document": "Guarantor's KYC document",
-        "documentHint": "Guarantor's identity document (image). Required in order to verify the guarantor."
+        "documentType": "Identity document type",
+        "documentTypePlaceholder": "Select a document type…",
+        "documentTypeHint": "Type of the guarantor's identity document.",
+        "document": "Guarantor's KYC document — front",
+        "documentHint": "Guarantor's identity document (front). Required in order to verify the guarantor.",
+        "documentBack": "Guarantor's KYC document — back",
+        "documentBackHint": "Photo of the back. Required for this document type before verification."
       },
       "relationships": {
         "legacyTag": "existing value",
@@ -928,8 +933,10 @@
         "mandateTypeHint": "General power of attorney, specific operations, etc.",
         "startsOn": "Starts on",
         "endsOn": "Ends on",
-        "document": "Proxy's KYC document (image)",
-        "documentHint": "Proxy's identity document (image). Required in order to verify the proxy."
+        "document": "Proxy's KYC document — front",
+        "documentHint": "Proxy's identity document (front). Required in order to verify the proxy.",
+        "documentBack": "Proxy's KYC document — back",
+        "documentBackHint": "Photo of the back. Required for this document type before verification."
       },
       "toast": {
         "createdTitle": "Proxy added",
@@ -2038,11 +2045,19 @@
       "depositValueHint": "Percentage or amount depending on the selected type.",
       "penaltyGraceDays": "Grace days before penalty",
       "penaltyGraceDaysHint": "Period (in days) after the due date before a penalty is applied. The field actually used by the engine.",
-      "penaltyDisabledNote": "Disabled fields: they are saved and copied onto the loan but are not yet used by the penalty engine (which relies on grace days + a global policy). Pending the back end — see back-issues.md #14.",
+      "penaltyHint": "Penalty applied each arrears period. The engine uses the value type, value and base; the value frozen when the loan was created takes precedence over later product edits.",
       "penaltyValue": "Penalty value",
+      "penaltyValueAmountHint": "Flat amount in FCFA charged each arrears period.",
+      "penaltyValueRateHint": "Percentage rate (e.g. 2 = 2%) applied to the chosen base each period.",
       "penaltyValueType": "Penalty value type",
-      "penaltyFormulaType": "Penalty formula type",
+      "penaltyValueTypeHint": "Flat amount or percentage of the base.",
+      "penaltyValueTypePlaceholder": "Select a type…",
+      "penaltyFormulaType": "Formula type (descriptive)",
+      "penaltyFormulaTypeHint": "Descriptive label frozen onto the loan; does not affect the calculation.",
+      "penaltyFormulaTypePlaceholder": "Select a formula…",
       "penaltyFormulaBase": "Penalty formula base",
+      "penaltyFormulaBaseHint": "The amount the percentage applies to.",
+      "penaltyFormulaBasePlaceholder": "Select a base…",
       "ledgerAccount": "Default ledger account (public_id)",
       "ledgerAccountHint": "Ledger account inherited by default by loans created with this product (P16 selector coming soon).",
       "policiesLabel": "Attached calculation policies",
@@ -2059,6 +2074,22 @@
       "status": "Status",
       "statusPlaceholder": "Default status (active)…",
       "statusHint": "Archiving is done via the \"Archive\" action."
+    },
+    "penaltyValueTypeOptions": {
+      "amount": "Flat amount",
+      "percentage": "Percentage"
+    },
+    "penaltyFormulaBaseOptions": {
+      "unpaid_scheduled_due": "Remaining unpaid due",
+      "overdue_amount": "Overdue amount (gross)",
+      "principal": "Installment principal",
+      "outstanding_principal": "Outstanding principal"
+    },
+    "penaltyFormulaTypeOptions": {
+      "fixed": "Fixed",
+      "flat_rate": "Flat rate",
+      "percentage": "Percentage",
+      "variable_rate": "Variable rate"
     },
     "toast": {
       "createdTitle": "Product created",

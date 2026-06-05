@@ -56,6 +56,7 @@ export function IdentityTab({ client, canEdit, onEdit }: Props) {
           <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
             <AuthenticatedImage
               documentPublicId={client.profile_photo_document_public_id}
+              srcUrl={client.profile_photo_thumbnail_url}
               alt={fullName}
               className="h-full w-full object-cover"
               fallback={

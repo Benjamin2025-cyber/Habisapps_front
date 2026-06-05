@@ -823,8 +823,13 @@
         "relationshipPlaceholder": "Sélectionner la relation…",
         "startsOn": "Démarre le",
         "endsOn": "Termine le",
-        "document": "Pièce KYC du garant",
-        "documentHint": "Pièce d'identité du garant (image). Obligatoire pour pouvoir vérifier le garant."
+        "documentType": "Type de pièce d'identité",
+        "documentTypePlaceholder": "Sélectionner un type de pièce…",
+        "documentTypeHint": "Type de la pièce d'identité du garant.",
+        "document": "Pièce KYC du garant — recto",
+        "documentHint": "Pièce d'identité du garant (recto). Obligatoire pour pouvoir vérifier le garant.",
+        "documentBack": "Pièce KYC du garant — verso",
+        "documentBackHint": "Photo du verso. Requise pour ce type de pièce avant la vérification."
       },
       "relationships": {
         "legacyTag": "valeur existante",
@@ -928,8 +933,10 @@
         "mandateTypeHint": "Procuration générale, opérations spécifiques, etc.",
         "startsOn": "Démarre le",
         "endsOn": "Termine le",
-        "document": "Pièce KYC du mandataire (image)",
-        "documentHint": "Pièce d'identité du mandataire (image). Obligatoire pour pouvoir vérifier le mandataire."
+        "document": "Pièce KYC du mandataire — recto",
+        "documentHint": "Pièce d'identité du mandataire (recto). Obligatoire pour pouvoir vérifier le mandataire.",
+        "documentBack": "Pièce KYC du mandataire — verso",
+        "documentBackHint": "Photo du verso. Requise pour ce type de pièce avant la vérification."
       },
       "toast": {
         "createdTitle": "Mandataire ajouté",
@@ -2038,11 +2045,19 @@
       "depositValueHint": "Pourcentage ou montant selon le type choisi.",
       "penaltyGraceDays": "Jours de grâce avant pénalité",
       "penaltyGraceDaysHint": "Délai (en jours) après l'échéance avant l'application d'une pénalité. Champ réellement utilisé par le moteur.",
-      "penaltyDisabledNote": "Champs désactivés : ils sont enregistrés et copiés sur le prêt mais ne sont pas encore exploités par le moteur de pénalité (qui s'appuie sur les jours de grâce + une politique globale). En attente du back-end — voir back-issues.md #14.",
+      "penaltyHint": "Pénalité appliquée à chaque période d'arriéré. Le moteur utilise le type de valeur, la valeur et la base ; la valeur figée à la création du prêt prime sur les modifications ultérieures du produit.",
       "penaltyValue": "Valeur de pénalité",
+      "penaltyValueAmountHint": "Montant fixe en FCFA prélevé à chaque période d'arriéré.",
+      "penaltyValueRateHint": "Taux en pourcentage (ex. 2 = 2 %) appliqué à la base choisie à chaque période.",
       "penaltyValueType": "Type de valeur de pénalité",
-      "penaltyFormulaType": "Type de formule de pénalité",
+      "penaltyValueTypeHint": "Montant fixe ou pourcentage de la base.",
+      "penaltyValueTypePlaceholder": "Sélectionner un type…",
+      "penaltyFormulaType": "Type de formule (descriptif)",
+      "penaltyFormulaTypeHint": "Étiquette descriptive figée sur le prêt ; n'affecte pas le calcul.",
+      "penaltyFormulaTypePlaceholder": "Sélectionner une formule…",
       "penaltyFormulaBase": "Base de la formule de pénalité",
+      "penaltyFormulaBaseHint": "Montant auquel le pourcentage s'applique.",
+      "penaltyFormulaBasePlaceholder": "Sélectionner une base…",
       "ledgerAccount": "Compte comptable par défaut (public_id)",
       "ledgerAccountHint": "Compte comptable hérité par défaut par les prêts créés avec ce produit (sélecteur P16 à venir).",
       "policiesLabel": "Politiques de calcul rattachées",
@@ -2059,6 +2074,22 @@
       "status": "Statut",
       "statusPlaceholder": "Statut par défaut (actif)…",
       "statusHint": "L'archivage se fait via l'action « Archiver »."
+    },
+    "penaltyValueTypeOptions": {
+      "amount": "Montant fixe",
+      "percentage": "Pourcentage"
+    },
+    "penaltyFormulaBaseOptions": {
+      "unpaid_scheduled_due": "Échéance impayée restante",
+      "overdue_amount": "Montant échu (brut)",
+      "principal": "Principal de l'échéance",
+      "outstanding_principal": "Principal restant dû"
+    },
+    "penaltyFormulaTypeOptions": {
+      "fixed": "Forfaitaire",
+      "flat_rate": "Taux fixe",
+      "percentage": "Pourcentage",
+      "variable_rate": "Taux variable"
     },
     "toast": {
       "createdTitle": "Produit créé",

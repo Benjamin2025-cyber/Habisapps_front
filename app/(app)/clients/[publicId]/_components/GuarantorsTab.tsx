@@ -29,13 +29,39 @@ import {
   type GuarantorWritePayload,
 } from "@/lib/api/client-guarantors";
 import { localizeApiError } from "@/lib/api/errors";
+import {
+  fetchIdentityDocumentTypes,
+  type IdentityDocumentType,
+} from "@/lib/api/reference";
+import { isKnownIdentityDocumentType } from "@/lib/catalogs/identity-document-types";
 import { ImageUploadField } from "../../../_components/ImageUploadField";
 import { SubResourceActionDrawer } from "./SubResourceActionDrawer";
 
 type Props = {
   clientPublicId: string;
+  /** Client's agency — sent on document upload (back-issue #11). */
+  agencyPublicId?: string | null;
   onCountChange?: (count: number) => void;
 };
+
+/**
+ * Backend identity-document keys that aren't in the legacy local slug catalog
+ * but do carry a French i18n label — mirrors IdentityDocumentsTab so guarantor
+ * ID types render the same labels. Together with `isKnownIdentityDocumentType`
+ * they decide when to prefer the i18n label over the server (English) one.
+ */
+const I18N_BACKEND_TYPE_KEYS = new Set(["national_id", "drivers_license"]);
+
+function identityTypeLabel(
+  key: string,
+  t: (k: string) => string,
+  catalogByKey: Map<string, IdentityDocumentType>,
+): string {
+  if (isKnownIdentityDocumentType(key) || I18N_BACKEND_TYPE_KEYS.has(key)) {
+    return t(`clientDetail.identityDocs.types.${key}`);
+  }
+  return catalogByKey.get(key)?.label ?? key ?? "—";
+}
 
 /**
  * Canonical guarantor-relationship catalog tuned for Cameroon microfinance.
@@ -88,7 +114,11 @@ const VERIFICATION_TONE: Record<
   rejected: "danger",
 };
 
-export function GuarantorsTab({ clientPublicId, onCountChange }: Props) {
+export function GuarantorsTab({
+  clientPublicId,
+  agencyPublicId,
+  onCountChange,
+}: Props) {
   const t = useTranslations();
   const session = useSession();
   const toast = useToast();
@@ -119,6 +149,25 @@ export function GuarantorsTab({ clientPublicId, onCountChange }: Props) {
   );
 
   const { data, loading, refetch } = useApi(fetcher, [token, clientPublicId]);
+
+  // Accepted identity-document catalog (back-issue #3) — drives the guarantor
+  // ID-type select + recto/verso requirement, the same source the main client
+  // identity documents use so the keys pass backend validation (issue #4).
+  const [docTypes, setDocTypes] = useState<IdentityDocumentType[]>([]);
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    fetchIdentityDocumentTypes(token)
+      .then((types) => {
+        if (!cancelled) setDocTypes(types);
+      })
+      .catch(() => {
+        if (!cancelled) setDocTypes([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   useEffect(() => {
     if (data) onCountChange?.(data.length);
@@ -368,6 +417,8 @@ export function GuarantorsTab({ clientPublicId, onCountChange }: Props) {
       <GuarantorDrawer
         open={drawerOpen}
         editing={editing}
+        docTypes={docTypes}
+        agencyPublicId={agencyPublicId}
         onClose={() => {
           setDrawerOpen(false);
           setEditing(null);
@@ -390,11 +441,15 @@ export function GuarantorsTab({ clientPublicId, onCountChange }: Props) {
 function GuarantorDrawer({
   open,
   editing,
+  docTypes,
+  agencyPublicId,
   onClose,
   onSubmit,
 }: {
   open: boolean;
   editing: ClientGuarantor | null;
+  docTypes: IdentityDocumentType[];
+  agencyPublicId?: string | null;
   onClose: () => void;
   onSubmit: (payload: GuarantorWritePayload) => Promise<void>;
 }) {
@@ -405,7 +460,9 @@ function GuarantorDrawer({
     relationship_type: "",
     starts_on: "",
     ends_on: "",
+    document_type: "",
     document_public_id: "",
+    back_document_public_id: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -422,7 +479,9 @@ function GuarantorDrawer({
         relationship_type: editing.relationship_type ?? "",
         starts_on: editing.starts_on ? editing.starts_on.slice(0, 10) : "",
         ends_on: editing.ends_on ? editing.ends_on.slice(0, 10) : "",
+        document_type: editing.document_type ?? "",
         document_public_id: editing.document_public_id ?? "",
+        back_document_public_id: editing.back_document_public_id ?? "",
       });
     } else {
       setForm({
@@ -431,10 +490,53 @@ function GuarantorDrawer({
         relationship_type: "",
         starts_on: "",
         ends_on: "",
+        document_type: "",
         document_public_id: "",
+        back_document_public_id: "",
       });
     }
   }, [open, editing]);
+
+  const documentTypeOptions = useMemo<
+    Array<{ value: string; label: string }>
+  >(() => {
+    const options: Array<{ value: string; label: string }> = docTypes.map(
+      (type) => ({
+        value: type.key,
+        label:
+          isKnownIdentityDocumentType(type.key) ||
+          I18N_BACKEND_TYPE_KEYS.has(type.key)
+            ? t(`clientDetail.identityDocs.types.${type.key}`)
+            : type.label,
+      }),
+    );
+    // Keep a legacy/unknown stored type visible so an edit doesn't silently drop it.
+    const currentValue = editing?.document_type;
+    if (
+      currentValue &&
+      !options.some((option) => option.value === currentValue)
+    ) {
+      options.push({
+        value: currentValue,
+        label: `${currentValue} (${t("clientDetail.identityDocs.types.legacyTag")})`,
+      });
+    }
+    return options;
+  }, [docTypes, editing, t]);
+
+  const selectedDocType = docTypes.find((type) => type.key === form.document_type);
+  const requiresBackFace = (selectedDocType?.required_faces ?? 1) >= 2;
+
+  function changeDocType(next: string) {
+    const nextType = docTypes.find((type) => type.key === next);
+    const nextRequiresBack = (nextType?.required_faces ?? 1) >= 2;
+    setForm((c) => ({
+      ...c,
+      document_type: next,
+      // Drop a captured verso when switching to a single-face type.
+      back_document_public_id: nextRequiresBack ? c.back_document_public_id : "",
+    }));
+  }
 
   const relationshipOptions = useMemo<
     Array<{ value: string; label: string }>
@@ -471,7 +573,11 @@ function GuarantorDrawer({
         relationship_type: nullable(form.relationship_type),
         starts_on: nullable(form.starts_on),
         ends_on: nullable(form.ends_on),
+        document_type: nullable(form.document_type),
         document_public_id: nullable(form.document_public_id),
+        back_document_public_id: requiresBackFace
+          ? nullable(form.back_document_public_id)
+          : null,
       });
     } catch (cause) {
       const { generalMessage, fieldErrors } = localizeApiError(cause, {
@@ -480,6 +586,9 @@ function GuarantorDrawer({
         relationship_type: t("clientDetail.guarantors.fields.relationship"),
         starts_on: t("clientDetail.guarantors.fields.startsOn"),
         ends_on: t("clientDetail.guarantors.fields.endsOn"),
+        document_type: t("clientDetail.guarantors.fields.documentType"),
+        document_public_id: t("clientDetail.guarantors.fields.document"),
+        back_document_public_id: t("clientDetail.guarantors.fields.documentBack"),
       });
       setErrors(fieldErrors);
       setGeneralError(generalMessage);
@@ -568,14 +677,38 @@ function GuarantorDrawer({
             error={errors.ends_on}
           />
         </div>
+        <Select
+          label={t("clientDetail.guarantors.fields.documentType")}
+          value={form.document_type}
+          options={documentTypeOptions}
+          placeholder={t("clientDetail.guarantors.fields.documentTypePlaceholder")}
+          isClearable
+          onChange={changeDocType}
+          error={errors.document_type}
+          hint={t("clientDetail.guarantors.fields.documentTypeHint")}
+        />
         <ImageUploadField
           category="identity"
           value={form.document_public_id}
+          agencyPublicId={agencyPublicId}
           onChange={(id) => setForm((c) => ({ ...c, document_public_id: id }))}
           label={t("clientDetail.guarantors.fields.document")}
           hint={t("clientDetail.guarantors.fields.documentHint")}
           error={errors.document_public_id}
         />
+        {requiresBackFace ? (
+          <ImageUploadField
+            category="identity"
+            value={form.back_document_public_id}
+            agencyPublicId={agencyPublicId}
+            onChange={(id) =>
+              setForm((c) => ({ ...c, back_document_public_id: id }))
+            }
+            label={t("clientDetail.guarantors.fields.documentBack")}
+            hint={t("clientDetail.guarantors.fields.documentBackHint")}
+            error={errors.back_document_public_id}
+          />
+        ) : null}
       </form>
     </Drawer>
   );

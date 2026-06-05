@@ -238,6 +238,7 @@ export default function ClientDetailPage(props: {
             <TabsPanel id="guarantors">
               <GuarantorsTab
                 clientPublicId={client.public_id}
+                agencyPublicId={client.agency_public_id}
                 onCountChange={setGuarantorsCount}
               />
             </TabsPanel>
@@ -247,6 +248,7 @@ export default function ClientDetailPage(props: {
             <TabsPanel id="proxies">
               <ProxiesTab
                 clientPublicId={client.public_id}
+                agencyPublicId={client.agency_public_id}
                 onCountChange={setProxiesCount}
               />
             </TabsPanel>

@@ -25,6 +25,27 @@ import {
 
 export type LoanProductDrawerMode = "create" | "edit";
 
+/**
+ * Penalty enums consumed by the arrears engine (issue #5 /
+ * `LoanPenaltyTermsResolver`). `value_type` + `value` + `formula_base` drive the
+ * per-period penalty; `formula_type` is descriptive metadata. Values must match
+ * the backend exactly — an unknown string makes the engine fall back to the
+ * global config policy.
+ */
+const PENALTY_VALUE_TYPES = ["amount", "percentage"] as const;
+const PENALTY_FORMULA_BASES = [
+  "unpaid_scheduled_due",
+  "overdue_amount",
+  "principal",
+  "outstanding_principal",
+] as const;
+const PENALTY_FORMULA_TYPES = [
+  "fixed",
+  "flat_rate",
+  "percentage",
+  "variable_rate",
+] as const;
+
 type Props = {
   open: boolean;
   mode: LoanProductDrawerMode;
@@ -620,49 +641,75 @@ export function LoanProductDrawer({
           />
 
           {/*
-           * The 4 fields below are stored & snapshotted onto loans but NOT yet
-           * read by the penalty engine (which uses penalty_grace_days + a global
-           * config policy). The API also enforces no enum on them. Disabled
-           * until the backend wires them up — see back-issues.md #14.
+           * Penalty terms are now consumed by the arrears engine (issue #5):
+           * `penalty_value_type` + `penalty_value` + `penalty_formula_base`
+           * drive the per-period penalty, with snapshot → product → global
+           * config precedence. `penalty_formula_type` is descriptive metadata
+           * snapshotted onto the loan. Selects keep the values to the exact
+           * enums the engine matches (a free-text typo would silently fall back
+           * to the global config policy).
            */}
-          <p className="rounded-[var(--radius-field)] border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-foreground">
-            {t("loanProducts.fields.penaltyDisabledNote")}
+          <p className="rounded-[var(--radius-field)] border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+            {t("loanProducts.fields.penaltyHint")}
           </p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Select
+              label={t("loanProducts.fields.penaltyValueType")}
+              value={form.penalty_value_type}
+              options={PENALTY_VALUE_TYPES.map((value) => ({
+                value,
+                label: t(`loanProducts.penaltyValueTypeOptions.${value}`),
+              }))}
+              placeholder={t("loanProducts.fields.penaltyValueTypePlaceholder")}
+              onChange={(value) => set("penalty_value_type", value)}
+              error={errors.penalty_value_type}
+              hint={t("loanProducts.fields.penaltyValueTypeHint")}
+              isClearable
+            />
             <TextField
               label={t("loanProducts.fields.penaltyValue")}
               type="number"
               value={form.penalty_value}
               onChange={(event) => set("penalty_value", event.target.value)}
               error={errors.penalty_value}
-              disabled
-            />
-            <TextField
-              label={t("loanProducts.fields.penaltyValueType")}
-              value={form.penalty_value_type}
-              onChange={(event) =>
-                set("penalty_value_type", event.target.value)
+              hint={
+                form.penalty_value_type === "percentage"
+                  ? t("loanProducts.fields.penaltyValueRateHint")
+                  : form.penalty_value_type === "amount"
+                    ? t("loanProducts.fields.penaltyValueAmountHint")
+                    : undefined
               }
-              error={errors.penalty_value_type}
-              disabled
             />
-            <TextField
+            {form.penalty_value_type === "percentage" ? (
+              <Select
+                label={t("loanProducts.fields.penaltyFormulaBase")}
+                value={form.penalty_formula_base}
+                options={PENALTY_FORMULA_BASES.map((value) => ({
+                  value,
+                  label: t(`loanProducts.penaltyFormulaBaseOptions.${value}`),
+                }))}
+                placeholder={t(
+                  "loanProducts.fields.penaltyFormulaBasePlaceholder",
+                )}
+                onChange={(value) => set("penalty_formula_base", value)}
+                error={errors.penalty_formula_base}
+                hint={t("loanProducts.fields.penaltyFormulaBaseHint")}
+                isClearable
+                className="sm:col-span-2"
+              />
+            ) : null}
+            <Select
               label={t("loanProducts.fields.penaltyFormulaType")}
               value={form.penalty_formula_type}
-              onChange={(event) =>
-                set("penalty_formula_type", event.target.value)
-              }
+              options={PENALTY_FORMULA_TYPES.map((value) => ({
+                value,
+                label: t(`loanProducts.penaltyFormulaTypeOptions.${value}`),
+              }))}
+              placeholder={t("loanProducts.fields.penaltyFormulaTypePlaceholder")}
+              onChange={(value) => set("penalty_formula_type", value)}
               error={errors.penalty_formula_type}
-              disabled
-            />
-            <TextField
-              label={t("loanProducts.fields.penaltyFormulaBase")}
-              value={form.penalty_formula_base}
-              onChange={(event) =>
-                set("penalty_formula_base", event.target.value)
-              }
-              error={errors.penalty_formula_base}
-              disabled
+              hint={t("loanProducts.fields.penaltyFormulaTypeHint")}
+              isClearable
               className="sm:col-span-2"
             />
           </div>

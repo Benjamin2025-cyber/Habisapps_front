@@ -90,9 +90,10 @@ export function CurrentDayCard({
   const isClosing = day.status === "closing";
   const isClosed = day.status === "closed";
   const blockers = extractBlockers(day.close_summary);
-  // Refuse start-close while teller sessions are still open: the backend
-  // currently deadlocks (the day goes to `closing`, which then blocks the very
-  // session-close needed to satisfy the controls). See back-issues-round3 D1.
+  // Refuse start-close while teller sessions are still open. The backend now
+  // rejects this safely (422 `open_teller_sessions`, no day-status change — D1
+  // fixed via the start-close preflight), but we still block the attempt up
+  // front so the admin gets a clear reason instead of a server error.
   const blockedByOpenSessions = registrable && (openSessionsCount ?? 0) > 0;
 
   return (

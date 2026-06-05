@@ -214,6 +214,7 @@ export default function GlobalClientImagePage() {
               <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-border bg-accent/10">
                 <AuthenticatedImage
                   documentPublicId={bundle.client.profile_photo_document_public_id}
+                  srcUrl={bundle.client.profile_photo_thumbnail_url}
                   alt={clientName}
                   className="h-full w-full object-cover"
                   fallback={

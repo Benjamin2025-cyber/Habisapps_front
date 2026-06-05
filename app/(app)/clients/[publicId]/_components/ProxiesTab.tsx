@@ -29,14 +29,27 @@ import {
   type ProxyWritePayload,
 } from "@/lib/api/client-proxies";
 import { localizeApiError } from "@/lib/api/errors";
-import { PERSONAL_IDENTITY_DOCUMENT_SLUGS } from "@/lib/catalogs/identity-document-types";
+import {
+  fetchIdentityDocumentTypes,
+  type IdentityDocumentType,
+} from "@/lib/api/reference";
+import { isKnownIdentityDocumentType } from "@/lib/catalogs/identity-document-types";
 import { ImageUploadField } from "../../../_components/ImageUploadField";
 import { SubResourceActionDrawer } from "./SubResourceActionDrawer";
 
 type Props = {
   clientPublicId: string;
+  /** Client's agency — sent on document upload (back-issue #11). */
+  agencyPublicId?: string | null;
   onCountChange?: (count: number) => void;
 };
+
+/**
+ * Backend identity-document keys not in the legacy local slug catalog but with
+ * a French i18n label — mirrors IdentityDocumentsTab so proxy ID types render
+ * the same labels.
+ */
+const I18N_BACKEND_TYPE_KEYS = new Set(["national_id", "drivers_license"]);
 
 /**
  * Tones for the KYC review state shown in the "Statut" column. The lifecycle
@@ -53,7 +66,11 @@ const VERIFICATION_TONE: Record<
   rejected: "danger",
 };
 
-export function ProxiesTab({ clientPublicId, onCountChange }: Props) {
+export function ProxiesTab({
+  clientPublicId,
+  agencyPublicId,
+  onCountChange,
+}: Props) {
   const t = useTranslations();
   const session = useSession();
   const toast = useToast();
@@ -85,6 +102,25 @@ export function ProxiesTab({ clientPublicId, onCountChange }: Props) {
   );
 
   const { data, loading, refetch } = useApi(fetcher, [token, clientPublicId]);
+
+  // Accepted identity-document catalog (back-issue #3) — drives the proxy
+  // ID-type select + recto/verso requirement, from the same source the client
+  // identity documents use so the keys pass backend validation (issue #4).
+  const [docTypes, setDocTypes] = useState<IdentityDocumentType[]>([]);
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    fetchIdentityDocumentTypes(token)
+      .then((types) => {
+        if (!cancelled) setDocTypes(types);
+      })
+      .catch(() => {
+        if (!cancelled) setDocTypes([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   useEffect(() => {
     if (data) onCountChange?.(data.length);
@@ -335,6 +371,8 @@ export function ProxiesTab({ clientPublicId, onCountChange }: Props) {
       <ProxyDrawer
         open={drawerOpen}
         editing={editing}
+        docTypes={docTypes}
+        agencyPublicId={agencyPublicId}
         onClose={() => {
           setDrawerOpen(false);
           setEditing(null);
@@ -357,11 +395,15 @@ export function ProxiesTab({ clientPublicId, onCountChange }: Props) {
 function ProxyDrawer({
   open,
   editing,
+  docTypes,
+  agencyPublicId,
   onClose,
   onSubmit,
 }: {
   open: boolean;
   editing: ClientProxy | null;
+  docTypes: IdentityDocumentType[];
+  agencyPublicId?: string | null;
   onClose: () => void;
   onSubmit: (payload: ProxyWritePayload) => Promise<void>;
 }) {
@@ -376,6 +418,7 @@ function ProxyDrawer({
     starts_on: "",
     ends_on: "",
     document_public_id: "",
+    back_document_public_id: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -396,6 +439,7 @@ function ProxyDrawer({
         starts_on: editing.starts_on ? editing.starts_on.slice(0, 10) : "",
         ends_on: editing.ends_on ? editing.ends_on.slice(0, 10) : "",
         document_public_id: editing.document_public_id ?? "",
+        back_document_public_id: editing.back_document_public_id ?? "",
       });
     } else {
       setForm({
@@ -408,20 +452,28 @@ function ProxyDrawer({
         starts_on: "",
         ends_on: "",
         document_public_id: "",
+        back_document_public_id: "",
       });
     }
   }, [open, editing]);
 
-  // A proxy is a natural person, so only personal identity documents apply.
-  // Labels are shared with the identity-documents tab (single i18n source).
+  // A proxy is a natural person, so the accepted identity-document catalog
+  // applies. Sourced from the backend (issue #4) so the keys validate and the
+  // recto/verso requirement is driven by `required_faces`; labels are shared
+  // with the identity-documents tab (single i18n source).
   const idDocumentTypeOptions = useMemo<
     Array<{ value: string; label: string }>
   >(() => {
-    const options: Array<{ value: string; label: string }> =
-      PERSONAL_IDENTITY_DOCUMENT_SLUGS.map((slug) => ({
-        value: slug,
-        label: t(`clientDetail.identityDocs.types.${slug}`),
-      }));
+    const options: Array<{ value: string; label: string }> = docTypes.map(
+      (type) => ({
+        value: type.key,
+        label:
+          isKnownIdentityDocumentType(type.key) ||
+          I18N_BACKEND_TYPE_KEYS.has(type.key)
+            ? t(`clientDetail.identityDocs.types.${type.key}`)
+            : type.label,
+      }),
+    );
     // Preserve any legacy free-text value on an existing record so editing
     // doesn't silently clear it.
     const currentValue = editing?.proxy_id_document_type;
@@ -435,7 +487,23 @@ function ProxyDrawer({
       });
     }
     return options;
-  }, [editing, t]);
+  }, [docTypes, editing, t]);
+
+  const selectedDocType = docTypes.find(
+    (type) => type.key === form.proxy_id_document_type,
+  );
+  const requiresBackFace = (selectedDocType?.required_faces ?? 1) >= 2;
+
+  function changeDocType(next: string) {
+    const nextType = docTypes.find((type) => type.key === next);
+    const nextRequiresBack = (nextType?.required_faces ?? 1) >= 2;
+    setForm((c) => ({
+      ...c,
+      proxy_id_document_type: next,
+      // Drop a captured verso when switching to a single-face type.
+      back_document_public_id: nextRequiresBack ? c.back_document_public_id : "",
+    }));
+  }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -453,6 +521,9 @@ function ProxyDrawer({
         starts_on: nullable(form.starts_on),
         ends_on: nullable(form.ends_on),
         document_public_id: nullable(form.document_public_id),
+        back_document_public_id: requiresBackFace
+          ? nullable(form.back_document_public_id)
+          : null,
       });
     } catch (cause) {
       const { generalMessage, fieldErrors } = localizeApiError(cause, {
@@ -464,6 +535,8 @@ function ProxyDrawer({
         mandate_type: t("clientDetail.proxies.fields.mandateType"),
         starts_on: t("clientDetail.proxies.fields.startsOn"),
         ends_on: t("clientDetail.proxies.fields.endsOn"),
+        document_public_id: t("clientDetail.proxies.fields.document"),
+        back_document_public_id: t("clientDetail.proxies.fields.documentBack"),
       });
       setErrors(fieldErrors);
       setGeneralError(generalMessage);
@@ -543,9 +616,8 @@ function ProxyDrawer({
             value={form.proxy_id_document_type}
             options={idDocumentTypeOptions}
             placeholder={t("clientDetail.proxies.fields.idTypePlaceholder")}
-            onChange={(next) =>
-              setForm((c) => ({ ...c, proxy_id_document_type: next }))
-            }
+            isClearable
+            onChange={changeDocType}
             error={errors.proxy_id_document_type}
           />
           <TextField
@@ -574,11 +646,25 @@ function ProxyDrawer({
         <ImageUploadField
           category="identity"
           value={form.document_public_id}
+          agencyPublicId={agencyPublicId}
           onChange={(id) => setForm((c) => ({ ...c, document_public_id: id }))}
           label={t("clientDetail.proxies.fields.document")}
           hint={t("clientDetail.proxies.fields.documentHint")}
           error={errors.document_public_id}
         />
+        {requiresBackFace ? (
+          <ImageUploadField
+            category="identity"
+            value={form.back_document_public_id}
+            agencyPublicId={agencyPublicId}
+            onChange={(id) =>
+              setForm((c) => ({ ...c, back_document_public_id: id }))
+            }
+            label={t("clientDetail.proxies.fields.documentBack")}
+            hint={t("clientDetail.proxies.fields.documentBackHint")}
+            error={errors.back_document_public_id}
+          />
+        ) : null}
       </form>
     </Drawer>
   );
