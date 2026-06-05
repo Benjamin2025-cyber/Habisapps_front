@@ -81,6 +81,7 @@ export function ResetPasswordForm({ initialPhone }: Props) {
         phone_number: normalizePhone(phone),
         otp,
         password,
+        password_confirmation: confirm,
       });
       router.replace("/login?reset=success");
     } catch (cause) {

@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { TextField } from "@/components/ui/TextField";
 import {
-  ALLOWED_TRANSITIONS,
   transitionLoanStatus,
+  uiTransitionTargets,
   type Loan,
   type LoanStatus,
 } from "@/lib/api/loans";
@@ -41,7 +41,8 @@ export function LoanStatusActions({ loan, onActed }: Props) {
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const targets = ALLOWED_TRANSITIONS[loan.status] ?? [];
+  // Hide `disbursed`: disbursement has its own dedicated screen (Issue 2).
+  const targets = uiTransitionTargets(loan.status);
   if (!canTransition || targets.length === 0) return null;
 
   function open(next: LoanStatus) {

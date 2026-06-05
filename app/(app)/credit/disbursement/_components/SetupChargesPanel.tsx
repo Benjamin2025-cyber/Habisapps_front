@@ -7,11 +7,12 @@ import { Select } from "@/components/ui/Select";
 import { localizeApiError } from "@/lib/api/errors";
 import {
   assessSetupCharges,
-  collectInsurancePremium,
   collectSetupCharge,
   decideSetupChargeException,
+  fetchSetupChargeState,
   isSetupChargeSettled,
-  type InsurancePremiumAssessment,
+  type LoanAssurance,
+  type RequiredNextAction,
   type SetupCharge,
   type SetupChargePaymentSource,
 } from "@/lib/api/loan-setup-charges";
@@ -28,8 +29,8 @@ type Props = {
   currency: string;
   accountOptions: ReadonlyArray<Option>;
   sessionOptions: ReadonlyArray<Option>;
-  /** Reports whether all charges + insurance are settled (gates disbursement). */
-  onSettledChange: (allSettled: boolean) => void;
+  /** Reports the backend's `ready_for_disbursement` (gates the disburse button). */
+  onReadyChange: (ready: boolean) => void;
 };
 
 export function SetupChargesPanel({
@@ -38,7 +39,7 @@ export function SetupChargesPanel({
   currency,
   accountOptions,
   sessionOptions,
-  onSettledChange,
+  onReadyChange,
 }: Props) {
   const t = useTranslations();
   const format = useFormatter();
@@ -51,7 +52,13 @@ export function SetupChargesPanel({
   const canWaive = isPlatformAdmin || directionPerm;
 
   const [charges, setCharges] = useState<SetupCharge[]>([]);
-  const [insurance, setInsurance] = useState<InsurancePremiumAssessment | null>(null);
+  // Informational only — NOT a collectible premium (Issue 3).
+  const [loanAssurance, setLoanAssurance] = useState<LoanAssurance | null>(null);
+  const [readinessStatus, setReadinessStatus] = useState<string>("");
+  const [readyForDisbursement, setReadyForDisbursement] = useState(false);
+  const [setupRequired, setSetupRequired] = useState(true);
+  const [requiredActions, setRequiredActions] = useState<RequiredNextAction[]>([]);
+  const [assessing, setAssessing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -68,14 +75,20 @@ export function SetupChargesPanel({
   const [waivingId, setWaivingId] = useState<string | null>(null);
   const [waiveComments, setWaiveComments] = useState("");
 
+  // Pure READ of the canonical readiness state — no assessment side-effect on
+  // open (Issue 1). Assessment is an explicit user action (`runAssess`).
   const load = useCallback(async () => {
     if (!token || !loanPublicId) return;
     setLoading(true);
     setLoadError(null);
     try {
-      const result = await assessSetupCharges(token, loanPublicId);
-      setCharges(result.charges);
-      setInsurance(result.insurance_premium_assessment);
+      const state = await fetchSetupChargeState(token, loanPublicId);
+      setCharges(state.setup_charges);
+      setLoanAssurance(state.loan_assurance);
+      setReadinessStatus(state.readiness_status);
+      setReadyForDisbursement(state.ready_for_disbursement);
+      setSetupRequired(state.setup_required);
+      setRequiredActions(state.required_next_actions ?? []);
       setLoaded(true);
     } catch (cause) {
       setLoadError(localizeApiError(cause).generalMessage);
@@ -84,36 +97,52 @@ export function SetupChargesPanel({
     }
   }, [token, loanPublicId]);
 
+  // Explicit assessment — only offered when the backend says it's needed.
+  async function runAssess() {
+    if (!token || !loanPublicId) return;
+    setAssessing(true);
+    setLoadError(null);
+    try {
+      await assessSetupCharges(token, loanPublicId);
+      await load();
+    } catch (cause) {
+      setLoadError(localizeApiError(cause).generalMessage);
+    } finally {
+      setAssessing(false);
+    }
+  }
+
   useEffect(() => {
     if (!active || !loanPublicId) {
       setCharges([]);
-      setInsurance(null);
+      setLoanAssurance(null);
       setLoaded(false);
       setLoadError(null);
       setRowError(null);
       setWaivingId(null);
+      setReadinessStatus("");
+      setReadyForDisbursement(false);
+      setRequiredActions([]);
       return;
     }
     setLoaded(false);
     void load();
   }, [active, loanPublicId, load]);
 
-  const allSettled = useMemo(() => {
-    const chargesOk = charges.every((c) => isSetupChargeSettled(c.status));
-    const insuranceOk = !insurance || isSetupChargeSettled(insurance.status);
-    return chargesOk && insuranceOk;
-  }, [charges, insurance]);
-
   const pendingCount = useMemo(
-    () =>
-      charges.filter((c) => !isSetupChargeSettled(c.status)).length +
-      (insurance && !isSetupChargeSettled(insurance.status) ? 1 : 0),
-    [charges, insurance],
+    () => charges.filter((c) => !isSetupChargeSettled(c.status)).length,
+    [charges],
   );
 
+  // The backend tells us when assessment is the next action — don't auto-assess.
+  const needsAssessment =
+    readinessStatus === "not_assessed" ||
+    requiredActions.some((a) => a.action === "assess_setup_charges");
+
+  // Disbursement readiness is driven by the backend, not a local charges rule.
   useEffect(() => {
-    onSettledChange(loaded && allSettled);
-  }, [loaded, allSettled, onSettledChange]);
+    onReadyChange(loaded ? readyForDisbursement : false);
+  }, [loaded, readyForDisbursement, onReadyChange]);
 
   function money(minor: number): string {
     return format.currencyMinor(minor, { currency });
@@ -148,27 +177,6 @@ export function SetupChargesPanel({
           paymentSource === "customer_account" ? accountId : null,
         teller_session_public_id:
           paymentSource === "teller_cash" ? sessionId : null,
-      });
-      toast.success(t("disbursement.setupCharges.settledToast"));
-      await load();
-    } catch (cause) {
-      setRowError(localizeApiError(cause).generalMessage);
-    } finally {
-      setBusyId(null);
-    }
-  }
-
-  async function settleInsurance(item: InsurancePremiumAssessment) {
-    if (!token || !loanPublicId) return;
-    if (!accountId) {
-      setRowError(t("disbursement.setupCharges.needSource"));
-      return;
-    }
-    setBusyId(item.public_id);
-    setRowError(null);
-    try {
-      await collectInsurancePremium(token, loanPublicId, item.public_id, {
-        customer_account_public_id: accountId,
       });
       toast.success(t("disbursement.setupCharges.settledToast"));
       await load();
@@ -215,12 +223,38 @@ export function SetupChargesPanel({
     );
   }
 
-  const hasItems = charges.length > 0 || insurance !== null;
-  if (!hasItems) {
+  // No setup required for this loan → nothing to collect here.
+  if (loaded && !setupRequired && charges.length === 0) {
     return (
       <p className="rounded-[var(--radius-field)] border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
         {t("disbursement.setupCharges.none")}
       </p>
+    );
+  }
+
+  // Not yet assessed → explicit assess action (opening the drawer is read-only).
+  if (loaded && needsAssessment && charges.length === 0) {
+    return (
+      <section className="flex flex-col gap-2 rounded-[var(--radius-card)] border border-border bg-background p-3">
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {t("disbursement.setupCharges.title")}
+        </span>
+        <p className="text-[0.7rem] text-muted-foreground">
+          {t("disbursement.setupCharges.assessNeeded")}
+        </p>
+        <div>
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={assessing}
+            onClick={runAssess}
+          >
+            {assessing
+              ? t("disbursement.setupCharges.assessing")
+              : t("disbursement.setupCharges.assess")}
+          </Button>
+        </div>
+      </section>
     );
   }
 
@@ -285,7 +319,7 @@ export function SetupChargesPanel({
       </div>
       {paymentSource === "teller_cash" ? (
         <p className="text-[0.7rem] text-muted-foreground">
-          {t("disbursement.setupCharges.insuranceAccountOnly")}
+          {t("disbursement.setupCharges.cashSourceNote")}
         </p>
       ) : null}
 
@@ -380,44 +414,32 @@ export function SetupChargesPanel({
           );
         })}
 
-        {insurance ? (
-          <li className="flex flex-col gap-2 px-3 py-2">
-            <div className="flex items-center gap-2">
-              <span className="min-w-0 flex-1 truncate text-sm text-foreground">
-                {t("disbursement.setupCharges.insurance")}
-              </span>
-              <span className="shrink-0 text-sm font-semibold tabular-nums text-foreground">
-                {money(insurance.premium_amount_minor)}
-              </span>
-              <Badge tone={statusTone(insurance.status)}>
-                {t(`disbursement.setupCharges.status.${insurance.status}`)}
-              </Badge>
-            </div>
-            {!isSetupChargeSettled(insurance.status) ? (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="primary"
-                  size="sm"
-                  disabled={busyId !== null}
-                  onClick={() => settleInsurance(insurance)}
-                >
-                  {busyId === insurance.public_id
-                    ? t("disbursement.setupCharges.settling")
-                    : t("disbursement.setupCharges.settle")}
-                </Button>
-                <span className="text-[0.7rem] text-muted-foreground">
-                  {t("disbursement.setupCharges.insuranceAccountOnly")}
-                </span>
-              </div>
-            ) : null}
-          </li>
-        ) : null}
       </ul>
 
+      {/* Loan assurance — informational metadata only, never collected here. */}
+      {loanAssurance && loanAssurance.amount_minor > 0 ? (
+        <div className="flex flex-col gap-1 rounded-[var(--radius-field)] border border-border bg-muted/20 px-3 py-2">
+          <div className="flex items-center gap-2">
+            <span className="min-w-0 flex-1 text-sm text-foreground">
+              {t("disbursement.setupCharges.insurance")}
+            </span>
+            <span className="shrink-0 text-sm font-semibold tabular-nums text-foreground">
+              {money(loanAssurance.amount_minor)}
+            </span>
+            <Badge tone="neutral">
+              {t("disbursement.setupCharges.informational")}
+            </Badge>
+          </div>
+          <span className="text-[0.7rem] text-muted-foreground">
+            {t("disbursement.setupCharges.loanAssuranceNote")}
+          </span>
+        </div>
+      ) : null}
+
       <p
-        className={`text-xs ${allSettled ? "text-success" : "text-warning"}`}
+        className={`text-xs ${readyForDisbursement ? "text-success" : "text-warning"}`}
       >
-        {allSettled
+        {readyForDisbursement
           ? t("disbursement.setupCharges.allSettled")
           : t("disbursement.setupCharges.pending", { count: pendingCount })}
       </p>

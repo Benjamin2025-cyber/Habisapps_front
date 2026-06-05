@@ -15,6 +15,8 @@ export async function activateRequest(payload: {
   phone_number: string;
   otp: string;
   password: string;
+  /** Required by the backend's `confirmed` rule — must equal `password`. */
+  password_confirmation: string;
 }): Promise<{ user: StaffUser }> {
   return apiRequest<{ user: StaffUser }>("activate", {
     method: "POST",
@@ -44,6 +46,8 @@ export async function resetPasswordRequest(payload: {
   phone_number: string;
   otp: string;
   password: string;
+  /** Required by the backend's `confirmed` rule — must equal `password`. */
+  password_confirmation: string;
 }): Promise<null> {
   return apiRequest<null>("password/reset", {
     method: "POST",

@@ -129,6 +129,18 @@ export const ALLOWED_TRANSITIONS: Record<LoanStatus, LoanStatus[]> = {
   rejected: [],
 };
 
+/**
+ * UI-facing transition targets. Mirrors {@link ALLOWED_TRANSITIONS} (which stays
+ * the backend-truth map) but HIDES `disbursed` as a generic target: operational
+ * disbursement must go through the dedicated Déblocage screen
+ * (`POST /loans/{id}/disburse`, setup-charge readiness + channel selection), not
+ * a raw status change. `disbursed → active` and all other transitions are kept.
+ * See issues.md (Issue 2).
+ */
+export function uiTransitionTargets(status: LoanStatus): LoanStatus[] {
+  return (ALLOWED_TRANSITIONS[status] ?? []).filter((to) => to !== "disbursed");
+}
+
 export type Loan = {
   public_id: string;
   loan_number: string | null;

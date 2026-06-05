@@ -48,7 +48,8 @@ export function DisburseDrawer({ open, loan, onClose, onSubmit }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
-  const [chargesSettled, setChargesSettled] = useState(false);
+  // Backend-driven readiness (ready_for_disbursement) reported by the panel.
+  const [readyToDisburse, setReadyToDisburse] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -186,7 +187,7 @@ export function DisburseDrawer({ open, loan, onClose, onSubmit }: Props) {
             size="md"
             type="submit"
             form="disburse-form"
-            disabled={submitting || !chargesSettled}
+            disabled={submitting || !readyToDisburse}
           >
             {submitting ? t("common.loading") : t("disbursement.drawer.confirm")}
           </Button>
@@ -226,7 +227,7 @@ export function DisburseDrawer({ open, loan, onClose, onSubmit }: Props) {
           currency={loan?.currency ?? "XAF"}
           accountOptions={accountOptions}
           sessionOptions={sessionOptions}
-          onSettledChange={setChargesSettled}
+          onReadyChange={setReadyToDisburse}
         />
 
         <Select

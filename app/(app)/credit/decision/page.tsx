@@ -16,9 +16,9 @@ import { MoreVerticalIcon } from "@/components/ui/icons";
 import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
 import {
-  ALLOWED_TRANSITIONS,
   fetchLoans,
   transitionLoanStatus,
+  uiTransitionTargets,
   type Loan,
   type LoanStatus,
   type PaginatedLoans,
@@ -196,9 +196,8 @@ export default function DecisionPage() {
               onClick: () => router.push(`/credit/loans/${loan.public_id}`),
             },
           ];
-          const targets = canTransition
-            ? (ALLOWED_TRANSITIONS[loan.status] ?? [])
-            : [];
+          // Hide `disbursed`: disbursement has its own dedicated screen (Issue 2).
+          const targets = canTransition ? uiTransitionTargets(loan.status) : [];
           if (targets.length > 0) {
             items.push({ kind: "separator" });
             for (const to of targets) {

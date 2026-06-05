@@ -68,7 +68,12 @@ export function ActivationVerifyStep({ phone, onBack, onSuccess }: Props) {
     }
     setSubmitting(true);
     try {
-      await activateRequest({ phone_number: phone, otp, password });
+      await activateRequest({
+        phone_number: phone,
+        otp,
+        password,
+        password_confirmation: confirm,
+      });
       onSuccess();
     } catch (cause) {
       if (cause instanceof ApiError) {
