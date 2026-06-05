@@ -25,6 +25,7 @@ import { useSession } from "@/lib/auth/SessionProvider";
 import { useFormatter, useTranslations } from "@/lib/i18n/I18nProvider";
 import { openBrandedReport } from "@/lib/print/report";
 import { PageHeader } from "../../_components/PageHeader";
+import { AuthenticatedImage } from "../../_components/AuthenticatedImage";
 
 type Bundle = {
   client: Client;
@@ -210,8 +211,17 @@ export default function GlobalClientImagePage() {
           {/* Identity */}
           <section className="rounded-[var(--radius-card)] border border-border bg-background p-5">
             <div className="flex flex-wrap items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent">
-                {clientName.slice(0, 2).toUpperCase()}
+              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-border bg-accent/10">
+                <AuthenticatedImage
+                  documentPublicId={bundle.client.profile_photo_document_public_id}
+                  alt={clientName}
+                  className="h-full w-full object-cover"
+                  fallback={
+                    <div className="flex h-full w-full items-center justify-center text-sm font-bold text-accent">
+                      {clientName.slice(0, 2).toUpperCase()}
+                    </div>
+                  }
+                />
               </div>
               <Link
                 href={`/clients/${bundle.client.public_id}`}

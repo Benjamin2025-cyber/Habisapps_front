@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import type { Client, ClientKycStatus, ClientStatus } from "@/lib/api/clients";
+import { AuthenticatedImage } from "../../../_components/AuthenticatedImage";
 
 type Props = {
   client: Client;
@@ -42,28 +43,48 @@ export function IdentityTab({ client, canEdit, onEdit }: Props) {
       .filter((value): value is string => !!value && value.length > 0)
       .join(" ") || "—";
 
+  const initials =
+    [client.last_name, client.first_name]
+      .map((n) => (n && n.trim().length > 0 ? n.trim()[0] : ""))
+      .join("")
+      .toUpperCase() || "•";
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-3 rounded-[var(--radius-card)] border border-border bg-background p-5">
-        <div className="flex flex-col gap-2">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            {t("clientDetail.identity.summaryLabel")}
-          </p>
-          <h2 className="text-xl font-bold text-foreground">{fullName}</h2>
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <Badge tone={STATUS_TONE[client.status]}>
-              {t(`clients.status.${client.status}`)}
-            </Badge>
-            <Badge tone={KYC_TONE[client.kyc_status]}>
-              {t("clientDetail.identity.kycPrefix", {
-                status: t(`clients.kyc.${client.kyc_status}`),
-              })}
-            </Badge>
-            {client.client_reference ? (
-              <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground tabular-nums">
-                {client.client_reference}
-              </span>
-            ) : null}
+        <div className="flex items-start gap-4">
+          <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
+            <AuthenticatedImage
+              documentPublicId={client.profile_photo_document_public_id}
+              alt={fullName}
+              className="h-full w-full object-cover"
+              fallback={
+                <div className="flex h-full w-full items-center justify-center text-lg font-bold text-muted-foreground">
+                  {initials}
+                </div>
+              }
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {t("clientDetail.identity.summaryLabel")}
+            </p>
+            <h2 className="text-xl font-bold text-foreground">{fullName}</h2>
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <Badge tone={STATUS_TONE[client.status]}>
+                {t(`clients.status.${client.status}`)}
+              </Badge>
+              <Badge tone={KYC_TONE[client.kyc_status]}>
+                {t("clientDetail.identity.kycPrefix", {
+                  status: t(`clients.kyc.${client.kyc_status}`),
+                })}
+              </Badge>
+              {client.client_reference ? (
+                <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground tabular-nums">
+                  {client.client_reference}
+                </span>
+              ) : null}
+            </div>
           </div>
         </div>
         {canEdit ? (

@@ -17,6 +17,7 @@ import type {
   ClientStatus,
   KycAction,
 } from "@/lib/api/clients";
+import { AuthenticatedImage } from "../../_components/AuthenticatedImage";
 
 type Props = {
   rows: ReadonlyArray<Client>;
@@ -95,9 +96,27 @@ export function ClientsTable({
             client.first_name,
             client.middle_name,
           ].filter((value): value is string => !!value && value.length > 0);
+          const name = parts.length === 0 ? "—" : parts.join(" ");
+          const initials =
+            [client.last_name, client.first_name]
+              .map((n) => (n && n.trim().length > 0 ? n.trim()[0] : ""))
+              .join("")
+              .toUpperCase() || "•";
           return (
-            <span className="text-foreground">
-              {parts.length === 0 ? "—" : parts.join(" ")}
+            <span className="flex items-center gap-2.5">
+              <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
+                <AuthenticatedImage
+                  documentPublicId={client.profile_photo_document_public_id}
+                  alt={name}
+                  className="h-full w-full object-cover"
+                  fallback={
+                    <span className="flex h-full w-full items-center justify-center text-[0.7rem] font-bold text-muted-foreground">
+                      {initials}
+                    </span>
+                  }
+                />
+              </span>
+              <span className="text-foreground">{name}</span>
             </span>
           );
         },
