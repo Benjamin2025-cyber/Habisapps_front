@@ -164,12 +164,6 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
         permissions: ["agencies.view"],
       },
       {
-        labelKey: "managers",
-        href: "/admin/managers",
-        available: false,
-        permissions: ["users.view"],
-      },
-      {
         labelKey: "clients",
         href: "/clients",
         available: true,
@@ -325,7 +319,9 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "reportsRelease",
         href: "/reports/release",
-        available: true,
+        // Locked: no "main levée" report type is exposed by the API and the
+        // product owner hasn't finalised the spec. Re-enable once both land.
+        available: false,
         permissions: ["accounting.audit.view"],
       },
       {

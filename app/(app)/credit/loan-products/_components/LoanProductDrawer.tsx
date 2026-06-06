@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { Select } from "@/components/ui/Select";
@@ -22,6 +22,7 @@ import {
   type RepaymentFrequency,
   type TermUnit,
 } from "@/lib/api/loan-products";
+import type { LedgerAccount } from "@/lib/api/ledger-accounts";
 
 export type LoanProductDrawerMode = "create" | "edit";
 
@@ -50,6 +51,8 @@ type Props = {
   open: boolean;
   mode: LoanProductDrawerMode;
   initial?: LoanProduct | null;
+  /** Active ledger accounts for the default-account picker (P16). */
+  ledgerAccounts: ReadonlyArray<LedgerAccount>;
   onClose: () => void;
   onSubmit: (payload: LoanProductWritePayload) => Promise<void>;
 };
@@ -144,12 +147,33 @@ export function LoanProductDrawer({
   open,
   mode,
   initial,
+  ledgerAccounts,
   onClose,
   onSubmit,
 }: Props) {
   const t = useTranslations();
   const session = useSession();
   const token = session.status === "authenticated" ? session.token : null;
+
+  // Default-account options: active accounts, plus the currently-stored account
+  // if it isn't in the active set (so editing never silently drops it).
+  const ledgerAccountOptions = useMemo<Array<{ value: string; label: string }>>(
+    () => {
+      const options = ledgerAccounts
+        .filter((a) => a.status === "active")
+        .map((a) => ({ value: a.public_id, label: `${a.code} — ${a.name}` }));
+      const current = initial?.ledger_account_public_id;
+      if (current && !options.some((o) => o.value === current)) {
+        const match = ledgerAccounts.find((a) => a.public_id === current);
+        options.push({
+          value: current,
+          label: match ? `${match.code} — ${match.name}` : current,
+        });
+      }
+      return options;
+    },
+    [ledgerAccounts, initial],
+  );
   const [form, setForm] = useState<FormState>(EMPTY);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -717,12 +741,14 @@ export function LoanProductDrawer({
 
         {/* Comptabilité */}
         <Section title={t("loanProducts.drawer.sectionAccounting")}>
-          <TextField
+          <Select
             label={t("loanProducts.fields.ledgerAccount")}
             value={form.ledger_account_public_id}
-            onChange={(event) =>
-              set("ledger_account_public_id", event.target.value)
-            }
+            options={ledgerAccountOptions}
+            placeholder={t("loanProducts.fields.ledgerAccountPlaceholder")}
+            isClearable
+            isSearchable
+            onChange={(next) => set("ledger_account_public_id", next)}
             error={errors.ledger_account_public_id}
             hint={t("loanProducts.fields.ledgerAccountHint")}
           />

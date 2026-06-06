@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import {
@@ -12,6 +12,10 @@ import {
   type LoanProductWritePayload,
   type PaginatedLoanProducts,
 } from "@/lib/api/loan-products";
+import {
+  fetchLedgerAccounts,
+  type LedgerAccount,
+} from "@/lib/api/ledger-accounts";
 import { localizeApiError, localizeApiMessage } from "@/lib/api/errors";
 import { useCanAny, useHasRole } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
@@ -62,6 +66,23 @@ export default function LoanProductsPage() {
   const [editing, setEditing] = useState<LoanProduct | null>(null);
 
   const token = session.status === "authenticated" ? session.token : null;
+
+  // Active ledger accounts power the product's default-account picker.
+  const [ledgerAccounts, setLedgerAccounts] = useState<LedgerAccount[]>([]);
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    fetchLedgerAccounts(token, { perPage: 200 })
+      .then((res) => {
+        if (!cancelled) setLedgerAccounts(res.data);
+      })
+      .catch(() => {
+        if (!cancelled) setLedgerAccounts([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   const fetcher = useCallback(
     async (signal: AbortSignal): Promise<PaginatedLoanProducts> => {
@@ -235,6 +256,7 @@ export default function LoanProductsPage() {
           open={drawerMode !== null}
           mode={drawerMode ?? "create"}
           initial={editing}
+          ledgerAccounts={ledgerAccounts}
           onClose={closeDrawer}
           onSubmit={handleSubmit}
         />
