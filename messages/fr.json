@@ -2885,6 +2885,9 @@
     "pageDescription": "Ouverture et clôture des sessions de caisse. Une session ouvre une caisse pour une journée avec un fonds déclaré.",
     "errorTitle": "Impossible de charger les sessions",
     "filters": {
+      "scopeLabel": "Portée",
+      "scopeMine": "Mes sessions",
+      "scopeAll": "Toutes les sessions",
       "statusLabel": "Statut",
       "statusAll": "Tous"
     },

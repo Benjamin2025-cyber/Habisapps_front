@@ -2885,6 +2885,9 @@
     "pageDescription": "Opening and closing of cash sessions. A session opens a till for a day with a declared fund.",
     "errorTitle": "Unable to load sessions",
     "filters": {
+      "scopeLabel": "Scope",
+      "scopeMine": "My sessions",
+      "scopeAll": "All sessions",
       "statusLabel": "Status",
       "statusAll": "All"
     },

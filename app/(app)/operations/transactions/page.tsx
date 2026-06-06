@@ -58,13 +58,22 @@ export default function CashTransactionsPage() {
   const [reversing, setReversing] = useState(false);
 
   const token = session.status === "authenticated" ? session.token : null;
+  const currentTellerPublicId =
+    session.status === "authenticated" ? session.user.public_id : null;
 
   const loadSessions = useCallback(async () => {
     if (!token) return;
     setLoadingSessions(true);
     try {
       const [sessions, tillsRes] = await Promise.all([
-        fetchTellerSessions(token, { perPage: 100 }),
+        // Only the connected teller's OWN open sessions — operations on another
+        // teller's session are rejected by the backend, so they must not be
+        // selectable here (server-side scope, not a client-side filter).
+        fetchTellerSessions(token, {
+          perPage: 100,
+          status: "open",
+          tellerUserPublicId: currentTellerPublicId ?? undefined,
+        }),
         fetchTills(token, { perPage: 100 }),
       ]);
       const open = sessions.data.filter((s) => s.status === "open");
@@ -78,7 +87,7 @@ export default function CashTransactionsPage() {
     } finally {
       setLoadingSessions(false);
     }
-  }, [token]);
+  }, [token, currentTellerPublicId]);
 
   useEffect(() => {
     void loadSessions();

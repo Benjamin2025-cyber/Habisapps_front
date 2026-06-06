@@ -43,6 +43,10 @@ export default function SessionsPage() {
   const canView = isPlatformAdmin || viewPerm;
   const canManage = isPlatformAdmin || managePerm;
 
+  // Default to the connected teller's own sessions (server-side filter) — the
+  // list can grow large, and a teller only manages their own. "all" widens it
+  // (the backend still agency-scopes non-admins).
+  const [scope, setScope] = useState<"mine" | "all">("mine");
   const [statusFilter, setStatusFilter] = useState<TellerSessionStatus | "">("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
@@ -50,6 +54,8 @@ export default function SessionsPage() {
   const [closing, setClosing] = useState<TellerSession | null>(null);
 
   const token = session.status === "authenticated" ? session.token : null;
+  const currentTellerPublicId =
+    session.status === "authenticated" ? session.user.public_id : null;
 
   const fetcher = useCallback(
     async (signal: AbortSignal): Promise<PaginatedTellerSessions> => {
@@ -59,9 +65,14 @@ export default function SessionsPage() {
         page,
         perPage: pageSize,
         status: statusFilter || undefined,
+        // Server-side scope to the connected teller by default.
+        tellerUserPublicId:
+          scope === "mine" && currentTellerPublicId
+            ? currentTellerPublicId
+            : undefined,
       });
     },
-    [token, page, pageSize, statusFilter],
+    [token, page, pageSize, statusFilter, scope, currentTellerPublicId],
   );
 
   const { data, loading, error, refetch } = useApi(fetcher, [
@@ -69,6 +80,8 @@ export default function SessionsPage() {
     page,
     pageSize,
     statusFilter,
+    scope,
+    currentTellerPublicId,
   ]);
 
   const [tills, setTills] = useState<Till[]>([]);
@@ -170,15 +183,21 @@ export default function SessionsPage() {
         }
       />
 
-      <section className="flex flex-col gap-2 rounded-[var(--radius-card)] border border-border bg-background p-4 sm:max-w-xs">
-        <label
-          htmlFor="sessions-status"
-          className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-        >
-          {t("sessions.filters.statusLabel")}
-        </label>
+      <section className="grid grid-cols-1 gap-3 rounded-[var(--radius-card)] border border-border bg-background p-4 sm:max-w-md sm:grid-cols-2">
         <Select
-          id="sessions-status"
+          label={t("sessions.filters.scopeLabel")}
+          value={scope}
+          options={[
+            { value: "mine", label: t("sessions.filters.scopeMine") },
+            { value: "all", label: t("sessions.filters.scopeAll") },
+          ]}
+          onChange={(next) => {
+            setScope(next as "mine" | "all");
+            setPage(1);
+          }}
+        />
+        <Select
+          label={t("sessions.filters.statusLabel")}
           value={statusFilter}
           options={[
             { value: "open", label: t("sessions.status.open") },
@@ -215,6 +234,7 @@ export default function SessionsPage() {
         rows={visible}
         loading={loading && !data}
         canManage={canManage}
+        currentTellerPublicId={currentTellerPublicId}
         tillLabelOf={tillLabelOf}
         tellerNameOf={tellerNameOf}
         pagination={

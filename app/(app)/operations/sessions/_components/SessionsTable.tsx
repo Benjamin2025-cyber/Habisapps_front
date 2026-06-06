@@ -16,6 +16,9 @@ type Props = {
   loading: boolean;
   pagination?: DataTablePagination;
   canManage: boolean;
+  /** Connected user's public_id — the close button only shows on their own
+   *  sessions (the backend rejects closing someone else's session). */
+  currentTellerPublicId: string | null;
   tillLabelOf: (publicId: string | null) => string;
   tellerNameOf: (publicId: string | null) => string;
   onClose: (session: TellerSession) => void;
@@ -26,6 +29,7 @@ export function SessionsTable({
   loading,
   pagination,
   canManage,
+  currentTellerPublicId,
   tillLabelOf,
   tellerNameOf,
   onClose,
@@ -113,7 +117,11 @@ export function SessionsTable({
         header: t("sessions.columns.actions"),
         meta: { align: "right" },
         cell: ({ row }) =>
-          canManage && row.original.status === "open" ? (
+          // Own open session only: the backend rejects closing another teller's
+          // session, so we don't surface the button for sessions that aren't ours.
+          canManage &&
+          row.original.status === "open" &&
+          row.original.teller_user_public_id === currentTellerPublicId ? (
             <div className="flex justify-end">
               <Button
                 variant="outline"
@@ -128,7 +136,7 @@ export function SessionsTable({
           ),
       },
     ],
-    [t, format, canManage, tillLabelOf, tellerNameOf, onClose],
+    [t, format, canManage, currentTellerPublicId, tillLabelOf, tellerNameOf, onClose],
   );
 
   return (
