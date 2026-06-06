@@ -15,9 +15,15 @@ import {
 } from "@/lib/api/accounting-days";
 import {
   fetchJournalEntries,
+  getJournalEntryStats,
   type JournalEntry,
+  type JournalEntryStats,
 } from "@/lib/api/journal-entries";
-import { countLoans, fetchLoans, type Loan } from "@/lib/api/loans";
+import { fetchLoans, type Loan } from "@/lib/api/loans";
+import {
+  getAccountantDashboard,
+  type AccountantDashboard,
+} from "@/lib/api/dashboard";
 import { listAuditEvents, type AuditEvent } from "@/lib/api/audit";
 import { useCan } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
@@ -45,19 +51,20 @@ const JOURNAL_STATUSES = [
 const DAY_OPEN_STATUSES = ["open", "reopened"];
 
 type AccountantAggregate = {
-  entries: JournalEntry[];
-  approvedLoans: number | null;
+  summary: AccountantDashboard | null;
+  journalStats: JournalEntryStats | null;
+  submittedQueue: JournalEntry[];
   disburseQueue: Loan[];
   currentDay: AccountingDay | null;
   recentEvents: AuditEvent[];
 };
 
 /**
- * Accountant dashboard. Journal-entry workload (status donut + "to approve"
- * queue), the disbursement queue (loans ready to disburse), the current
- * accounting-day state, plus the audit feed and notifications. Journal counts
- * are derived client-side from a page of entries until a status filter / stats
- * endpoint lands (dashboard-request.md #4).
+ * Accountant dashboard. KPIs come from `GET /dashboards/accountant` (accurate,
+ * agency-scoped counts incl. a precise disbursement-queue size); the entry-status
+ * donut from `GET /journal-entries/stats`; the queues from
+ * `GET /journal-entries?filter[status]=submitted` and
+ * `GET /loans?filter[awaiting_disbursement]=true`.
  */
 export function DashboardAccountantLayout() {
   const t = useTranslations();
@@ -74,23 +81,22 @@ export function DashboardAccountantLayout() {
     async (signal: AbortSignal): Promise<AccountantAggregate> => {
       if (!token) throw new Error("Missing session token");
       void signal;
-      const [entries, approvedLoans, disburseQueue, currentDay, recentEvents] =
+      const [summary, journalStats, submittedQueue, disburseQueue, currentDay, recentEvents] =
         await Promise.all([
+          safeNullable(() => getAccountantDashboard(token)),
+          safeNullable(() => getJournalEntryStats(token)),
           safeArray(() =>
-            fetchJournalEntries(token, { perPage: 100 }).then((r) => r.data),
+            fetchJournalEntries(token, { status: "submitted", perPage: 6 }).then((r) => r.data),
           ),
-          safeNullable(() => countLoans(token, { status: "approved" })),
           safeArray(() =>
-            fetchLoans(token, { perPage: 6, status: "approved" }).then((r) => r.data),
+            fetchLoans(token, { perPage: 6, awaitingDisbursement: true }).then((r) => r.data),
           ),
           safeNullable(() => fetchCurrentAccountingDay(token)),
           canSeeAudit
-            ? safeArray(() =>
-                listAuditEvents(token, { perPage: 10 }).then((r) => r.data),
-              )
+            ? safeArray(() => listAuditEvents(token, { perPage: 10 }).then((r) => r.data))
             : [],
         ]);
-      return { entries, approvedLoans, disburseQueue, currentDay, recentEvents };
+      return { summary, journalStats, submittedQueue, disburseQueue, currentDay, recentEvents };
     },
     [token, canSeeAudit],
   );
@@ -99,13 +105,8 @@ export function DashboardAccountantLayout() {
 
   if (session.status !== "authenticated") return null;
 
-  const entries = data?.entries ?? [];
-  const byStatus = entries.reduce<Record<string, number>>((acc, e) => {
-    acc[e.status] = (acc[e.status] ?? 0) + 1;
-    return acc;
-  }, {});
-  const submitted = entries.filter((e) => e.status === "submitted");
-  const postedCount = byStatus.posted ?? 0;
+  const summary = data?.summary ?? null;
+  const byStatus = data?.journalStats?.by_status ?? {};
 
   const segments = JOURNAL_STATUSES.map((status) => ({
     key: status,
@@ -164,14 +165,14 @@ export function DashboardAccountantLayout() {
               icon={FileTextIcon}
               tone="warning"
               label={t("dashboard.accountant.kpi.pendingEntries")}
-              value={submitted.length}
+              value={summary?.submitted_journal_count ?? (loading ? "…" : "—")}
               loading={loading && !data}
             />
             <DashboardStatTile
               icon={BanknoteIcon}
               tone="success"
               label={t("dashboard.accountant.kpi.toDisburse")}
-              value={data?.approvedLoans ?? (loading ? "…" : "—")}
+              value={summary?.awaiting_disbursement_count ?? (loading ? "…" : "—")}
               loading={loading && !data}
             />
             <DashboardStatTile
@@ -189,7 +190,7 @@ export function DashboardAccountantLayout() {
               icon={LayersIcon}
               tone="info"
               label={t("dashboard.accountant.kpi.postedToday")}
-              value={postedCount}
+              value={summary?.posted_journal_count ?? (loading ? "…" : "—")}
               loading={loading && !data}
             />
           </div>
@@ -212,7 +213,7 @@ export function DashboardAccountantLayout() {
             bodyClassName="px-5 py-2"
           >
             <DashboardJournalTable
-              entries={loading && !data ? null : submitted.slice(0, 6)}
+              entries={data?.submittedQueue ?? null}
               loading={loading && !data}
               emptyLabel={t("dashboard.accountant.queueEmpty")}
             />

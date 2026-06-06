@@ -30,6 +30,31 @@ export async function countStaffUsers(token: string): Promise<number> {
   return countResource(token, "staff-users", {});
 }
 
+/**
+ * `GET /loans/stats` — counts grouped by status (a true partition of the scoped
+ * total) plus arrears / PAR / disbursement aggregates. Scoped like `/loans`
+ * (agency / institution / officer-self via `filter[credit_agent_public_id]`).
+ */
+export type LoanStats = {
+  by_status: Record<string, number>;
+  in_arrears_count: number;
+  par_buckets: { par30: number; par60: number; par90: number };
+  awaiting_disbursement_count: number;
+};
+
+export async function getLoanStats(
+  token: string,
+  filters: { creditAgentPublicId?: string } = {},
+): Promise<LoanStats> {
+  return apiRequest<LoanStats>("loans/stats", {
+    method: "GET",
+    token,
+    query: filters.creditAgentPublicId
+      ? { "filter[credit_agent_public_id]": filters.creditAgentPublicId }
+      : undefined,
+  });
+}
+
 async function countResource(
   token: string,
   path: string,
@@ -300,6 +325,12 @@ export async function fetchLoans(
     perPage?: number;
     status?: LoanStatus;
     clientPublicId?: string;
+    /** Restrict to loans originated by this credit agent (officer self-scope). */
+    creditAgentPublicId?: string;
+    /** Only loans ready to disburse (approved, charges resolved, mapping present). */
+    awaitingDisbursement?: boolean;
+    /** Only loans currently in arrears. */
+    inArrears?: boolean;
     search?: string;
   } = {},
 ): Promise<PaginatedLoans> {
@@ -309,6 +340,15 @@ export async function fetchLoans(
   if (options.status) query.set("status", options.status);
   if (options.clientPublicId) {
     query.set("filter[client_public_id]", options.clientPublicId);
+  }
+  if (options.creditAgentPublicId) {
+    query.set("filter[credit_agent_public_id]", options.creditAgentPublicId);
+  }
+  if (options.awaitingDisbursement) {
+    query.set("filter[awaiting_disbursement]", "true");
+  }
+  if (options.inArrears) {
+    query.set("filter[in_arrears]", "true");
   }
   if (options.search && options.search.trim().length > 0) {
     query.set("search", options.search.trim());

@@ -421,8 +421,10 @@
         "activeLoans": "Crédits actifs",
         "pending": "Demandes à instruire",
         "clients": "Clients",
+        "portfolio": "Encours portefeuille",
         "delinquent": "Crédits en retard"
       },
+      "collectionsMtd": "Collecte du mois : {amount}",
       "delinquentSoon": "Compteur des retards bientôt disponible.",
       "portfolioTitle": "Répartition du portefeuille",
       "recentLoans": "Crédits récents",

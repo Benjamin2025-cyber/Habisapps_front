@@ -166,3 +166,91 @@ export async function getAgenciesPerformance(
     },
   });
 }
+
+/* ------------------------------------------------------------------ *
+ * Self-scoped dashboards for field roles that 403 on /operational.
+ * Each requires its own role (loan-officer / kyc-officer / accountant /
+ * regional-manager) — call only from the matching role's layout.
+ * ------------------------------------------------------------------ */
+export type LoanOfficerDashboard = {
+  scope: string;
+  agency_public_id: string | null;
+  currency: string;
+  active_loan_count: number;
+  application_count: number;
+  delinquent_loan_count: number;
+  portfolio_outstanding_minor: number;
+  collections_mtd_minor: number;
+  /** Full per-status partition of the officer's own portfolio. */
+  by_status: Record<string, number>;
+};
+
+export async function getLoanOfficerDashboard(
+  token: string,
+): Promise<LoanOfficerDashboard> {
+  return apiRequest<LoanOfficerDashboard>("dashboards/loan-officer", {
+    method: "GET",
+    token,
+  });
+}
+
+export type KycOfficerDashboard = {
+  scope: string;
+  /** Buckets collapse draft + pending_review into `pending`. */
+  by_kyc_status: { pending: number; verified: number; rejected: number };
+  recent_pending_count: number;
+};
+
+export async function getKycOfficerDashboard(
+  token: string,
+): Promise<KycOfficerDashboard> {
+  return apiRequest<KycOfficerDashboard>("dashboards/kyc-officer", {
+    method: "GET",
+    token,
+  });
+}
+
+export type AccountantDashboard = {
+  scope: string;
+  agency_public_id: string | null;
+  submitted_journal_count: number;
+  approved_unposted_journal_count: number;
+  posted_journal_count: number;
+  rejected_journal_count: number;
+  awaiting_disbursement_count: number;
+};
+
+export async function getAccountantDashboard(
+  token: string,
+): Promise<AccountantDashboard> {
+  return apiRequest<AccountantDashboard>("dashboards/accountant", {
+    method: "GET",
+    token,
+  });
+}
+
+export type RegionalAgencyRow = {
+  agency_public_id: string;
+  agency_code: string;
+  agency_name: string;
+  active_loan_count: number;
+  delinquent_loan_count: number;
+  portfolio_outstanding_minor: number;
+};
+
+export type RegionalDashboard = {
+  scope: string;
+  agencies: RegionalAgencyRow[];
+  active_loan_count: number;
+  delinquent_loan_count: number;
+  portfolio_outstanding_minor: number;
+};
+
+export async function getRegionalDashboard(
+  token: string,
+): Promise<RegionalDashboard> {
+  return apiRequest<RegionalDashboard>("dashboards/regional", {
+    method: "GET",
+    token,
+  });
+}

@@ -22,6 +22,10 @@ export type TellerSessionSummary = {
   withdrawals_total_minor: number;
   manual_journals_total_minor: number;
   reversals_total_minor: number;
+  /** Sum of applied fees on posted transactions. */
+  commissions_total_minor: number;
+  /** Distinct clients served by posted transactions. */
+  distinct_clients_served_count: number;
   transaction_count: number;
   posted_transaction_count: number;
   pending_transaction_count: number;

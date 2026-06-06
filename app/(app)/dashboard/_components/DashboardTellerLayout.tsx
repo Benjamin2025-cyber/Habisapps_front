@@ -204,8 +204,8 @@ export function DashboardTellerLayout() {
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               <SummaryItem icon={ChevronDownIcon} tone="success" label={t("dashboard.teller.summary.deposits")} value={money(summary?.deposits_total_minor ?? 0)} />
               <SummaryItem icon={ChevronDownIcon} iconClassName="rotate-180" tone="danger" label={t("dashboard.teller.summary.withdrawals")} value={money(summary?.withdrawals_total_minor ?? 0)} />
-              <SummaryItem icon={CashIcon} tone="accent" label={t("dashboard.teller.summary.commissions")} value={money(0)} />
-              <SummaryItem icon={UsersIcon} tone="info" label={t("dashboard.teller.summary.clientsServed")} value="0" />
+              <SummaryItem icon={CashIcon} tone="accent" label={t("dashboard.teller.summary.commissions")} value={money(summary?.commissions_total_minor ?? 0)} />
+              <SummaryItem icon={UsersIcon} tone="info" label={t("dashboard.teller.summary.clientsServed")} value={String(summary?.distinct_clients_served_count ?? 0)} />
             </div>
           </section>
         </div>

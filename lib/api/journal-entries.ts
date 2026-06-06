@@ -102,13 +102,32 @@ export type JournalLineCreatePayload = {
  * Paginated list. The index exposes no server-side filters, so status
  * filtering is applied client-side over the loaded page.
  */
+/**
+ * `GET /journal-entries/stats` — counts grouped by status (a partition of the
+ * scoped total) plus a `submitted_count` convenience aggregate.
+ */
+export type JournalEntryStats = {
+  by_status: Record<string, number>;
+  submitted_count: number;
+};
+
+export async function getJournalEntryStats(
+  token: string,
+): Promise<JournalEntryStats> {
+  return apiRequest<JournalEntryStats>("journal-entries/stats", {
+    method: "GET",
+    token,
+  });
+}
+
 export async function fetchJournalEntries(
   token: string,
-  options: { page?: number; perPage?: number } = {},
+  options: { page?: number; perPage?: number; status?: JournalEntryStatus } = {},
 ): Promise<PaginatedJournalEntries> {
   const query = new URLSearchParams();
   query.set("per_page", String(options.perPage ?? 25));
   if (options.page && options.page > 0) query.set("page", String(options.page));
+  if (options.status) query.set("filter[status]", options.status);
 
   const response = await fetch(`/api/v1/journal-entries?${query.toString()}`, {
     method: "GET",

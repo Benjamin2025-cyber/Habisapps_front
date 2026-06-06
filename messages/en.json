@@ -421,8 +421,10 @@
         "activeLoans": "Active loans",
         "pending": "Applications to review",
         "clients": "Clients",
+        "portfolio": "Outstanding portfolio",
         "delinquent": "Overdue loans"
       },
+      "collectionsMtd": "Collected this month: {amount}",
       "delinquentSoon": "Overdue counter coming soon.",
       "portfolioTitle": "Portfolio breakdown",
       "recentLoans": "Recent loans",

@@ -141,6 +141,27 @@ export type KycActionPayload = {
  * Paginated list. The endpoint defaults to agency-scoped — pass `scope=all`
  * to broaden to institution level (requires `crm.scope.institution.read`).
  */
+/**
+ * `GET /clients/stats` — counts grouped by status and KYC status. KYC buckets
+ * collapse draft + pending_review into `pending`. Scoped like `/clients`
+ * (agency by default; pass `scope=all` for institution-wide).
+ */
+export type ClientStats = {
+  by_status: Record<string, number>;
+  by_kyc_status: { pending: number; verified: number; rejected: number };
+};
+
+export async function getClientStats(
+  token: string,
+  options: { scope?: "all" } = {},
+): Promise<ClientStats> {
+  return apiRequest<ClientStats>("clients/stats", {
+    method: "GET",
+    token,
+    query: options.scope ? { scope: options.scope } : undefined,
+  });
+}
+
 export async function fetchClients(
   token: string,
   options: {

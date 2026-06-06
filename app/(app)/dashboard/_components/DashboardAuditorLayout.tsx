@@ -11,9 +11,10 @@ import {
   countClients,
   countStaffUsers,
   fetchLoans,
+  getLoanStats,
   type Loan,
+  type LoanStats,
 } from "@/lib/api/loans";
-import { countLoansByStatus } from "@/lib/api/dashboard-stats";
 import { listAuditEvents, type AuditEvent } from "@/lib/api/audit";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useApi } from "@/lib/hooks/useApi";
@@ -27,21 +28,10 @@ import { DashboardActivitiesCard } from "./DashboardActivitiesCard";
 import { DashboardNotificationsCard } from "./DashboardTellerSections";
 import { loanStatusTone } from "./dashboard-status";
 
-const LOAN_STATUSES = [
-  "application",
-  "in_review",
-  "approved",
-  "disbursed",
-  "active",
-  "rescheduled",
-  "closed",
-  "rejected",
-  "written_off",
-] as const;
 const LOAN_DONUT = ["active", "in_review", "approved", "closed", "rejected"] as const;
 
 type AuditorAggregate = {
-  loansByStatus: Record<string, number>;
+  loanStats: LoanStats | null;
   clientsTotal: number | null;
   agenciesTotal: number | null;
   usersTotal: number | null;
@@ -63,9 +53,9 @@ export function DashboardAuditorLayout() {
     async (signal: AbortSignal): Promise<AuditorAggregate> => {
       if (!token) throw new Error("Missing session token");
       void signal;
-      const [loansByStatus, clientsTotal, agenciesTotal, usersTotal, recentEvents, recentLoans] =
+      const [loanStats, clientsTotal, agenciesTotal, usersTotal, recentEvents, recentLoans] =
         await Promise.all([
-          countLoansByStatus(token, LOAN_STATUSES),
+          safeNullable(() => getLoanStats(token)),
           safeNullable(() => countClients(token, { scope: "all" })),
           safeNullable(() =>
             fetchAgencies(token, { perPage: 1 }).then(
@@ -76,7 +66,7 @@ export function DashboardAuditorLayout() {
           safeArray(() => listAuditEvents(token, { perPage: 12 }).then((r) => r.data)),
           safeArray(() => fetchLoans(token, { perPage: 6 }).then((r) => r.data)),
         ]);
-      return { loansByStatus, clientsTotal, agenciesTotal, usersTotal, recentEvents, recentLoans };
+      return { loanStats, clientsTotal, agenciesTotal, usersTotal, recentEvents, recentLoans };
     },
     [token],
   );
@@ -85,8 +75,8 @@ export function DashboardAuditorLayout() {
 
   if (session.status !== "authenticated") return null;
 
-  const loansByStatus = data?.loansByStatus ?? {};
-  const totalLoans = LOAN_STATUSES.reduce((sum, s) => sum + (loansByStatus[s] ?? 0), 0);
+  const loansByStatus = data?.loanStats?.by_status ?? {};
+  const totalLoans = Object.values(loansByStatus).reduce((sum, n) => sum + n, 0);
   const loanSegments = LOAN_DONUT.map((status) => ({
     key: status,
     label: t(`dashboard.common.loanStatus.${status}`),

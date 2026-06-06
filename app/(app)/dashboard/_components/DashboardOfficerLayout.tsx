@@ -9,12 +9,15 @@ import {
   LayersIcon,
   UsersIcon,
 } from "@/components/ui/icons";
-import { countClients, countLoans, fetchLoans, type Loan } from "@/lib/api/loans";
-import { countLoansByStatus } from "@/lib/api/dashboard-stats";
+import { fetchLoans, type Loan } from "@/lib/api/loans";
+import {
+  getLoanOfficerDashboard,
+  type LoanOfficerDashboard,
+} from "@/lib/api/dashboard";
 import { useCan } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useApi } from "@/lib/hooks/useApi";
-import { useTranslations } from "@/lib/i18n/I18nProvider";
+import { useFormatter, useTranslations } from "@/lib/i18n/I18nProvider";
 import { DashboardHeader } from "./DashboardHeader";
 import { DashboardStatTile } from "./DashboardStatTile";
 import { DashboardDistributionCard } from "./DashboardDistributionCard";
@@ -35,23 +38,23 @@ const PORTFOLIO_STATUSES = [
 ] as const;
 
 type OfficerAggregate = {
-  byStatus: Record<string, number>;
-  clientsCount: number | null;
-  delinquentCount: number | null;
+  summary: LoanOfficerDashboard;
   recentLoans: Loan[];
 };
 
 /**
- * Loan-officer dashboard. Portfolio KPIs + a loan-status donut + recent loans on
- * the left, quick actions + notifications on the right. The portfolio numbers
- * are derived from per-status `countLoans` probes (agency-scoped today; an
- * officer-scoped filter is requested in dashboard-request.md #1). The "overdue"
- * tile is a placeholder until the delinquency endpoint lands (#2).
+ * Loan-officer dashboard. Driven by `GET /dashboards/loan-officer` — a single
+ * self-scoped call (loans where `credit_agent = me`) returning portfolio KPIs +
+ * a full per-status breakdown. Recent loans are likewise self-scoped via
+ * `filter[credit_agent_public_id]`.
  */
 export function DashboardOfficerLayout() {
   const t = useTranslations();
+  const format = useFormatter();
   const session = useSession();
   const token = session.status === "authenticated" ? session.token : null;
+  const myPublicId =
+    session.status === "authenticated" ? session.user.public_id : null;
 
   const canCreateLoan = useCan("loans.create");
   const canCreateClient = useCan("crm.clients.create");
@@ -62,34 +65,27 @@ export function DashboardOfficerLayout() {
     async (signal: AbortSignal): Promise<OfficerAggregate> => {
       if (!token) throw new Error("Missing session token");
       void signal;
-      const [byStatus, clientsCount, delinquentCount, recent] = await Promise.all([
-        countLoansByStatus(token, [
-          "application",
-          "in_review",
-          "approved",
-          "disbursed",
-          "active",
-          "rescheduled",
-          "closed",
-          "rejected",
-          "written_off",
-        ]),
-        safeNullable(() => countClients(token, { status: "active" })),
-        safeNullable(() => countLoans(token, { in_arrears: true })),
-        safeArray(() => fetchLoans(token, { perPage: 6 }).then((r) => r.data)),
+      const [summary, recent] = await Promise.all([
+        getLoanOfficerDashboard(token),
+        safeArray(() =>
+          fetchLoans(token, {
+            perPage: 6,
+            creditAgentPublicId: myPublicId ?? undefined,
+          }).then((r) => r.data),
+        ),
       ]);
-      return { byStatus, clientsCount, delinquentCount, recentLoans: recent };
+      return { summary, recentLoans: recent };
     },
-    [token],
+    [token, myPublicId],
   );
 
-  const { data, loading } = useApi(fetcher, [token]);
+  const { data, loading } = useApi(fetcher, [token, myPublicId]);
 
   if (session.status !== "authenticated") return null;
 
-  const byStatus = data?.byStatus ?? {};
-  const activeCount = byStatus.active ?? 0;
-  const pendingCount = (byStatus.application ?? 0) + (byStatus.in_review ?? 0);
+  const summary = data?.summary ?? null;
+  const byStatus = summary?.by_status ?? {};
+  const currency = summary?.currency ?? "XAF";
 
   const segments = PORTFOLIO_STATUSES.map((status) => ({
     key: status,
@@ -145,28 +141,37 @@ export function DashboardOfficerLayout() {
               icon={BanknoteIcon}
               tone="success"
               label={t("dashboard.officer.kpi.activeLoans")}
-              value={activeCount}
+              value={summary?.active_loan_count ?? 0}
               loading={loading && !data}
             />
             <DashboardStatTile
               icon={LayersIcon}
               tone="info"
               label={t("dashboard.officer.kpi.pending")}
-              value={pendingCount}
+              value={summary?.application_count ?? 0}
               loading={loading && !data}
             />
             <DashboardStatTile
-              icon={UsersIcon}
+              icon={BookIcon}
               tone="accent"
-              label={t("dashboard.officer.kpi.clients")}
-              value={data?.clientsCount ?? (loading ? "…" : "—")}
+              label={t("dashboard.officer.kpi.portfolio")}
+              value={summary ? format.currencyMinor(summary.portfolio_outstanding_minor, { currency }) : "—"}
+              footer={
+                summary ? (
+                  <span className="text-xs text-muted-foreground">
+                    {t("dashboard.officer.collectionsMtd", {
+                      amount: format.currencyMinor(summary.collections_mtd_minor, { currency }),
+                    })}
+                  </span>
+                ) : undefined
+              }
               loading={loading && !data}
             />
             <DashboardStatTile
               icon={AlertTriangleIcon}
               tone="warning"
               label={t("dashboard.officer.kpi.delinquent")}
-              value={data?.delinquentCount ?? (loading ? "…" : "—")}
+              value={summary?.delinquent_loan_count ?? 0}
               loading={loading && !data}
             />
           </div>
@@ -199,14 +204,6 @@ export function DashboardOfficerLayout() {
       </div>
     </>
   );
-}
-
-async function safeNullable<T>(fn: () => Promise<T>): Promise<T | null> {
-  try {
-    return await fn();
-  } catch {
-    return null;
-  }
 }
 
 async function safeArray<T>(fn: () => Promise<T[]>): Promise<T[]> {

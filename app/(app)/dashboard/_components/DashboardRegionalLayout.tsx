@@ -3,17 +3,21 @@
 import { useCallback } from "react";
 import { Badge } from "@/components/ui/Badge";
 import {
+  AlertTriangleIcon,
   BanknoteIcon,
+  BookIcon,
   BuildingIcon,
-  CheckCircleIcon,
   UsersIcon,
 } from "@/components/ui/icons";
-import { fetchAgencies, type Agency } from "@/lib/api/agencies";
-import { countClients, fetchLoans, type Loan } from "@/lib/api/loans";
-import { countClientsByKyc, countLoansByStatus } from "@/lib/api/dashboard-stats";
+import { getClientStats, type ClientStats } from "@/lib/api/clients";
+import { fetchLoans, getLoanStats, type Loan, type LoanStats } from "@/lib/api/loans";
+import {
+  getRegionalDashboard,
+  type RegionalDashboard,
+} from "@/lib/api/dashboard";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useApi } from "@/lib/hooks/useApi";
-import { useTranslations } from "@/lib/i18n/I18nProvider";
+import { useFormatter, useTranslations } from "@/lib/i18n/I18nProvider";
 import { DashboardHeader } from "./DashboardHeader";
 import { DashboardStatTile } from "./DashboardStatTile";
 import { DashboardDistributionCard } from "./DashboardDistributionCard";
@@ -22,55 +26,26 @@ import { DashboardBarList } from "./DashboardBarList";
 import { DashboardLoansTable } from "./DashboardLoansTable";
 import { DashboardActionTiles, type ActionTile } from "./DashboardActionTiles";
 import { DashboardNotificationsCard } from "./DashboardTellerSections";
-import { kycStatusTone, loanStatusTone, type StatusTone } from "./dashboard-status";
+import { loanStatusTone } from "./dashboard-status";
 
-const LOAN_STATUSES = [
-  "application",
-  "in_review",
-  "approved",
-  "disbursed",
-  "active",
-  "rescheduled",
-  "closed",
-  "rejected",
-  "written_off",
-] as const;
 const LOAN_DONUT = ["active", "in_review", "approved", "closed", "rejected"] as const;
-const KYC_STATUSES = [
-  "draft",
-  "pending_review",
-  "verified",
-  "rejected",
-  "suspended",
-  "archived",
-] as const;
-const KYC_BARS = ["draft", "pending_review", "verified", "rejected"] as const;
-
-const AGENCY_STATUS_TONE: Record<string, StatusTone> = {
-  active: "success",
-  inactive: "neutral",
-  suspended: "warning",
-  archived: "neutral",
-};
 
 type RegionalAggregate = {
-  loansByStatus: Record<string, number>;
-  clientsByKyc: Record<string, number>;
-  clientsTotal: number | null;
-  agencies: Agency[];
-  agenciesTotal: number;
+  summary: RegionalDashboard | null;
+  loanStats: LoanStats | null;
+  clientStats: ClientStats | null;
   recentLoans: Loan[];
 };
 
 /**
- * Regional-manager dashboard — institution-wide, read-only. `/loans` and
- * `/clients` (with `scope=all`) return cross-agency data thanks to the
- * `*.scope.institution.read` grants, so portfolio/KYC distributions are
- * institution totals. Per-agency performance is the agency directory until the
- * aggregation endpoint lands (dashboard-request.md #8).
+ * Regional-manager dashboard — institution-wide, read-only. Driven by
+ * `GET /dashboards/regional` (per-agency active/delinquent/portfolio + totals),
+ * with institution-wide loan/KYC distributions from `/loans/stats` and
+ * `/clients/stats?scope=all`.
  */
 export function DashboardRegionalLayout() {
   const t = useTranslations();
+  const format = useFormatter();
   const session = useSession();
   const token = session.status === "authenticated" ? session.token : null;
 
@@ -78,25 +53,13 @@ export function DashboardRegionalLayout() {
     async (signal: AbortSignal): Promise<RegionalAggregate> => {
       if (!token) throw new Error("Missing session token");
       void signal;
-      const [loansByStatus, clientsByKyc, clientsTotal, agenciesPage, recentLoans] =
-        await Promise.all([
-          countLoansByStatus(token, LOAN_STATUSES),
-          countClientsByKyc(token, KYC_STATUSES, "all"),
-          safeNullable(() => countClients(token, { scope: "all" })),
-          fetchAgencies(token, { perPage: 6 }).catch(() => ({
-            data: [] as Agency[],
-            meta: { pagination: { total: 0 } },
-          })),
-          safeArray(() => fetchLoans(token, { perPage: 6 }).then((r) => r.data)),
-        ]);
-      return {
-        loansByStatus,
-        clientsByKyc,
-        clientsTotal,
-        agencies: agenciesPage.data,
-        agenciesTotal: agenciesPage.meta?.pagination?.total ?? agenciesPage.data.length,
-        recentLoans,
-      };
+      const [summary, loanStats, clientStats, recentLoans] = await Promise.all([
+        safeNullable(() => getRegionalDashboard(token)),
+        safeNullable(() => getLoanStats(token)),
+        safeNullable(() => getClientStats(token, { scope: "all" })),
+        safeArray(() => fetchLoans(token, { perPage: 6 }).then((r) => r.data)),
+      ]);
+      return { summary, loanStats, clientStats, recentLoans };
     },
     [token],
   );
@@ -105,22 +68,21 @@ export function DashboardRegionalLayout() {
 
   if (session.status !== "authenticated") return null;
 
-  const loansByStatus = data?.loansByStatus ?? {};
-  const totalLoans = LOAN_STATUSES.reduce((sum, s) => sum + (loansByStatus[s] ?? 0), 0);
-  const clientsByKyc = data?.clientsByKyc ?? {};
+  const summary = data?.summary ?? null;
+  const loanByStatus = data?.loanStats?.by_status ?? {};
+  const kyc = data?.clientStats?.by_kyc_status ?? null;
 
   const loanSegments = LOAN_DONUT.map((status) => ({
     key: status,
     label: t(`dashboard.common.loanStatus.${status}`),
-    value: loansByStatus[status] ?? 0,
+    value: loanByStatus[status] ?? 0,
     tone: loanStatusTone(status),
   }));
-  const kycBars = KYC_BARS.map((status) => ({
-    key: status,
-    label: t(`dashboard.common.kycStatus.${status}`),
-    value: clientsByKyc[status] ?? 0,
-    tone: kycStatusTone(status),
-  }));
+  const kycBars = [
+    { key: "pending", label: t("dashboard.common.kycStatus.pending_review"), value: kyc?.pending ?? 0, tone: "warning" as const },
+    { key: "verified", label: t("dashboard.common.kycStatus.verified"), value: kyc?.verified ?? 0, tone: "success" as const },
+    { key: "rejected", label: t("dashboard.common.kycStatus.rejected"), value: kyc?.rejected ?? 0, tone: "danger" as const },
+  ];
 
   const firstName = session.user.name.split(" ")[0];
 
@@ -142,30 +104,30 @@ export function DashboardRegionalLayout() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <DashboardStatTile
               icon={BanknoteIcon}
-              tone="info"
-              label={t("dashboard.regional.kpi.totalLoans")}
-              value={totalLoans}
-              loading={loading && !data}
-            />
-            <DashboardStatTile
-              icon={CheckCircleIcon}
               tone="success"
               label={t("dashboard.regional.kpi.activeLoans")}
-              value={loansByStatus.active ?? 0}
+              value={summary?.active_loan_count ?? (loading ? "…" : "—")}
               loading={loading && !data}
             />
             <DashboardStatTile
-              icon={UsersIcon}
-              tone="accent"
-              label={t("dashboard.regional.kpi.clients")}
-              value={data?.clientsTotal ?? (loading ? "…" : "—")}
+              icon={AlertTriangleIcon}
+              tone="warning"
+              label={t("dashboard.officer.kpi.delinquent")}
+              value={summary?.delinquent_loan_count ?? (loading ? "…" : "—")}
+              loading={loading && !data}
+            />
+            <DashboardStatTile
+              icon={BookIcon}
+              tone="info"
+              label={t("dashboard.officer.kpi.portfolio")}
+              value={summary ? format.currencyMinor(summary.portfolio_outstanding_minor, { currency: "XAF" }) : "—"}
               loading={loading && !data}
             />
             <DashboardStatTile
               icon={BuildingIcon}
               tone="primary"
               label={t("dashboard.regional.kpi.agencies")}
-              value={data?.agenciesTotal ?? (loading ? "…" : "—")}
+              value={summary?.agencies.length ?? (loading ? "…" : "—")}
               loading={loading && !data}
             />
           </div>
@@ -208,41 +170,41 @@ export function DashboardRegionalLayout() {
             title={t("dashboard.regional.agenciesTitle")}
             icon={BuildingIcon}
             tone="primary"
+            bodyClassName="px-5 py-2"
           >
             {loading && !data ? (
               <p className="py-6 text-center text-sm text-muted-foreground">
                 {t("common.loading")}
               </p>
-            ) : !data || data.agencies.length === 0 ? (
+            ) : !summary || summary.agencies.length === 0 ? (
               <p className="py-6 text-center text-sm text-muted-foreground">
                 {t("dashboard.common.empty.agencies")}
               </p>
             ) : (
               <ul className="flex flex-col divide-y divide-border">
-                {data.agencies.map((agency) => (
-                  <li
-                    key={agency.public_id}
-                    className="flex items-center justify-between gap-2 py-2.5"
-                  >
+                {summary.agencies.map((agency) => (
+                  <li key={agency.agency_public_id} className="flex items-center justify-between gap-2 py-2.5">
                     <span className="flex min-w-0 flex-col">
                       <span className="truncate text-sm font-medium text-foreground">
-                        {agency.name}
+                        {agency.agency_name}
                       </span>
                       <span className="truncate text-xs text-muted-foreground">
-                        {agency.code}
-                        {agency.city ? ` · ${agency.city}` : ""}
+                        {agency.agency_code} ·{" "}
+                        {format.currencyMinor(agency.portfolio_outstanding_minor, { currency: "XAF" })}
                       </span>
                     </span>
-                    <Badge tone={AGENCY_STATUS_TONE[agency.status] ?? "neutral"}>
-                      {agency.status}
-                    </Badge>
+                    <span className="flex shrink-0 items-center gap-2">
+                      <span className="text-xs tabular-nums text-muted-foreground">
+                        {agency.active_loan_count}
+                      </span>
+                      {agency.delinquent_loan_count > 0 ? (
+                        <Badge tone="danger">{agency.delinquent_loan_count}</Badge>
+                      ) : null}
+                    </span>
                   </li>
                 ))}
               </ul>
             )}
-            <p className="mt-3 text-xs text-muted-foreground">
-              {t("dashboard.regional.agenciesSoon")}
-            </p>
           </DashboardCard>
 
           <DashboardActionTiles
