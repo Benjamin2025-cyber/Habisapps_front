@@ -116,7 +116,7 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "batch",
         href: "/settings/batch",
-        available: false,
+        available: true,
         permissions: ["batch.procedures.view", "batch.procedures.manage"],
       },
     ],

@@ -3299,6 +3299,170 @@
       }
     }
   },
+  "batch": {
+    "pageTitle": "Paramétrage — Batch",
+    "pageDescription": "Référentiel des procédures batch et de leurs exécutions (vérifications de clôture, arriérés, pénalités, hooks de portefeuille).",
+    "tabsAriaLabel": "Sections du module batch",
+    "tabs": {
+      "procedures": "Procédures",
+      "runs": "Exécutions"
+    },
+    "procedures": {
+      "listTitle": "Procédures batch",
+      "count": "{count} procédure(s)",
+      "empty": "Aucune procédure batch.",
+      "errorTitle": "Impossible de charger les procédures",
+      "columns": {
+        "name": "Procédure",
+        "code": "Code",
+        "schedule": "Cadence",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "schedule": {
+        "manual": "Manuelle",
+        "daily": "Quotidienne",
+        "weekly": "Hebdomadaire",
+        "monthly": "Mensuelle"
+      },
+      "codes": {
+        "loan_arrears_assessment": "Évaluation des arriérés",
+        "loan_monthly_arrears_penalty": "Pénalités mensuelles d'arriérés",
+        "loan_portfolio_report_hook": "Hook de reporting portefeuille",
+        "accounting_close_verification": "Vérification de clôture comptable",
+        "cash_close_verification": "Vérification de clôture caisse"
+      },
+      "actions": {
+        "create": "Nouvelle procédure",
+        "edit": "Modifier",
+        "activate": "Activer",
+        "deactivate": "Désactiver",
+        "menu": "Actions de la procédure"
+      },
+      "drawer": {
+        "titleCreate": "Nouvelle procédure batch",
+        "titleEdit": "Modifier la procédure",
+        "hint": "Une procédure est identifiée par un code immuable ; seul son statut la rend exécutable."
+      },
+      "fields": {
+        "code": "Code",
+        "codeImmutable": "Le code ne peut pas être modifié après création.",
+        "codePlaceholder": "Sélectionner une procédure exécutable…",
+        "codeSelectHint": "Seules les procédures pour lesquelles le back-end possède un traitement sont proposées.",
+        "codeNotExecutableWarning": "Ce code n'a aucun traitement côté back-end : la procédure sera enregistrée mais ses exécutions échoueront.",
+        "name": "Nom",
+        "description": "Description",
+        "schedule": "Cadence",
+        "schedulePlaceholder": "Sélectionner une cadence…",
+        "scheduleHint": "Indicatif : la cadence réelle est pilotée par le moteur / la clôture de journée.",
+        "metadata": "Métadonnées (avancé)",
+        "metadataHint": "Objet JSON optionnel (ex. paramètres de planification). Laisser vide si inutile.",
+        "metadataInvalid": "JSON invalide : saisir un objet JSON valide."
+      },
+      "toast": {
+        "createdTitle": "Procédure créée",
+        "createdBody": "La procédure {name} a été créée.",
+        "updatedTitle": "Procédure mise à jour",
+        "updatedBody": "La procédure {name} a été modifiée.",
+        "statusTitle": "Statut modifié",
+        "statusBody": "La procédure {name} est maintenant : {status}.",
+        "errorTitle": "Action impossible"
+      }
+    },
+    "runs": {
+      "institution": "Institution",
+      "listTitle": "Exécutions",
+      "count": "{count} exécution(s)",
+      "empty": "Aucune exécution.",
+      "errorTitle": "Impossible de charger les exécutions",
+      "columns": {
+        "procedure": "Procédure",
+        "businessDate": "Date comptable",
+        "agency": "Agence",
+        "status": "Statut",
+        "finishedAt": "Terminée le",
+        "actions": "Actions"
+      },
+      "status": {
+        "pending": "En attente",
+        "running": "En cours",
+        "succeeded": "Réussie",
+        "failed": "Échouée",
+        "cancelled": "Annulée"
+      },
+      "filters": {
+        "procedure": "Procédure",
+        "procedureAll": "Toutes les procédures",
+        "status": "Statut",
+        "statusAll": "Tous les statuts",
+        "dateFrom": "Du",
+        "dateTo": "Au"
+      },
+      "actions": {
+        "create": "Nouvelle exécution",
+        "details": "Détails",
+        "execute": "Exécuter",
+        "retry": "Relancer",
+        "cancel": "Annuler",
+        "menu": "Actions de l'exécution"
+      },
+      "confirm": {
+        "execute": {
+          "title": "Exécuter la procédure ?",
+          "message": "L'exécution applique la procédure pour la date comptable. Les contrôles de pré-requis sont vérifiés côté serveur."
+        },
+        "retry": {
+          "title": "Relancer l'exécution ?",
+          "message": "L'exécution repasse en attente et pourra être exécutée à nouveau."
+        },
+        "cancel": {
+          "title": "Annuler l'exécution ?",
+          "message": "Seule une exécution en attente non démarrée peut être annulée."
+        }
+      },
+      "drawer": {
+        "titleCreate": "Nouvelle exécution",
+        "hint": "Crée une exécution en attente. Lancez-la ensuite via « Exécuter ».",
+        "submit": "Créer"
+      },
+      "fields": {
+        "procedure": "Procédure",
+        "procedurePlaceholder": "Sélectionner une procédure…",
+        "notExecutableWarning": "Cette procédure n'a aucun traitement côté back-end : son exécution échouera. Choisissez une procédure exécutable.",
+        "closeControlWarning": "Procédure de contrôle de clôture : elle est pilotée par la clôture de journée comptable (lien journée requis) et ne s'exécute pas en autonome ici.",
+        "inactiveWarning": "Procédure inactive : activez-la dans l'onglet Procédures avant de pouvoir l'exécuter.",
+        "businessDate": "Date comptable",
+        "businessDateHint": "Date d'application de la procédure.",
+        "agency": "Agence",
+        "agencyPlaceholder": "Institution (aucune agence)…",
+        "agencyHint": "Laisser vide pour une exécution au niveau institution."
+      },
+      "detail": {
+        "title": "Détail de l'exécution",
+        "procedure": "Procédure",
+        "status": "Statut",
+        "businessDate": "Date comptable",
+        "agency": "Agence",
+        "startedAt": "Démarrée le",
+        "finishedAt": "Terminée le",
+        "accountingDay": "Journée comptable",
+        "failureReason": "Motif d'échec",
+        "summary": "Résultat",
+        "noSummary": "Aucun résultat à afficher."
+      },
+      "toast": {
+        "createdTitle": "Exécution créée",
+        "createdBody": "L'exécution a été créée (en attente).",
+        "actionTitle": "Action effectuée",
+        "actionBody": "Action « {action} » effectuée.",
+        "errorTitle": "Action impossible"
+      }
+    }
+  },
   "denominations": {
     "pageTitle": "Type monnaie (coupures)",
     "pageDescription": "Référentiel des coupures (billets et pièces) et de leur valeur, utilisé pour le comptage des espèces.",

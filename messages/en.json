@@ -3299,6 +3299,170 @@
       }
     }
   },
+  "batch": {
+    "pageTitle": "Settings — Batch",
+    "pageDescription": "Catalog of batch procedures and their runs (close verifications, arrears, penalties, portfolio hooks).",
+    "tabsAriaLabel": "Batch module sections",
+    "tabs": {
+      "procedures": "Procedures",
+      "runs": "Runs"
+    },
+    "procedures": {
+      "listTitle": "Batch procedures",
+      "count": "{count} procedure(s)",
+      "empty": "No batch procedure.",
+      "errorTitle": "Could not load procedures",
+      "columns": {
+        "name": "Procedure",
+        "code": "Code",
+        "schedule": "Cadence",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "schedule": {
+        "manual": "Manual",
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly"
+      },
+      "codes": {
+        "loan_arrears_assessment": "Loan arrears assessment",
+        "loan_monthly_arrears_penalty": "Monthly arrears penalty",
+        "loan_portfolio_report_hook": "Portfolio reporting hook",
+        "accounting_close_verification": "Accounting close verification",
+        "cash_close_verification": "Cash close verification"
+      },
+      "actions": {
+        "create": "New procedure",
+        "edit": "Edit",
+        "activate": "Activate",
+        "deactivate": "Deactivate",
+        "menu": "Procedure actions"
+      },
+      "drawer": {
+        "titleCreate": "New batch procedure",
+        "titleEdit": "Edit procedure",
+        "hint": "A procedure is identified by an immutable code; only its status makes it executable."
+      },
+      "fields": {
+        "code": "Code",
+        "codeImmutable": "The code cannot be changed after creation.",
+        "codePlaceholder": "Select an executable procedure…",
+        "codeSelectHint": "Only procedures the backend has a handler for are offered.",
+        "codeNotExecutableWarning": "This code has no backend handler: the procedure will be saved but its runs will fail.",
+        "name": "Name",
+        "description": "Description",
+        "schedule": "Cadence",
+        "schedulePlaceholder": "Select a cadence…",
+        "scheduleHint": "Indicative: the real cadence is driven by the engine / day close.",
+        "metadata": "Metadata (advanced)",
+        "metadataHint": "Optional JSON object (e.g. scheduling parameters). Leave empty if unused.",
+        "metadataInvalid": "Invalid JSON: enter a valid JSON object."
+      },
+      "toast": {
+        "createdTitle": "Procedure created",
+        "createdBody": "Procedure {name} has been created.",
+        "updatedTitle": "Procedure updated",
+        "updatedBody": "Procedure {name} has been updated.",
+        "statusTitle": "Status changed",
+        "statusBody": "Procedure {name} is now: {status}.",
+        "errorTitle": "Action not allowed"
+      }
+    },
+    "runs": {
+      "institution": "Institution",
+      "listTitle": "Runs",
+      "count": "{count} run(s)",
+      "empty": "No run.",
+      "errorTitle": "Could not load runs",
+      "columns": {
+        "procedure": "Procedure",
+        "businessDate": "Business date",
+        "agency": "Agency",
+        "status": "Status",
+        "finishedAt": "Finished at",
+        "actions": "Actions"
+      },
+      "status": {
+        "pending": "Pending",
+        "running": "Running",
+        "succeeded": "Succeeded",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
+      },
+      "filters": {
+        "procedure": "Procedure",
+        "procedureAll": "All procedures",
+        "status": "Status",
+        "statusAll": "All statuses",
+        "dateFrom": "From",
+        "dateTo": "To"
+      },
+      "actions": {
+        "create": "New run",
+        "details": "Details",
+        "execute": "Execute",
+        "retry": "Retry",
+        "cancel": "Cancel",
+        "menu": "Run actions"
+      },
+      "confirm": {
+        "execute": {
+          "title": "Execute the procedure?",
+          "message": "Execution applies the procedure for the business date. Prerequisite controls are checked server-side."
+        },
+        "retry": {
+          "title": "Retry the run?",
+          "message": "The run goes back to pending and can be executed again."
+        },
+        "cancel": {
+          "title": "Cancel the run?",
+          "message": "Only a pending run that has not started can be cancelled."
+        }
+      },
+      "drawer": {
+        "titleCreate": "New run",
+        "hint": "Creates a pending run. Then launch it via \"Execute\".",
+        "submit": "Create"
+      },
+      "fields": {
+        "procedure": "Procedure",
+        "procedurePlaceholder": "Select a procedure…",
+        "notExecutableWarning": "This procedure has no backend handler: executing it will fail. Pick an executable procedure.",
+        "closeControlWarning": "Close-control procedure: it is driven by the accounting-day close (requires a day link) and does not run standalone here.",
+        "inactiveWarning": "Inactive procedure: activate it in the Procedures tab before it can be executed.",
+        "businessDate": "Business date",
+        "businessDateHint": "Date the procedure applies to.",
+        "agency": "Agency",
+        "agencyPlaceholder": "Institution (no agency)…",
+        "agencyHint": "Leave empty for an institution-level run."
+      },
+      "detail": {
+        "title": "Run detail",
+        "procedure": "Procedure",
+        "status": "Status",
+        "businessDate": "Business date",
+        "agency": "Agency",
+        "startedAt": "Started at",
+        "finishedAt": "Finished at",
+        "accountingDay": "Accounting day",
+        "failureReason": "Failure reason",
+        "summary": "Result",
+        "noSummary": "No result to display."
+      },
+      "toast": {
+        "createdTitle": "Run created",
+        "createdBody": "The run has been created (pending).",
+        "actionTitle": "Action done",
+        "actionBody": "Action \"{action}\" completed.",
+        "errorTitle": "Action not allowed"
+      }
+    }
+  },
   "denominations": {
     "pageTitle": "Cash denominations",
     "pageDescription": "Reference data for cash denominations (banknotes and coins) and their value, used for cash counting.",
