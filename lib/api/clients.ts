@@ -157,8 +157,11 @@ export async function fetchClients(
   query.set("per_page", String(options.perPage ?? 100));
   if (options.page && options.page > 0) query.set("page", String(options.page));
   if (options.scope) query.set("scope", options.scope);
-  if (options.status) query.set("filter[status]", options.status);
-  if (options.kycStatus) query.set("filter[kyc_status]", options.kycStatus);
+  // The clients index reads top-level `status` / `kyc_status` query params
+  // (see ClientCrudWorkflow::applySafeFilters) — NOT `filter[...]`. Sending the
+  // bracketed form silently returns unfiltered results.
+  if (options.status) query.set("status", options.status);
+  if (options.kycStatus) query.set("kyc_status", options.kycStatus);
   if (options.search && options.search.trim().length > 0) {
     query.set("search", options.search.trim());
   }

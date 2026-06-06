@@ -1,43 +1,47 @@
 import type { StaffUser } from "@/lib/api/types";
 
 /**
- * Dashboard rendering preset, picked once per session based on the user's
- * roles. The mapping is intentionally coarse: 3 buckets that cover all 11
- * roles defined in `config/security.php`.
+ * Dashboard rendering preset, picked once per session from the user's roles.
+ * Every role gets a purpose-built, data-rich layout scoped to what it may see;
+ * `minimal` is the fallback for the bare `staff` role with no business authority.
  *
- * - `management`: leadership + risk + audit. Renders the full PDF p6 layout
- *   (KPI strip, alerts, user-management widget, activities, agency table).
- * - `field`: day-to-day operators. Renders a role-tailored counts + queues
- *   layout (NOT the management cards — they 403 on `/dashboards/operational`).
- * - `minimal`: generic `staff` role with no business authority. Welcome only.
+ * Resolution is priority-ordered (see `PRESET_BY_ROLE`): a user holding several
+ * roles lands on the highest-authority dashboard they qualify for.
  */
-export type DashboardPreset = "management" | "teller" | "field" | "minimal";
+export type DashboardPreset =
+  | "management"
+  | "teller"
+  | "officer"
+  | "accountant"
+  | "kyc"
+  | "regional"
+  | "compliance"
+  | "auditor"
+  | "userAdmin"
+  | "minimal";
 
-const MANAGEMENT_ROLES = [
-  "platform-admin",
-  "agency-manager",
-  "compliance-officer",
-  "auditor",
-];
-
-// The teller (cashier) gets a dedicated cash-desk dashboard (drawer/session +
-// cash quick-actions) instead of the generic field cards.
-const TELLER_ROLES = ["teller"];
-
-const FIELD_ROLES = [
-  "regional-manager",
-  "loan-officer",
-  "accountant",
-  "kyc-officer",
-  "user-admin",
+/**
+ * Role → preset, in descending precedence. `platform-admin` / `agency-manager`
+ * keep the operational management dashboard (they pass `/dashboards/operational`);
+ * every other role has a dedicated layout built from the data its permissions
+ * unlock (the field roles 403 on the operational endpoint).
+ */
+const PRESET_BY_ROLE: ReadonlyArray<readonly [string, DashboardPreset]> = [
+  ["platform-admin", "management"],
+  ["agency-manager", "management"],
+  ["compliance-officer", "compliance"],
+  ["auditor", "auditor"],
+  ["regional-manager", "regional"],
+  ["accountant", "accountant"],
+  ["loan-officer", "officer"],
+  ["kyc-officer", "kyc"],
+  ["teller", "teller"],
+  ["user-admin", "userAdmin"],
 ];
 
 export function resolveDashboardPreset(user: StaffUser): DashboardPreset {
-  const roles = user.roles;
-  // Management wins first (a manager who is also a teller still sees management);
-  // the teller desk is for pure cashiers.
-  if (roles.some((role) => MANAGEMENT_ROLES.includes(role))) return "management";
-  if (roles.some((role) => TELLER_ROLES.includes(role))) return "teller";
-  if (roles.some((role) => FIELD_ROLES.includes(role))) return "field";
+  for (const [role, preset] of PRESET_BY_ROLE) {
+    if (user.roles.includes(role)) return preset;
+  }
   return "minimal";
 }

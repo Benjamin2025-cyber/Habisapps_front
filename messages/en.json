@@ -344,7 +344,7 @@
         "title": "Notifications",
         "viewAll": "View all",
         "viewAllFooter": "View all notifications",
-        "empty": "No notifications.",
+        "empty": "No unread notifications.",
         "loadError": "Could not load notifications."
       }
     },
@@ -352,6 +352,197 @@
       "title": "Welcome {name}",
       "body": "Your account is active. Your administrator will assign you a role to unlock the corresponding features.",
       "contactAdmin": "Contact your administrator"
+    },
+    "common": {
+      "quickActions": "Quick actions",
+      "viewAll": "View all",
+      "soon": "Coming soon",
+      "loadError": "Could not load data.",
+      "loanStatus": {
+        "application": "Application",
+        "in_review": "In review",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "disbursed": "Disbursed",
+        "active": "Active",
+        "rescheduled": "Rescheduled",
+        "closed": "Closed",
+        "written_off": "Written off"
+      },
+      "kycStatus": {
+        "draft": "Draft",
+        "pending_review": "To verify",
+        "verified": "Verified",
+        "rejected": "Rejected",
+        "suspended": "Suspended",
+        "archived": "Archived"
+      },
+      "journalStatus": {
+        "draft": "Draft",
+        "submitted": "Submitted",
+        "approved": "Approved",
+        "posted": "Posted",
+        "rejected": "Rejected",
+        "cancelled": "Cancelled",
+        "archived": "Archived",
+        "reversed": "Reversed"
+      },
+      "empty": {
+        "loans": "No loans.",
+        "clients": "No clients.",
+        "journal": "No entries.",
+        "agencies": "No agencies."
+      },
+      "loanColumns": {
+        "loan": "Loan",
+        "client": "Client",
+        "status": "Status",
+        "amount": "Amount",
+        "date": "Date"
+      },
+      "clientColumns": {
+        "client": "Client",
+        "kyc": "KYC",
+        "status": "Status",
+        "date": "Onboarded"
+      },
+      "journalColumns": {
+        "reference": "Reference",
+        "date": "Date",
+        "status": "Status"
+      }
+    },
+    "officer": {
+      "greeting": "Hello {name} 👋",
+      "subtitle": "Your loan portfolio and next actions.",
+      "scopeNote": "Agency scope",
+      "kpi": {
+        "activeLoans": "Active loans",
+        "pending": "Applications to review",
+        "clients": "Clients",
+        "delinquent": "Overdue loans"
+      },
+      "delinquentSoon": "Overdue counter coming soon.",
+      "portfolioTitle": "Portfolio breakdown",
+      "recentLoans": "Recent loans",
+      "recentLoansViewAll": "View loans",
+      "actions": {
+        "newLoan": "Request a loan",
+        "newClient": "Create a client",
+        "decisions": "Credit decisions",
+        "myClients": "My clients"
+      }
+    },
+    "accountant": {
+      "greeting": "Hello {name} 👋",
+      "subtitle": "Accounting, disbursements and the accounting day.",
+      "kpi": {
+        "pendingEntries": "Entries to approve",
+        "toDisburse": "Ready to disburse",
+        "accountingDay": "Accounting day",
+        "postedToday": "Posted entries"
+      },
+      "journalTitle": "Entry status",
+      "queueTitle": "Entries to approve",
+      "queueViewAll": "View journal",
+      "queueEmpty": "No entries to approve.",
+      "disburseTitle": "Disbursement queue",
+      "disburseViewAll": "View disbursements",
+      "disburseEmpty": "No loans to disburse.",
+      "day": {
+        "title": "Accounting day",
+        "open": "Open",
+        "closed": "Closed",
+        "none": "No day",
+        "manage": "Manage day",
+        "businessDate": "Business date"
+      },
+      "actions": {
+        "newEntry": "New entry",
+        "disburse": "Disburse",
+        "day": "Accounting day",
+        "reports": "Reports"
+      }
+    },
+    "kyc": {
+      "greeting": "Hello {name} 👋",
+      "subtitle": "KYC verification queue and client management.",
+      "kpi": {
+        "toVerify": "To verify",
+        "verified": "Verified",
+        "rejected": "Rejected",
+        "total": "Clients (agency)"
+      },
+      "funnelTitle": "KYC funnel",
+      "queueTitle": "Verification queue",
+      "queueViewAll": "View clients",
+      "queueEmpty": "No clients to verify.",
+      "actions": {
+        "newClient": "Create a client",
+        "queue": "KYC queue",
+        "clients": "All clients",
+        "guarantors": "Guarantors"
+      }
+    },
+    "regional": {
+      "greeting": "Hello {name} 👋",
+      "subtitle": "Institution view — read-only portfolio and agencies.",
+      "kpi": {
+        "totalLoans": "Loans (institution)",
+        "activeLoans": "Active loans",
+        "clients": "Clients",
+        "agencies": "Agencies"
+      },
+      "loanDistTitle": "Loans by status",
+      "kycDistTitle": "Clients by KYC status",
+      "agenciesTitle": "Agencies",
+      "agenciesViewAll": "View agencies",
+      "agenciesSoon": "Per-agency performance coming soon.",
+      "recentLoans": "Recent loans"
+    },
+    "compliance": {
+      "greeting": "Hello {name} 👋",
+      "subtitle": "Institution KYC control and compliance sign-offs.",
+      "kpi": {
+        "kycToControl": "KYC to control",
+        "controlApprovals": "Control sign-offs",
+        "clients": "Clients (institution)",
+        "verified": "Verified"
+      },
+      "funnelTitle": "KYC funnel (institution)",
+      "kycQueueTitle": "KYC review (institution)",
+      "kycQueueViewAll": "View clients",
+      "kycQueueEmpty": "No files to control.",
+      "controlQueueTitle": "Loans under control",
+      "controlQueueViewAll": "View decisions",
+      "controlQueueEmpty": "No loans under control.",
+      "controlSoon": "Control sign-off list coming soon."
+    },
+    "auditor": {
+      "greeting": "Hello {name} 👋",
+      "subtitle": "Read-only — activity, compliance and institution metrics.",
+      "kpi": {
+        "loans": "Loans",
+        "clients": "Clients",
+        "agencies": "Agencies",
+        "users": "Users"
+      },
+      "loanDistTitle": "Loans by status"
+    },
+    "userAdmin": {
+      "greeting": "Hello {name} 👋",
+      "subtitle": "User and access management.",
+      "kpi": {
+        "users": "Users",
+        "active": "Active accounts",
+        "suspended": "Suspended accounts"
+      },
+      "soon": "Status breakdown coming soon.",
+      "actions": {
+        "newUser": "Add a user",
+        "roles": "Roles",
+        "users": "All users"
+      }
     }
   },
   "shell": {

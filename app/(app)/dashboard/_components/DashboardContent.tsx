@@ -2,16 +2,22 @@
 
 import { useMemo } from "react";
 import { useSession } from "@/lib/auth/SessionProvider";
-import { DashboardFieldLayout } from "./DashboardFieldLayout";
 import { DashboardManagementLayout } from "./DashboardManagementLayout";
 import { DashboardMinimalLayout } from "./DashboardMinimalLayout";
 import { DashboardTellerLayout } from "./DashboardTellerLayout";
+import { DashboardOfficerLayout } from "./DashboardOfficerLayout";
+import { DashboardAccountantLayout } from "./DashboardAccountantLayout";
+import { DashboardKycLayout } from "./DashboardKycLayout";
+import { DashboardRegionalLayout } from "./DashboardRegionalLayout";
+import { DashboardComplianceLayout } from "./DashboardComplianceLayout";
+import { DashboardAuditorLayout } from "./DashboardAuditorLayout";
+import { DashboardUserAdminLayout } from "./DashboardUserAdminLayout";
 import { resolveDashboardPreset } from "./preset";
 
 /**
- * Top-level dashboard router. Picks one of three layouts based on the user's
- * roles (see `./preset.ts` for the role → preset map). The (app)/layout has
- * already gated for an authenticated session before we get here.
+ * Top-level dashboard router. Picks one role-tailored layout based on the user's
+ * roles (see `./preset.ts`). The (app)/layout has already gated for an
+ * authenticated session before we get here.
  */
 export function DashboardContent() {
   const session = useSession();
@@ -25,8 +31,26 @@ export function DashboardContent() {
 
   if (session.status !== "authenticated") return null;
 
-  if (preset === "management") return <DashboardManagementLayout />;
-  if (preset === "teller") return <DashboardTellerLayout />;
-  if (preset === "field") return <DashboardFieldLayout />;
-  return <DashboardMinimalLayout />;
+  switch (preset) {
+    case "management":
+      return <DashboardManagementLayout />;
+    case "teller":
+      return <DashboardTellerLayout />;
+    case "officer":
+      return <DashboardOfficerLayout />;
+    case "accountant":
+      return <DashboardAccountantLayout />;
+    case "kyc":
+      return <DashboardKycLayout />;
+    case "regional":
+      return <DashboardRegionalLayout />;
+    case "compliance":
+      return <DashboardComplianceLayout />;
+    case "auditor":
+      return <DashboardAuditorLayout />;
+    case "userAdmin":
+      return <DashboardUserAdminLayout />;
+    default:
+      return <DashboardMinimalLayout />;
+  }
 }

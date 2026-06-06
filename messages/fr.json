@@ -344,7 +344,7 @@
         "title": "Notifications",
         "viewAll": "Voir toutes",
         "viewAllFooter": "Voir toutes les notifications",
-        "empty": "Aucune notification.",
+        "empty": "Aucune notification non lue.",
         "loadError": "Impossible de charger les notifications."
       }
     },
@@ -352,6 +352,197 @@
       "title": "Bienvenue {name}",
       "body": "Votre compte est actif. Votre administrateur va vous attribuer un rôle pour débloquer les fonctionnalités correspondantes.",
       "contactAdmin": "Contactez votre administrateur"
+    },
+    "common": {
+      "quickActions": "Actions rapides",
+      "viewAll": "Voir tout",
+      "soon": "Bientôt disponible",
+      "loadError": "Impossible de charger les données.",
+      "loanStatus": {
+        "application": "Demande",
+        "in_review": "En instruction",
+        "approved": "Approuvé",
+        "rejected": "Rejeté",
+        "disbursed": "Décaissé",
+        "active": "Actif",
+        "rescheduled": "Rééchelonné",
+        "closed": "Clôturé",
+        "written_off": "Passé en perte"
+      },
+      "kycStatus": {
+        "draft": "Brouillon",
+        "pending_review": "À vérifier",
+        "verified": "Vérifié",
+        "rejected": "Rejeté",
+        "suspended": "Suspendu",
+        "archived": "Archivé"
+      },
+      "journalStatus": {
+        "draft": "Brouillon",
+        "submitted": "Soumise",
+        "approved": "Approuvée",
+        "posted": "Comptabilisée",
+        "rejected": "Rejetée",
+        "cancelled": "Annulée",
+        "archived": "Archivée",
+        "reversed": "Contrepassée"
+      },
+      "empty": {
+        "loans": "Aucun crédit.",
+        "clients": "Aucun client.",
+        "journal": "Aucune écriture.",
+        "agencies": "Aucune agence."
+      },
+      "loanColumns": {
+        "loan": "Crédit",
+        "client": "Client",
+        "status": "Statut",
+        "amount": "Montant",
+        "date": "Date"
+      },
+      "clientColumns": {
+        "client": "Client",
+        "kyc": "KYC",
+        "status": "Statut",
+        "date": "Inscrit le"
+      },
+      "journalColumns": {
+        "reference": "Référence",
+        "date": "Date",
+        "status": "Statut"
+      }
+    },
+    "officer": {
+      "greeting": "Bonjour {name} 👋",
+      "subtitle": "Votre portefeuille de crédits et vos prochaines actions.",
+      "scopeNote": "Périmètre agence",
+      "kpi": {
+        "activeLoans": "Crédits actifs",
+        "pending": "Demandes à instruire",
+        "clients": "Clients",
+        "delinquent": "Crédits en retard"
+      },
+      "delinquentSoon": "Compteur des retards bientôt disponible.",
+      "portfolioTitle": "Répartition du portefeuille",
+      "recentLoans": "Crédits récents",
+      "recentLoansViewAll": "Voir les crédits",
+      "actions": {
+        "newLoan": "Demander un crédit",
+        "newClient": "Créer un client",
+        "decisions": "Décisions de crédit",
+        "myClients": "Mes clients"
+      }
+    },
+    "accountant": {
+      "greeting": "Bonjour {name} 👋",
+      "subtitle": "Comptabilité, décaissements et journée comptable.",
+      "kpi": {
+        "pendingEntries": "Écritures à valider",
+        "toDisburse": "Prêts à décaisser",
+        "accountingDay": "Journée comptable",
+        "postedToday": "Écritures comptabilisées"
+      },
+      "journalTitle": "Statut des écritures",
+      "queueTitle": "Écritures à valider",
+      "queueViewAll": "Voir le journal",
+      "queueEmpty": "Aucune écriture à valider.",
+      "disburseTitle": "File de décaissement",
+      "disburseViewAll": "Voir les décaissements",
+      "disburseEmpty": "Aucun crédit à décaisser.",
+      "day": {
+        "title": "Journée comptable",
+        "open": "Ouverte",
+        "closed": "Clôturée",
+        "none": "Aucune journée",
+        "manage": "Gérer la journée",
+        "businessDate": "Date comptable"
+      },
+      "actions": {
+        "newEntry": "Nouvelle écriture",
+        "disburse": "Décaisser",
+        "day": "Journée comptable",
+        "reports": "Rapports"
+      }
+    },
+    "kyc": {
+      "greeting": "Bonjour {name} 👋",
+      "subtitle": "File de vérification KYC et gestion des clients.",
+      "kpi": {
+        "toVerify": "À vérifier",
+        "verified": "Vérifiés",
+        "rejected": "Rejetés",
+        "total": "Clients (agence)"
+      },
+      "funnelTitle": "Entonnoir KYC",
+      "queueTitle": "File de vérification",
+      "queueViewAll": "Voir les clients",
+      "queueEmpty": "Aucun client à vérifier.",
+      "actions": {
+        "newClient": "Créer un client",
+        "queue": "File KYC",
+        "clients": "Tous les clients",
+        "guarantors": "Garants"
+      }
+    },
+    "regional": {
+      "greeting": "Bonjour {name} 👋",
+      "subtitle": "Vue institution — lecture seule du portefeuille et des agences.",
+      "kpi": {
+        "totalLoans": "Crédits (institution)",
+        "activeLoans": "Crédits actifs",
+        "clients": "Clients",
+        "agencies": "Agences"
+      },
+      "loanDistTitle": "Crédits par statut",
+      "kycDistTitle": "Clients par statut KYC",
+      "agenciesTitle": "Agences",
+      "agenciesViewAll": "Voir les agences",
+      "agenciesSoon": "Performance par agence bientôt disponible.",
+      "recentLoans": "Crédits récents"
+    },
+    "compliance": {
+      "greeting": "Bonjour {name} 👋",
+      "subtitle": "Contrôle KYC institution et visas de conformité.",
+      "kpi": {
+        "kycToControl": "KYC à contrôler",
+        "controlApprovals": "Visas de contrôle",
+        "clients": "Clients (institution)",
+        "verified": "Vérifiés"
+      },
+      "funnelTitle": "Entonnoir KYC (institution)",
+      "kycQueueTitle": "Revue KYC (institution)",
+      "kycQueueViewAll": "Voir les clients",
+      "kycQueueEmpty": "Aucun dossier à contrôler.",
+      "controlQueueTitle": "Crédits en contrôle",
+      "controlQueueViewAll": "Voir les décisions",
+      "controlQueueEmpty": "Aucun crédit en contrôle.",
+      "controlSoon": "Liste des visas de contrôle bientôt disponible."
+    },
+    "auditor": {
+      "greeting": "Bonjour {name} 👋",
+      "subtitle": "Lecture seule — activité, conformité et indicateurs institution.",
+      "kpi": {
+        "loans": "Crédits",
+        "clients": "Clients",
+        "agencies": "Agences",
+        "users": "Utilisateurs"
+      },
+      "loanDistTitle": "Crédits par statut"
+    },
+    "userAdmin": {
+      "greeting": "Bonjour {name} 👋",
+      "subtitle": "Gestion des utilisateurs et des accès.",
+      "kpi": {
+        "users": "Utilisateurs",
+        "active": "Comptes actifs",
+        "suspended": "Comptes suspendus"
+      },
+      "soon": "Répartition par statut bientôt disponible.",
+      "actions": {
+        "newUser": "Ajouter un utilisateur",
+        "roles": "Rôles",
+        "users": "Tous les utilisateurs"
+      }
     }
   },
   "shell": {

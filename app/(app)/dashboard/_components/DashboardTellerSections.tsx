@@ -182,7 +182,7 @@ export function DashboardNotificationsCard() {
     let cancelled = false;
     setLoading(true);
     setError(false);
-    fetchNotifications(token, { perPage: 5 })
+    fetchNotifications(token, { read: false, perPage: 5 })
       .then((res) => {
         if (!cancelled) setRows(res.data);
       })
@@ -204,9 +204,13 @@ export function DashboardNotificationsCard() {
           <BellIcon className="h-4 w-4 text-accent" />
           {t("dashboard.teller.notifications.title")}
         </h2>
-        <span className="text-xs font-semibold text-accent">
+        <Link
+          href="/notifications"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline"
+        >
           {t("dashboard.teller.notifications.viewAll")}
-        </span>
+          <ChevronRightIcon className="h-3.5 w-3.5" />
+        </Link>
       </header>
       {loading && rows.length === 0 ? (
         <p className="px-5 py-6 text-center text-xs text-muted-foreground">
@@ -227,28 +231,36 @@ export function DashboardNotificationsCard() {
               const Icon = NOTIF_ICON[n.type] ?? InfoIcon;
               const color = NOTIF_COLOR[n.type] ?? "text-info";
               return (
-                <li key={n.public_id} className="flex items-start gap-3 px-5 py-3">
-                  <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${color}`} />
-                  <div className="flex min-w-0 flex-col">
-                    <span className="text-sm font-medium text-foreground">{n.title}</span>
-                    {n.message ? (
-                      <span className="line-clamp-2 text-xs text-muted-foreground">
-                        {n.message}
+                <li key={n.public_id}>
+                  <Link
+                    href={`/notifications?selected=${encodeURIComponent(n.public_id)}`}
+                    className="flex items-start gap-3 px-5 py-3 transition-colors hover:bg-muted/40"
+                  >
+                    <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${color}`} />
+                    <div className="flex min-w-0 flex-col">
+                      <span className="text-sm font-medium text-foreground">{n.title}</span>
+                      {n.message ? (
+                        <span className="line-clamp-2 text-xs text-muted-foreground">
+                          {n.message}
+                        </span>
+                      ) : null}
+                      <span className="text-[0.7rem] text-muted-foreground/80">
+                        {format.relative(n.created_at)}
                       </span>
-                    ) : null}
-                    <span className="text-[0.7rem] text-muted-foreground/80">
-                      {format.relative(n.created_at)}
-                    </span>
-                  </div>
+                    </div>
+                  </Link>
                 </li>
               );
             })}
           </ul>
           <div className="border-t border-border px-5 py-3">
-            <span className="inline-flex items-center gap-1 text-xs font-semibold text-accent">
+            <Link
+              href="/notifications"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline"
+            >
               {t("dashboard.teller.notifications.viewAllFooter")}
               <ChevronRightIcon className="h-3.5 w-3.5" />
-            </span>
+            </Link>
           </div>
         </>
       )}
