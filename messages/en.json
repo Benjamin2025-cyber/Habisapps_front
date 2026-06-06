@@ -255,6 +255,20 @@
     "teller": {
       "greeting": "Hello {name} 👋",
       "subtitle": "Teller dashboard",
+      "today": "Today",
+      "kpi": {
+        "soldeCaisse": "Till balance",
+        "deposits": "Deposits",
+        "withdrawals": "Withdrawals",
+        "transactions": "Transactions"
+      },
+      "summary": {
+        "title": "Day summary",
+        "deposits": "Deposits",
+        "withdrawals": "Withdrawals",
+        "commissions": "Commissions",
+        "clientsServed": "Clients served"
+      },
       "drawer": {
         "title": "My till",
         "open": "Open",
@@ -262,7 +276,8 @@
         "till": "Till",
         "date": "Opening date",
         "opening": "Opening float",
-        "noneBody": "No cash session is open. Open your till to start the day.",
+        "noneTitle": "No active session",
+        "noneBody": "Open a session to start the day and process operations.",
         "openCta": "Open a session",
         "closeCta": "Manage / close the till",
         "liveNote": "The running balance and the cash difference are calculated at close."
@@ -271,6 +286,8 @@
       "actions": {
         "deposit": "Deposit",
         "withdrawal": "Withdrawal",
+        "newDeposit": "New deposit",
+        "newWithdrawal": "New withdrawal",
         "sessions": "Cash sessions",
         "clients": "Clients",
         "accounts": "Accounts"
@@ -299,13 +316,17 @@
       },
       "recent": {
         "title": "Recent transactions",
+        "viewAll": "View all operations",
         "date": "Date",
+        "time": "Time",
         "type": "Type",
         "account": "Account",
+        "description": "Description",
         "amount": "Amount",
         "channel": "Channel",
         "status": "Status",
-        "empty": "No recent transactions.",
+        "empty": "No operations today",
+        "emptyHint": "Operations you process will appear here.",
         "loadError": "Could not load transactions.",
         "types": {
           "deposit": "Deposit",
@@ -321,6 +342,8 @@
       },
       "notifications": {
         "title": "Notifications",
+        "viewAll": "View all",
+        "viewAllFooter": "View all notifications",
         "empty": "No notifications.",
         "loadError": "Could not load notifications."
       }
@@ -396,8 +419,11 @@
       },
       "notifications": {
         "label": "Notifications",
+        "unreadHeading": "Unread",
         "empty": "No notifications yet.",
+        "emptyUnread": "You're all caught up, no unread notifications.",
         "markAllRead": "Mark all read",
+        "viewAll": "View all",
         "loadError": "Could not load notifications."
       },
       "accountingDay": {
@@ -3855,6 +3881,62 @@
       "closedBody": "The accounting day was closed successfully.",
       "closeBlockedTitle": "Close not possible",
       "errorTitle": "Action not possible"
+    }
+  },
+  "notifications": {
+    "pageTitle": "Notifications",
+    "pageDescription": "Review your alerts and messages. Select a notification to read its details.",
+    "search": {
+      "placeholder": "Search notifications…",
+      "label": "Search notifications"
+    },
+    "filters": {
+      "all": "All",
+      "unread": "Unread",
+      "read": "Read"
+    },
+    "markAllRead": "Mark all read",
+    "list": {
+      "loadError": "Could not load notifications.",
+      "empty": "No notifications.",
+      "emptyUnread": "No unread notifications.",
+      "emptyRead": "No read notifications.",
+      "unreadBadge": "Unread",
+      "showing": "{count} of {total}",
+      "ariaLabel": "Notification list"
+    },
+    "pagination": {
+      "page": "Page {page} / {pages}",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "detail": {
+      "heading": "Details",
+      "backToList": "Back to list",
+      "empty": "Select a notification to view its details.",
+      "loadError": "Could not load this notification.",
+      "notFound": "This notification could not be found.",
+      "sectionInfo": "Information",
+      "sectionMetadata": "Related data",
+      "sectionActions": "Actions",
+      "fields": {
+        "type": "Type",
+        "category": "Category",
+        "agency": "Agency",
+        "receivedAt": "Received on",
+        "status": "Status"
+      },
+      "status": {
+        "read": "Read",
+        "unread": "Unread"
+      },
+      "openLink": "Open related item"
+    },
+    "type": {
+      "info": "Information",
+      "success": "Success",
+      "warning": "Warning",
+      "error": "Error"
     }
   }
 }

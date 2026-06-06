@@ -1,32 +1,29 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BellIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/cn";
+import { notificationVisual } from "../notifications/_components/notification-visuals";
 import {
   fetchNotifications,
   fetchUnreadNotificationCount,
   markAllNotificationsRead,
-  markNotificationRead,
   type AppNotification,
 } from "@/lib/api/notifications";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useFormatter, useTranslations } from "@/lib/i18n/I18nProvider";
 
 const UNREAD_POLL_MS = 60_000;
-const TYPE_DOT: Record<string, string> = {
-  success: "bg-success",
-  warning: "bg-warning",
-  error: "bg-danger",
-  info: "bg-info",
-};
+const UNREAD_FEED_LIMIT = 25;
 
 /**
  * Top-bar notification bell (#26). Shows an unread badge, and a dropdown feed
- * with the most recent notifications. Clicking an item marks it read (and
- * follows its in-app `action_url` when present); "mark all read" clears the
- * badge. Unread count refreshes on an interval so the badge stays live.
+ * with the 25 most recent **unread** notifications. Clicking an item opens it on
+ * the full notifications screen (which marks it read); "view all" links to that
+ * screen; "mark all read" clears the badge. Unread count refreshes on an
+ * interval so the badge stays live.
  */
 export function NotificationBell() {
   const t = useTranslations();
@@ -53,11 +50,10 @@ export function NotificationBell() {
     if (!token) return;
     setLoading(true);
     setError(false);
-    fetchNotifications(token, { perPage: 8 })
+    fetchNotifications(token, { read: false, perPage: UNREAD_FEED_LIMIT })
       .then((res) => {
         setItems(res.data);
-        setUnread(res.data.filter((n) => !n.read_at).length);
-        // The unread badge may exceed the 8 shown; reconcile via the count call.
+        // The badge may exceed the 25 shown; reconcile via the count call.
         refreshUnread();
       })
       .catch(() => setError(true))
@@ -96,25 +92,15 @@ export function NotificationBell() {
     };
   }, [open]);
 
-  async function handleItemClick(item: AppNotification) {
-    if (!token) return;
+  function handleItemClick(item: AppNotification) {
+    // Open it on the full screen, which marks it read. Optimistically drop it
+    // from the unread feed and decrement the badge for instant feedback.
     if (!item.read_at) {
-      // Optimistic: flag read locally, decrement badge, then persist.
-      setItems((current) =>
-        current.map((n) =>
-          n.public_id === item.public_id
-            ? { ...n, read_at: new Date().toISOString() }
-            : n,
-        ),
-      );
+      setItems((current) => current.filter((n) => n.public_id !== item.public_id));
       setUnread((u) => Math.max(0, u - 1));
-      markNotificationRead(token, item.public_id).catch(() => refreshUnread());
     }
-    // Follow only in-app links (avoid sending the user to a raw API path).
-    if (item.action_url && item.action_url.startsWith("/") && !item.action_url.startsWith("/api")) {
-      setOpen(false);
-      router.push(item.action_url);
-    }
+    setOpen(false);
+    router.push(`/notifications?selected=${encodeURIComponent(item.public_id)}`);
   }
 
   async function handleMarkAll() {
@@ -183,12 +169,12 @@ export function NotificationBell() {
               </p>
             ) : items.length === 0 ? (
               <p className="px-4 py-8 text-center text-xs text-muted-foreground">
-                {t("shell.topBar.notifications.empty")}
+                {t("shell.topBar.notifications.emptyUnread")}
               </p>
             ) : (
               <ul className="divide-y divide-border">
                 {items.map((item) => {
-                  const dot = TYPE_DOT[item.type] ?? "bg-muted-foreground";
+                  const visual = notificationVisual(item.type);
                   const unreadItem = !item.read_at;
                   return (
                     <li key={item.public_id}>
@@ -200,7 +186,14 @@ export function NotificationBell() {
                           unreadItem && "bg-accent/5",
                         )}
                       >
-                        <span className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", dot)} />
+                        <span
+                          className={cn(
+                            "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+                            visual.chipClass,
+                          )}
+                        >
+                          <visual.Icon className="h-4 w-4" />
+                        </span>
                         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                           <span
                             className={cn(
@@ -226,6 +219,16 @@ export function NotificationBell() {
               </ul>
             )}
           </div>
+
+          <footer className="border-t border-border">
+            <Link
+              href="/notifications"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2.5 text-center text-xs font-semibold text-accent hover:bg-muted/40"
+            >
+              {t("shell.topBar.notifications.viewAll")}
+            </Link>
+          </footer>
         </div>
       ) : null}
     </div>

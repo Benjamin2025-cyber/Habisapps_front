@@ -48,10 +48,12 @@ type Props<TRow> = {
 /**
  * Generic data table built on TanStack Table v8 (headless).
  *
- * Section design mirrors interfaces.pdf p8 list cards: a tinted header strip
- * with a vertical accent bar on the left + optional right-side count, then
- * the column header row in the same tint with no uppercase, then white body
- * rows. Bottom caption + server-side pagination sit below the card.
+ * Section design: a tinted header strip with a vertical accent bar on the left
+ * + optional right-side count, then a clean column-header row (uppercase
+ * micro-labels in muted text, separated by a single border — same style as the
+ * app's detail cards), then airy white body rows with light dividers. Left
+ * edges are aligned at `px-5` throughout. Bottom caption + server-side
+ * pagination sit below the card.
  */
 export function DataTable<TRow>({
   columns,
@@ -96,7 +98,7 @@ export function DataTable<TRow>({
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-accent/5 text-xs">
+            <thead className="border-b border-border">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
@@ -113,7 +115,7 @@ export function DataTable<TRow>({
                             : undefined
                         }
                         className={cn(
-                          "px-4 py-3 font-semibold text-foreground",
+                          "px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground",
                           align === "right" ? "text-right" : "text-left",
                         )}
                       >
@@ -129,7 +131,7 @@ export function DataTable<TRow>({
                 </tr>
               ))}
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-border/60">
               {loading && data.length === 0 ? (
                 <SkeletonRows
                   rows={4}
@@ -139,7 +141,7 @@ export function DataTable<TRow>({
                 <tr>
                   <td
                     colSpan={table.getVisibleLeafColumns().length}
-                    className="px-4 py-12 text-center text-sm text-muted-foreground"
+                    className="px-5 py-12 text-center text-sm text-muted-foreground"
                   >
                     {emptyMessage ?? t("dataTable.empty")}
                   </td>
@@ -150,7 +152,7 @@ export function DataTable<TRow>({
                     key={row.id}
                     onClick={onRowClick ? () => onRowClick(row.original) : undefined}
                     className={cn(
-                      "transition-colors hover:bg-accent/5",
+                      "transition-colors hover:bg-muted/40",
                       onRowClick && "cursor-pointer",
                     )}
                   >
@@ -162,7 +164,7 @@ export function DataTable<TRow>({
                         <td
                           key={cell.id}
                           className={cn(
-                            "px-4 py-3 align-middle",
+                            "px-5 py-3.5 align-middle text-foreground",
                             align === "right" ? "text-right" : "text-left",
                           )}
                         >
@@ -264,7 +266,7 @@ function SkeletonRows({ rows, columns }: { rows: number; columns: number }) {
       {Array.from({ length: rows }).map((_, rowIndex) => (
         <tr key={rowIndex}>
           {Array.from({ length: columns }).map((__, columnIndex) => (
-            <td key={columnIndex} className="px-4 py-3">
+            <td key={columnIndex} className="px-5 py-3.5">
               <span className="block h-3 w-full animate-pulse rounded bg-muted/60" />
             </td>
           ))}

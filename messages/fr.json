@@ -255,6 +255,20 @@
     "teller": {
       "greeting": "Bonjour {name} 👋",
       "subtitle": "Tableau de bord caissier",
+      "today": "Aujourd'hui",
+      "kpi": {
+        "soldeCaisse": "Solde Caisse",
+        "deposits": "Dépôts",
+        "withdrawals": "Retraits",
+        "transactions": "Transactions"
+      },
+      "summary": {
+        "title": "Résumé du jour",
+        "deposits": "Dépôts",
+        "withdrawals": "Retraits",
+        "commissions": "Commissions",
+        "clientsServed": "Clients servis"
+      },
       "drawer": {
         "title": "Ma caisse",
         "open": "Ouverte",
@@ -262,7 +276,8 @@
         "till": "Caisse",
         "date": "Date d'ouverture",
         "opening": "Fonds d'ouverture",
-        "noneBody": "Aucune session de caisse ouverte. Ouvrez votre caisse pour commencer la journée.",
+        "noneTitle": "Aucune session active",
+        "noneBody": "Ouvrez une session pour commencer la journée et effectuer des opérations.",
         "openCta": "Ouvrir une session",
         "closeCta": "Gérer / clôturer la caisse",
         "liveNote": "Le solde courant et l'écart de caisse sont calculés à la clôture."
@@ -271,6 +286,8 @@
       "actions": {
         "deposit": "Versement",
         "withdrawal": "Retrait",
+        "newDeposit": "Nouveau Versement",
+        "newWithdrawal": "Nouveau Retrait",
         "sessions": "Sessions de caisse",
         "clients": "Clients",
         "accounts": "Comptes"
@@ -299,13 +316,17 @@
       },
       "recent": {
         "title": "Opérations récentes",
+        "viewAll": "Voir toutes les opérations",
         "date": "Date",
+        "time": "Heure",
         "type": "Type",
         "account": "Compte",
+        "description": "Description",
         "amount": "Montant",
         "channel": "Canal",
         "status": "Statut",
-        "empty": "Aucune opération récente.",
+        "empty": "Aucune opération aujourd'hui",
+        "emptyHint": "Les opérations effectuées seront affichées ici.",
         "loadError": "Impossible de charger les opérations.",
         "types": {
           "deposit": "Versement",
@@ -321,6 +342,8 @@
       },
       "notifications": {
         "title": "Notifications",
+        "viewAll": "Voir toutes",
+        "viewAllFooter": "Voir toutes les notifications",
         "empty": "Aucune notification.",
         "loadError": "Impossible de charger les notifications."
       }
@@ -396,8 +419,11 @@
       },
       "notifications": {
         "label": "Notifications",
+        "unreadHeading": "Non lues",
         "empty": "Aucune notification pour l'instant.",
+        "emptyUnread": "Vous êtes à jour, aucune notification non lue.",
         "markAllRead": "Tout marquer lu",
+        "viewAll": "Voir tout",
         "loadError": "Impossible de charger les notifications."
       },
       "accountingDay": {
@@ -3855,6 +3881,62 @@
       "closedBody": "La journée comptable a été clôturée avec succès.",
       "closeBlockedTitle": "Clôture impossible",
       "errorTitle": "Action impossible"
+    }
+  },
+  "notifications": {
+    "pageTitle": "Notifications",
+    "pageDescription": "Consultez vos alertes et messages. Sélectionnez une notification pour en lire le détail.",
+    "search": {
+      "placeholder": "Rechercher une notification…",
+      "label": "Rechercher des notifications"
+    },
+    "filters": {
+      "all": "Toutes",
+      "unread": "Non lues",
+      "read": "Lues"
+    },
+    "markAllRead": "Tout marquer lu",
+    "list": {
+      "loadError": "Impossible de charger les notifications.",
+      "empty": "Aucune notification.",
+      "emptyUnread": "Aucune notification non lue.",
+      "emptyRead": "Aucune notification lue.",
+      "unreadBadge": "Non lue",
+      "showing": "{count} sur {total}",
+      "ariaLabel": "Liste des notifications"
+    },
+    "pagination": {
+      "page": "Page {page} / {pages}",
+      "previous": "Précédent",
+      "next": "Suivant"
+    },
+    "detail": {
+      "heading": "Détails",
+      "backToList": "Retour à la liste",
+      "empty": "Sélectionnez une notification pour en afficher le détail.",
+      "loadError": "Impossible de charger cette notification.",
+      "notFound": "Cette notification est introuvable.",
+      "sectionInfo": "Informations",
+      "sectionMetadata": "Données associées",
+      "sectionActions": "Actions",
+      "fields": {
+        "type": "Type",
+        "category": "Catégorie",
+        "agency": "Agence",
+        "receivedAt": "Reçue le",
+        "status": "Statut"
+      },
+      "status": {
+        "read": "Lue",
+        "unread": "Non lue"
+      },
+      "openLink": "Ouvrir l'élément lié"
+    },
+    "type": {
+      "info": "Information",
+      "success": "Succès",
+      "warning": "Avertissement",
+      "error": "Erreur"
     }
   }
 }
