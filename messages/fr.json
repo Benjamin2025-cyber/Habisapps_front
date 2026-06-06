@@ -156,6 +156,7 @@
     "forbiddenBody": "Votre profil ne dispose pas des droits nécessaires pour consulter ces indicateurs.",
     "comingSoon": "Bientôt disponible",
     "comingSoonChart": "Graphique disponible bientôt — endpoint de série temporelle en cours d'implémentation.",
+    "chartEmpty": "Aucune donnée sur cette période.",
     "viewMore": "Voir plus",
     "quickActions": {
       "deposit": "Dépôt en caisse",

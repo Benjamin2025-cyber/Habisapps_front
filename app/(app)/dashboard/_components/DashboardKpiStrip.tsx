@@ -15,10 +15,6 @@ type Tone = "primary" | "accent" | "info" | "danger" | "neutral";
 
 type Props = {
   data: OperationalDashboard | null;
-  /** Approximate count of loans whose status is `active`. May be null when unavailable. */
-  activeLoansCount: number | null;
-  /** Counts unavailable today (no `delinquent` status); display as "—". */
-  delinquentLoansCount: number | null;
   clientsCount: number | null;
 };
 
@@ -36,12 +32,7 @@ type Props = {
  * `bg-*` utilities so the build doesn't depend on whether each utility
  * was generated for a given theme token.
  */
-export function DashboardKpiStrip({
-  data,
-  activeLoansCount,
-  delinquentLoansCount,
-  clientsCount,
-}: Props) {
+export function DashboardKpiStrip({ data, clientsCount }: Props) {
   const t = useTranslations();
   const format = useFormatter();
 
@@ -51,6 +42,8 @@ export function DashboardKpiStrip({
     (data?.par.par30_outstanding_at_risk_minor ?? 0) +
     (data?.par.par60_outstanding_at_risk_minor ?? 0) +
     (data?.par.par90_outstanding_at_risk_minor ?? 0);
+  const activeLoansCount = data?.active_loan_count ?? null;
+  const delinquentLoansCount = data?.delinquent_loan_count ?? null;
 
   return (
     <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">

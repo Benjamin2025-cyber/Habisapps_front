@@ -5,11 +5,19 @@ import { Alert } from "@/components/ui/Alert";
 import { ApiError } from "@/lib/api/client";
 import { localizeApiMessage } from "@/lib/api/errors";
 import {
+  getAgenciesPerformance,
+  getDashboardTimeseries,
   getOperationalDashboard,
+  type AgencyPerformanceRow,
+  type DashboardTimeseries,
   type OperationalDashboard,
 } from "@/lib/api/dashboard";
 import { listAuditEvents, type AuditEvent } from "@/lib/api/audit";
-import { countClients, countLoans, countStaffUsers } from "@/lib/api/loans";
+import { countClients } from "@/lib/api/loans";
+import {
+  fetchStaffUserStatusCounts,
+  type StaffUserStatusCounts,
+} from "@/lib/api/staff-users";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useApi } from "@/lib/hooks/useApi";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
@@ -22,7 +30,7 @@ import {
 } from "./DashboardFilters";
 import { DashboardQuickActions } from "./DashboardQuickActions";
 import { DashboardKpiStrip } from "./DashboardKpiStrip";
-import { DashboardChartPlaceholder } from "./DashboardChartPlaceholder";
+import { DashboardTrendCard } from "./DashboardTrendCard";
 import { DashboardAlertsCard } from "./DashboardAlertsCard";
 import { DashboardUserManagementCard } from "./DashboardUserManagementCard";
 import { DashboardLoanTrackingCard } from "./DashboardLoanTrackingCard";
@@ -32,11 +40,11 @@ import { DashboardFreshness } from "./DashboardFreshness";
 
 type ManagementAggregate = {
   dashboard: OperationalDashboard;
-  activeLoansCount: number | null;
-  delinquentLoansCount: number | null;
   clientsCount: number | null;
-  totalUsersCount: number | null;
+  statusCounts: StaffUserStatusCounts | null;
   recentEvents: AuditEvent[];
+  timeseries: DashboardTimeseries | null;
+  agencies: AgencyPerformanceRow[] | null;
 };
 
 /**
@@ -64,36 +72,38 @@ export function DashboardManagementLayout() {
     async (signal: AbortSignal): Promise<ManagementAggregate> => {
       if (!token) throw new Error("Missing session token");
       const { from, to } = periodToDateRange(filters.period);
+      const agency = filters.agencyPublicId || undefined;
 
       // The operational dashboard is foundational — its failure surfaces in the
-      // error block. Every other call (counts, audit feed) is best-effort: a
-      // 403 / network blip on one endpoint must not blank out the page.
-      const [dashboard, activeLoansCount, clientsCount, totalUsersCount, recentEvents] =
+      // error block. Every other call is best-effort: a 403 / network blip on
+      // one endpoint must not blank out the page.
+      const [dashboard, clientsCount, statusCounts, recentEvents, timeseries, agencies] =
         await Promise.all([
           getOperationalDashboard(token, {
-            agency_public_id: filters.agencyPublicId || undefined,
+            agency_public_id: agency,
             period_starts_on: from,
             period_ends_on: to,
           }),
-          safeNullable(() => countLoans(token, { status: "active" })),
           // Pass scope=all so management roles get institution-wide totals;
           // the API rejects this for users without `crm.scope.institution.read`,
           // which is fine — `safeNullable` keeps the rest of the page alive.
           safeNullable(() => countClients(token, { status: "active", scope: "all" })),
-          safeNullable(() => countStaffUsers(token)),
+          safeNullable(() => fetchStaffUserStatusCounts(token)),
           safeArray(() =>
             listAuditEvents(token, { perPage: 10 }).then((response) => response.data),
           ),
+          safeNullable(() =>
+            getDashboardTimeseries(token, { agency_public_id: agency, period: filters.period }),
+          ),
+          safeNullable(() =>
+            getAgenciesPerformance(token, {
+              agency_public_id: agency,
+              period: filters.period,
+            }).then((r) => r.agencies),
+          ),
         ]);
       void signal;
-      return {
-        dashboard,
-        activeLoansCount,
-        delinquentLoansCount: null,
-        clientsCount,
-        totalUsersCount,
-        recentEvents,
-      };
+      return { dashboard, clientsCount, statusCounts, recentEvents, timeseries, agencies };
     },
     [token, filters.agencyPublicId, filters.period],
   );
@@ -111,9 +121,11 @@ export function DashboardManagementLayout() {
   }, [data]);
 
   const inactiveUsersFlag = useMemo<number | null>(() => {
-    // No status filter on /staff-users yet; show "—" via null.
-    return null;
-  }, []);
+    const counts = data?.statusCounts;
+    if (!counts) return null;
+    // "Inactifs" = suspended + deactivated accounts.
+    return counts.suspended + counts.deactivated;
+  }, [data]);
 
   if (session.status !== "authenticated") return null;
 
@@ -146,14 +158,12 @@ export function DashboardManagementLayout() {
 
       <DashboardKpiStrip
         data={data?.dashboard ?? null}
-        activeLoansCount={data?.activeLoansCount ?? null}
-        delinquentLoansCount={data?.delinquentLoansCount ?? null}
         clientsCount={data?.clientsCount ?? null}
       />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <DashboardChartPlaceholder
+          <DashboardTrendCard
             title={t("dashboard.financialPerformance.title")}
             subtitle={t("dashboard.financialPerformance.subtitle")}
             rangeOptions={[
@@ -179,29 +189,42 @@ export function DashboardManagementLayout() {
                 color: "var(--color-accent)",
               },
             ]}
+            points={data?.timeseries?.points ?? null}
+            granularity={data?.timeseries?.granularity}
+            currency={data?.dashboard.currency}
+            loading={loading && !data}
           />
         </div>
         <div className="flex flex-col gap-4">
           <DashboardAlertsCard
-            delinquentLoans={data?.delinquentLoansCount ?? null}
+            delinquentLoans={data?.dashboard.delinquent_loan_count ?? null}
             inactiveUsers={inactiveUsersFlag}
             lowCollectionFlag={lowCollectionFlag}
             loading={loading && !data}
           />
           <DashboardUserManagementCard
-            totalUsers={data?.totalUsersCount ?? null}
+            totalUsers={data?.statusCounts?.total ?? null}
+            activeUsers={data?.statusCounts?.active ?? null}
+            suspendedUsers={data?.statusCounts?.suspended ?? null}
             loading={loading && !data}
           />
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <DashboardLoanTrackingCard data={data?.dashboard ?? null} />
+        <DashboardLoanTrackingCard
+          data={data?.dashboard ?? null}
+          points={data?.timeseries?.points ?? null}
+        />
         <DashboardActivitiesCard
           events={data?.recentEvents ?? null}
           loading={loading && !data}
         />
-        <DashboardAgenciesCard />
+        <DashboardAgenciesCard
+          rows={data?.agencies ?? null}
+          currency={data?.dashboard.currency}
+          loading={loading && !data}
+        />
       </div>
     </>
   );

@@ -156,6 +156,7 @@
     "forbiddenBody": "Your profile does not have the rights required to view these indicators.",
     "comingSoon": "Coming soon",
     "comingSoonChart": "Chart coming soon — time-series endpoint under implementation.",
+    "chartEmpty": "No data for this period.",
     "viewMore": "View more",
     "quickActions": {
       "deposit": "Till deposit",

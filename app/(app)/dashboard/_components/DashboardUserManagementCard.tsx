@@ -7,18 +7,21 @@ import { useTranslations } from "@/lib/i18n/I18nProvider";
 
 type Props = {
   totalUsers: number | null;
+  activeUsers?: number | null;
+  suspendedUsers?: number | null;
   loading?: boolean;
 };
 
 /**
  * Compact panel that mirrors the PDF "Gestion des utilisateurs" widget.
- *
- * Today we can only display the total user count. Active/suspended splits
- * require the `staff-users` index to accept a status filter (see
- * BUILDABLE_PAGES.md "Modules avec maquette mais sans endpoint dédié").
- * The placeholder under the counters notes that limitation.
+ * Total / active / suspended come from `GET /staff-users` `meta.status_counts`.
  */
-export function DashboardUserManagementCard({ totalUsers, loading }: Props) {
+export function DashboardUserManagementCard({
+  totalUsers,
+  activeUsers = null,
+  suspendedUsers = null,
+  loading,
+}: Props) {
   const t = useTranslations();
   const canAddUser = useCan("users.create");
   const canManageRoles = useCan("roles.manage");
@@ -40,21 +43,17 @@ export function DashboardUserManagementCard({ totalUsers, loading }: Props) {
         />
         <CounterRow
           label={t("dashboard.userManagement.active")}
-          count={null}
+          count={activeUsers}
           dotColor="var(--color-success)"
           loading={loading}
         />
         <CounterRow
           label={t("dashboard.userManagement.suspended")}
-          count={null}
+          count={suspendedUsers}
           dotColor="var(--color-danger)"
           loading={loading}
         />
       </ul>
-
-      <p className="text-[11px] text-muted-foreground">
-        {t("dashboard.userManagement.countsUnavailable")}
-      </p>
 
       <div className="flex flex-wrap items-center gap-2">
         {canAddUser ? (

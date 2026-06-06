@@ -9,7 +9,7 @@ import {
   LayersIcon,
   UsersIcon,
 } from "@/components/ui/icons";
-import { countClients, fetchLoans, type Loan } from "@/lib/api/loans";
+import { countClients, countLoans, fetchLoans, type Loan } from "@/lib/api/loans";
 import { countLoansByStatus } from "@/lib/api/dashboard-stats";
 import { useCan } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
@@ -37,6 +37,7 @@ const PORTFOLIO_STATUSES = [
 type OfficerAggregate = {
   byStatus: Record<string, number>;
   clientsCount: number | null;
+  delinquentCount: number | null;
   recentLoans: Loan[];
 };
 
@@ -61,7 +62,7 @@ export function DashboardOfficerLayout() {
     async (signal: AbortSignal): Promise<OfficerAggregate> => {
       if (!token) throw new Error("Missing session token");
       void signal;
-      const [byStatus, clientsCount, recent] = await Promise.all([
+      const [byStatus, clientsCount, delinquentCount, recent] = await Promise.all([
         countLoansByStatus(token, [
           "application",
           "in_review",
@@ -74,9 +75,10 @@ export function DashboardOfficerLayout() {
           "written_off",
         ]),
         safeNullable(() => countClients(token, { status: "active" })),
+        safeNullable(() => countLoans(token, { in_arrears: true })),
         safeArray(() => fetchLoans(token, { perPage: 6 }).then((r) => r.data)),
       ]);
-      return { byStatus, clientsCount, recentLoans: recent };
+      return { byStatus, clientsCount, delinquentCount, recentLoans: recent };
     },
     [token],
   );
@@ -164,12 +166,8 @@ export function DashboardOfficerLayout() {
               icon={AlertTriangleIcon}
               tone="warning"
               label={t("dashboard.officer.kpi.delinquent")}
-              value="—"
-              footer={
-                <span className="text-xs text-muted-foreground">
-                  {t("dashboard.officer.delinquentSoon")}
-                </span>
-              }
+              value={data?.delinquentCount ?? (loading ? "…" : "—")}
+              loading={loading && !data}
             />
           </div>
 

@@ -6,9 +6,14 @@ import { ApiError, apiRequest, notifyAuthExpired } from "./client";
  */
 export async function countLoans(
   token: string,
-  filters: { status?: string } = {},
+  filters: { status?: string; in_arrears?: boolean } = {},
 ): Promise<number> {
-  return countResource(token, "loans", filters);
+  // `in_arrears=true` restricts to loans with overdue, unpaid schedule exposure
+  // as of today (same delinquency definition as the operational dashboard).
+  return countResource(token, "loans", {
+    status: filters.status,
+    in_arrears: filters.in_arrears ? "true" : undefined,
+  });
 }
 
 export async function countClients(

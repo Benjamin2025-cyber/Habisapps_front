@@ -35,6 +35,15 @@ export type StaffUser = {
   } | null;
 };
 
+/** Full-scope status breakdown returned in `meta.status_counts`. */
+export type StaffUserStatusCounts = {
+  total: number;
+  pending_verification: number;
+  active: number;
+  suspended: number;
+  deactivated: number;
+};
+
 export type PaginatedStaffUsers = {
   data: StaffUser[];
   meta: {
@@ -44,6 +53,8 @@ export type PaginatedStaffUsers = {
       total: number;
       last_page: number;
     };
+    /** Counts across the whole visible scope (not just the page). */
+    status_counts?: StaffUserStatusCounts;
   };
 };
 
@@ -64,14 +75,20 @@ export type StaffUserWritePayload = {
 };
 
 /**
- * Paginated list. Reads the envelope directly so we get `meta.pagination`.
- * Server-side `search` covers name/phone/email/matricule/job_title/agency;
- * status/agency/role have no server filter yet, so the call site narrows
- * those client-side on the returned page.
+ * Paginated list. Reads the envelope directly so we get `meta.pagination` and
+ * `meta.status_counts`. Server-side `search` covers
+ * name/phone/email/matricule/job_title/agency; `status` is now a real server
+ * filter (`filter[status]`). The response always carries `status_counts` over
+ * the whole visible scope, so a `per_page=1` call is enough to read the splits.
  */
 export async function fetchStaffUsers(
   token: string,
-  options: { page?: number; perPage?: number; search?: string } = {},
+  options: {
+    page?: number;
+    perPage?: number;
+    search?: string;
+    status?: StaffUserStatus;
+  } = {},
 ): Promise<PaginatedStaffUsers> {
   const query = new URLSearchParams();
   query.set("per_page", String(options.perPage ?? 100));
@@ -80,6 +97,9 @@ export async function fetchStaffUsers(
   }
   if (options.search && options.search.trim().length > 0) {
     query.set("search", options.search.trim());
+  }
+  if (options.status) {
+    query.set("filter[status]", options.status);
   }
 
   const response = await fetch(`/api/v1/staff-users?${query.toString()}`, {
@@ -120,6 +140,14 @@ export async function fetchStaffUsers(
       },
     },
   };
+}
+
+/** Status breakdown across the visible scope (one cheap `per_page=1` call). */
+export async function fetchStaffUserStatusCounts(
+  token: string,
+): Promise<StaffUserStatusCounts | null> {
+  const res = await fetchStaffUsers(token, { perPage: 1 });
+  return res.meta.status_counts ?? null;
 }
 
 export async function getStaffUser(

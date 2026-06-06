@@ -1,20 +1,32 @@
 "use client";
 
 import { useFormatter, useTranslations } from "@/lib/i18n/I18nProvider";
-import type { OperationalDashboard } from "@/lib/api/dashboard";
-import { DashboardChartPlaceholder } from "./DashboardChartPlaceholder";
+import type {
+  DashboardTimeseriesPoint,
+  OperationalDashboard,
+} from "@/lib/api/dashboard";
+import { DashboardLineChart, type LineSeries } from "./DashboardLineChart";
 
 type Props = {
   data: OperationalDashboard | null;
+  /** Timeseries points for the mini trend chart. */
+  points?: DashboardTimeseriesPoint[] | null;
 };
 
 /**
  * "Suivi des Crédits" panel from PDF p6: three KPI rows (granted, delinquent,
  * repaid) on top, and the small time-series chart placeholder underneath.
  */
-export function DashboardLoanTrackingCard({ data }: Props) {
+export function DashboardLoanTrackingCard({ data, points }: Props) {
   const t = useTranslations();
   const format = useFormatter();
+
+  const series: LineSeries[] = points
+    ? [
+        { label: "balance", color: "var(--color-info)", values: points.map((p) => p.balance_minor) },
+        { label: "collection", color: "var(--color-success)", values: points.map((p) => p.collection_minor) },
+      ]
+    : [];
 
   // We surface monetary figures from the operational dashboard:
   //  - Granted today / on period   ≈ collections.expected_collection_minor
@@ -82,10 +94,13 @@ export function DashboardLoanTrackingCard({ data }: Props) {
         ))}
       </ul>
 
-      <DashboardChartPlaceholder
-        title=""
-        className="border-0 bg-transparent p-0 shadow-none"
-      />
+      {points && points.length > 0 ? (
+        <DashboardLineChart series={series} xLabels={[]} height={120} />
+      ) : (
+        <div className="flex h-[120px] items-center justify-center text-xs text-muted-foreground">
+          {data === null ? t("common.loading") : t("dashboard.chartEmpty")}
+        </div>
+      )}
     </article>
   );
 }
