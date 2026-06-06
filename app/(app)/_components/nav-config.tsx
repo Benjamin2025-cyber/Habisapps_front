@@ -82,7 +82,7 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "audit",
         href: "/admin/audit",
-        available: false,
+        available: true,
         permissions: ["audit.view"],
       },
     ],
@@ -266,6 +266,12 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
         href: "/accounting/ledger-accounts",
         available: true,
         permissions: ["ledger.accounts.view"],
+      },
+      {
+        labelKey: "operationCodes",
+        href: "/accounting/operation-codes",
+        available: true,
+        permissions: ["operation.codes.view", "operation.mappings.view"],
       },
       {
         labelKey: "sectors",

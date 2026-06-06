@@ -320,7 +320,6 @@ export function RunsTab() {
           placeholder={t("batch.runs.filters.procedureAll")}
           isClearable
           isSearchable
-          size="sm"
           onChange={(next) => {
             setProcedureFilter(next);
             setPage(1);
@@ -335,7 +334,6 @@ export function RunsTab() {
           }))}
           placeholder={t("batch.runs.filters.statusAll")}
           isClearable
-          size="sm"
           onChange={(next) => {
             setStatusFilter(next as BatchRunStatus | "");
             setPage(1);

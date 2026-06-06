@@ -376,6 +376,7 @@
         "loanTransfers": "Muter prêt",
         "delinquencies": "Suivi des exigibles",
         "ledgerAccounts": "Comptes généraux",
+        "operationCodes": "Codes opération & imputations",
         "sectors": "Secteurs d'activité",
         "journalEntries": "Opérations diverses",
         "globalClientImage": "Image globale client",
@@ -3297,6 +3298,226 @@
         "title": "Balance des comptes",
         "description": "Balance, grand livre et balance EMF/COBAC."
       }
+    }
+  },
+  "operationCodes": {
+    "pageTitle": "Comptabilité — Codes opération & imputations",
+    "pageDescription": "Référentiel des codes d'opération et de leurs imputations comptables automatiques (compte à débiter / créditer sur le plan comptable).",
+    "tabsAriaLabel": "Sections des codes d'opération",
+    "tabs": {
+      "codes": "Codes opération",
+      "mappings": "Imputations"
+    },
+    "modules": {
+      "accounting": "Comptabilité",
+      "cash": "Caisse",
+      "loan": "Crédit",
+      "insurance": "Assurance",
+      "hr": "RH",
+      "fx": "Change",
+      "islamic_finance": "Finance islamique",
+      "sms": "SMS",
+      "reporting": "Reporting",
+      "alert": "Alerte"
+    },
+    "directions": {
+      "debit": "Débit",
+      "credit": "Crédit",
+      "debit_credit": "Débit / Crédit"
+    },
+    "codes": {
+      "listTitle": "Codes d'opération",
+      "count": "{count} code(s)",
+      "empty": "Aucun code d'opération.",
+      "errorTitle": "Impossible de charger les codes d'opération",
+      "columns": {
+        "code": "Code",
+        "label": "Intitulé",
+        "module": "Module",
+        "direction": "Sens",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Actif",
+        "inactive": "Inactif",
+        "archived": "Archivé"
+      },
+      "actions": {
+        "create": "Nouveau code",
+        "edit": "Modifier",
+        "activate": "Activer",
+        "deactivate": "Désactiver",
+        "archive": "Archiver",
+        "menu": "Actions du code"
+      },
+      "filters": {
+        "search": "Recherche",
+        "searchPlaceholder": "Code, intitulé…",
+        "module": "Module",
+        "moduleAll": "Tous les modules",
+        "status": "Statut",
+        "statusAll": "Tous les statuts"
+      },
+      "drawer": {
+        "titleCreate": "Nouveau code d'opération",
+        "titleEdit": "Modifier le code d'opération",
+        "hint": "Le code est immuable ; il sert de clé aux imputations comptables."
+      },
+      "fields": {
+        "code": "Code",
+        "codeHint": "Identifiant technique immuable (ex. loan_setup_dossier_fee).",
+        "codeImmutable": "Le code ne peut pas être modifié après création.",
+        "label": "Intitulé",
+        "module": "Module",
+        "modulePlaceholder": "Sélectionner un module…",
+        "operationType": "Type d'opération",
+        "operationTypeHint": "Optionnel (ex. posting).",
+        "direction": "Sens",
+        "directionPlaceholder": "Sélectionner un sens…",
+        "status": "Statut"
+      },
+      "confirm": {
+        "archive": {
+          "title": "Archiver le code ?",
+          "message": "Le code {code} sera archivé et ne pourra plus être utilisé pour de nouvelles imputations."
+        }
+      },
+      "toast": {
+        "createdTitle": "Code créé",
+        "createdBody": "Le code {code} a été créé.",
+        "updatedTitle": "Code mis à jour",
+        "updatedBody": "Le code {code} a été modifié.",
+        "statusTitle": "Statut modifié",
+        "statusBody": "Le code {code} est maintenant : {status}.",
+        "archivedTitle": "Code archivé",
+        "archivedBody": "Le code {code} a été archivé.",
+        "errorTitle": "Action impossible"
+      }
+    },
+    "mappings": {
+      "listTitle": "Imputations comptables",
+      "count": "{count} imputation(s)",
+      "empty": "Aucune imputation.",
+      "errorTitle": "Impossible de charger les imputations",
+      "global": "Global",
+      "columns": {
+        "code": "Code opération",
+        "agency": "Agence",
+        "debit": "Compte débit",
+        "credit": "Compte crédit",
+        "currency": "Devise",
+        "status": "Statut",
+        "approval": "Approbation",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Actif",
+        "inactive": "Inactif",
+        "archived": "Archivé"
+      },
+      "approval": {
+        "draft": "Brouillon",
+        "submitted": "Soumise",
+        "approved": "Approuvée",
+        "rejected": "Rejetée",
+        "suspended": "Suspendue",
+        "revoked": "Révoquée",
+        "expired": "Expirée",
+        "archived": "Archivée"
+      },
+      "actions": {
+        "create": "Nouvelle imputation",
+        "edit": "Modifier",
+        "archive": "Archiver",
+        "menu": "Actions de l'imputation"
+      },
+      "filters": {
+        "search": "Recherche",
+        "searchPlaceholder": "Code, compte, devise…",
+        "status": "Statut",
+        "statusAll": "Tous les statuts"
+      },
+      "drawer": {
+        "titleCreate": "Nouvelle imputation",
+        "titleEdit": "Modifier l'imputation",
+        "hint": "Rattache un code d'opération à un compte débit et/ou crédit du plan comptable (au moins un)."
+      },
+      "fields": {
+        "code": "Code d'opération",
+        "codeImmutable": "Le code d'opération ne peut pas être modifié après création.",
+        "codePlaceholder": "Sélectionner un code d'opération…",
+        "agency": "Agence",
+        "agencyPlaceholder": "Global (toutes agences)…",
+        "agencyHint": "Laisser vide pour une imputation globale.",
+        "debit": "Compte à débiter",
+        "credit": "Compte à créditer",
+        "accountPlaceholder": "Sélectionner un compte…",
+        "legRequired": "Renseignez au moins un compte (débit ou crédit).",
+        "currency": "Devise",
+        "currencyHint": "Code ISO à 3 lettres (ex. XAF).",
+        "effectiveFrom": "Effective du",
+        "effectiveTo": "Effective au",
+        "status": "Statut",
+        "approval": "Approbation",
+        "approvalHint": "Une imputation doit être approuvée pour être prise en compte par le moteur."
+      },
+      "confirm": {
+        "archive": {
+          "title": "Archiver l'imputation ?",
+          "message": "Cette imputation sera archivée et ne sera plus utilisée pour l'auto-comptabilisation."
+        }
+      },
+      "toast": {
+        "createdTitle": "Imputation créée",
+        "createdBody": "L'imputation a été créée.",
+        "updatedTitle": "Imputation mise à jour",
+        "updatedBody": "L'imputation a été modifiée.",
+        "archivedTitle": "Imputation archivée",
+        "archivedBody": "L'imputation a été archivée.",
+        "errorTitle": "Action impossible"
+      }
+    }
+  },
+  "audit": {
+    "pageTitle": "Journal d'audit",
+    "pageDescription": "Historique des actions enregistrées dans le système (création, modification, suppression). Lecture seule.",
+    "errorTitle": "Impossible de charger le journal d'audit",
+    "listTitle": "Événements d'audit",
+    "count": "{count} événement(s)",
+    "empty": "Aucun événement d'audit.",
+    "system": "Système",
+    "columns": {
+      "timestamp": "Horodatage",
+      "event": "Événement",
+      "description": "Description",
+      "subject": "Objet",
+      "causer": "Auteur",
+      "logName": "Journal"
+    },
+    "events": {
+      "created": "Création",
+      "updated": "Modification",
+      "deleted": "Suppression",
+      "restored": "Restauration"
+    },
+    "filters": {
+      "search": "Recherche",
+      "searchPlaceholder": "Description, objet, journal…",
+      "event": "Événement",
+      "eventAll": "Tous les événements",
+      "logName": "Journal",
+      "logNamePlaceholder": "Nom du journal…"
+    },
+    "detail": {
+      "title": "Détail de l'événement",
+      "event": "Événement",
+      "logName": "Journal",
+      "subject": "Objet",
+      "causer": "Auteur",
+      "description": "Description",
+      "properties": "Propriétés",
+      "noProperties": "Aucune propriété enregistrée."
     }
   },
   "batch": {

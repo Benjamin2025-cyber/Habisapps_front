@@ -376,6 +376,7 @@
         "loanTransfers": "Transfer loan",
         "delinquencies": "Receivables tracking",
         "ledgerAccounts": "General ledger accounts",
+        "operationCodes": "Operation codes & postings",
         "sectors": "Business sectors",
         "journalEntries": "Miscellaneous entries",
         "globalClientImage": "Global client image",
@@ -3297,6 +3298,226 @@
         "title": "Trial balance",
         "description": "Trial balance, general ledger and EMF/COBAC balance."
       }
+    }
+  },
+  "operationCodes": {
+    "pageTitle": "Accounting — Operation codes & postings",
+    "pageDescription": "Catalog of operation codes and their automatic accounting postings (ledger account to debit / credit).",
+    "tabsAriaLabel": "Operation code sections",
+    "tabs": {
+      "codes": "Operation codes",
+      "mappings": "Postings"
+    },
+    "modules": {
+      "accounting": "Accounting",
+      "cash": "Cash",
+      "loan": "Loan",
+      "insurance": "Insurance",
+      "hr": "HR",
+      "fx": "FX",
+      "islamic_finance": "Islamic finance",
+      "sms": "SMS",
+      "reporting": "Reporting",
+      "alert": "Alert"
+    },
+    "directions": {
+      "debit": "Debit",
+      "credit": "Credit",
+      "debit_credit": "Debit / Credit"
+    },
+    "codes": {
+      "listTitle": "Operation codes",
+      "count": "{count} code(s)",
+      "empty": "No operation code.",
+      "errorTitle": "Could not load operation codes",
+      "columns": {
+        "code": "Code",
+        "label": "Label",
+        "module": "Module",
+        "direction": "Direction",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "archived": "Archived"
+      },
+      "actions": {
+        "create": "New code",
+        "edit": "Edit",
+        "activate": "Activate",
+        "deactivate": "Deactivate",
+        "archive": "Archive",
+        "menu": "Code actions"
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Code, label…",
+        "module": "Module",
+        "moduleAll": "All modules",
+        "status": "Status",
+        "statusAll": "All statuses"
+      },
+      "drawer": {
+        "titleCreate": "New operation code",
+        "titleEdit": "Edit operation code",
+        "hint": "The code is immutable; it is the key for accounting postings."
+      },
+      "fields": {
+        "code": "Code",
+        "codeHint": "Immutable technical identifier (e.g. loan_setup_dossier_fee).",
+        "codeImmutable": "The code cannot be changed after creation.",
+        "label": "Label",
+        "module": "Module",
+        "modulePlaceholder": "Select a module…",
+        "operationType": "Operation type",
+        "operationTypeHint": "Optional (e.g. posting).",
+        "direction": "Direction",
+        "directionPlaceholder": "Select a direction…",
+        "status": "Status"
+      },
+      "confirm": {
+        "archive": {
+          "title": "Archive the code?",
+          "message": "Code {code} will be archived and can no longer be used for new postings."
+        }
+      },
+      "toast": {
+        "createdTitle": "Code created",
+        "createdBody": "Code {code} has been created.",
+        "updatedTitle": "Code updated",
+        "updatedBody": "Code {code} has been updated.",
+        "statusTitle": "Status changed",
+        "statusBody": "Code {code} is now: {status}.",
+        "archivedTitle": "Code archived",
+        "archivedBody": "Code {code} has been archived.",
+        "errorTitle": "Action not allowed"
+      }
+    },
+    "mappings": {
+      "listTitle": "Accounting postings",
+      "count": "{count} posting(s)",
+      "empty": "No posting.",
+      "errorTitle": "Could not load postings",
+      "global": "Global",
+      "columns": {
+        "code": "Operation code",
+        "agency": "Agency",
+        "debit": "Debit account",
+        "credit": "Credit account",
+        "currency": "Currency",
+        "status": "Status",
+        "approval": "Approval",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "archived": "Archived"
+      },
+      "approval": {
+        "draft": "Draft",
+        "submitted": "Submitted",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "suspended": "Suspended",
+        "revoked": "Revoked",
+        "expired": "Expired",
+        "archived": "Archived"
+      },
+      "actions": {
+        "create": "New posting",
+        "edit": "Edit",
+        "archive": "Archive",
+        "menu": "Posting actions"
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Code, account, currency…",
+        "status": "Status",
+        "statusAll": "All statuses"
+      },
+      "drawer": {
+        "titleCreate": "New posting",
+        "titleEdit": "Edit posting",
+        "hint": "Links an operation code to a debit and/or credit ledger account (at least one)."
+      },
+      "fields": {
+        "code": "Operation code",
+        "codeImmutable": "The operation code cannot be changed after creation.",
+        "codePlaceholder": "Select an operation code…",
+        "agency": "Agency",
+        "agencyPlaceholder": "Global (all agencies)…",
+        "agencyHint": "Leave empty for a global posting.",
+        "debit": "Account to debit",
+        "credit": "Account to credit",
+        "accountPlaceholder": "Select an account…",
+        "legRequired": "Provide at least one account (debit or credit).",
+        "currency": "Currency",
+        "currencyHint": "3-letter ISO code (e.g. XAF).",
+        "effectiveFrom": "Effective from",
+        "effectiveTo": "Effective to",
+        "status": "Status",
+        "approval": "Approval",
+        "approvalHint": "A posting must be approved for the engine to use it."
+      },
+      "confirm": {
+        "archive": {
+          "title": "Archive the posting?",
+          "message": "This posting will be archived and no longer used for auto-posting."
+        }
+      },
+      "toast": {
+        "createdTitle": "Posting created",
+        "createdBody": "The posting has been created.",
+        "updatedTitle": "Posting updated",
+        "updatedBody": "The posting has been updated.",
+        "archivedTitle": "Posting archived",
+        "archivedBody": "The posting has been archived.",
+        "errorTitle": "Action not allowed"
+      }
+    }
+  },
+  "audit": {
+    "pageTitle": "Audit log",
+    "pageDescription": "History of actions recorded in the system (create, update, delete). Read-only.",
+    "errorTitle": "Could not load the audit log",
+    "listTitle": "Audit events",
+    "count": "{count} event(s)",
+    "empty": "No audit event.",
+    "system": "System",
+    "columns": {
+      "timestamp": "Timestamp",
+      "event": "Event",
+      "description": "Description",
+      "subject": "Subject",
+      "causer": "Actor",
+      "logName": "Log"
+    },
+    "events": {
+      "created": "Created",
+      "updated": "Updated",
+      "deleted": "Deleted",
+      "restored": "Restored"
+    },
+    "filters": {
+      "search": "Search",
+      "searchPlaceholder": "Description, subject, log…",
+      "event": "Event",
+      "eventAll": "All events",
+      "logName": "Log",
+      "logNamePlaceholder": "Log name…"
+    },
+    "detail": {
+      "title": "Event detail",
+      "event": "Event",
+      "logName": "Log",
+      "subject": "Subject",
+      "causer": "Actor",
+      "description": "Description",
+      "properties": "Properties",
+      "noProperties": "No recorded properties."
     }
   },
   "batch": {
