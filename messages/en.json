@@ -4132,5 +4132,168 @@
       "warning": "Warning",
       "error": "Error"
     }
+  },
+  "database": {
+    "title": "Database backup & restore",
+    "description": "Create, verify and restore database backups. Platform administrators only.",
+    "errorTitle": "Could not load data",
+    "storage": {
+      "title": "Storage health",
+      "enabled": "Service enabled",
+      "disabled": "Service disabled",
+      "reachable": "Disk reachable",
+      "unreachable": "Disk unreachable",
+      "disk": "Disk: {disk}",
+      "freeSpace": "Free space",
+      "backupCount": "Backups",
+      "totalSize": "Total size",
+      "lastBackup": "Last backup",
+      "never": "None",
+      "notPrivateWarning": "The backup disk is not private. Check the configuration: artifacts must never be publicly exposed.",
+      "maintenanceLockTitle": "Maintenance lock active",
+      "maintenanceLockBody": "A maintenance operation is in progress ({reason}). Expires: {expires}.",
+      "noReason": "no reason given",
+      "noExpiry": "no expiry",
+      "retentionSummary": "Retention: keep {days} days, {count} backups max, {protect} most-recent backups protected."
+    },
+    "backups": {
+      "tab": "Backups",
+      "createButton": "Create backup",
+      "empty": "No backups yet.",
+      "columns": {
+        "filename": "File",
+        "status": "Status",
+        "size": "Size",
+        "createdAt": "Created",
+        "actions": "Actions"
+      },
+      "status": {
+        "pending": "Pending",
+        "running": "Running",
+        "completed": "Completed",
+        "verified": "Verified",
+        "failed": "Failed",
+        "deleted": "Deleted"
+      },
+      "verification": {
+        "passed": "Verification OK",
+        "failed": "Verification failed"
+      },
+      "actions": {
+        "download": "Download",
+        "verify": "Verify",
+        "restore": "Restore",
+        "delete": "Delete"
+      },
+      "toast": {
+        "downloadErrorTitle": "Download failed",
+        "verifyPassedTitle": "Backup verified",
+        "verifyFailedTitle": "Verification failed",
+        "verifyErrorTitle": "Could not verify backup",
+        "deletedTitle": "Backup deleted",
+        "deleteErrorTitle": "Could not delete backup"
+      },
+      "createDrawer": {
+        "title": "Create backup",
+        "description": "Starts a new full database backup.",
+        "intro": "The backup runs in the background. It will appear in the list as “Running”, then “Completed”.",
+        "noteLabel": "Note (optional)",
+        "notePlaceholder": "e.g. Before v2.3 upgrade",
+        "noteHint": "255 characters maximum.",
+        "cancel": "Cancel",
+        "submit": "Start backup",
+        "submitting": "Starting…",
+        "toastTitle": "Backup requested",
+        "toastBody": "The backup has been queued."
+      },
+      "deleteDialog": {
+        "title": "Delete this backup?",
+        "description": "The artifact “{filename}” will be permanently deleted. This action cannot be undone.",
+        "confirm": "Delete",
+        "deleting": "Deleting…"
+      }
+    },
+    "restores": {
+      "tab": "Restores",
+      "empty": "No restore operations recorded.",
+      "destructive": "Destructive",
+      "columns": {
+        "startedAt": "Date",
+        "target": "Target",
+        "mode": "Mode",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "target": {
+        "same_database": "Production database",
+        "staging_database": "Staging database",
+        "external_database": "External database"
+      },
+      "mode": {
+        "dry_run": "Dry run",
+        "verify_only": "Verify only",
+        "replace": "Replace"
+      },
+      "status": {
+        "planned": "Planned",
+        "pending": "Pending",
+        "running": "Running",
+        "completed": "Completed",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
+      },
+      "actions": {
+        "cancel": "Cancel"
+      },
+      "toast": {
+        "cancelledTitle": "Restore cancelled",
+        "cancelErrorTitle": "Could not cancel restore"
+      }
+    },
+    "restoreDrawer": {
+      "title": "Restore from a backup",
+      "intro": "Configure the restore. A dry run is recommended before any real replacement.",
+      "targetLabel": "Restore target",
+      "modeLabel": "Mode",
+      "target": {
+        "same_database": "Production database",
+        "staging_database": "Staging database",
+        "external_database": "External database"
+      },
+      "mode": {
+        "dry_run": "Dry run",
+        "verify_only": "Verify only",
+        "replace": "Replace (destructive)"
+      },
+      "modeHint": {
+        "dry_run": "Validates the restore without modifying the database.",
+        "verify_only": "Structural check only, no writes.",
+        "replace": "Overwrites existing data. A pre-restore backup is created automatically."
+      },
+      "phraseLabel": "Confirmation phrase (if configured)",
+      "phrasePlaceholder": "Leave empty if not required",
+      "phraseHint": "Only required if the backend enforces it.",
+      "destructiveTitle": "Destructive operation",
+      "destructiveBody": "“Replace” mode overwrites the current data of the target database. This action cannot be undone.",
+      "cancel": "Cancel",
+      "planning": "Planning…",
+      "planButton": "Prepare restore",
+      "cancelPlan": "Cancel plan",
+      "executing": "Executing…",
+      "executeButton": "Execute restore",
+      "planReadyTitle": "Restore plan ready",
+      "planDestructive": "This plan is destructive. Confirm with your password to execute it.",
+      "planSafe": "Confirm with your password to execute this plan.",
+      "summaryTarget": "Target",
+      "summaryMode": "Mode",
+      "summaryExpires": "Expires",
+      "noExecutePermission": "You can prepare a plan but not execute it. An administrator with execute rights must complete the operation.",
+      "stepUpIntro": "For security, re-enter your password.",
+      "passwordLabel": "Password",
+      "execToastTitle": "Restore started",
+      "execToastBody": "The restore was accepted and runs in the background.",
+      "cancelToastTitle": "Plan cancelled",
+      "cancelToastBody": "The restore plan was cancelled."
+    }
   }
 }

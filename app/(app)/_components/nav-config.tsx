@@ -92,13 +92,11 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     icon: DatabaseIcon,
     defaultExpanded: false,
     items: [
-      // Backups have no dedicated permission in security.php — gate behind a
-      // platform-admin-only proxy. `system.view-health` is the closest match.
       {
         labelKey: "databaseBackups",
         href: "/database/backups",
-        available: false,
-        permissions: ["system.view-health"],
+        available: true,
+        permissions: ["system.database.view"],
       },
     ],
   },

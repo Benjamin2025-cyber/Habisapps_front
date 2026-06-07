@@ -4132,5 +4132,168 @@
       "warning": "Avertissement",
       "error": "Erreur"
     }
+  },
+  "database": {
+    "title": "Sauvegarde & restauration de la base",
+    "description": "Créez, vérifiez et restaurez des sauvegardes de la base de données. Réservé aux administrateurs plateforme.",
+    "errorTitle": "Impossible de charger les données",
+    "storage": {
+      "title": "État du stockage",
+      "enabled": "Service actif",
+      "disabled": "Service désactivé",
+      "reachable": "Disque accessible",
+      "unreachable": "Disque inaccessible",
+      "disk": "Disque : {disk}",
+      "freeSpace": "Espace libre",
+      "backupCount": "Sauvegardes",
+      "totalSize": "Volume total",
+      "lastBackup": "Dernière sauvegarde",
+      "never": "Aucune",
+      "notPrivateWarning": "Le disque de sauvegarde n'est pas privé. Vérifiez la configuration : les artefacts ne doivent jamais être exposés publiquement.",
+      "maintenanceLockTitle": "Verrou de maintenance actif",
+      "maintenanceLockBody": "Une opération de maintenance est en cours ({reason}). Expiration : {expires}.",
+      "noReason": "raison non précisée",
+      "noExpiry": "sans échéance",
+      "retentionSummary": "Rétention : conservation {days} jours, {count} sauvegardes max, {protect} sauvegardes récentes protégées."
+    },
+    "backups": {
+      "tab": "Sauvegardes",
+      "createButton": "Créer une sauvegarde",
+      "empty": "Aucune sauvegarde pour le moment.",
+      "columns": {
+        "filename": "Fichier",
+        "status": "Statut",
+        "size": "Taille",
+        "createdAt": "Créée le",
+        "actions": "Actions"
+      },
+      "status": {
+        "pending": "En attente",
+        "running": "En cours",
+        "completed": "Terminée",
+        "verified": "Vérifiée",
+        "failed": "Échouée",
+        "deleted": "Supprimée"
+      },
+      "verification": {
+        "passed": "Vérification OK",
+        "failed": "Vérification échouée"
+      },
+      "actions": {
+        "download": "Télécharger",
+        "verify": "Vérifier",
+        "restore": "Restaurer",
+        "delete": "Supprimer"
+      },
+      "toast": {
+        "downloadErrorTitle": "Échec du téléchargement",
+        "verifyPassedTitle": "Sauvegarde vérifiée",
+        "verifyFailedTitle": "Vérification échouée",
+        "verifyErrorTitle": "Impossible de vérifier la sauvegarde",
+        "deletedTitle": "Sauvegarde supprimée",
+        "deleteErrorTitle": "Impossible de supprimer la sauvegarde"
+      },
+      "createDrawer": {
+        "title": "Créer une sauvegarde",
+        "description": "Lance une nouvelle sauvegarde complète de la base.",
+        "intro": "La sauvegarde est exécutée en arrière-plan. Elle apparaîtra dans la liste avec le statut « En cours », puis « Terminée ».",
+        "noteLabel": "Note (facultatif)",
+        "notePlaceholder": "Ex. Avant mise à jour v2.3",
+        "noteHint": "255 caractères maximum.",
+        "cancel": "Annuler",
+        "submit": "Lancer la sauvegarde",
+        "submitting": "Lancement…",
+        "toastTitle": "Sauvegarde demandée",
+        "toastBody": "La sauvegarde a été mise en file d'attente."
+      },
+      "deleteDialog": {
+        "title": "Supprimer cette sauvegarde ?",
+        "description": "L'artefact « {filename} » sera définitivement supprimé. Cette action est irréversible.",
+        "confirm": "Supprimer",
+        "deleting": "Suppression…"
+      }
+    },
+    "restores": {
+      "tab": "Restaurations",
+      "empty": "Aucune restauration enregistrée.",
+      "destructive": "Destructive",
+      "columns": {
+        "startedAt": "Date",
+        "target": "Cible",
+        "mode": "Mode",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "target": {
+        "same_database": "Base de production",
+        "staging_database": "Base de préproduction",
+        "external_database": "Base externe"
+      },
+      "mode": {
+        "dry_run": "Simulation",
+        "verify_only": "Vérification seule",
+        "replace": "Remplacement"
+      },
+      "status": {
+        "planned": "Planifiée",
+        "pending": "En attente",
+        "running": "En cours",
+        "completed": "Terminée",
+        "failed": "Échouée",
+        "cancelled": "Annulée"
+      },
+      "actions": {
+        "cancel": "Annuler"
+      },
+      "toast": {
+        "cancelledTitle": "Restauration annulée",
+        "cancelErrorTitle": "Impossible d'annuler la restauration"
+      }
+    },
+    "restoreDrawer": {
+      "title": "Restaurer depuis une sauvegarde",
+      "intro": "Configurez la restauration. Une simulation (« dry run ») est recommandée avant tout remplacement réel.",
+      "targetLabel": "Cible de restauration",
+      "modeLabel": "Mode",
+      "target": {
+        "same_database": "Base de production",
+        "staging_database": "Base de préproduction",
+        "external_database": "Base externe"
+      },
+      "mode": {
+        "dry_run": "Simulation (dry run)",
+        "verify_only": "Vérification seule",
+        "replace": "Remplacement (destructif)"
+      },
+      "modeHint": {
+        "dry_run": "Valide la restauration sans modifier la base.",
+        "verify_only": "Contrôle structurel uniquement, sans écriture.",
+        "replace": "Écrase les données existantes. Une sauvegarde préalable est créée automatiquement."
+      },
+      "phraseLabel": "Phrase de confirmation (si configurée)",
+      "phrasePlaceholder": "Laisser vide si non requis",
+      "phraseHint": "Requise uniquement si le back-office l'exige.",
+      "destructiveTitle": "Opération destructive",
+      "destructiveBody": "Le mode « Remplacement » écrase les données actuelles de la base cible. Cette action est irréversible.",
+      "cancel": "Annuler",
+      "planning": "Planification…",
+      "planButton": "Préparer la restauration",
+      "cancelPlan": "Annuler le plan",
+      "executing": "Exécution…",
+      "executeButton": "Exécuter la restauration",
+      "planReadyTitle": "Plan de restauration prêt",
+      "planDestructive": "Ce plan est destructif. Confirmez avec votre mot de passe pour l'exécuter.",
+      "planSafe": "Confirmez avec votre mot de passe pour exécuter ce plan.",
+      "summaryTarget": "Cible",
+      "summaryMode": "Mode",
+      "summaryExpires": "Expire le",
+      "noExecutePermission": "Vous pouvez préparer un plan mais pas l'exécuter. Un administrateur disposant du droit d'exécution doit finaliser l'opération.",
+      "stepUpIntro": "Pour des raisons de sécurité, saisissez à nouveau votre mot de passe.",
+      "passwordLabel": "Mot de passe",
+      "execToastTitle": "Restauration lancée",
+      "execToastBody": "La restauration a été acceptée et s'exécute en arrière-plan.",
+      "cancelToastTitle": "Plan annulé",
+      "cancelToastBody": "Le plan de restauration a été annulé."
+    }
   }
 }
