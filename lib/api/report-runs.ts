@@ -1,4 +1,5 @@
 import { apiRequest, notifyAuthExpired } from "./client";
+import { getRequestLocale } from "./locale";
 
 /**
  * P24 — Édition › Rapports (report-runs). Un rapport est CALCULÉ à la génération
@@ -69,6 +70,7 @@ export async function fetchReportRuns(
     headers: {
       Accept: "application/json",
       "X-API-Version": process.env.NEXT_PUBLIC_API_VERSION ?? "1",
+      "X-Locale": getRequestLocale(),
       Authorization: `Bearer ${token}`,
     },
     credentials: "omit",

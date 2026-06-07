@@ -1,4 +1,5 @@
 import { notifyAuthExpired } from "./client";
+import { getRequestLocale } from "./locale";
 
 /**
  * Report definitions (#28) — the catalogue of generatable reports. A report run
@@ -45,6 +46,7 @@ export async function fetchReportDefinitions(
     headers: {
       Accept: "application/json",
       "X-API-Version": process.env.NEXT_PUBLIC_API_VERSION ?? "1",
+      "X-Locale": getRequestLocale(),
       Authorization: `Bearer ${token}`,
     },
     credentials: "omit",

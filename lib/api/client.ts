@@ -1,3 +1,4 @@
+import { getRequestLocale } from "./locale";
 import type { ApiEnvelope, ApiErrorBag } from "./types";
 
 const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION ?? "1";
@@ -50,6 +51,12 @@ type RequestOptions = {
   query?: Record<string, string | number | boolean | undefined>;
   /** Abort signal for cancellation. */
   signal?: AbortSignal;
+  /**
+   * Locale to request from the API (sent as `X-Locale`). Defaults to the user's
+   * active locale read from the `habis.locale` cookie. Pass explicitly when the
+   * cookie is unavailable (e.g. server-side calls).
+   */
+  locale?: string;
 };
 
 function buildUrl(path: string, query?: RequestOptions["query"]): string {
@@ -108,6 +115,7 @@ export async function apiRequest<T>(
   const headers: Record<string, string> = {
     Accept: "application/json",
     "X-API-Version": API_VERSION,
+    "X-Locale": options.locale ?? getRequestLocale(),
   };
 
   if (options.body !== undefined) {

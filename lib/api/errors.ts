@@ -61,6 +61,49 @@ export function localizeValidationMessage(
   if (/does not exist/i.test(rawMessage) || /does not match/i.test(rawMessage)) {
     return `Le champ ${label} fait référence à une valeur inconnue.`;
   }
+
+  // --- French rule patterns -------------------------------------------------
+  // HabisApi now localizes validation rules itself (when we send `X-Locale: fr`)
+  // but renders the raw snake_case field name into `:attribute` because its
+  // `validation.attributes` map is empty. Re-detect the rule from the French
+  // sentence and re-render it with our clean, context-specific field label so
+  // forms never surface "Le champ phone number ...".
+  if (/est obligatoire/i.test(rawMessage)) {
+    return `Le champ ${label} est obligatoire.`;
+  }
+  if (/déjà utilisé/i.test(rawMessage)) {
+    return `Le champ ${label} est déjà utilisé.`;
+  }
+  const frMaxMatch = rawMessage.match(/ne doit pas dépasser\s+(\d+)\s+caractères/i);
+  if (frMaxMatch) {
+    return `Le champ ${label} ne doit pas dépasser ${frMaxMatch[1]} caractères.`;
+  }
+  const frMinMatch = rawMessage.match(/doit (?:faire|contenir) au moins\s+(\d+)\s+caractères/i);
+  if (frMinMatch) {
+    return `Le champ ${label} doit contenir au moins ${frMinMatch[1]} caractères.`;
+  }
+  if (/adresse e-?mail valide/i.test(rawMessage)) {
+    return `Le champ ${label} doit être un email valide.`;
+  }
+  if (/valeur sélectionnée pour .* est invalide/i.test(rawMessage) || /valeur sélectionnée.*invalide/i.test(rawMessage)) {
+    return `Le champ ${label} : la valeur sélectionnée est invalide.`;
+  }
+  if (/chaîne de caractères/i.test(rawMessage)) {
+    return `Le champ ${label} doit être du texte.`;
+  }
+  if (/une date valide/i.test(rawMessage)) {
+    return `Le champ ${label} doit être une date valide.`;
+  }
+  if (/doit être un nombre/i.test(rawMessage) || /doit être un entier/i.test(rawMessage)) {
+    return `Le champ ${label} doit être un nombre.`;
+  }
+  if (/vrai ou faux/i.test(rawMessage)) {
+    return `Le champ ${label} doit être vrai ou faux.`;
+  }
+  if (/le format du champ .* est invalide/i.test(rawMessage)) {
+    return `Le champ ${label} est invalide.`;
+  }
+
   // Laravel field-validation messages start with "The <field> ...". Anything
   // else is a domain/business message (e.g. a respondUnprocessable rule like
   // "Loan must define a positive number of installments.") — surface it

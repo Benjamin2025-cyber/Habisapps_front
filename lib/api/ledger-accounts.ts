@@ -1,4 +1,5 @@
 import { apiRequest, notifyAuthExpired } from "./client";
+import { getRequestLocale } from "./locale";
 
 /**
  * P16 — Comptabilité › Plan comptable (comptes généraux / ledger accounts).
@@ -129,6 +130,7 @@ export type LedgerAccountMovements = {
 const JSON_HEADERS = (token: string): Record<string, string> => ({
   Accept: "application/json",
   "X-API-Version": process.env.NEXT_PUBLIC_API_VERSION ?? "1",
+  "X-Locale": getRequestLocale(),
   Authorization: `Bearer ${token}`,
 });
 

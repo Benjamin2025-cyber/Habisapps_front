@@ -1,4 +1,5 @@
 import { apiRequest, notifyAuthExpired } from "./client";
+import { getRequestLocale } from "./locale";
 
 /**
  * Record lifecycle (soft-delete). A document is `active` on creation and
@@ -82,6 +83,7 @@ export async function fetchIdentityDocuments(
       headers: {
         Accept: "application/json",
         "X-API-Version": process.env.NEXT_PUBLIC_API_VERSION ?? "1",
+        "X-Locale": getRequestLocale(),
         Authorization: `Bearer ${token}`,
       },
       credentials: "omit",

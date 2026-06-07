@@ -1,4 +1,5 @@
 import { apiRequest, notifyAuthExpired } from "./client";
+import { getRequestLocale } from "./locale";
 
 /**
  * P20 — Caisse › Sessions de caisse (teller-sessions). Une session ouvre une
@@ -128,6 +129,7 @@ export async function fetchTellerSessions(
     headers: {
       Accept: "application/json",
       "X-API-Version": process.env.NEXT_PUBLIC_API_VERSION ?? "1",
+      "X-Locale": getRequestLocale(),
       Authorization: `Bearer ${token}`,
     },
     credentials: "omit",

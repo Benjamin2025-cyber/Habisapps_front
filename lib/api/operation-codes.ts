@@ -1,4 +1,5 @@
 import { apiRequest, notifyAuthExpired } from "./client";
+import { getRequestLocale } from "./locale";
 
 /**
  * P16b — Comptabilité › Codes opération. Référentiel des codes d'opération
@@ -89,6 +90,7 @@ export async function fetchOperationCodes(
     headers: {
       Accept: "application/json",
       "X-API-Version": process.env.NEXT_PUBLIC_API_VERSION ?? "1",
+      "X-Locale": getRequestLocale(),
       Authorization: `Bearer ${token}`,
     },
     credentials: "omit",

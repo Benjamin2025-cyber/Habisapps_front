@@ -1,4 +1,5 @@
 import { ApiError, notifyAuthExpired } from "./client";
+import { getRequestLocale } from "./locale";
 
 /**
  * Documents (Spatie media). Upload via multipart `POST /documents`; file
@@ -50,6 +51,7 @@ export async function uploadDocument(
       headers: {
         Accept: "application/json",
         "X-API-Version": process.env.NEXT_PUBLIC_API_VERSION ?? "1",
+        "X-Locale": getRequestLocale(),
         Authorization: `Bearer ${token}`,
       },
       body,
@@ -99,6 +101,7 @@ export async function fetchDocumentObjectUrl(
     headers: {
       Accept: "*/*",
       "X-API-Version": process.env.NEXT_PUBLIC_API_VERSION ?? "1",
+      "X-Locale": getRequestLocale(),
       Authorization: `Bearer ${token}`,
     },
     credentials: "omit",

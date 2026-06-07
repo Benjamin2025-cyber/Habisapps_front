@@ -1,4 +1,5 @@
 import { apiRequest, ApiError, notifyAuthExpired } from "./client";
+import { getRequestLocale } from "./locale";
 
 /**
  * Database management — backups, restores, storage health.
@@ -141,6 +142,7 @@ async function fetchListEnvelope<T>(
     headers: {
       Accept: "application/json",
       "X-API-Version": process.env.NEXT_PUBLIC_API_VERSION ?? "1",
+      "X-Locale": getRequestLocale(),
       Authorization: `Bearer ${token}`,
     },
     credentials: "omit",
@@ -280,6 +282,7 @@ export async function downloadDatabaseBackup(
       headers: {
         Accept: "*/*",
         "X-API-Version": process.env.NEXT_PUBLIC_API_VERSION ?? "1",
+        "X-Locale": getRequestLocale(),
         Authorization: `Bearer ${token}`,
       },
       credentials: "omit",

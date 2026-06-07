@@ -1,4 +1,5 @@
 import { ApiError, apiRequest, notifyAuthExpired } from "./client";
+import { getRequestLocale } from "./locale";
 
 /**
  * Lightweight count helper. Calls `GET /loans` with `per_page=1` and reads
@@ -71,6 +72,7 @@ async function countResource(
   const headers: Record<string, string> = {
     Accept: "application/json",
     "X-API-Version": process.env.NEXT_PUBLIC_API_VERSION ?? "1",
+    "X-Locale": getRequestLocale(),
     Authorization: `Bearer ${token}`,
   };
 
@@ -359,6 +361,7 @@ export async function fetchLoans(
     headers: {
       Accept: "application/json",
       "X-API-Version": process.env.NEXT_PUBLIC_API_VERSION ?? "1",
+      "X-Locale": getRequestLocale(),
       Authorization: `Bearer ${token}`,
     },
     credentials: "omit",
@@ -460,6 +463,7 @@ export async function updateLoanLinkedAccounts(
       Accept: "application/json",
       "Content-Type": "application/json",
       "X-API-Version": process.env.NEXT_PUBLIC_API_VERSION ?? "1",
+      "X-Locale": getRequestLocale(),
       Authorization: `Bearer ${token}`,
     },
     credentials: "omit",
