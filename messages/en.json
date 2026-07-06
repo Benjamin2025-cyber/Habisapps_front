@@ -3996,6 +3996,8 @@
       "startClosing": "Starting…",
       "close": "Close the day",
       "closing": "Closing…",
+      "cancelClose": "Cancel close",
+      "cancelClosing": "Cancelling…",
       "reopen": "Reopen"
     },
     "current": {
@@ -4007,6 +4009,7 @@
       "holiday": "Holiday",
       "closingTitle": "Closing in progress",
       "closingBody": "Close controls are running. Registration is blocked until the day is finalised. Finalise the close once the controls pass.",
+      "closingRecovery": "If the controls cannot pass, cancel the close: the day returns to open, registration is re-enabled, and you can restart the close once the blockers are fixed.",
       "openSessionsTitle": "{count} teller session(s) still open",
       "openSessionsBody": "Close every teller session before starting the day-close. Otherwise the day stays stuck in closing (sessions can no longer be closed once the close has started).",
       "openSessionsLink": "Go to teller sessions →",
@@ -4064,6 +4067,10 @@
       "title": "Close the day?",
       "body": "Closing finalises the accounting day. The system switches to consultation-only mode until the next day is opened. This can only succeed once every close control passes."
     },
+    "cancelClose": {
+      "title": "Cancel the close?",
+      "body": "The day returns to open and operation registration is allowed again. Use this to recover a day stuck in closing, fix the failing controls, then restart the close. This is not a final close."
+    },
     "toast": {
       "openedTitle": "Day opened",
       "openedBody": "The accounting day of {date} is open.",
@@ -4071,9 +4078,12 @@
       "reopenedBody": "The accounting day of {date} has been reopened.",
       "startClosedTitle": "Close started",
       "startClosedBody": "Close controls are running. Registration is now blocked.",
+      "startBlockedTitle": "Cannot start the close",
       "closedTitle": "Day closed",
       "closedBody": "The accounting day was closed successfully.",
       "closeBlockedTitle": "Close not possible",
+      "cancelClosedTitle": "Close cancelled",
+      "cancelClosedBody": "The day is open again and registration is re-enabled.",
       "errorTitle": "Action not possible"
     }
   },

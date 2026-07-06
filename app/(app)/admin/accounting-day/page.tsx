@@ -7,6 +7,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Select } from "@/components/ui/Select";
 import { fetchAgencies, type Agency } from "@/lib/api/agencies";
 import {
+  cancelCloseAccountingDay,
   closeAccountingDay,
   fetchAccountingDays,
   fetchCurrentAccountingDay,
@@ -19,6 +20,7 @@ import {
   type ReopenAccountingDayPayload,
 } from "@/lib/api/accounting-days";
 import { fetchTellerSessions } from "@/lib/api/teller-sessions";
+import { ApiError } from "@/lib/api/client";
 import { localizeApiError, localizeApiMessage } from "@/lib/api/errors";
 import { useCanAny, useHasRole } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
@@ -37,7 +39,9 @@ import { ReopenDayDrawer } from "./_components/ReopenDayDrawer";
  * Drives the EMF accounting-day lifecycle (open → start-close → close →
  * reopen). While a day is open the institution can register operations; once
  * closed the whole system drops to consultation-only mode (the backend's
- * registration lock). Permissions `accounting.days.*`.
+ * registration lock). A day stuck in `closing` (failing close controls) can be
+ * rolled back to open via cancel-close, a recovery action distinct from the
+ * final close. Permissions `accounting.days.*`.
  */
 export default function AccountingDayPage() {
   const t = useTranslations();
@@ -64,6 +68,7 @@ export default function AccountingDayPage() {
   const [reopenDrawer, setReopenDrawer] = useState(false);
   const [startCloseConfirm, setStartCloseConfirm] = useState(false);
   const [closeConfirm, setCloseConfirm] = useState(false);
+  const [cancelCloseConfirm, setCancelCloseConfirm] = useState(false);
   const [busyAction, setBusyAction] = useState<DayAction | "open" | null>(null);
   const [agencies, setAgencies] = useState<Agency[]>([]);
   // Platform admins aren't tied to one agency, so they pick the scope to view:
@@ -227,13 +232,55 @@ export default function AccountingDayPage() {
       );
       refetchAll();
     } catch (cause) {
+      // A blocked preflight (422 accounting_day_start_close_blocked) carries an
+      // `errors.blockers` list and a localized `message`. Show the message plus
+      // the blockers rather than the generic error (localizeApiError mangles the
+      // {code, blockers} bag), so the admin sees exactly what to clear first.
+      const blocked =
+        cause instanceof ApiError &&
+        cause.status === 422 &&
+        codeOf(cause) === "accounting_day_start_close_blocked";
+      if (blocked) {
+        const blockers = extractStartCloseBlockers(cause as ApiError);
+        toast.error(
+          t("accountingDay.toast.startBlockedTitle"),
+          blockers.length > 0
+            ? `${(cause as ApiError).message} — ${blockers.join(" · ")}`
+            : (cause as ApiError).message,
+        );
+      } else {
+        toast.error(
+          t("accountingDay.toast.errorTitle"),
+          localizeApiError(cause).generalMessage,
+        );
+      }
+      // Refresh so the card reflects the (unchanged, still-open) state.
+      refetchAll();
+    } finally {
+      setBusyAction(null);
+      setStartCloseConfirm(false);
+    }
+  }
+
+  async function handleCancelClose() {
+    if (!token || !currentDay) return;
+    setBusyAction("cancel-close");
+    try {
+      await cancelCloseAccountingDay(token, currentDay.public_id);
+      toast.success(
+        t("accountingDay.toast.cancelClosedTitle"),
+        t("accountingDay.toast.cancelClosedBody"),
+      );
+      refetchAll();
+    } catch (cause) {
       toast.error(
         t("accountingDay.toast.errorTitle"),
         localizeApiError(cause).generalMessage,
       );
+      refetchAll();
     } finally {
       setBusyAction(null);
-      setStartCloseConfirm(false);
+      setCancelCloseConfirm(false);
     }
   }
 
@@ -319,6 +366,7 @@ export default function AccountingDayPage() {
           onOpen={() => setOpenDrawer(true)}
           onStartClose={() => setStartCloseConfirm(true)}
           onClose={() => setCloseConfirm(true)}
+          onCancelClose={() => setCancelCloseConfirm(true)}
           onReopen={() => setReopenDrawer(true)}
         />
       )}
@@ -406,6 +454,55 @@ export default function AccountingDayPage() {
         onConfirm={handleClose}
         onClose={() => (busyAction ? undefined : setCloseConfirm(false))}
       />
+
+      <ConfirmDialog
+        open={cancelCloseConfirm}
+        title={t("accountingDay.cancelClose.title")}
+        description={t("accountingDay.cancelClose.body")}
+        confirmLabel={t("accountingDay.actions.cancelClose")}
+        cancelLabel={t("common.cancel")}
+        tone="primary"
+        loading={busyAction === "cancel-close"}
+        busyLabel={t("accountingDay.actions.cancelClosing")}
+        onConfirm={handleCancelClose}
+        onClose={() => (busyAction ? undefined : setCancelCloseConfirm(false))}
+      />
     </>
   );
+}
+
+/** Read the machine `code` from a 422 domain error's `errors` bag, if present. */
+function codeOf(error: ApiError): string | null {
+  const errors = error.errors as Record<string, unknown> | null;
+  const code = errors?.code;
+  return typeof code === "string" ? code : null;
+}
+
+/**
+ * Extract human-readable blocker labels from a start-close 422's
+ * `errors.blockers` list. Entries are backend-shaped `{ control, message?,
+ * count? }`; prefer the message, fall back to the control key, and append the
+ * count when the backend provides one.
+ */
+function extractStartCloseBlockers(error: ApiError): string[] {
+  const errors = error.errors as Record<string, unknown> | null;
+  const raw = errors?.blockers;
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((entry) => {
+      if (typeof entry === "string") return entry;
+      if (!entry || typeof entry !== "object") return null;
+      const record = entry as Record<string, unknown>;
+      const label =
+        typeof record.message === "string"
+          ? record.message
+          : typeof record.control === "string"
+            ? record.control
+            : null;
+      if (label === null) return null;
+      return typeof record.count === "number"
+        ? `${label} (${record.count})`
+        : label;
+    })
+    .filter((value): value is string => value !== null);
 }

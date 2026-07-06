@@ -11,7 +11,9 @@ import { getRequestLocale } from "./locale";
  *
  * Lifecycle: planned → open → closing → closed → (reopened). The close runs
  * batch controls; if they fail the day stays `closing` with a
- * `close_failure_reason` and a `close_summary` of blockers.
+ * `close_failure_reason` and a `close_summary` of blockers. `closing` is NOT a
+ * dead end: `cancel-close` rolls it back to open (or reopened) so the blockers
+ * can be cleared and the close retried, without database intervention.
  *
  * Permissions: `accounting.days.view` / `.open` / `.close` / `.reopen`. Scope is
  * agency by default; institution-wide days are platform-admin only.
@@ -181,12 +183,36 @@ export async function openAccountingDay(
  * Begin closing the day: transitions open → closing and runs the close-control
  * batches. The returned day carries `close_summary`; registrations are blocked
  * from this point on.
+ *
+ * Preflight: the backend now validates every close control BEFORE entering
+ * `closing`. A blocked preflight throws `ApiError` 422 with
+ * `code: accounting_day_start_close_blocked` and an `errors.blockers` array
+ * (entries shaped `{ control, message?, count? }`); the day stays open in that
+ * case. Callers should surface the blockers rather than a generic failure.
  */
 export async function startCloseAccountingDay(
   token: string,
   publicId: string,
 ): Promise<AccountingDay> {
   return apiRequest<AccountingDay>(`accounting-days/${publicId}/start-close`, {
+    method: "POST",
+    token,
+  });
+}
+
+/**
+ * Escape hatch out of `closing`: transitions the day back to open (or reopened
+ * when it had previously been reopened), clears `close_failure_reason`, and
+ * re-enables registration. This is a recovery action for a day whose close
+ * controls cannot pass — it is NOT a substitute for the final close. Uses the
+ * `accounting.days.close` permission. Throws `ApiError` 422
+ * (`accounting_day_invalid_transition`) if the day is not currently `closing`.
+ */
+export async function cancelCloseAccountingDay(
+  token: string,
+  publicId: string,
+): Promise<AccountingDay> {
+  return apiRequest<AccountingDay>(`accounting-days/${publicId}/cancel-close`, {
     method: "POST",
     token,
   });

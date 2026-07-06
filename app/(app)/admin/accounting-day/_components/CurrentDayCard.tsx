@@ -11,7 +11,7 @@ import {
   accountingDayStatusKey,
 } from "./status";
 
-export type DayAction = "start-close" | "close" | "reopen";
+export type DayAction = "start-close" | "close" | "cancel-close" | "reopen";
 
 type Props = {
   day: AccountingDay | null;
@@ -26,6 +26,7 @@ type Props = {
   onOpen: () => void;
   onStartClose: () => void;
   onClose: () => void;
+  onCancelClose: () => void;
   onReopen: () => void;
 };
 
@@ -45,6 +46,7 @@ export function CurrentDayCard({
   onOpen,
   onStartClose,
   onClose,
+  onCancelClose,
   onReopen,
 }: Props) {
   const t = useTranslations();
@@ -142,6 +144,19 @@ export function CurrentDayCard({
 
           {isClosing && canClose ? (
             <Button
+              variant="outline"
+              size="md"
+              onClick={onCancelClose}
+              disabled={busyAction !== null}
+            >
+              {busyAction === "cancel-close"
+                ? t("accountingDay.actions.cancelClosing")
+                : t("accountingDay.actions.cancelClose")}
+            </Button>
+          ) : null}
+
+          {isClosing && canClose ? (
+            <Button
               variant="primary"
               size="md"
               onClick={onClose}
@@ -213,6 +228,11 @@ export function CurrentDayCard({
           <p className="mt-1 text-foreground/80">
             {t("accountingDay.current.closingBody")}
           </p>
+          {canClose ? (
+            <p className="mt-1 text-foreground/80">
+              {t("accountingDay.current.closingRecovery")}
+            </p>
+          ) : null}
           {day.close_failure_reason ? (
             <p className="mt-2 text-foreground/80">{day.close_failure_reason}</p>
           ) : null}

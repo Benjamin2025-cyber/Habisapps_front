@@ -3996,6 +3996,8 @@
       "startClosing": "Démarrage…",
       "close": "Clôturer la journée",
       "closing": "Clôture…",
+      "cancelClose": "Annuler la clôture",
+      "cancelClosing": "Annulation…",
       "reopen": "Rouvrir"
     },
     "current": {
@@ -4007,6 +4009,7 @@
       "holiday": "Jour férié",
       "closingTitle": "Clôture en cours",
       "closingBody": "Les contrôles de clôture s'exécutent. Les enregistrements sont bloqués jusqu'à la finalisation. Finalisez la clôture une fois les contrôles réussis.",
+      "closingRecovery": "Si les contrôles ne peuvent pas aboutir, annulez la clôture : la journée revient à l'état ouvert, les enregistrements sont réactivés et vous pourrez relancer la clôture après correction.",
       "openSessionsTitle": "{count} session(s) de caisse encore ouverte(s)",
       "openSessionsBody": "Fermez toutes les sessions de caisse avant de démarrer la clôture. Sinon la journée reste bloquée en clôture (les sessions ne peuvent plus être fermées une fois la clôture lancée).",
       "openSessionsLink": "Aller aux sessions de caisse →",
@@ -4064,6 +4067,10 @@
       "title": "Clôturer la journée ?",
       "body": "La clôture finalise la journée comptable. Le système passe en consultation seule jusqu'à l'ouverture de la journée suivante. Cette action ne peut aboutir que si tous les contrôles de clôture sont réussis."
     },
+    "cancelClose": {
+      "title": "Annuler la clôture ?",
+      "body": "La journée revient à l'état ouvert et les enregistrements d'opérations sont de nouveau autorisés. Utilisez cette action pour débloquer une journée coincée en clôture, corriger les contrôles en échec, puis relancer la clôture. Il ne s'agit pas d'une clôture définitive."
+    },
     "toast": {
       "openedTitle": "Journée ouverte",
       "openedBody": "La journée comptable du {date} est ouverte.",
@@ -4071,9 +4078,12 @@
       "reopenedBody": "La journée comptable du {date} a été rouverte.",
       "startClosedTitle": "Clôture démarrée",
       "startClosedBody": "Les contrôles de clôture s'exécutent. Les enregistrements sont désormais bloqués.",
+      "startBlockedTitle": "Impossible de démarrer la clôture",
       "closedTitle": "Journée clôturée",
       "closedBody": "La journée comptable a été clôturée avec succès.",
       "closeBlockedTitle": "Clôture impossible",
+      "cancelClosedTitle": "Clôture annulée",
+      "cancelClosedBody": "La journée est de nouveau ouverte et les enregistrements sont réactivés.",
       "errorTitle": "Action impossible"
     }
   },
