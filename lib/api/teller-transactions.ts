@@ -17,7 +17,16 @@ import { getRequestLocale } from "./locale";
  *  - CREATE / reverse renvoient la transaction directement sous `data`.
  */
 export type TellerTransactionType = "deposit" | "withdrawal" | string;
-export type TellerTransactionStatus = "posted" | "reversed" | string;
+/**
+ * `pending_review` is produced by teller manual journals and blocks both the
+ * session reconciliation and the accounting-day close until posted or cancelled.
+ */
+export type TellerTransactionStatus =
+  | "posted"
+  | "pending_review"
+  | "cancelled"
+  | "reversed"
+  | string;
 
 export type InitiatorType = "holder" | "proxy" | "staff_on_behalf" | "system";
 

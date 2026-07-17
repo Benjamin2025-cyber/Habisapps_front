@@ -3161,6 +3161,19 @@
       "confirm": "Close",
       "openingLabel": "Opening fund"
     },
+    "closeGuard": {
+      "checking": "Checking close controls…",
+      "title": "Cannot close",
+      "intro": "This session cannot be closed as it stands. These items would block the accounting day close, and they can no longer be fixed once the day enters closing.",
+      "pendingTitle": "Transactions pending review.",
+      "pendingBody": "{count} transaction(s) must be posted or cancelled before closing.",
+      "pendingAction": "View transactions",
+      "reconciliationTitle": "Missing cash-up.",
+      "reconciliationBody": "No balanced reconciliation (zero difference) has been recorded for this session. Count the cash and record the cash-up before closing.",
+      "reconciliationAction": "Record the cash-up",
+      "unavailableTitle": "Controls not verified",
+      "unavailableBody": "Could not verify the close controls. You may close, but the accounting day may be blocked afterwards."
+    },
     "toast": {
       "openedTitle": "Session opened",
       "openedBody": "Session opened on {till}.",

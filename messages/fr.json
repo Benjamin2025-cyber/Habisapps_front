@@ -3161,6 +3161,19 @@
       "confirm": "Clôturer",
       "openingLabel": "Fonds d'ouverture"
     },
+    "closeGuard": {
+      "checking": "Vérification des contrôles de clôture…",
+      "title": "Clôture impossible",
+      "intro": "Cette session ne peut pas être clôturée en l'état. Ces points bloqueraient ensuite la clôture de la journée comptable, et ils ne pourront plus être corrigés une fois la journée en clôture.",
+      "pendingTitle": "Transactions en attente de revue.",
+      "pendingBody": "{count} transaction(s) doivent être comptabilisées ou annulées avant la clôture.",
+      "pendingAction": "Voir les transactions",
+      "reconciliationTitle": "Arrêté de caisse manquant.",
+      "reconciliationBody": "Aucun arrêté équilibré (écart nul) n'a été enregistré pour cette session. Comptez les espèces et enregistrez l'arrêté avant de clôturer.",
+      "reconciliationAction": "Enregistrer l'arrêté",
+      "unavailableTitle": "Contrôles non vérifiés",
+      "unavailableBody": "Impossible de vérifier les contrôles de clôture. Vous pouvez clôturer, mais la journée comptable risque d'être bloquée ensuite."
+    },
     "toast": {
       "openedTitle": "Session ouverte",
       "openedBody": "Session ouverte sur {till}.",

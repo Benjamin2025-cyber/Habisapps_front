@@ -62,6 +62,14 @@ export default function CashInspectionPage() {
   const [tills, setTills] = useState<Till[]>([]);
   const [tellers, setTellers] = useState<StaffUser[]>([]);
   const [sessionId, setSessionId] = useState("");
+
+  // Deep link from the close-session guard: `?session=<public_id>` preselects the
+  // session so "Enregistrer l'arrêté" lands on the right one. Read in an effect
+  // rather than via `useSearchParams` so the page needs no Suspense boundary.
+  useEffect(() => {
+    const preset = new URLSearchParams(window.location.search).get("session");
+    if (preset) setSessionId(preset);
+  }, []);
   const [recons, setRecons] = useState<TillReconciliation[]>([]);
   const [loadingRecons, setLoadingRecons] = useState(false);
   const [error, setError] = useState<string | null>(null);
