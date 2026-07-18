@@ -1764,6 +1764,13 @@
         "releasedTitle": "Guarantor released",
         "releasedBody": "The guarantor obligation has been released.",
         "errorTitle": "Action failed"
+      },
+      "release": {
+        "title": "Release this guarantee obligation",
+        "description": "The release is final and can only happen after the loan is closed. Add the reason that will appear on the release certificate.",
+        "reasonLabel": "Release reason",
+        "reasonPlaceholder": "e.g. Loan fully settled",
+        "reasonHint": "Optional — defaults to the obligation's release condition."
       }
     },
     "collateral": {
@@ -1810,6 +1817,13 @@
         "releasedTitle": "Collateral released",
         "releasedBody": "The collateral has been released.",
         "errorTitle": "Action failed"
+      },
+      "release": {
+        "title": "Release this collateral",
+        "description": "The release is final and can only happen after the loan is closed. Add the reason that will appear on the release certificate.",
+        "reasonLabel": "Release reason",
+        "reasonPlaceholder": "e.g. Loan fully settled",
+        "reasonHint": "Optional — defaults to “Loan settled” on the certificate."
       }
     },
     "item": {
@@ -3120,6 +3134,7 @@
       "teller": "Teller",
       "businessDate": "Date",
       "opening": "Opening fund",
+      "currentBalance": "Theoretical balance",
       "closing": "Closing fund",
       "status": "Status",
       "actions": "Actions"
@@ -3334,6 +3349,7 @@
       "businessDate": "Date",
       "status": "Status",
       "opening": "Opening fund",
+      "currentBalance": "Current theoretical balance",
       "closing": "Closing fund",
       "openedAt": "Opened on",
       "closedAt": "Closed on"
@@ -3396,6 +3412,7 @@
       "till": "Till",
       "teller": "Teller",
       "opening": "Opening fund",
+      "currentBalance": "Theoretical balance",
       "closing": "Closing fund",
       "status": "Status"
     },
@@ -3533,6 +3550,74 @@
       "balance": {
         "title": "Trial balance",
         "description": "Trial balance, general ledger and EMF/COBAC balance."
+      }
+    },
+    "release": {
+      "unavailableBody": "The “Guarantee release” definition is not active on this instance yet. Ask an administrator to enable it.",
+      "generateTitle": "Generate a guarantee-release certificate",
+      "generateHint": "Pick the agency, the closed loan, then the already-released guarantee to certify.",
+      "agency": "Agency",
+      "agencyPlaceholder": "Choose an agency",
+      "loanSearch": "Search a loan",
+      "loanSearchPlaceholder": "Loan no., client…",
+      "loan": "Closed loan",
+      "loanPickAgency": "Choose an agency first",
+      "loanPlaceholder": "Choose a closed loan",
+      "loanLoading": "Loading loans…",
+      "loanEmpty": "No closed loan in this agency",
+      "item": "Released guarantee",
+      "itemPlaceholder": "Choose a released guarantee",
+      "itemLoading": "Loading guarantees…",
+      "itemEmptyTitle": "No released guarantee",
+      "itemEmpty": "This loan has no released guarantee to certify. Release a collateral or a guarantee obligation from the loan record first.",
+      "itemCollateral": "Collateral",
+      "itemObligation": "Guarantee obligation",
+      "generate": "Generate the certificate",
+      "generating": "Generating…",
+      "errorTitle": "Cannot generate",
+      "successTitle": "Certificate generated",
+      "successBody": "The guarantee-release certificate has been generated.",
+      "historyTitle": "Generated certificates",
+      "historyCount": "{count} certificate(s)",
+      "historyEmpty": "No guarantee-release certificate generated yet.",
+      "columns": {
+        "loan": "Loan",
+        "client": "Client",
+        "item": "Guarantee",
+        "generatedAt": "Generated at",
+        "actions": "Actions"
+      },
+      "fields": {
+        "agency": "Agency",
+        "client": "Client",
+        "loanNumber": "Loan no.",
+        "itemType": "Guarantee type",
+        "itemDescription": "Designation",
+        "category": "Category",
+        "owner": "Owner",
+        "guarantor": "Guarantor",
+        "releaseDate": "Release date",
+        "reason": "Reason",
+        "amount": "Amount",
+        "releasedBy": "Released by"
+      },
+      "itemColumns": {
+        "description": "Designation",
+        "quantity": "Quantity",
+        "reference": "Reference",
+        "amount": "Amount"
+      },
+      "reasons": {
+        "loan_closed": "Loan settled"
+      },
+      "preview": {
+        "title": "Release certificate",
+        "print": "Print / PDF",
+        "heading": "Guarantee release certificate",
+        "fileName": "release-certificate",
+        "released": "Released guarantee",
+        "itemsTitle": "Asset details",
+        "noItems": "No detailed asset"
       }
     }
   },

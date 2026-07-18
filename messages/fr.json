@@ -1764,6 +1764,13 @@
         "releasedTitle": "Garant libéré",
         "releasedBody": "L'engagement de garant a été libéré.",
         "errorTitle": "Action impossible"
+      },
+      "release": {
+        "title": "Libérer cet engagement de caution",
+        "description": "La mainlevée est définitive et ne peut intervenir qu'après clôture du prêt. Précisez le motif qui figurera sur l'attestation de mainlevée.",
+        "reasonLabel": "Motif de la mainlevée",
+        "reasonPlaceholder": "Ex. Prêt intégralement soldé",
+        "reasonHint": "Facultatif — à défaut, la condition de libération de l'engagement sera indiquée."
       }
     },
     "collateral": {
@@ -1810,6 +1817,13 @@
         "releasedTitle": "Garantie libérée",
         "releasedBody": "La garantie a été libérée.",
         "errorTitle": "Action impossible"
+      },
+      "release": {
+        "title": "Libérer cet objet en garantie",
+        "description": "La mainlevée est définitive et ne peut intervenir qu'après clôture du prêt. Précisez le motif qui figurera sur l'attestation de mainlevée.",
+        "reasonLabel": "Motif de la mainlevée",
+        "reasonPlaceholder": "Ex. Prêt intégralement soldé",
+        "reasonHint": "Facultatif — à défaut, « Prêt soldé » sera indiqué sur l'attestation."
       }
     },
     "item": {
@@ -3120,6 +3134,7 @@
       "teller": "Caissier",
       "businessDate": "Date",
       "opening": "Fonds d'ouverture",
+      "currentBalance": "Solde théorique",
       "closing": "Fonds de clôture",
       "status": "Statut",
       "actions": "Actions"
@@ -3334,6 +3349,7 @@
       "businessDate": "Date",
       "status": "Statut",
       "opening": "Fonds d'ouverture",
+      "currentBalance": "Solde théorique actuel",
       "closing": "Fonds de clôture",
       "openedAt": "Ouverte le",
       "closedAt": "Clôturée le"
@@ -3396,6 +3412,7 @@
       "till": "Caisse",
       "teller": "Caissier",
       "opening": "Fonds d'ouverture",
+      "currentBalance": "Solde théorique",
       "closing": "Fonds de clôture",
       "status": "Statut"
     },
@@ -3533,6 +3550,74 @@
       "balance": {
         "title": "Balance des comptes",
         "description": "Balance, grand livre et balance EMF/COBAC."
+      }
+    },
+    "release": {
+      "unavailableBody": "La définition « Mainlevée de garantie » n'est pas encore active sur cette instance. Contactez un administrateur pour l'activer.",
+      "generateTitle": "Générer une attestation de mainlevée",
+      "generateHint": "Choisissez l'agence, le prêt clôturé, puis la garantie déjà libérée à attester.",
+      "agency": "Agence",
+      "agencyPlaceholder": "Choisir une agence",
+      "loanSearch": "Rechercher un prêt",
+      "loanSearchPlaceholder": "N° de prêt, client…",
+      "loan": "Prêt clôturé",
+      "loanPickAgency": "Choisissez d'abord une agence",
+      "loanPlaceholder": "Choisir un prêt clôturé",
+      "loanLoading": "Chargement des prêts…",
+      "loanEmpty": "Aucun prêt clôturé dans cette agence",
+      "item": "Garantie libérée",
+      "itemPlaceholder": "Choisir une garantie libérée",
+      "itemLoading": "Chargement des garanties…",
+      "itemEmptyTitle": "Aucune garantie libérée",
+      "itemEmpty": "Ce prêt n'a aucune garantie libérée à attester. Libérez d'abord un objet en garantie ou un engagement de caution depuis la fiche du prêt.",
+      "itemCollateral": "Objet en garantie",
+      "itemObligation": "Engagement de caution",
+      "generate": "Générer l'attestation",
+      "generating": "Génération…",
+      "errorTitle": "Génération impossible",
+      "successTitle": "Attestation générée",
+      "successBody": "L'attestation de mainlevée a été générée.",
+      "historyTitle": "Attestations générées",
+      "historyCount": "{count} attestation(s)",
+      "historyEmpty": "Aucune attestation de mainlevée générée pour l'instant.",
+      "columns": {
+        "loan": "Prêt",
+        "client": "Client",
+        "item": "Garantie",
+        "generatedAt": "Généré le",
+        "actions": "Actions"
+      },
+      "fields": {
+        "agency": "Agence",
+        "client": "Client",
+        "loanNumber": "N° de prêt",
+        "itemType": "Type de garantie",
+        "itemDescription": "Désignation",
+        "category": "Catégorie",
+        "owner": "Propriétaire",
+        "guarantor": "Garant",
+        "releaseDate": "Date de mainlevée",
+        "reason": "Motif",
+        "amount": "Montant",
+        "releasedBy": "Libéré par"
+      },
+      "itemColumns": {
+        "description": "Désignation",
+        "quantity": "Quantité",
+        "reference": "Référence",
+        "amount": "Montant"
+      },
+      "reasons": {
+        "loan_closed": "Prêt soldé"
+      },
+      "preview": {
+        "title": "Attestation de mainlevée",
+        "print": "Imprimer / PDF",
+        "heading": "Attestation de mainlevée de garantie",
+        "fileName": "attestation-mainlevee",
+        "released": "Garantie libérée",
+        "itemsTitle": "Détail des biens",
+        "noItems": "Aucun bien détaillé"
       }
     }
   },

@@ -64,12 +64,14 @@ export function DashboardKpiStrip({ data, clientsCount }: Props) {
       <KpiCard
         tone="info"
         icon={<BanknoteIcon className="h-5 w-5" />}
-        label={
-          activeLoansCount === null
-            ? t("dashboard.kpi.activeLoans.title")
-            : t("dashboard.kpi.activeLoans.count", { count: activeLoansCount })
+        // Count of active loans — NOT the principal balance (that's "Solde
+        // Principal"). `active_loan_count` is the API's dedicated counter.
+        label={t("dashboard.kpi.activeLoans.title")}
+        value={
+          data && activeLoansCount !== null
+            ? format.number(activeLoansCount)
+            : "—"
         }
-        value={data ? format.currencyMinor(balance) : "—"}
         loading={data === null}
       />
       <KpiCard

@@ -84,6 +84,27 @@ export function SessionsTable({
         },
       },
       {
+        // Live theoretical cash balance (opening funds ± posted cash movements),
+        // from the server-computed `summary.expected_cash_balance_minor` — the
+        // same figure the arrêté reconciles against. Distinct from the fixed
+        // opening declaration on its left.
+        id: "currentBalance",
+        header: t("sessions.columns.currentBalance"),
+        meta: { align: "right" },
+        cell: ({ row }) => {
+          const v = row.original.summary?.expected_cash_balance_minor;
+          return (
+            <span className="font-semibold tabular-nums text-foreground">
+              {v !== null && v !== undefined
+                ? format.currencyMinor(v, {
+                    currency: row.original.currency ?? "XAF",
+                  })
+                : "—"}
+            </span>
+          );
+        },
+      },
+      {
         id: "closing",
         header: t("sessions.columns.closing"),
         meta: { align: "right" },

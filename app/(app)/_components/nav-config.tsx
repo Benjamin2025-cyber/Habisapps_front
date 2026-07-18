@@ -317,9 +317,10 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
       {
         labelKey: "reportsRelease",
         href: "/reports/release",
-        // Locked: no "main levée" report type is exposed by the API and the
-        // product owner hasn't finalised the spec. Re-enable once both land.
-        available: false,
+        // Unlocked: the `credit_guarantee_release` report type is now exposed by
+        // the API (bad1987/habis-finance-api#1) and the page generates the
+        // mainlevée attestation.
+        available: true,
         permissions: ["accounting.audit.view"],
       },
       {

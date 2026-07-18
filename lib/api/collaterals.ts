@@ -134,15 +134,21 @@ export async function updateCollateral(
   );
 }
 
-/** Release a collateral. Requires the loan to be closed (else 422). */
+/**
+ * Release a collateral. Requires the loan to be closed (else 422). An optional
+ * `reason` (max 1000 chars) is recorded and surfaces as the motif on the
+ * mainlevée attestation — otherwise it falls back to `loan_closed`.
+ */
 export async function releaseCollateral(
   token: string,
   loanPublicId: string,
   collateralPublicId: string,
+  reason?: string | null,
 ): Promise<Collateral> {
+  const body = reason && reason.trim() ? { reason: reason.trim() } : {};
   return apiRequest<Collateral>(
     `loans/${loanPublicId}/collaterals/${collateralPublicId}/release`,
-    { method: "POST", token, body: {} },
+    { method: "POST", token, body },
   );
 }
 

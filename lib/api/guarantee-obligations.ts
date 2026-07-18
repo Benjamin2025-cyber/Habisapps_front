@@ -120,15 +120,22 @@ export async function updateGuaranteeObligation(
   );
 }
 
-/** Release an obligation. Requires the loan to be closed (else 422). */
+/**
+ * Release an obligation. Requires the loan to be closed (else 422). An optional
+ * `reason` (max 1000 chars) is recorded and surfaces as the motif on the
+ * mainlevée attestation — otherwise it falls back to the obligation's
+ * `release_condition` and finally `loan_closed`.
+ */
 export async function releaseGuaranteeObligation(
   token: string,
   loanPublicId: string,
   obligationPublicId: string,
+  reason?: string | null,
 ): Promise<GuaranteeObligation> {
+  const body = reason && reason.trim() ? { reason: reason.trim() } : {};
   return apiRequest<GuaranteeObligation>(
     `loans/${loanPublicId}/guarantee-obligations/${obligationPublicId}/release`,
-    { method: "POST", token, body: {} },
+    { method: "POST", token, body },
   );
 }
 

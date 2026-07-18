@@ -219,6 +219,7 @@ export default function CashInspectionPage() {
         { label: t("cashInspection.fields.teller"), value: tellerNameOf(selected.teller_user_public_id) },
         { label: t("cashInspection.fields.status"), value: selected.status },
         { label: t("cashInspection.fields.opening"), value: money(selected.opening_declaration_minor) },
+        { label: t("cashInspection.fields.currentBalance"), value: money(selected.summary?.expected_cash_balance_minor) },
         { label: t("cashInspection.fields.closing"), value: money(selected.closing_declaration_minor) },
       ],
       columns: [
@@ -394,6 +395,11 @@ export default function CashInspectionPage() {
               </Badge>
             </div>
             <Field label={t("cashInspection.fields.opening")} value={money(selected.opening_declaration_minor)} strong />
+            <Field
+              label={t("cashInspection.fields.currentBalance")}
+              value={money(selected.summary?.expected_cash_balance_minor)}
+              strong
+            />
             <Field label={t("cashInspection.fields.closing")} value={money(selected.closing_declaration_minor)} strong />
             <Field label={t("cashInspection.fields.openedAt")} value={selected.opened_at ? selected.opened_at.slice(0, 16).replace("T", " ") : "—"} />
             <Field label={t("cashInspection.fields.closedAt")} value={selected.closed_at ? selected.closed_at.slice(0, 16).replace("T", " ") : "—"} />

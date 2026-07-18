@@ -100,6 +100,7 @@ export default function CashDraftPage() {
         t("cashDraft.columns.till"),
         t("cashDraft.columns.teller"),
         t("cashDraft.columns.opening"),
+        t("cashDraft.columns.currentBalance"),
         t("cashDraft.columns.closing"),
         t("cashDraft.columns.status"),
       ],
@@ -108,10 +109,11 @@ export default function CashDraftPage() {
         tillLabelOf(s.till_public_id),
         tellerNameOf(s.teller_user_public_id),
         money(s.opening_declaration_minor, s.currency ?? "XAF"),
+        money(s.summary?.expected_cash_balance_minor, s.currency ?? "XAF"),
         money(s.closing_declaration_minor, s.currency ?? "XAF"),
         s.status,
       ]),
-      numericColumns: [3, 4],
+      numericColumns: [3, 4, 5],
       generatedLabel: t("common.generatedOn"),
       emptyLabel: t("cashDraft.empty"),
     });
@@ -149,13 +151,14 @@ export default function CashDraftPage() {
               <th className="px-4 py-2 font-semibold">{t("cashDraft.columns.till")}</th>
               <th className="px-4 py-2 font-semibold">{t("cashDraft.columns.teller")}</th>
               <th className="px-4 py-2 text-right font-semibold">{t("cashDraft.columns.opening")}</th>
+              <th className="px-4 py-2 text-right font-semibold">{t("cashDraft.columns.currentBalance")}</th>
               <th className="px-4 py-2 text-right font-semibold">{t("cashDraft.columns.closing")}</th>
               <th className="px-4 py-2 font-semibold">{t("cashDraft.columns.status")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {rows.length === 0 ? (
-              <tr><td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">{t("cashDraft.empty")}</td></tr>
+              <tr><td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">{t("cashDraft.empty")}</td></tr>
             ) : (
               rows.map((s) => (
                 <tr key={s.public_id}>
@@ -163,6 +166,7 @@ export default function CashDraftPage() {
                   <td className="px-4 py-2.5 text-foreground">{tillLabelOf(s.till_public_id)}</td>
                   <td className="px-4 py-2.5 text-muted-foreground">{tellerNameOf(s.teller_user_public_id)}</td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{money(s.opening_declaration_minor, s.currency ?? "XAF")}</td>
+                  <td className="px-4 py-2.5 text-right font-semibold tabular-nums text-foreground">{money(s.summary?.expected_cash_balance_minor, s.currency ?? "XAF")}</td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{money(s.closing_declaration_minor, s.currency ?? "XAF")}</td>
                   <td className="px-4 py-2.5">
                     <Badge tone={s.status === "open" ? "success" : "neutral"}>

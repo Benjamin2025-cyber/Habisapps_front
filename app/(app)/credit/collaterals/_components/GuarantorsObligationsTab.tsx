@@ -5,6 +5,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { TextField } from "@/components/ui/TextField";
 import { DataTable } from "@/components/ui/DataTable";
 import {
   DropdownMenu,
@@ -154,26 +156,40 @@ export function GuarantorsObligationsTab({ loan, loanClosed }: Props) {
     [token, loan.public_id, t, toast, refetch],
   );
 
-  const handleRelease = useCallback(
-    async (o: GuaranteeObligation) => {
-      if (!token) return;
-      try {
-        await releaseGuaranteeObligation(token, loan.public_id, o.public_id);
-        toast.success(
-          t("guarantees.obligation.toast.releasedTitle"),
-          t("guarantees.obligation.toast.releasedBody"),
-        );
-        refetch();
-      } catch (cause) {
-        const { generalMessage } = localizeApiError(cause);
-        toast.error(
-          t("guarantees.obligation.toast.errorTitle"),
-          generalMessage,
-        );
-      }
-    },
-    [token, loan.public_id, t, toast, refetch],
+  const [releaseTarget, setReleaseTarget] = useState<GuaranteeObligation | null>(
+    null,
   );
+  const [releaseReason, setReleaseReason] = useState("");
+  const [releasing, setReleasing] = useState(false);
+
+  const openRelease = useCallback((o: GuaranteeObligation) => {
+    setReleaseReason("");
+    setReleaseTarget(o);
+  }, []);
+
+  async function confirmRelease() {
+    if (!token || !releaseTarget) return;
+    setReleasing(true);
+    try {
+      await releaseGuaranteeObligation(
+        token,
+        loan.public_id,
+        releaseTarget.public_id,
+        releaseReason,
+      );
+      toast.success(
+        t("guarantees.obligation.toast.releasedTitle"),
+        t("guarantees.obligation.toast.releasedBody"),
+      );
+      setReleaseTarget(null);
+      refetch();
+    } catch (cause) {
+      const { generalMessage } = localizeApiError(cause);
+      toast.error(t("guarantees.obligation.toast.errorTitle"), generalMessage);
+    } finally {
+      setReleasing(false);
+    }
+  }
 
   const columns = useMemo<ColumnDef<GuaranteeObligation, unknown>[]>(
     () => [
@@ -260,7 +276,7 @@ export function GuarantorsObligationsTab({ loan, loanClosed }: Props) {
             });
             items.push({
               label: t("guarantees.obligation.actions.release"),
-              onClick: () => handleRelease(o),
+              onClick: () => openRelease(o),
               disabled: !loanClosed,
             });
           }
@@ -280,7 +296,7 @@ export function GuarantorsObligationsTab({ loan, loanClosed }: Props) {
         },
       },
     ],
-    [t, format, loanClosed, handleCancel, handleRelease],
+    [t, format, loanClosed, handleCancel, openRelease],
   );
 
   return (
@@ -343,6 +359,29 @@ export function GuarantorsObligationsTab({ loan, loanClosed }: Props) {
         }}
         onSubmit={handleSubmit}
       />
+
+      <ConfirmDialog
+        open={releaseTarget !== null}
+        title={t("guarantees.obligation.release.title")}
+        description={t("guarantees.obligation.release.description")}
+        confirmLabel={t("guarantees.obligation.actions.release")}
+        cancelLabel={t("common.cancel")}
+        tone="danger"
+        loading={releasing}
+        busyLabel={t("common.loading")}
+        onConfirm={confirmRelease}
+        onClose={() => (releasing ? undefined : setReleaseTarget(null))}
+      >
+        <TextField
+          id="obligation-release-reason"
+          label={t("guarantees.obligation.release.reasonLabel")}
+          value={releaseReason}
+          onChange={(e) => setReleaseReason(e.target.value)}
+          placeholder={t("guarantees.obligation.release.reasonPlaceholder")}
+          hint={t("guarantees.obligation.release.reasonHint")}
+          maxLength={1000}
+        />
+      </ConfirmDialog>
     </div>
   );
 }

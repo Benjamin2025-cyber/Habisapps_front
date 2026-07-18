@@ -4,6 +4,8 @@ import { useCallback, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { TextField } from "@/components/ui/TextField";
 import {
   DropdownMenu,
   type DropdownMenuItem,
@@ -80,6 +82,9 @@ export function CollateralsTab({ loan, loanClosed }: Props) {
     initial: Collateral | null;
   } | null>(null);
   const [itemDrawer, setItemDrawer] = useState<ItemDrawerState | null>(null);
+  const [releaseTarget, setReleaseTarget] = useState<Collateral | null>(null);
+  const [releaseReason, setReleaseReason] = useState("");
+  const [releasing, setReleasing] = useState(false);
 
   const money = (minor: number | null, currency: string | null) =>
     minor === null || minor === undefined
@@ -140,18 +145,32 @@ export function CollateralsTab({ loan, loanClosed }: Props) {
     refetch();
   }
 
-  async function handleRelease(collateral: Collateral) {
-    if (!token) return;
+  function openRelease(collateral: Collateral) {
+    setReleaseReason("");
+    setReleaseTarget(collateral);
+  }
+
+  async function handleRelease() {
+    if (!token || !releaseTarget) return;
+    setReleasing(true);
     try {
-      await releaseCollateral(token, loan.public_id, collateral.public_id);
+      await releaseCollateral(
+        token,
+        loan.public_id,
+        releaseTarget.public_id,
+        releaseReason,
+      );
       toast.success(
         t("guarantees.collateral.toast.releasedTitle"),
         t("guarantees.collateral.toast.releasedBody"),
       );
+      setReleaseTarget(null);
       refetch();
     } catch (cause) {
       const { generalMessage } = localizeApiError(cause);
       toast.error(t("guarantees.collateral.toast.errorTitle"), generalMessage);
+    } finally {
+      setReleasing(false);
     }
   }
 
@@ -216,7 +235,7 @@ export function CollateralsTab({ loan, loanClosed }: Props) {
             { kind: "separator" },
             {
               label: t("guarantees.collateral.actions.release"),
-              onClick: () => handleRelease(collateral),
+              onClick: () => openRelease(collateral),
               disabled: !loanClosed || collateral.status !== "active",
               destructive: true,
             },
@@ -371,6 +390,29 @@ export function CollateralsTab({ loan, loanClosed }: Props) {
           onSubmit={handleItemSubmit}
         />
       ) : null}
+
+      <ConfirmDialog
+        open={releaseTarget !== null}
+        title={t("guarantees.collateral.release.title")}
+        description={t("guarantees.collateral.release.description")}
+        confirmLabel={t("guarantees.collateral.actions.release")}
+        cancelLabel={t("common.cancel")}
+        tone="danger"
+        loading={releasing}
+        busyLabel={t("common.loading")}
+        onConfirm={handleRelease}
+        onClose={() => (releasing ? undefined : setReleaseTarget(null))}
+      >
+        <TextField
+          id="collateral-release-reason"
+          label={t("guarantees.collateral.release.reasonLabel")}
+          value={releaseReason}
+          onChange={(e) => setReleaseReason(e.target.value)}
+          placeholder={t("guarantees.collateral.release.reasonPlaceholder")}
+          hint={t("guarantees.collateral.release.reasonHint")}
+          maxLength={1000}
+        />
+      </ConfirmDialog>
     </div>
   );
 }
