@@ -12,6 +12,7 @@ import type {
   LedgerAccount,
   LedgerAccountClass,
   LedgerAccountCreatePayload,
+  LedgerAccountScope,
   LedgerAccountUpdatePayload,
   LedgerNormalBalanceSide,
 } from "@/lib/api/ledger-accounts";
@@ -25,13 +26,28 @@ type Props = {
   agencies: ReadonlyArray<Agency>;
   /** Existing accounts offered as parent (the current one is excluded). */
   parentChoices: ReadonlyArray<LedgerAccount>;
+  /**
+   * May create/maintain institution-level grouping accounts
+   * (`ledger.scope.institution.manage`). Without it the scope choice is not
+   * offered at all, since only agency accounts are permitted.
+   */
+  canManageInstitutionScope: boolean;
   onClose: () => void;
   onSubmit: (
     payload: LedgerAccountCreatePayload | LedgerAccountUpdatePayload,
   ) => Promise<void>;
 };
 
+/**
+ * `grouping` is `is_postable: false` — the account consolidates the accounts
+ * beneath it and refuses entries of its own. Expressed as a named nature rather
+ * than a raw flag because that is the accounting concept users are choosing.
+ */
+type AccountNature = "postable" | "grouping";
+
 type FormState = {
+  scope: LedgerAccountScope;
+  nature: AccountNature;
   code: string;
   name: string;
   account_class: LedgerAccountClass | "";
@@ -43,6 +59,8 @@ type FormState = {
 };
 
 const EMPTY: FormState = {
+  scope: "agency",
+  nature: "postable",
   code: "",
   name: "",
   account_class: "",
@@ -76,6 +94,7 @@ export function LedgerAccountDrawer({
   initial,
   agencies,
   parentChoices,
+  canManageInstitutionScope,
   onClose,
   onSubmit,
 }: Props) {
@@ -93,6 +112,8 @@ export function LedgerAccountDrawer({
     setGeneralError(null);
     if (isEdit && initial) {
       setForm({
+        scope: initial.scope,
+        nature: initial.is_postable ? "postable" : "grouping",
         code: initial.code ?? "",
         name: initial.name ?? "",
         account_class: initial.account_class,
@@ -123,6 +144,24 @@ export function LedgerAccountDrawer({
     }));
   }
 
+  /**
+   * An institution account carries no agency and is always a grouping account
+   * (the API rejects either combination), so switching scope clears both rather
+   * than letting the user submit something that cannot be accepted.
+   */
+  function onScopeChange(next: LedgerAccountScope) {
+    setForm((current) => ({
+      ...current,
+      scope: next,
+      agency_public_id: next === "institution" ? "" : current.agency_public_id,
+      nature: next === "institution" ? "grouping" : current.nature,
+      // A parent legal under the old scope may be illegal under the new one.
+      parent_account_public_id: "",
+    }));
+  }
+
+  const isInstitutionScope = form.scope === "institution";
+
   const agencyOptions = useMemo(
     () =>
       agencies.map((agency) => ({
@@ -132,16 +171,34 @@ export function LedgerAccountDrawer({
     [agencies],
   );
 
-  const parentOptions = useMemo(
-    () =>
-      parentChoices
-        .filter((account) => account.public_id !== initial?.public_id)
-        .map((account) => ({
-          value: account.public_id,
-          label: `${account.code} — ${account.name}`,
-        })),
-    [parentChoices, initial?.public_id],
-  );
+  /**
+   * A consolidated chart of accounts flows one way: agency detail accounts roll
+   * up into institution grouping accounts. So an institution account may only be
+   * grouped under another institution account, and an agency account under an
+   * institution account or one of its own agency — never under another agency's.
+   * Offering illegal parents would only produce a 422 on save.
+   */
+  const parentOptions = useMemo(() => {
+    const agencyId = form.agency_public_id;
+    return parentChoices
+      .filter((account) => account.public_id !== initial?.public_id)
+      .filter((account) => {
+        if (isInstitutionScope) return account.scope === "institution";
+        return (
+          account.scope === "institution" ||
+          (agencyId !== "" && account.agency_public_id === agencyId)
+        );
+      })
+      .map((account) => ({
+        value: account.public_id,
+        label: `${account.code} — ${account.name}`,
+      }));
+  }, [parentChoices, initial?.public_id, isInstitutionScope, form.agency_public_id]);
+
+  const natureOptions: Array<{ value: AccountNature; label: string }> = [
+    { value: "postable", label: t("ledgerAccounts.nature.postable") },
+    { value: "grouping", label: t("ledgerAccounts.nature.grouping") },
+  ];
 
   const statusOptions: Array<{
     value: "active" | "inactive" | "suspended";
@@ -163,17 +220,29 @@ export function LedgerAccountDrawer({
       payload = {
         name: form.name.trim(),
         account_type: nullable(form.account_type),
+        // Only send is_postable when it actually changed: an unchanged grouping
+        // account would otherwise be re-asserted as postable and rejected.
+        is_postable:
+          initial && initial.is_postable !== (form.nature === "postable")
+            ? form.nature === "postable"
+            : undefined,
         parent_account_public_id: nullable(form.parent_account_public_id),
         normal_balance_side: form.normal_balance_side || undefined,
         status: form.status || undefined,
       } satisfies LedgerAccountUpdatePayload;
     } else {
       payload = {
-        agency_public_id: nullable(form.agency_public_id),
+        scope: form.scope,
+        // An institution account never carries an agency, and the API refuses
+        // the pair outright rather than ignoring it.
+        agency_public_id: isInstitutionScope
+          ? undefined
+          : nullable(form.agency_public_id),
         code: form.code.trim(),
         name: form.name.trim(),
         account_class: (form.account_class || "asset") as LedgerAccountClass,
         account_type: nullable(form.account_type),
+        is_postable: isInstitutionScope ? undefined : form.nature === "postable",
         parent_account_public_id: nullable(form.parent_account_public_id),
         normal_balance_side: (form.normal_balance_side ||
           "debit") as LedgerNormalBalanceSide,
@@ -190,6 +259,8 @@ export function LedgerAccountDrawer({
         account_class: t("ledgerAccounts.fields.class"),
         account_type: t("ledgerAccounts.fields.type"),
         agency_public_id: t("ledgerAccounts.fields.agency"),
+        scope: t("ledgerAccounts.fields.scope"),
+        is_postable: t("ledgerAccounts.fields.nature"),
         parent_account_public_id: t("ledgerAccounts.fields.parent"),
         normal_balance_side: t("ledgerAccounts.fields.normalSide"),
         status: t("ledgerAccounts.fields.status"),
@@ -299,7 +370,24 @@ export function LedgerAccountDrawer({
 
         <Section title={t("ledgerAccounts.drawer.sectionStructure")}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {!isEdit ? (
+            {!isEdit && canManageInstitutionScope ? (
+              <Select
+                label={t("ledgerAccounts.fields.scope")}
+                value={form.scope}
+                options={[
+                  { value: "agency", label: t("ledgerAccounts.scope.agency") },
+                  {
+                    value: "institution",
+                    label: t("ledgerAccounts.scope.institution"),
+                  },
+                ]}
+                isSearchable={false}
+                onChange={(next) => onScopeChange(next as LedgerAccountScope)}
+                error={errors.scope}
+                hint={t("ledgerAccounts.fields.scopeHint")}
+              />
+            ) : null}
+            {!isEdit && !isInstitutionScope ? (
               <Select
                 label={t("ledgerAccounts.fields.agency")}
                 value={form.agency_public_id}
@@ -311,6 +399,21 @@ export function LedgerAccountDrawer({
                 hint={t("ledgerAccounts.fields.agencyHint")}
               />
             ) : null}
+            {isInstitutionScope ? (
+              <p className="text-xs text-muted-foreground sm:col-span-2">
+                {t("ledgerAccounts.drawer.institutionGroupingNote")}
+              </p>
+            ) : (
+              <Select
+                label={t("ledgerAccounts.fields.nature")}
+                value={form.nature}
+                options={natureOptions}
+                isSearchable={false}
+                onChange={(next) => set("nature", next as AccountNature)}
+                error={errors.is_postable}
+                hint={t("ledgerAccounts.fields.natureHint")}
+              />
+            )}
             <Select
               label={t("ledgerAccounts.fields.parent")}
               value={form.parent_account_public_id}

@@ -76,6 +76,33 @@ export function LedgerAccountsTable({
         ),
       },
       {
+        id: "structure",
+        header: t("ledgerAccounts.columns.structure"),
+        // Where the account sits in the consolidated chart. A grouping account
+        // takes no entries, so flagging it here saves users discovering that
+        // only when a journal line is refused.
+        cell: ({ row }) => {
+          const account = row.original;
+          return (
+            <div className="flex flex-wrap items-center gap-1">
+              {account.scope === "institution" ? (
+                <Badge tone="accent">
+                  {t("ledgerAccounts.scope.institution")}
+                </Badge>
+              ) : null}
+              {account.is_postable ? null : (
+                <Badge tone="neutral">
+                  {t("ledgerAccounts.nature.grouping")}
+                </Badge>
+              )}
+              {account.scope === "agency" && account.is_postable ? (
+                <span className="text-muted-foreground">—</span>
+              ) : null}
+            </div>
+          );
+        },
+      },
+      {
         accessorKey: "account_class",
         header: t("ledgerAccounts.columns.class"),
         cell: ({ getValue }) => {

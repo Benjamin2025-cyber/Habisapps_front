@@ -18,33 +18,51 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onSubmit: (payload: OpenAccountingDayPayload) => Promise<void>;
-  /** Platform admins choose scope (institution / a specific agency). */
-  isPlatformAdmin: boolean;
+  /**
+   * May open the institution's own period — the arrêté comptable. This is the
+   * `accounting.scope.institution.manage` permission, not a role: head-office
+   * accounting (chief-accountant) holds it as well as platform-admin.
+   */
+  canOpenInstitutionScope: boolean;
+  /** Only platform admins may open *another* agency's day. */
+  canOpenAnyAgency: boolean;
+  /** False for head-office actors, who carry no agency assignment. */
+  hasOwnAgency: boolean;
   agencies: Agency[];
 };
 
 /**
  * Opens a new accounting day. Agency staff open their own agency's day (no
- * scope fields — the backend resolves it). Platform admins may instead open an
- * institution-wide day or pick a specific agency. The business date is optional;
+ * scope fields — the backend resolves it from their assignment). Actors who may
+ * manage the institution period choose the scope instead; only platform admins
+ * can additionally target a specific agency. The business date is optional;
  * left empty, the backend derives the next business date from the calendar.
  */
 export function OpenDayDrawer({
   open,
   onClose,
   onSubmit,
-  isPlatformAdmin,
+  canOpenInstitutionScope,
+  canOpenAnyAgency,
+  hasOwnAgency,
   agencies,
 }: Props) {
   const t = useTranslations();
-  const [scope, setScope] = useState<AccountingDayScope>("agency");
+  // Agency scope needs an agency the backend can resolve: the actor's own, or
+  // an explicit one that only a platform admin may choose. Without either it
+  // would be rejected, so head office defaults straight to institution scope.
+  const canUseAgencyScope = canOpenAnyAgency || hasOwnAgency;
+  const defaultScope: AccountingDayScope = canUseAgencyScope
+    ? "agency"
+    : "institution";
+  const [scope, setScope] = useState<AccountingDayScope>(defaultScope);
   const [agencyPublicId, setAgencyPublicId] = useState("");
   const [businessDate, setBusinessDate] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function reset() {
-    setScope("agency");
+    setScope(defaultScope);
     setAgencyPublicId("");
     setBusinessDate("");
     setError(null);
@@ -61,11 +79,11 @@ export function OpenDayDrawer({
     setError(null);
     const payload: OpenAccountingDayPayload = {};
     if (businessDate) payload.business_date = businessDate;
-    if (isPlatformAdmin) {
+    if (canOpenInstitutionScope) {
       payload.scope = scope;
-      if (scope === "agency" && agencyPublicId) {
-        payload.agency_public_id = agencyPublicId;
-      }
+    }
+    if (canOpenAnyAgency && scope === "agency" && agencyPublicId) {
+      payload.agency_public_id = agencyPublicId;
     }
     try {
       await onSubmit(payload);
@@ -111,7 +129,7 @@ export function OpenDayDrawer({
           </Alert>
         ) : null}
 
-        {isPlatformAdmin ? (
+        {canOpenInstitutionScope ? (
           <Select
             id="accounting-day-scope"
             label={t("accountingDay.open.scopeLabel")}
@@ -120,13 +138,15 @@ export function OpenDayDrawer({
             isSearchable={false}
             hint={t("accountingDay.open.scopeHint")}
             options={[
-              { value: "agency", label: t("accountingDay.scope.agency") },
+              ...(canUseAgencyScope
+                ? [{ value: "agency", label: t("accountingDay.scope.agency") }]
+                : []),
               { value: "institution", label: t("accountingDay.scope.institution") },
             ]}
           />
         ) : null}
 
-        {isPlatformAdmin && scope === "agency" ? (
+        {canOpenAnyAgency && scope === "agency" ? (
           <Select
             id="accounting-day-agency"
             label={t("accountingDay.open.agencyLabel")}

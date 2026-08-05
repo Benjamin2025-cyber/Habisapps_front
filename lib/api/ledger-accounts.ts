@@ -1,4 +1,4 @@
-import { apiRequest, notifyAuthExpired } from "./client";
+import { ApiError, apiRequest, notifyAuthExpired } from "./client";
 import { getRequestLocale } from "./locale";
 
 /**
@@ -19,6 +19,18 @@ import { getRequestLocale } from "./locale";
  * Le scope agence est appliqué côté API : un compte sans agence (`agency_id`
  * null) est institutionnel et visible par tous ; sinon il est limité à son
  * agence (sauf `platform-admin` / `ledger.scope.institution.read`).
+ *
+ * Plan comptable consolidé : un compte **de regroupement** (`is_postable`
+ * false) ne reçoit aucune écriture — son solde est la consolidation des comptes
+ * de détail placés sous lui. C'est le cas de tout compte institutionnel
+ * (`scope: "institution"`, ex. `571000 Caisse Globale` regroupant `571001`,
+ * `571002`… par agence) et de tout compte d'agence ayant acquis un
+ * sous-compte : l'API bascule alors automatiquement son `is_postable` à false.
+ * Ne jamais proposer un compte non imputable comme cible d'écriture.
+ *
+ * Le solde d'un compte de regroupement est consolidé par défaut ; `consolidated`
+ * force le comportement (`false` = mouvements propres uniquement). Le champ
+ * `scope` de la réponse indique lequel des deux a été renvoyé.
  */
 export type LedgerAccountClass =
   | "asset"
@@ -35,19 +47,30 @@ export type LedgerAccountStatus =
   | "suspended"
   | "archived";
 
+/** `institution` == `agency_public_id === null`; the API sends both. */
+export type LedgerAccountScope = "agency" | "institution";
+
 export type LedgerAccount = {
   public_id: string;
+  scope: LedgerAccountScope;
   agency_public_id: string | null;
   parent_account_public_id: string | null;
   code: string;
   name: string;
   account_class: LedgerAccountClass;
   account_type: string | null;
+  /** False for a grouping account: it consolidates its children and refuses entries. */
+  is_postable: boolean;
   normal_balance_side: LedgerNormalBalanceSide;
   status: LedgerAccountStatus;
   created_at: string;
   updated_at: string;
 };
+
+/** A grouping account can never be an entry target. */
+export function isPostableTarget(account: LedgerAccount): boolean {
+  return account.status === "active" && account.is_postable;
+}
 
 export type Pagination = {
   current_page: number;
@@ -62,11 +85,14 @@ export type PaginatedLedgerAccounts = {
 };
 
 export type LedgerAccountCreatePayload = {
+  /** Defaults to `agency` API-side. `institution` requires ledger.scope.institution.manage. */
+  scope?: LedgerAccountScope;
   agency_public_id?: string | null;
   code: string;
   name: string;
   account_class: LedgerAccountClass;
   account_type?: string | null;
+  is_postable?: boolean;
   parent_account_public_id?: string | null;
   normal_balance_side: LedgerNormalBalanceSide;
   status?: "active" | "inactive" | "suspended";
@@ -76,14 +102,23 @@ export type LedgerAccountCreatePayload = {
 export type LedgerAccountUpdatePayload = {
   name?: string;
   account_type?: string | null;
+  is_postable?: boolean;
   parent_account_public_id?: string | null;
   normal_balance_side?: LedgerNormalBalanceSide;
   status?: LedgerAccountStatus;
 };
 
+/**
+ * `ledger_account_consolidated` means the figure includes the whole subtree, so
+ * it must be labelled as consolidated rather than shown as own movements.
+ */
+export type LedgerBalanceScope =
+  | "ledger_account"
+  | "ledger_account_consolidated";
+
 /** Solde agrégé d'un compte sur une période (montants en *_minor, scale 2). */
 export type LedgerAccountBalance = {
-  scope: string;
+  scope: LedgerBalanceScope;
   public_id: string;
   currency: string;
   from: string | null;
@@ -96,7 +131,7 @@ export type LedgerAccountBalance = {
 
 /** Résumé du relevé (mouvements + soldes d'ouverture/clôture). */
 export type LedgerStatement = {
-  scope: string;
+  scope: LedgerBalanceScope;
   public_id: string;
   currency: string;
   from: string | null;
@@ -156,7 +191,13 @@ export async function fetchLedgerAccounts(
   const text = await response.text();
   if (!response.ok || text.length === 0) {
     if (response.status === 401) notifyAuthExpired();
-    throw new Error(`Failed to fetch ledger accounts (HTTP ${response.status})`);
+    // ApiError rather than Error: callers need the status to tell a permission
+    // refusal (403) apart from a real failure.
+    throw new ApiError(
+      `Failed to fetch ledger accounts (HTTP ${response.status})`,
+      response.status,
+      null,
+    );
   }
 
   // The ledger-accounts endpoint returns Laravel's default paginated shape:
@@ -236,7 +277,13 @@ export async function deleteLedgerAccount(
 export async function getLedgerAccountBalance(
   token: string,
   publicId: string,
-  options: { currency?: string; from?: string; to?: string } = {},
+  options: {
+    currency?: string;
+    from?: string;
+    to?: string;
+    /** Omit to let the API decide from `is_postable`. */
+    consolidated?: boolean;
+  } = {},
 ): Promise<LedgerAccountBalance> {
   return apiRequest<LedgerAccountBalance>(`ledger-accounts/${publicId}/balance`, {
     method: "GET",
@@ -245,6 +292,7 @@ export async function getLedgerAccountBalance(
       currency: options.currency,
       from: options.from,
       to: options.to,
+      consolidated: options.consolidated,
     },
   });
 }
@@ -256,6 +304,8 @@ export async function fetchLedgerAccountMovements(
     currency?: string;
     from?: string;
     to?: string;
+    /** Omit to let the API decide from `is_postable`. */
+    consolidated?: boolean;
     page?: number;
     perPage?: number;
   } = {},
@@ -264,6 +314,9 @@ export async function fetchLedgerAccountMovements(
   if (options.currency) query.set("currency", options.currency);
   if (options.from) query.set("from", options.from);
   if (options.to) query.set("to", options.to);
+  if (options.consolidated !== undefined) {
+    query.set("consolidated", String(options.consolidated));
+  }
   query.set("per_page", String(options.perPage ?? 25));
   if (options.page && options.page > 0) query.set("page", String(options.page));
 
@@ -275,8 +328,12 @@ export async function fetchLedgerAccountMovements(
   const text = await response.text();
   if (!response.ok || text.length === 0) {
     if (response.status === 401) notifyAuthExpired();
-    throw new Error(
+    // A grouping account's statement consolidates every agency beneath it, so
+    // 403 here is an expected permission outcome, not a fault: keep the status.
+    throw new ApiError(
       `Failed to fetch ledger movements (HTTP ${response.status})`,
+      response.status,
+      null,
     );
   }
 

@@ -572,6 +572,7 @@
         "roles": "Rôles & permissions",
         "audit": "Journal d'audit",
         "databaseBackups": "Sauvegardes",
+        "institution": "Institution",
         "denominations": "Type monnaie",
         "batch": "Procédure Batch",
         "tills": "Caisses",
@@ -1405,6 +1406,67 @@
       "statusErrorTitle": "Changement de statut impossible",
       "managerChangedTitle": "Responsable modifié",
       "managerChangedBody": "La gestion de {name} a été mise à jour."
+    }
+  },
+  "institution": {
+    "pageTitle": "Institution",
+    "pageDescription": "L'identité légale déclarée de l'institution. Ces informations sont reportées sur les états réglementaires et les attestations délivrées.",
+    "errorTitle": "Impossible de charger la fiche institution",
+    "saveErrorTitle": "Enregistrement impossible",
+    "unconfiguredTitle": "Institution non encore identifiée",
+    "unconfiguredBody": "La raison sociale et les références d'agrément sont vides. Renseignez-les avant de générer un état réglementaire : elles ne sont jamais déduites.",
+    "sections": {
+      "identity": "Identité légale",
+      "regulatory": "Agrément et immatriculation",
+      "address": "Siège social",
+      "contact": "Contact",
+      "declared": "Paramètres comptables déclarés"
+    },
+    "fields": {
+      "legal_name": "Raison sociale",
+      "legal_nameHint": "La personne morale, exactement telle qu'elle figure sur la décision d'agrément et au RCCM — forme juridique incluse (ex. « HABIS MICROFINANCE SA »). C'est ce nom qui figure sur les états réglementaires.",
+      "trade_name": "Nom commercial",
+      "legal_form": "Forme juridique",
+      "emf_category": "Catégorie EMF",
+      "supervisory_authority": "Autorité de supervision",
+      "approval_number": "Numéro d'agrément",
+      "approval_date": "Date d'agrément",
+      "registration_number": "Numéro d'immatriculation (RCCM)",
+      "tax_identification_number": "Numéro d'identifiant unique (NIU)",
+      "address_line_1": "Adresse ligne 1",
+      "address_line_2": "Adresse ligne 2",
+      "po_box": "Boîte postale",
+      "city": "Ville",
+      "region": "Région",
+      "country": "Pays",
+      "phone_number": "Téléphone",
+      "fax_number": "Fax",
+      "email": "E-mail",
+      "website": "Site web",
+      "declared_reporting_currency": "Devise de reporting déclarée",
+      "declaredCurrencyHint": "Purement déclaratif : la configuration comptable reste la référence pour la devise réellement utilisée.",
+      "fiscal_year_start_month": "Premier mois de l'exercice",
+      "fiscalMonthPlaceholder": "Choisir un mois",
+      "fiscalMonthHint": "Purement déclaratif : le calendrier comptable reste la référence.",
+      "trade_nameHint": "Le nom sous lequel vous exercez publiquement — l'enseigne de l'agence, les reçus, l'application (ex. « HabisLoan »). Laissez vide s'il est identique à la raison sociale."
+    },
+    "months": {
+      "1": "Janvier",
+      "2": "Février",
+      "3": "Mars",
+      "4": "Avril",
+      "5": "Mai",
+      "6": "Juin",
+      "7": "Juillet",
+      "8": "Août",
+      "9": "Septembre",
+      "10": "Octobre",
+      "11": "Novembre",
+      "12": "Décembre"
+    },
+    "toast": {
+      "savedTitle": "Institution mise à jour",
+      "savedBody": "La fiche institution a été enregistrée."
     }
   },
   "accounts": {
@@ -2698,6 +2760,7 @@
     "columns": {
       "code": "Code",
       "name": "Intitulé",
+      "structure": "Structure",
       "class": "Classe",
       "normalSide": "Sens normal",
       "type": "Type",
@@ -2746,7 +2809,11 @@
       "typeHint": "Sous-catégorisation libre, ex. « caisse », « banque ».",
       "agency": "Agence",
       "agencyPlaceholder": "Agence de rattachement",
-      "agencyHint": "Laissez vide pour un compte institutionnel (toutes agences).",
+      "agencyHint": "Laissez vide pour utiliser votre agence de rattachement.",
+      "scope": "Périmètre",
+      "scopeHint": "Un compte institutionnel regroupe les comptes de détail de toutes les agences (ex. 571000 Caisse Globale au-dessus de 571001, 571002…).",
+      "nature": "Nature",
+      "natureHint": "Un compte de regroupement consolide les comptes placés sous lui et ne reçoit aucune écriture.",
       "parent": "Compte parent",
       "parentPlaceholder": "Aucun (compte racine)",
       "parentHint": "Rattache ce compte à un compte de niveau supérieur.",
@@ -2765,7 +2832,16 @@
       "sectionIdentity": "Identité",
       "sectionStructure": "Structure",
       "sectionAccounting": "Comptabilité",
+      "institutionGroupingNote": "Un compte institutionnel est toujours un compte de regroupement : il consolide les comptes des agences placés sous lui et ne reçoit aucune écriture.",
       "create": "Créer"
+    },
+    "scope": {
+      "agency": "Agence",
+      "institution": "Institution"
+    },
+    "nature": {
+      "postable": "Compte imputable (détail)",
+      "grouping": "Compte de regroupement"
     },
     "archive": {
       "title": "Archiver ce compte ?",
@@ -2796,6 +2872,8 @@
       "totalDebit": "Total débit",
       "totalCredit": "Total crédit",
       "empty": "Aucun mouvement sur cette période.",
+      "consolidatedNote": "Compte de regroupement : les montants ci-dessous consolident les comptes de détail placés sous celui-ci.",
+      "consolidatedForbidden": "Le solde d'un compte institutionnel consolide les écritures de toutes les agences. Sa consultation requiert l'habilitation de lecture au périmètre institution.",
       "pageOf": "Page {page} / {total}",
       "printFilePrefix": "releve-compte",
       "printHeading": "Relevé de compte général",
@@ -3503,7 +3581,13 @@
       "submitting": "Génération…",
       "errorTitle": "Échec de la génération",
       "successTitle": "Rapport généré",
-      "successBody": "Le rapport a été calculé et ajouté à la liste."
+      "successBody": "Le rapport a été calculé et ajouté à la liste.",
+      "consolidated": "Consolidation",
+      "consolidatedHint": "En consolidé, les comptes de regroupement reportent le total des comptes de détail placés sous eux. Les totaux généraux ne comptent chaque mouvement qu'une fois dans les deux cas.",
+      "consolidatedOff": "Comptes de détail uniquement",
+      "consolidatedOn": "Consolidé (cumulé)",
+      "agencyAllPlaceholder": "Toutes les agences (institution)",
+      "agencyConsolidatedHint": "Laissez vide pour le cumul au niveau institution. Choisir une agence limite l'état à l'arborescence de cette seule agence."
     },
     "unavailableType": "Aucun type de rapport correspondant n'est exposé par l'API pour cette rubrique.",
     "errorTitle": "Impossible de charger les rapports",

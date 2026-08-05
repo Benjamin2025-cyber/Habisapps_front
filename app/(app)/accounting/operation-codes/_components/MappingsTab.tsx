@@ -33,6 +33,7 @@ import {
 } from "@/lib/api/operation-codes";
 import {
   fetchLedgerAccounts,
+  isPostableTarget,
   type LedgerAccount,
 } from "@/lib/api/ledger-accounts";
 import { listAgencies, type Agency } from "@/lib/api/agencies";
@@ -560,10 +561,13 @@ function MappingDrawer({
         .map((c) => ({ value: c.public_id, label: `${c.code} — ${c.label}` })),
     [codes],
   );
+  // A grouping account cannot be an automatic posting target either: the API
+  // refuses it when resolving the mapping's debit/credit legs, so keep it out
+  // of the picker rather than surfacing a 422 on save.
   const accountOptions = useMemo(
     () =>
       accounts
-        .filter((a) => a.status === "active")
+        .filter(isPostableTarget)
         .map((a) => ({ value: a.public_id, label: `${a.code} — ${a.name}` })),
     [accounts],
   );

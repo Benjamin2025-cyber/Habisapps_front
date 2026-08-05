@@ -104,6 +104,12 @@ export function ReportsHub({ types, title, description }: Props) {
       return key.endsWith("_minor") ? money(val, currency) : format.number(val);
     }
     if (val === null || val === undefined) return "—";
+    // Columns are derived from the row keys, so a report can introduce a boolean
+    // column (a consolidated trial balance adds `is_postable`) without any change
+    // here — raw "true"/"false" would leak into a localized report.
+    if (typeof val === "boolean") {
+      return val ? t("common.yes") : t("common.no");
+    }
     return String(val);
   }
 
