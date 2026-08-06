@@ -147,13 +147,27 @@ export async function fetchJournalEntries(
     throw new Error(`Failed to fetch journal entries (HTTP ${response.status})`);
   }
 
-  // Default Laravel paginated resource shape: { data: [...], meta: { current_page, ... } }
+  // The endpoint returns the app envelope, not Laravel's default paginated
+  // shape: `{ data: { journal_entries: [...] }, meta: { pagination: {...},
+  // current_page, total, ... } }` — `data` is an OBJECT and `meta` carries both
+  // the nested `pagination` and Laravel's flat keys.
+  //
+  // Reading `data` as an array silently yielded zero rows while `meta.total`
+  // still reported the real count, so the screen said "1 écriture(s)" over an
+  // empty table. Same handling as fetchLedgerAccounts.
   const envelope = JSON.parse(text) as {
-    data?: JournalEntry[];
-    meta?: Partial<Pagination>;
+    data?: { journal_entries?: JournalEntry[] } | JournalEntry[];
+    meta?: Partial<Pagination> & { pagination?: Partial<Pagination> };
   };
-  const rows = Array.isArray(envelope.data) ? envelope.data : [];
-  const m = envelope.meta ?? {};
+
+  const rows: JournalEntry[] = Array.isArray(envelope.data)
+    ? envelope.data
+    : Array.isArray(envelope.data?.journal_entries)
+      ? envelope.data!.journal_entries!
+      : [];
+
+  // Accept either a nested `meta.pagination` (app envelope) or a flat `meta`.
+  const m = envelope.meta?.pagination ?? envelope.meta ?? {};
 
   return {
     data: rows,

@@ -43,13 +43,20 @@ export default function JournalEntriesPage() {
   const reviewPerm = useCanAny(["journal.entries.review"]);
   const postPerm = useCanAny(["journal.entries.post"]);
   const reversePerm = useCanAny(["journal.entries.reverse"]);
+  const manageLinesPerm = useCanAny([
+    "journal.lines.create",
+    "journal.lines.update",
+  ]);
   const canView = isPlatformAdmin || viewPerm;
   const canCreate = isPlatformAdmin || createPerm;
   const canReview = isPlatformAdmin || reviewPerm;
   const canPost = isPlatformAdmin || postPerm;
   const canReverse = isPlatformAdmin || reversePerm;
-  // Journal-line CRUD is platform-admin only per the API policy.
-  const canManageLines = isPlatformAdmin;
+  // JournalLinePolicy used to answer platform-admin to everything, ignoring the
+  // journal.lines.* permissions; it now honours them, scoped to the agency of
+  // the parent entry. So an accountant who may prepare an entry can also add its
+  // lines — without which "create an entry" produces something unusable.
+  const canManageLines = isPlatformAdmin || manageLinesPerm;
 
   const [statusFilter, setStatusFilter] = useState<JournalEntryStatus | "all">(
     "all",

@@ -27,12 +27,20 @@ type Props = {
   onArchive: (account: LedgerAccount) => void;
 };
 
+/**
+ * Tone per PCEMF class. Grouped so the balance sheet (classes 1–5) reads apart
+ * from the income statement (6–7), with the off-balance-sheet class (8) distinct
+ * from both.
+ */
 const CLASS_TONE: Record<LedgerAccountClass, "info" | "success" | "warning"> = {
-  asset: "info",
-  liability: "warning",
-  equity: "warning",
-  revenue: "success",
-  expense: "info",
+  capitaux_permanents: "info",
+  valeurs_immobilisees: "info",
+  operations_clientele: "info",
+  tiers: "info",
+  tresorerie_interbancaire: "info",
+  charges: "warning",
+  produits: "success",
+  hors_bilan: "warning",
 };
 
 const STATUS_TONE: Record<
