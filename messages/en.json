@@ -3706,7 +3706,9 @@
         "itemsTitle": "Asset details",
         "noItems": "No detailed asset"
       }
-    }
+    },
+    "definitionsForbidden": "You do not have access to the report catalogue, so no report can be generated here. Reports already generated remain viewable and printable.",
+    "definitionsUnavailable": "The report catalogue could not be loaded, so no report can be generated here. Reports already generated remain viewable and printable."
   },
   "operationCodes": {
     "pageTitle": "Accounting — Operation codes & postings",

@@ -14,6 +14,7 @@ import {
   fetchReportDefinitions,
   type ReportDefinition,
 } from "@/lib/api/report-definitions";
+import { ApiError } from "@/lib/api/client";
 import { localizeApiMessage } from "@/lib/api/errors";
 import { useCanAny, useHasRole } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
@@ -52,6 +53,8 @@ export function ReportsHub({ types, title, description }: Props) {
 
   const [preview, setPreview] = useState<ReportRun | null>(null);
   const [definitions, setDefinitions] = useState<ReportDefinition[]>([]);
+  // Kept so an empty catalogue can be told apart from an unreadable one.
+  const [definitionsError, setDefinitionsError] = useState<unknown>(null);
   const [genOpen, setGenOpen] = useState(false);
 
   const fetcher = useCallback(
@@ -71,10 +74,19 @@ export function ReportsHub({ types, title, description }: Props) {
     let cancelled = false;
     fetchReportDefinitions(token, { status: "active" })
       .then((defs) => {
-        if (!cancelled) setDefinitions(defs);
+        if (!cancelled) {
+          setDefinitions(defs);
+          setDefinitionsError(null);
+        }
       })
-      .catch(() => {
-        if (!cancelled) setDefinitions([]);
+      .catch((cause: unknown) => {
+        // Keep *why* the catalogue came back empty. Swallowing this reported a
+        // refusal as "no report definitions exist for this type", which sends the
+        // reader hunting for missing seed data instead of a missing permission.
+        if (!cancelled) {
+          setDefinitions([]);
+          setDefinitionsError(cause);
+        }
       });
     return () => {
       cancelled = true;
@@ -168,7 +180,11 @@ export function ReportsHub({ types, title, description }: Props) {
 
       {!canGenerate && types.length > 0 ? (
         <p className="rounded-[var(--radius-field)] border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-warning">
-          {t("reports.generateDisabled")}
+          {definitionsError instanceof ApiError && definitionsError.status === 403
+            ? t("reports.definitionsForbidden")
+            : definitionsError
+              ? t("reports.definitionsUnavailable")
+              : t("reports.generateDisabled")}
         </p>
       ) : null}
 

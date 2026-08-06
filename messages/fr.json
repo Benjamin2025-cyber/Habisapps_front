@@ -3706,7 +3706,9 @@
         "itemsTitle": "Détail des biens",
         "noItems": "Aucun bien détaillé"
       }
-    }
+    },
+    "definitionsForbidden": "Vous n'avez pas accès au catalogue des rapports : aucun rapport ne peut être généré ici. Les rapports déjà générés restent consultables et imprimables.",
+    "definitionsUnavailable": "Le catalogue des rapports n'a pas pu être chargé : aucun rapport ne peut être généré ici. Les rapports déjà générés restent consultables et imprimables."
   },
   "operationCodes": {
     "pageTitle": "Comptabilité — Codes opération & imputations",
