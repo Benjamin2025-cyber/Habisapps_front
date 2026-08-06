@@ -2807,7 +2807,7 @@
       "name": "Intitulé",
       "class": "Classe",
       "classPlaceholder": "Choisir une classe",
-      "classEditHint": "La classe est immuable après création.",
+      "classEditHint": "Corrigeable tant que le compte ne porte aucun mouvement. Par convention PCEMF, la classe correspond au premier chiffre du code (un code 5xxxxx relève de la classe 5).",
       "type": "Type (optionnel)",
       "typeHint": "Sous-catégorisation libre, ex. « caisse », « banque ».",
       "agency": "Agence",

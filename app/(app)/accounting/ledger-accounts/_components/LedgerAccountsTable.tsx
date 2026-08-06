@@ -174,10 +174,13 @@ export function LedgerAccountsTable({
               onClick: () => onEdit(account),
             });
             if (account.status !== "active") {
+              // Archived accounts are reactivatable on purpose. A code belongs to
+              // the regulated chart and cannot be reinvented, so if archiving were
+              // final a mistyped account would strand its code for good — and the
+              // account holding it could never be corrected.
               items.push({
                 label: t("ledgerAccounts.actions.activate"),
                 onClick: () => onSetStatus(account, "active"),
-                disabled: account.status === "archived",
               });
             }
             if (account.status === "active") {

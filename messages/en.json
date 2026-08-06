@@ -2807,7 +2807,7 @@
       "name": "Name",
       "class": "Class",
       "classPlaceholder": "Choose a class",
-      "classEditHint": "The class is immutable after creation.",
+      "classEditHint": "Correctable while the account carries no movements. By PCEMF convention the class matches the leading digit of the code (a 5xxxxx code is class 5).",
       "type": "Type (optional)",
       "typeHint": "Free-form sub-categorisation, e.g. \"cash\", \"bank\".",
       "agency": "Agency",

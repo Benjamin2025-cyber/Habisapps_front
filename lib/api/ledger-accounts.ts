@@ -120,9 +120,13 @@ export type LedgerAccountCreatePayload = {
   status?: "active" | "inactive" | "suspended";
 };
 
-/** Update is partial; `code`, `account_class` and `agency` are immutable. */
+/**
+ * Update is partial. `code` and `agency` are immutable; `account_class` is
+ * correctable only while the account carries no movements (API-enforced).
+ */
 export type LedgerAccountUpdatePayload = {
   name?: string;
+  account_class?: LedgerAccountClass;
   account_type?: string | null;
   is_postable?: boolean;
   parent_account_public_id?: string | null;

@@ -233,6 +233,15 @@ export function LedgerAccountDrawer({
     if (isEdit) {
       payload = {
         name: form.name.trim(),
+        // Only send the class when it changed. A class picked by mistake must be
+        // fixable — PCEMF codes cannot be reinvented, so an uncorrectable class
+        // would strand its code. The API accepts the change while the account has
+        // no movements and refuses it afterwards, because reclassifying would
+        // restate figures already reported.
+        account_class:
+          initial && form.account_class && initial.account_class !== form.account_class
+            ? (form.account_class as LedgerAccountClass)
+            : undefined,
         account_type: nullable(form.account_type),
         // Only send is_postable when it actually changed: an unchanged grouping
         // account would otherwise be re-asserted as postable and rejected.
@@ -371,7 +380,6 @@ export function LedgerAccountDrawer({
               onChange={(next) => onClassChange(next as LedgerAccountClass | "")}
               error={errors.account_class}
               required
-              disabled={isEdit}
               hint={isEdit ? t("ledgerAccounts.fields.classEditHint") : undefined}
             />
             <TextField
