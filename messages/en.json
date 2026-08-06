@@ -2768,11 +2768,14 @@
       "actions": "Actions"
     },
     "class": {
-      "asset": "Asset",
-      "liability": "Liability",
-      "equity": "Equity",
-      "revenue": "Revenue",
-      "expense": "Expense"
+      "capitaux_permanents": "Class 1 — Permanent capital",
+      "valeurs_immobilisees": "Class 2 — Fixed assets",
+      "operations_clientele": "Class 3 — Customer operations",
+      "tiers": "Class 4 — Third parties",
+      "tresorerie_interbancaire": "Class 5 — Treasury & interbank operations",
+      "charges": "Class 6 — Expenses",
+      "produits": "Class 7 — Income",
+      "hors_bilan": "Class 8 — Off-balance sheet"
     },
     "side": {
       "debit": "Debit",

@@ -32,12 +32,34 @@ import { getRequestLocale } from "./locale";
  * force le comportement (`false` = mouvements propres uniquement). Le champ
  * `scope` de la réponse indique lequel des deux a été renvoyé.
  */
+/**
+ * Classes du PCEMF (Plan Comptable des Établissements de Microfinance,
+ * CEMAC/COBAC) — le plan qu'un EMF camerounais est tenu de tenir. La classe est
+ * le premier chiffre du code : `571001` est un compte de classe 5.
+ *
+ * Remplace les natures IFRS (asset/liability/equity/revenue/expense), qui
+ * décrivaient la nature d'un compte et non sa place dans le plan national. La
+ * nature reste déductible : les classes 6 et 7 forment le compte de résultat, 8
+ * le hors bilan, et pour les classes 1 à 5 le côté du bilan suit
+ * `normal_balance_side`.
+ */
 export type LedgerAccountClass =
-  | "asset"
-  | "liability"
-  | "equity"
-  | "revenue"
-  | "expense";
+  /** Classe 1 — Comptes de capitaux permanents. */
+  | "capitaux_permanents"
+  /** Classe 2 — Comptes de valeurs immobilisées. */
+  | "valeurs_immobilisees"
+  /** Classe 3 — Comptes d'opérations avec la clientèle. */
+  | "operations_clientele"
+  /** Classe 4 — Comptes de tiers. */
+  | "tiers"
+  /** Classe 5 — Comptes de trésorerie et d'opérations interbancaires. */
+  | "tresorerie_interbancaire"
+  /** Classe 6 — Comptes de charges. */
+  | "charges"
+  /** Classe 7 — Comptes de produits. */
+  | "produits"
+  /** Classe 8 — Comptes de hors bilan. */
+  | "hors_bilan";
 
 export type LedgerNormalBalanceSide = "debit" | "credit";
 

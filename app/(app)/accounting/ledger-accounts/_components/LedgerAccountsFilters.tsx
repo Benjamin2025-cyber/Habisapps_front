@@ -20,12 +20,16 @@ export const EMPTY_LEDGER_ACCOUNTS_FILTERS: LedgerAccountsFilterState = {
   status: "",
 };
 
+/** The eight PCEMF classes, in class order (1 → 8). */
 const CLASSES: LedgerAccountClass[] = [
-  "asset",
-  "liability",
-  "equity",
-  "revenue",
-  "expense",
+  "capitaux_permanents",
+  "valeurs_immobilisees",
+  "operations_clientele",
+  "tiers",
+  "tresorerie_interbancaire",
+  "charges",
+  "produits",
+  "hors_bilan",
 ];
 
 const STATUSES: LedgerAccountStatus[] = [

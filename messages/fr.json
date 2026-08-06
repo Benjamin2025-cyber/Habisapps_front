@@ -2768,11 +2768,14 @@
       "actions": "Actions"
     },
     "class": {
-      "asset": "Actif",
-      "liability": "Passif",
-      "equity": "Capitaux propres",
-      "revenue": "Produit",
-      "expense": "Charge"
+      "capitaux_permanents": "Classe 1 — Comptes de capitaux permanents",
+      "valeurs_immobilisees": "Classe 2 — Comptes de valeurs immobilisées",
+      "operations_clientele": "Classe 3 — Comptes d'opérations avec la clientèle",
+      "tiers": "Classe 4 — Comptes de tiers",
+      "tresorerie_interbancaire": "Classe 5 — Comptes de trésorerie et d'opérations interbancaires",
+      "charges": "Classe 6 — Comptes de charges",
+      "produits": "Classe 7 — Comptes de produits",
+      "hors_bilan": "Classe 8 — Comptes de hors bilan"
     },
     "side": {
       "debit": "Débit",

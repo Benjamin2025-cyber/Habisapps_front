@@ -71,21 +71,35 @@ const EMPTY: FormState = {
   status: "",
 };
 
+/** The eight PCEMF classes, in class order (1 → 8). */
 const CLASSES: LedgerAccountClass[] = [
-  "asset",
-  "liability",
-  "equity",
-  "revenue",
-  "expense",
+  "capitaux_permanents",
+  "valeurs_immobilisees",
+  "operations_clientele",
+  "tiers",
+  "tresorerie_interbancaire",
+  "charges",
+  "produits",
+  "hors_bilan",
 ];
 
-/** Conventional normal balance side for each class (suggested, overridable). */
+/**
+ * Conventional normal balance side for each class (suggested, overridable).
+ *
+ * Classes 3, 4 and 8 legitimately go both ways — client lending is a debit-side
+ * class 3 while client deposits are credit-side, and off-balance-sheet
+ * commitments given differ from those received. The suggestion here is only the
+ * more common case; the field stays editable.
+ */
 const SIDE_BY_CLASS: Record<LedgerAccountClass, LedgerNormalBalanceSide> = {
-  asset: "debit",
-  expense: "debit",
-  liability: "credit",
-  equity: "credit",
-  revenue: "credit",
+  capitaux_permanents: "credit",
+  valeurs_immobilisees: "debit",
+  operations_clientele: "credit",
+  tiers: "credit",
+  tresorerie_interbancaire: "debit",
+  charges: "debit",
+  produits: "credit",
+  hors_bilan: "debit",
 };
 
 export function LedgerAccountDrawer({
@@ -240,7 +254,10 @@ export function LedgerAccountDrawer({
           : nullable(form.agency_public_id),
         code: form.code.trim(),
         name: form.name.trim(),
-        account_class: (form.account_class || "asset") as LedgerAccountClass,
+        // No default: a PCEMF class is an accounting decision, not something to
+        // guess. Left empty, the API's `required` rule returns a field error
+        // that handleSubmit's catch already surfaces on this input.
+        account_class: form.account_class as LedgerAccountClass,
         account_type: nullable(form.account_type),
         is_postable: isInstitutionScope ? undefined : form.nature === "postable",
         parent_account_public_id: nullable(form.parent_account_public_id),
