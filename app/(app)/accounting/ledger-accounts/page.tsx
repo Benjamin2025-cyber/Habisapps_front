@@ -56,6 +56,10 @@ export default function LedgerAccountsPage() {
   ]);
   const canView = isPlatformAdmin || canViewPerm;
   const canManage = isPlatformAdmin || canManagePerm;
+  // Minting institution grouping accounts governs every agency chart below, so
+  // it is its own permission: an agency accountant maintains only its own chart.
+  const canInstitutionScopePerm = useCanAny(["ledger.scope.institution.manage"]);
+  const canManageInstitutionScope = isPlatformAdmin || canInstitutionScopePerm;
 
   const [filters, setFilters] = useState<LedgerAccountsFilterState>(
     EMPTY_LEDGER_ACCOUNTS_FILTERS,
@@ -170,6 +174,9 @@ export default function LedgerAccountsPage() {
       );
     }
     closeDrawer();
+    // Refetch rather than patching locally: giving an account its first child
+    // turns the *parent* into a grouping account server-side (its `is_postable`
+    // flips to false), a change the client never asked for and cannot infer.
     refetch();
   }
 
@@ -283,6 +290,7 @@ export default function LedgerAccountsPage() {
           initial={editing}
           agencies={agencies}
           parentChoices={parentChoices}
+          canManageInstitutionScope={canManageInstitutionScope}
           onClose={closeDrawer}
           onSubmit={handleSubmit}
         />

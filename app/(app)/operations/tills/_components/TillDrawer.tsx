@@ -8,6 +8,7 @@ import { TextField } from "@/components/ui/TextField";
 import { MoneyField } from "@/components/ui/MoneyField";
 import { localizeApiError } from "@/lib/api/errors";
 import type { Agency } from "@/lib/api/agencies";
+import { isPostableTarget } from "@/lib/api/ledger-accounts";
 import type { LedgerAccount } from "@/lib/api/ledger-accounts";
 import type { StaffUser } from "@/lib/api/staff-users";
 import type { Till, TillWritePayload } from "@/lib/api/tills";
@@ -137,17 +138,24 @@ export function TillDrawer({
     [tellers, agencyForFilter],
   );
 
-  // Only active asset ledger accounts in the till's agency are valid.
+  /*
+   * A till holds cash, so its ledger account must be a PCEMF class 5 account
+   * (trésorerie et opérations interbancaires) that belongs to the till's own
+   * agency and can actually receive entries. The API enforces all three.
+   *
+   * Institution accounts (`agency_public_id === null`) are excluded on purpose:
+   * they are grouping accounts with no agency, so the API refuses them twice
+   * over. They used to slip through this filter.
+   */
   const ledgerOptions = useMemo(
     () =>
       ledgerAccounts
         .filter(
           (a) =>
-            a.status === "active" &&
-            a.account_class === "asset" &&
-            (a.agency_public_id === null ||
-              !agencyForFilter ||
-              a.agency_public_id === agencyForFilter),
+            isPostableTarget(a) &&
+            a.account_class === "tresorerie_interbancaire" &&
+            a.agency_public_id !== null &&
+            (!agencyForFilter || a.agency_public_id === agencyForFilter),
         )
         .map((a) => ({ value: a.public_id, label: `${a.code} — ${a.name}` })),
     [ledgerAccounts, agencyForFilter],

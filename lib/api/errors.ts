@@ -23,6 +23,21 @@ export function localizeValidationMessage(
     return `Le champ ${label} est invalide.`;
   }
 
+  // Only rewrite *machine-generated* validation messages. The rules below match
+  // on a phrase appearing anywhere, so without this gate a domain message is
+  // silently reduced to a generic one: "Ce code est déjà utilisé dans le plan
+  // comptable de HABIS Test Agency." would collapse to "Le champ Code est déjà
+  // utilisé.", dropping the part that tells you where the clash is. Laravel's
+  // messages always open with a known prefix in either locale; anything else is
+  // a business rule from `respondUnprocessable` and must survive verbatim.
+  const trimmed = rawMessage.trim();
+  const isGeneratedValidationMessage =
+    /^the\s/i.test(trimmed) ||
+    /^(le champ|la valeur|le format du champ)/i.test(trimmed);
+  if (!isGeneratedValidationMessage) {
+    return rawMessage;
+  }
+
   if (/is required/i.test(rawMessage)) {
     return `Le champ ${label} est obligatoire.`;
   }

@@ -572,6 +572,7 @@
         "roles": "Roles & permissions",
         "audit": "Audit log",
         "databaseBackups": "Backups",
+        "institution": "Institution",
         "denominations": "Currency denomination",
         "batch": "Batch Procedure",
         "tills": "Tills",
@@ -1405,6 +1406,67 @@
       "statusErrorTitle": "Unable to change status",
       "managerChangedTitle": "Manager changed",
       "managerChangedBody": "Management of {name} has been updated."
+    }
+  },
+  "institution": {
+    "pageTitle": "Institution",
+    "pageDescription": "The institution's declared legal identity. These details are stamped onto supervisory filings and issued attestations.",
+    "errorTitle": "Unable to load the institution profile",
+    "saveErrorTitle": "Unable to save",
+    "unconfiguredTitle": "Institution not yet identified",
+    "unconfiguredBody": "The legal name and approval details are blank. Fill them in before generating a regulatory filing — they are never guessed.",
+    "sections": {
+      "identity": "Legal identity",
+      "regulatory": "Approval and registration",
+      "address": "Head office",
+      "contact": "Contact",
+      "declared": "Declared accounting settings"
+    },
+    "fields": {
+      "legal_name": "Legal name",
+      "legal_nameHint": "The legal person, exactly as written on the approval decision and the RCCM — including the legal form (e.g. \"HABIS MICROFINANCE SA\"). Regulatory filings use this name.",
+      "trade_name": "Trade name",
+      "legal_form": "Legal form",
+      "emf_category": "EMF category",
+      "supervisory_authority": "Supervisory authority",
+      "approval_number": "Approval number",
+      "approval_date": "Approval date",
+      "registration_number": "Registration number (RCCM)",
+      "tax_identification_number": "Taxpayer number (NIU)",
+      "address_line_1": "Address line 1",
+      "address_line_2": "Address line 2",
+      "po_box": "PO box",
+      "city": "City",
+      "region": "Region",
+      "country": "Country",
+      "phone_number": "Phone",
+      "fax_number": "Fax",
+      "email": "Email",
+      "website": "Website",
+      "declared_reporting_currency": "Declared reporting currency",
+      "declaredCurrencyHint": "Declarative only: the accounting configuration remains authoritative for the currency actually used.",
+      "fiscal_year_start_month": "First month of the fiscal year",
+      "fiscalMonthPlaceholder": "Choose a month",
+      "fiscalMonthHint": "Declarative only: the accounting calendar remains authoritative.",
+      "trade_nameHint": "The name you trade under publicly — the branch sign, receipts, the app (e.g. \"HabisLoan\"). Leave empty if it is the same as the legal name."
+    },
+    "months": {
+      "1": "January",
+      "2": "February",
+      "3": "March",
+      "4": "April",
+      "5": "May",
+      "6": "June",
+      "7": "July",
+      "8": "August",
+      "9": "September",
+      "10": "October",
+      "11": "November",
+      "12": "December"
+    },
+    "toast": {
+      "savedTitle": "Institution updated",
+      "savedBody": "The institution profile has been saved."
     }
   },
   "accounts": {
@@ -2698,6 +2760,7 @@
     "columns": {
       "code": "Code",
       "name": "Name",
+      "structure": "Structure",
       "class": "Class",
       "normalSide": "Normal balance side",
       "type": "Type",
@@ -2705,11 +2768,14 @@
       "actions": "Actions"
     },
     "class": {
-      "asset": "Asset",
-      "liability": "Liability",
-      "equity": "Equity",
-      "revenue": "Revenue",
-      "expense": "Expense"
+      "capitaux_permanents": "Class 1 — Permanent capital",
+      "valeurs_immobilisees": "Class 2 — Fixed assets",
+      "operations_clientele": "Class 3 — Customer operations",
+      "tiers": "Class 4 — Third parties",
+      "tresorerie_interbancaire": "Class 5 — Treasury & interbank operations",
+      "charges": "Class 6 — Expenses",
+      "produits": "Class 7 — Income",
+      "hors_bilan": "Class 8 — Off-balance sheet"
     },
     "side": {
       "debit": "Debit",
@@ -2741,12 +2807,16 @@
       "name": "Name",
       "class": "Class",
       "classPlaceholder": "Choose a class",
-      "classEditHint": "The class is immutable after creation.",
+      "classEditHint": "Correctable while the account carries no movements. By PCEMF convention the class matches the leading digit of the code (a 5xxxxx code is class 5).",
       "type": "Type (optional)",
       "typeHint": "Free-form sub-categorisation, e.g. \"cash\", \"bank\".",
       "agency": "Agency",
       "agencyPlaceholder": "Assigned agency",
-      "agencyHint": "Leave empty for an institutional account (all agencies).",
+      "agencyHint": "Leave empty to use your own agency.",
+      "scope": "Scope",
+      "scopeHint": "An institution account groups the detail accounts of every agency (e.g. 571000 Caisse Globale above 571001, 571002…).",
+      "nature": "Nature",
+      "natureHint": "A grouping account consolidates the accounts beneath it and receives no entries.",
       "parent": "Parent account",
       "parentPlaceholder": "None (root account)",
       "parentHint": "Links this account to a higher-level account.",
@@ -2765,7 +2835,16 @@
       "sectionIdentity": "Identity",
       "sectionStructure": "Structure",
       "sectionAccounting": "Accounting",
+      "institutionGroupingNote": "An institution account is always a grouping account: it consolidates the agency accounts beneath it and receives no entries.",
       "create": "Create"
+    },
+    "scope": {
+      "agency": "Agency",
+      "institution": "Institution"
+    },
+    "nature": {
+      "postable": "Postable account (detail)",
+      "grouping": "Grouping account"
     },
     "archive": {
       "title": "Archive this account?",
@@ -2796,6 +2875,8 @@
       "totalDebit": "Total debit",
       "totalCredit": "Total credit",
       "empty": "No movement for this period.",
+      "consolidatedNote": "Grouping account: the amounts below consolidate the detail accounts beneath it.",
+      "consolidatedForbidden": "An institution account's balance consolidates the entries of every agency. Reading it requires the institution-scope read permission.",
       "pageOf": "Page {page} / {total}",
       "printFilePrefix": "ledger-account-statement",
       "printHeading": "General ledger account statement",
@@ -3503,7 +3584,13 @@
       "submitting": "Generating…",
       "errorTitle": "Generation failed",
       "successTitle": "Report generated",
-      "successBody": "The report was computed and added to the list."
+      "successBody": "The report was computed and added to the list.",
+      "consolidated": "Consolidation",
+      "consolidatedHint": "Consolidated, grouping accounts report the total of the detail accounts beneath them. Grand totals count each movement once either way.",
+      "consolidatedOff": "Detail accounts only",
+      "consolidatedOn": "Consolidated (rolled up)",
+      "agencyAllPlaceholder": "All agencies (institution-wide)",
+      "agencyConsolidatedHint": "Leave empty for the institution-wide rollup. Choosing an agency restricts the report to that agency's own tree."
     },
     "unavailableType": "No matching report type is exposed by the API for this section.",
     "errorTitle": "Unable to load reports",
@@ -3619,7 +3706,9 @@
         "itemsTitle": "Asset details",
         "noItems": "No detailed asset"
       }
-    }
+    },
+    "definitionsForbidden": "You do not have access to the report catalogue, so no report can be generated here. Reports already generated remain viewable and printable.",
+    "definitionsUnavailable": "The report catalogue could not be loaded, so no report can be generated here. Reports already generated remain viewable and printable."
   },
   "operationCodes": {
     "pageTitle": "Accounting — Operation codes & postings",

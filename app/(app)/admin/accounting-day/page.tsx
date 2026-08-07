@@ -59,8 +59,19 @@ export default function AccountingDayPage() {
   const canOpen = isPlatformAdmin || canOpenPerm;
   const canClose = isPlatformAdmin || canClosePerm;
   const canReopen = isPlatformAdmin || canReopenPerm;
+  // The institution's own period (the arrêté comptable) is head-office
+  // accounting work, so it is gated on a permission rather than on
+  // platform-admin. `chief-accountant` holds it and carries no agency.
+  const canInstitutionScopePerm = useCanAny([
+    "accounting.scope.institution.manage",
+  ]);
+  const canManageInstitutionScope = isPlatformAdmin || canInstitutionScopePerm;
 
   const token = session.status === "authenticated" ? session.token : null;
+  // Head-office actors have no agency assignment, so the backend cannot resolve
+  // an agency-scoped day for them: they must name the scope explicitly.
+  const hasOwnAgency =
+    session.status === "authenticated" && session.user.agency_public_id != null;
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
@@ -84,7 +95,9 @@ export default function AccountingDayPage() {
     async (signal: AbortSignal): Promise<AccountingDay | null> => {
       if (!token) throw new Error("Missing session token");
       void signal;
-      if (isPlatformAdmin) {
+      // Naming the scope is required, not just an admin convenience: without an
+      // agency assignment an unscoped request cannot be resolved (422).
+      if (canManageInstitutionScope) {
         return scopeValue === "institution"
           ? fetchCurrentAccountingDay(token, { scope: "institution" })
           : fetchCurrentAccountingDay(token, {
@@ -94,7 +107,7 @@ export default function AccountingDayPage() {
       }
       return fetchCurrentAccountingDay(token);
     },
-    [token, isPlatformAdmin, scopeValue],
+    [token, canManageInstitutionScope, scopeValue],
   );
 
   const historyFetcher = useCallback(
@@ -111,7 +124,7 @@ export default function AccountingDayPage() {
     loading: currentLoading,
     error: currentError,
     refetch: refetchCurrent,
-  } = useApi(currentFetcher, [token, isPlatformAdmin, scopeValue]);
+  } = useApi(currentFetcher, [token, canManageInstitutionScope, scopeValue]);
 
   const scopeOptions = useMemo(
     () => [
@@ -192,7 +205,7 @@ export default function AccountingDayPage() {
     const day = await openAccountingDay(token, payload);
     // Point the admin's scope view at whatever they just opened, so the card
     // reflects the new day instead of the previously-selected scope.
-    if (isPlatformAdmin) {
+    if (canManageInstitutionScope) {
       setScopeValue(
         day.scope === "institution" ? "institution" : day.agency_public_id ?? "institution",
       );
@@ -324,7 +337,7 @@ export default function AccountingDayPage() {
         }
       />
 
-      {isPlatformAdmin ? (
+      {canManageInstitutionScope ? (
         <div className="max-w-sm">
           <Select
             id="accounting-day-scope-view"
@@ -415,7 +428,9 @@ export default function AccountingDayPage() {
           open={openDrawer}
           onClose={() => setOpenDrawer(false)}
           onSubmit={handleOpen}
-          isPlatformAdmin={isPlatformAdmin}
+          canOpenInstitutionScope={canManageInstitutionScope}
+          canOpenAnyAgency={isPlatformAdmin}
+          hasOwnAgency={hasOwnAgency}
           agencies={agencies}
         />
       ) : null}

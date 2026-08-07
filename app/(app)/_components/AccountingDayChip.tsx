@@ -48,22 +48,35 @@ export function AccountingDayChip() {
 
   const token = session.status === "authenticated" ? session.token : null;
 
+  /*
+   * The backend resolves an unscoped "current day" from the actor's agency
+   * assignment, so anyone without one must name the scope explicitly or the
+   * request fails and the chip silently disappears.
+   *
+   * That applies to platform admins and to head-office roles alike:
+   * `chief-accountant` carries no agency by design and is precisely the actor
+   * running the institution's period, so it must not be the one left with no
+   * indicator.
+   */
+  const hasOwnAgency =
+    session.status === "authenticated" && session.user.agency_public_id != null;
+  const wantsInstitutionScope = isPlatformAdmin || !hasOwnAgency;
+
   const fetcher = useCallback(
     async (signal: AbortSignal): Promise<AccountingDay | null> => {
       void signal;
       if (!token || !canView) return null;
-      // Platform admins have no single agency scope; show the institution day.
-      return isPlatformAdmin
+      return wantsInstitutionScope
         ? fetchCurrentAccountingDay(token, { scope: "institution" })
         : fetchCurrentAccountingDay(token);
     },
-    [token, canView, isPlatformAdmin],
+    [token, canView, wantsInstitutionScope],
   );
 
   const { data: day, loading, error } = useApi(fetcher, [
     token,
     canView,
-    isPlatformAdmin,
+    wantsInstitutionScope,
   ]);
 
   if (!canView || error) return null;

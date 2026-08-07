@@ -23,6 +23,7 @@ import {
 } from "@/lib/api/journal-entries";
 import {
   fetchLedgerAccounts,
+  isPostableTarget,
   type LedgerAccount,
 } from "@/lib/api/ledger-accounts";
 import { useSession } from "@/lib/auth/SessionProvider";
@@ -135,15 +136,18 @@ export function JournalEntryDetailDrawer({
     return (id: string | null) => (id ? (byId.get(id) ?? id) : "—");
   }, [ledgerAccounts]);
 
-  // Only active accounts within the entry's agency scope can receive lines.
+  // Only active, *postable* accounts of the entry's own agency can receive lines.
+  //
+  // Grouping accounts are excluded: they consolidate the accounts beneath them
+  // and the API refuses an entry on one (422 `ledger_account_not_postable`).
+  // That covers every institution-scoped account — which is also why the agency
+  // match is strict here: an account with no agency is institutional, never a
+  // posting target.
   const accountOptions = useMemo(() => {
     if (!entry) return [];
     return ledgerAccounts
       .filter(
-        (a) =>
-          a.status === "active" &&
-          (a.agency_public_id === null ||
-            a.agency_public_id === entry.agency_public_id),
+        (a) => isPostableTarget(a) && a.agency_public_id === entry.agency_public_id,
       )
       .map((a) => ({ value: a.public_id, label: `${a.code} — ${a.name}` }));
   }, [ledgerAccounts, entry]);

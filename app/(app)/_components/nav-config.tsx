@@ -106,6 +106,12 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     defaultExpanded: false,
     items: [
       {
+        labelKey: "institution",
+        href: "/settings/institution",
+        available: true,
+        permissions: ["institution.profile.view"],
+      },
+      {
         labelKey: "denominations",
         href: "/settings/denominations",
         available: true,

@@ -27,12 +27,20 @@ type Props = {
   onArchive: (account: LedgerAccount) => void;
 };
 
+/**
+ * Tone per PCEMF class. Grouped so the balance sheet (classes 1–5) reads apart
+ * from the income statement (6–7), with the off-balance-sheet class (8) distinct
+ * from both.
+ */
 const CLASS_TONE: Record<LedgerAccountClass, "info" | "success" | "warning"> = {
-  asset: "info",
-  liability: "warning",
-  equity: "warning",
-  revenue: "success",
-  expense: "info",
+  capitaux_permanents: "info",
+  valeurs_immobilisees: "info",
+  operations_clientele: "info",
+  tiers: "info",
+  tresorerie_interbancaire: "info",
+  charges: "warning",
+  produits: "success",
+  hors_bilan: "warning",
 };
 
 const STATUS_TONE: Record<
@@ -74,6 +82,33 @@ export function LedgerAccountsTable({
         cell: ({ getValue }) => (
           <span className="text-foreground">{(getValue() as string) || "—"}</span>
         ),
+      },
+      {
+        id: "structure",
+        header: t("ledgerAccounts.columns.structure"),
+        // Where the account sits in the consolidated chart. A grouping account
+        // takes no entries, so flagging it here saves users discovering that
+        // only when a journal line is refused.
+        cell: ({ row }) => {
+          const account = row.original;
+          return (
+            <div className="flex flex-wrap items-center gap-1">
+              {account.scope === "institution" ? (
+                <Badge tone="accent">
+                  {t("ledgerAccounts.scope.institution")}
+                </Badge>
+              ) : null}
+              {account.is_postable ? null : (
+                <Badge tone="neutral">
+                  {t("ledgerAccounts.nature.grouping")}
+                </Badge>
+              )}
+              {account.scope === "agency" && account.is_postable ? (
+                <span className="text-muted-foreground">—</span>
+              ) : null}
+            </div>
+          );
+        },
       },
       {
         accessorKey: "account_class",
@@ -139,10 +174,13 @@ export function LedgerAccountsTable({
               onClick: () => onEdit(account),
             });
             if (account.status !== "active") {
+              // Archived accounts are reactivatable on purpose. A code belongs to
+              // the regulated chart and cannot be reinvented, so if archiving were
+              // final a mistyped account would strand its code for good — and the
+              // account holding it could never be corrected.
               items.push({
                 label: t("ledgerAccounts.actions.activate"),
                 onClick: () => onSetStatus(account, "active"),
-                disabled: account.status === "archived",
               });
             }
             if (account.status === "active") {
