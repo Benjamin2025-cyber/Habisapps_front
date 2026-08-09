@@ -85,7 +85,12 @@ export type LedgerAccount = {
   account_type: string | null;
   /** False for a grouping account: it consolidates its children and refuses entries. */
   is_postable: boolean;
-  normal_balance_side: LedgerNormalBalanceSide;
+  /**
+   * Null for a *bivalent* account — no imposed side. Comptes de liaison, de
+   * régularisation and hors bilan take entries both ways by nature, so the API
+   * reports the side they actually sit on rather than one they should match.
+   */
+  normal_balance_side: LedgerNormalBalanceSide | null;
   status: LedgerAccountStatus;
   created_at: string;
   updated_at: string;
@@ -143,7 +148,8 @@ export type LedgerAccountCreatePayload = {
   account_type?: string | null;
   is_postable?: boolean;
   parent_account_public_id?: string | null;
-  normal_balance_side: LedgerNormalBalanceSide;
+  /** Null creates a bivalent account: no imposed side. */
+  normal_balance_side: LedgerNormalBalanceSide | null;
   status?: "active" | "inactive" | "suspended";
 };
 
@@ -157,7 +163,8 @@ export type LedgerAccountUpdatePayload = {
   account_type?: string | null;
   is_postable?: boolean;
   parent_account_public_id?: string | null;
-  normal_balance_side?: LedgerNormalBalanceSide;
+  /** Null makes the account bivalent: no imposed side. */
+  normal_balance_side?: LedgerNormalBalanceSide | null;
   status?: LedgerAccountStatus;
 };
 
@@ -180,6 +187,8 @@ export type LedgerAccountBalance = {
   credit_total_minor: number;
   balance_minor: number;
   normal_balance_side: LedgerNormalBalanceSide | null;
+  /** The side the account actually sits on this period; null when it nets to zero. */
+  balance_side: LedgerNormalBalanceSide | null;
 };
 
 /** Résumé du relevé (mouvements + soldes d'ouverture/clôture). */
@@ -194,6 +203,8 @@ export type LedgerStatement = {
   credit_total_minor: number;
   closing_balance_minor: number;
   normal_balance_side: LedgerNormalBalanceSide | null;
+  /** The side the account actually sits on this period; null when it nets to zero. */
+  balance_side: LedgerNormalBalanceSide | null;
 };
 
 export type LedgerMovement = {

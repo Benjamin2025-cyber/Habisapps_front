@@ -2780,7 +2780,8 @@
     },
     "side": {
       "debit": "Debit",
-      "credit": "Credit"
+      "credit": "Credit",
+      "none": "No imposed side (bivalent)"
     },
     "status": {
       "active": "Active",

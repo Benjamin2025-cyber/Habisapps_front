@@ -57,7 +57,7 @@ type FormState = {
   account_type: string;
   agency_public_id: string;
   parent_account_public_id: string;
-  normal_balance_side: LedgerNormalBalanceSide | "";
+  normal_balance_side: LedgerNormalBalanceSide | "none" | "";
   status: "active" | "inactive" | "suspended" | "";
 };
 
@@ -75,6 +75,18 @@ const EMPTY: FormState = {
 };
 
 const CLASSES = LEDGER_ACCOUNT_CLASSES;
+
+/**
+ * The form marks "no imposed side" as `"none"` so the Select has something to
+ * hold; the API expects an explicit `null`. `""` means untouched.
+ */
+function sideForPayload(
+  value: LedgerNormalBalanceSide | "none" | "",
+): LedgerNormalBalanceSide | null | undefined {
+  if (value === "") return undefined;
+
+  return value === "none" ? null : value;
+}
 
 /**
  * Conventional normal balance side for each class (suggested, overridable).
@@ -128,7 +140,9 @@ export function LedgerAccountDrawer({
         account_type: initial.account_type ?? "",
         agency_public_id: initial.agency_public_id ?? "",
         parent_account_public_id: initial.parent_account_public_id ?? "",
-        normal_balance_side: initial.normal_balance_side,
+        // '' is the drawer's empty marker; null is a real value meaning
+        // bivalent, so it maps to the explicit 'none' option.
+        normal_balance_side: initial.normal_balance_side ?? "none",
         status: initial.status === "archived" ? "" : initial.status,
       });
     } else {
@@ -242,7 +256,9 @@ export function LedgerAccountDrawer({
             ? form.nature === "postable"
             : undefined,
         parent_account_public_id: nullable(form.parent_account_public_id),
-        normal_balance_side: form.normal_balance_side || undefined,
+        // "none" is bivalent, which the API expects as an explicit null —
+        // `|| undefined` would drop it and leave the side unchanged.
+        normal_balance_side: sideForPayload(form.normal_balance_side),
         status: form.status || undefined,
       } satisfies LedgerAccountUpdatePayload;
     } else {
@@ -262,8 +278,7 @@ export function LedgerAccountDrawer({
         account_type: nullable(form.account_type),
         is_postable: isInstitutionScope ? undefined : form.nature === "postable",
         parent_account_public_id: nullable(form.parent_account_public_id),
-        normal_balance_side: (form.normal_balance_side ||
-          "debit") as LedgerNormalBalanceSide,
+        normal_balance_side: sideForPayload(form.normal_balance_side) ?? "debit",
         status: form.status || undefined,
       } satisfies LedgerAccountCreatePayload;
     }
@@ -484,10 +499,17 @@ export function LedgerAccountDrawer({
               options={[
                 { value: "debit", label: t("ledgerAccounts.side.debit") },
                 { value: "credit", label: t("ledgerAccounts.side.credit") },
+                // Bivalent: comptes de liaison, de régularisation and hors
+                // bilan take entries both ways, so imposing a side would make
+                // half their balances read negative.
+                { value: "none", label: t("ledgerAccounts.side.none") },
               ]}
               placeholder={t("ledgerAccounts.fields.normalSidePlaceholder")}
               onChange={(next) =>
-                set("normal_balance_side", next as LedgerNormalBalanceSide | "")
+                set(
+                  "normal_balance_side",
+                  next as LedgerNormalBalanceSide | "none" | "",
+                )
               }
               error={errors.normal_balance_side}
               required

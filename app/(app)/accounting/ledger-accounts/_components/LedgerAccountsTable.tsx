@@ -128,9 +128,11 @@ export function LedgerAccountsTable({
         header: t("ledgerAccounts.columns.normalSide"),
         cell: ({ getValue }) => {
           const value = getValue() as LedgerAccount["normal_balance_side"];
+          // Null is a bivalent account — no imposed side — not a missing value,
+          // so it gets its own label rather than `side.null`.
           return (
             <span className="text-muted-foreground">
-              {t(`ledgerAccounts.side.${value}`)}
+              {t(value ? `ledgerAccounts.side.${value}` : "ledgerAccounts.side.none")}
             </span>
           );
         },
