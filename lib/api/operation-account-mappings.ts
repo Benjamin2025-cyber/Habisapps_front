@@ -29,10 +29,25 @@ export type MappingApprovalStatus =
   | "archived";
 
 /** Approval values accepted on create (the full set is allowed on update). */
-export const MAPPING_CREATE_APPROVAL_STATUSES = [
+/**
+ * What an author may set. `approved` and `rejected` are decisions, taken through
+ * the approve/reject endpoints by someone other than the author — the API
+ * refuses them here.
+ */
+export const MAPPING_CREATE_APPROVAL_STATUSES = ["draft", "submitted"] as const;
+
+/**
+ * What an edit may set: everything except the two decisions. Withdrawing,
+ * suspending or revoking only takes a rule out of service, so it needs no
+ * countersignature.
+ */
+export const MAPPING_EDIT_APPROVAL_STATUSES = [
   "draft",
   "submitted",
-  "approved",
+  "suspended",
+  "revoked",
+  "expired",
+  "archived",
 ] as const;
 
 export type OperationAccountMapping = {
@@ -158,6 +173,31 @@ export async function updateOperationAccountMapping(
 }
 
 /** Archives the mapping (status → archived). */
+/**
+ * Approve a mapping — the decision that puts the posting rule into service.
+ * Requires `operation.mappings.approve`, and the API refuses the author: 403
+ * when the caller wrote it, 422 when it has already been decided.
+ */
+export async function approveOperationAccountMapping(
+  token: string,
+  publicId: string,
+): Promise<OperationAccountMapping> {
+  return apiRequest<OperationAccountMapping>(
+    `operation-account-mappings/${publicId}/approve`,
+    { method: "POST", token },
+  );
+}
+
+export async function rejectOperationAccountMapping(
+  token: string,
+  publicId: string,
+): Promise<OperationAccountMapping> {
+  return apiRequest<OperationAccountMapping>(
+    `operation-account-mappings/${publicId}/reject`,
+    { method: "POST", token },
+  );
+}
+
 export async function deleteOperationAccountMapping(
   token: string,
   publicId: string,

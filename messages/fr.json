@@ -3846,7 +3846,9 @@
         "create": "Nouvelle imputation",
         "edit": "Modifier",
         "archive": "Archiver",
-        "menu": "Actions de l'imputation"
+        "menu": "Actions de l'imputation",
+        "approve": "Approuver",
+        "reject": "Rejeter"
       },
       "filters": {
         "search": "Recherche",
@@ -3891,7 +3893,11 @@
         "updatedBody": "L'imputation a été modifiée.",
         "archivedTitle": "Imputation archivée",
         "archivedBody": "L'imputation a été archivée.",
-        "errorTitle": "Action impossible"
+        "errorTitle": "Action impossible",
+        "approvedTitle": "Imputation approuvée",
+        "approvedBody": "La règle d'imputation est désormais en service.",
+        "rejectedTitle": "Imputation rejetée",
+        "rejectedBody": "La règle d'imputation n'a pas été approuvée."
       }
     }
   },

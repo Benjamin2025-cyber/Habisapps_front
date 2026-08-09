@@ -3846,7 +3846,9 @@
         "create": "New posting",
         "edit": "Edit",
         "archive": "Archive",
-        "menu": "Posting actions"
+        "menu": "Posting actions",
+        "approve": "Approve",
+        "reject": "Reject"
       },
       "filters": {
         "search": "Search",
@@ -3891,7 +3893,11 @@
         "updatedBody": "The posting has been updated.",
         "archivedTitle": "Posting archived",
         "archivedBody": "The posting has been archived.",
-        "errorTitle": "Action not allowed"
+        "errorTitle": "Action not allowed",
+        "approvedTitle": "Mapping approved",
+        "approvedBody": "The posting rule is now in service.",
+        "rejectedTitle": "Mapping rejected",
+        "rejectedBody": "The posting rule was not approved."
       }
     }
   },

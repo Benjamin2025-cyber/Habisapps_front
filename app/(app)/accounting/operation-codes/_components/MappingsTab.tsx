@@ -20,7 +20,10 @@ import {
   deleteOperationAccountMapping,
   fetchOperationAccountMappings,
   updateOperationAccountMapping,
+  approveOperationAccountMapping,
+  rejectOperationAccountMapping,
   MAPPING_CREATE_APPROVAL_STATUSES,
+  MAPPING_EDIT_APPROVAL_STATUSES,
   type MappingApprovalStatus,
   type MappingStatus,
   type MappingWritePayload,
@@ -64,16 +67,6 @@ const APPROVAL_TONE: Record<
   archived: "neutral",
 };
 
-const ALL_APPROVAL_STATUSES: MappingApprovalStatus[] = [
-  "draft",
-  "submitted",
-  "approved",
-  "rejected",
-  "suspended",
-  "revoked",
-  "expired",
-  "archived",
-];
 
 function short(pid: string | null): string {
   if (!pid) return "—";
@@ -93,6 +86,10 @@ export function MappingsTab() {
   const canCreate = isPlatformAdmin || create;
   const canUpdate = isPlatformAdmin || update;
   const canArchive = isPlatformAdmin || archive;
+  // Approving is the checker half of a maker-checker control, so it is its own
+  // permission — holding create does not imply it.
+  const approve = useCanAny(["operation.mappings.approve"]);
+  const canApprove = isPlatformAdmin || approve;
   const hasRowActions = canUpdate || canArchive;
 
   const [page, setPage] = useState(1);
@@ -183,6 +180,29 @@ export function MappingsTab() {
   ]);
 
   const rows = data?.data ?? [];
+
+  async function decide(mapping: OperationAccountMapping, decision: "approve" | "reject") {
+    if (!token) return;
+    try {
+      if (decision === "approve") {
+        await approveOperationAccountMapping(token, mapping.public_id);
+      } else {
+        await rejectOperationAccountMapping(token, mapping.public_id);
+      }
+      toast.success(
+        t(`operationCodes.mappings.toast.${decision}dTitle`),
+        t(`operationCodes.mappings.toast.${decision}dBody`),
+      );
+      refetch();
+    } catch (cause) {
+      // Chiefly the two the API enforces: 403 when the caller wrote the rule,
+      // 422 when it has already been decided. Both read clearly as-is.
+      toast.error(
+        t("operationCodes.mappings.toast.errorTitle"),
+        localizeApiError(cause).generalMessage,
+      );
+    }
+  }
 
   async function handleArchive() {
     if (!token || !confirmArchive) return;
@@ -338,6 +358,21 @@ export function MappingsTab() {
                   items.push({
                     label: t("operationCodes.mappings.actions.edit"),
                     onClick: () => setDrawer({ mode: "edit", initial: m }),
+                  });
+                }
+                if (
+                  canApprove &&
+                  (m.approval_status === "draft" || m.approval_status === "submitted")
+                ) {
+                  if (items.length > 0) items.push({ kind: "separator" });
+                  items.push({
+                    label: t("operationCodes.mappings.actions.approve"),
+                    onClick: () => void decide(m, "approve"),
+                  });
+                  items.push({
+                    label: t("operationCodes.mappings.actions.reject"),
+                    onClick: () => void decide(m, "reject"),
+                    destructive: true,
                   });
                 }
                 if (canArchive && m.status !== "archived") {
@@ -567,8 +602,12 @@ function MappingDrawer({
       : (["active", "inactive"] as const)
   ).map((s) => ({ value: s, label: t(`operationCodes.mappings.status.${s}`) }));
 
+  // Neither list offers `approved`/`rejected`: those are decisions taken from
+  // the row menu by someone other than the author, and the API refuses them here.
   const approvalOptions = (
-    isEdit ? ALL_APPROVAL_STATUSES : [...MAPPING_CREATE_APPROVAL_STATUSES]
+    isEdit
+      ? [...MAPPING_EDIT_APPROVAL_STATUSES]
+      : [...MAPPING_CREATE_APPROVAL_STATUSES]
   ).map((s) => ({ value: s, label: t(`operationCodes.mappings.approval.${s}`) }));
 
   const noLeg =
