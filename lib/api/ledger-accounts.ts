@@ -148,8 +148,12 @@ export type LedgerAccountCreatePayload = {
   account_type?: string | null;
   is_postable?: boolean;
   parent_account_public_id?: string | null;
-  /** Null creates a bivalent account: no imposed side. */
-  normal_balance_side: LedgerNormalBalanceSide | null;
+  /**
+   * Null creates a bivalent account: no imposed side. Distinct from omitting
+   * the key, which means the user never chose — the API's `present` rule
+   * rejects that with a field error rather than letting a side be guessed.
+   */
+  normal_balance_side?: LedgerNormalBalanceSide | null;
   status?: "active" | "inactive" | "suspended";
 };
 

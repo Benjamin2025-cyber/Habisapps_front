@@ -278,7 +278,10 @@ export function LedgerAccountDrawer({
         account_type: nullable(form.account_type),
         is_postable: isInstitutionScope ? undefined : form.nature === "postable",
         parent_account_public_id: nullable(form.parent_account_public_id),
-        normal_balance_side: sideForPayload(form.normal_balance_side) ?? "debit",
+        // Same as the edit branch: "none" must reach the API as an explicit
+        // null. Defaulting to "debit" here would take a bivalent account the
+        // user asked for and quietly create a debit one instead.
+        normal_balance_side: sideForPayload(form.normal_balance_side),
         status: form.status || undefined,
       } satisfies LedgerAccountCreatePayload;
     }
