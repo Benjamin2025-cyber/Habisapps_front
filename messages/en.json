@@ -2775,7 +2775,8 @@
       "tresorerie_interbancaire": "Class 5 — Treasury & interbank operations",
       "charges": "Class 6 — Expenses",
       "produits": "Class 7 — Income",
-      "hors_bilan": "Class 8 — Off-balance sheet"
+      "hors_bilan": "Class 9 — Off-balance sheet",
+      "soldes_intermediaires_gestion": "Class 8 — Intermediate management balances"
     },
     "side": {
       "debit": "Debit",
@@ -2825,7 +2826,8 @@
       "normalSideHint": "Side that increases the account. Pre-filled based on the class.",
       "status": "Status",
       "statusPlaceholder": "Status",
-      "statusHint": "An inactive account can no longer be posted to."
+      "statusHint": "An inactive account can no longer be posted to.",
+      "classDerivedHint": "Determined by the code: in the PCEMF chart the class is its leading digit (a 5xxxxx code is class 5)."
     },
     "drawer": {
       "titleCreate": "New general ledger account",
@@ -2887,6 +2889,10 @@
         "debit": "Debit",
         "credit": "Credit"
       }
+    },
+    "picker": {
+      "noResults": "No matching account",
+      "searching": "Searching…"
     }
   },
   "sectors": {

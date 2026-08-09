@@ -8,6 +8,11 @@ import { TextField } from "@/components/ui/TextField";
 import { localizeApiError } from "@/lib/api/errors";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import type { Agency } from "@/lib/api/agencies";
+import { classFromCode, LEDGER_ACCOUNT_CLASSES } from "@/lib/api/ledger-accounts";
+import {
+  LedgerAccountPicker,
+  type LedgerAccountOption,
+} from "@/app/(app)/_components/LedgerAccountPicker";
 import type {
   LedgerAccount,
   LedgerAccountClass,
@@ -24,8 +29,6 @@ type Props = {
   mode: LedgerAccountDrawerMode;
   initial?: LedgerAccount | null;
   agencies: ReadonlyArray<Agency>;
-  /** Existing accounts offered as parent (the current one is excluded). */
-  parentChoices: ReadonlyArray<LedgerAccount>;
   /**
    * May create/maintain institution-level grouping accounts
    * (`ledger.scope.institution.manage`). Without it the scope choice is not
@@ -71,25 +74,15 @@ const EMPTY: FormState = {
   status: "",
 };
 
-/** The eight PCEMF classes, in class order (1 → 8). */
-const CLASSES: LedgerAccountClass[] = [
-  "capitaux_permanents",
-  "valeurs_immobilisees",
-  "operations_clientele",
-  "tiers",
-  "tresorerie_interbancaire",
-  "charges",
-  "produits",
-  "hors_bilan",
-];
+const CLASSES = LEDGER_ACCOUNT_CLASSES;
 
 /**
  * Conventional normal balance side for each class (suggested, overridable).
  *
- * Classes 3, 4 and 8 legitimately go both ways — client lending is a debit-side
- * class 3 while client deposits are credit-side, and off-balance-sheet
- * commitments given differ from those received. The suggestion here is only the
- * more common case; the field stays editable.
+ * Classes 3, 4, 5 and 9 legitimately go both ways — client lending is a
+ * debit-side class 3 while client deposits are credit-side, treasury holds both
+ * cash and borrowings, and commitments given differ from those received. The
+ * suggestion here is only the more common case; the field stays editable.
  */
 const SIDE_BY_CLASS: Record<LedgerAccountClass, LedgerNormalBalanceSide> = {
   capitaux_permanents: "credit",
@@ -99,6 +92,7 @@ const SIDE_BY_CLASS: Record<LedgerAccountClass, LedgerNormalBalanceSide> = {
   tresorerie_interbancaire: "debit",
   charges: "debit",
   produits: "credit",
+  soldes_intermediaires_gestion: "credit",
   hors_bilan: "debit",
 };
 
@@ -107,13 +101,13 @@ export function LedgerAccountDrawer({
   mode,
   initial,
   agencies,
-  parentChoices,
   canManageInstitutionScope,
   onClose,
   onSubmit,
 }: Props) {
   const t = useTranslations();
   const [form, setForm] = useState<FormState>(EMPTY);
+  const [parent, setParent] = useState<LedgerAccountOption | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
@@ -140,10 +134,29 @@ export function LedgerAccountDrawer({
     } else {
       setForm(EMPTY);
     }
+    if (!isEdit) setParent(null);
   }, [open, isEdit, initial]);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
+  }
+
+  /**
+   * In PCEMF the class is the leading digit of the code, and the API refuses any
+   * other combination — so deriving it here removes a choice that could only be
+   * made wrongly. A code that starts with something else leaves the field alone.
+   */
+  function onCodeChange(next: string) {
+    const derived = classFromCode(next);
+    setForm((current) => ({
+      ...current,
+      code: next,
+      account_class: derived ?? current.account_class,
+      normal_balance_side:
+        derived && current.normal_balance_side === ""
+          ? SIDE_BY_CLASS[derived]
+          : current.normal_balance_side,
+    }));
   }
 
   /** Picking a class on creation pre-fills the normal side if still empty. */
@@ -172,6 +185,8 @@ export function LedgerAccountDrawer({
       // A parent legal under the old scope may be illegal under the new one.
       parent_account_public_id: "",
     }));
+    // A parent legal under the old scope may be illegal under the new one.
+    setParent(null);
   }
 
   const isInstitutionScope = form.scope === "institution";
@@ -185,29 +200,6 @@ export function LedgerAccountDrawer({
     [agencies],
   );
 
-  /**
-   * A consolidated chart of accounts flows one way: agency detail accounts roll
-   * up into institution grouping accounts. So an institution account may only be
-   * grouped under another institution account, and an agency account under an
-   * institution account or one of its own agency — never under another agency's.
-   * Offering illegal parents would only produce a 422 on save.
-   */
-  const parentOptions = useMemo(() => {
-    const agencyId = form.agency_public_id;
-    return parentChoices
-      .filter((account) => account.public_id !== initial?.public_id)
-      .filter((account) => {
-        if (isInstitutionScope) return account.scope === "institution";
-        return (
-          account.scope === "institution" ||
-          (agencyId !== "" && account.agency_public_id === agencyId)
-        );
-      })
-      .map((account) => ({
-        value: account.public_id,
-        label: `${account.code} — ${account.name}`,
-      }));
-  }, [parentChoices, initial?.public_id, isInstitutionScope, form.agency_public_id]);
 
   const natureOptions: Array<{ value: AccountNature; label: string }> = [
     { value: "postable", label: t("ledgerAccounts.nature.postable") },
@@ -363,7 +355,7 @@ export function LedgerAccountDrawer({
             <TextField
               label={t("ledgerAccounts.fields.code")}
               value={form.code}
-              onChange={(event) => set("code", event.target.value)}
+              onChange={(event) => onCodeChange(event.target.value)}
               error={errors.code}
               disabled={isEdit}
               required={!isEdit}
@@ -380,7 +372,11 @@ export function LedgerAccountDrawer({
               onChange={(next) => onClassChange(next as LedgerAccountClass | "")}
               error={errors.account_class}
               required
-              hint={isEdit ? t("ledgerAccounts.fields.classEditHint") : undefined}
+              hint={
+                isEdit
+                  ? t("ledgerAccounts.fields.classEditHint")
+                  : t("ledgerAccounts.fields.classDerivedHint")
+              }
             />
             <TextField
               label={t("ledgerAccounts.fields.name")}
@@ -439,15 +435,35 @@ export function LedgerAccountDrawer({
                 hint={t("ledgerAccounts.fields.natureHint")}
               />
             )}
-            <Select
+            <LedgerAccountPicker
               label={t("ledgerAccounts.fields.parent")}
-              value={form.parent_account_public_id}
-              options={parentOptions}
+              value={parent}
+              onChange={(option) => {
+                setParent(option);
+                set("parent_account_public_id", option?.value ?? "");
+              }}
+              initialValuePublicId={initial?.parent_account_public_id ?? null}
               placeholder={t("ledgerAccounts.fields.parentPlaceholder")}
-              isClearable
-              onChange={(next) => set("parent_account_public_id", next)}
               error={errors.parent_account_public_id}
               hint={t("ledgerAccounts.fields.parentHint")}
+              resetKey={`${form.scope}:${form.agency_public_id}`}
+              /*
+               * A consolidated chart flows one way: agency detail accounts roll up
+               * into institution grouping accounts. So an institution account may
+               * only sit under another institution account, and an agency account
+               * under an institution account or one of its own agency — never
+               * under another agency's. Offering an illegal parent would only
+               * produce a 422 on save.
+               */
+              filter={(account) => {
+                if (account.public_id === initial?.public_id) return false;
+                if (isInstitutionScope) return account.scope === "institution";
+                return (
+                  account.scope === "institution" ||
+                  (form.agency_public_id !== "" &&
+                    account.agency_public_id === form.agency_public_id)
+                );
+              }}
             />
             <TextField
               label={t("ledgerAccounts.fields.type")}

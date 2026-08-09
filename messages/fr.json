@@ -2775,7 +2775,8 @@
       "tresorerie_interbancaire": "Classe 5 — Comptes de trésorerie et d'opérations interbancaires",
       "charges": "Classe 6 — Comptes de charges",
       "produits": "Classe 7 — Comptes de produits",
-      "hors_bilan": "Classe 8 — Comptes de hors bilan"
+      "hors_bilan": "Classe 9 — Comptes de hors bilan",
+      "soldes_intermediaires_gestion": "Classe 8 — Soldes intermédiaires de gestion"
     },
     "side": {
       "debit": "Débit",
@@ -2825,7 +2826,8 @@
       "normalSideHint": "Sens d'augmentation du compte. Pré-rempli selon la classe.",
       "status": "Statut",
       "statusPlaceholder": "Statut",
-      "statusHint": "Un compte inactif ne peut plus être imputé."
+      "statusHint": "Un compte inactif ne peut plus être imputé.",
+      "classDerivedHint": "Déterminée par le code : dans le plan PCEMF, la classe est son premier chiffre (un code 5xxxxx relève de la classe 5)."
     },
     "drawer": {
       "titleCreate": "Nouveau compte général",
@@ -2887,6 +2889,10 @@
         "debit": "Débit",
         "credit": "Crédit"
       }
+    },
+    "picker": {
+      "noResults": "Aucun compte correspondant",
+      "searching": "Recherche…"
     }
   },
   "sectors": {

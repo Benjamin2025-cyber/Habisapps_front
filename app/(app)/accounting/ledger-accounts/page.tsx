@@ -124,11 +124,6 @@ export default function LedgerAccountsPage() {
     });
   }, [data, filters]);
 
-  // Parent choices come from active accounts on the loaded page.
-  const parentChoices = useMemo(
-    () => (data?.data ?? []).filter((a) => a.status !== "archived"),
-    [data],
-  );
 
   if (session.status !== "authenticated" || !canView) return null;
 
@@ -289,7 +284,6 @@ export default function LedgerAccountsPage() {
           mode={drawerMode ?? "create"}
           initial={editing}
           agencies={agencies}
-          parentChoices={parentChoices}
           canManageInstitutionScope={canManageInstitutionScope}
           onClose={closeDrawer}
           onSubmit={handleSubmit}

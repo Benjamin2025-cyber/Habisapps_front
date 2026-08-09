@@ -6,6 +6,7 @@ import { fetchClients, type Client } from "@/lib/api/clients";
 import { useCan } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
+import { debounce } from "@/lib/debounce";
 
 /** Client option carries its agency + plain holder name for the selection. */
 export type ClientOption = AsyncSelectOption & {
@@ -119,13 +120,3 @@ function toOption(client: Client): ClientOption {
   };
 }
 
-function debounce<A extends unknown[]>(
-  fn: (...args: A) => void,
-  ms: number,
-): (...args: A) => void {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  return (...args: A) => {
-    if (timer) clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), ms);
-  };
-}

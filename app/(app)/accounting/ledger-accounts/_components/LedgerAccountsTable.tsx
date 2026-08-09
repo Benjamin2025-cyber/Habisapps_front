@@ -29,7 +29,7 @@ type Props = {
 
 /**
  * Tone per PCEMF class. Grouped so the balance sheet (classes 1–5) reads apart
- * from the income statement (6–7), with the off-balance-sheet class (8) distinct
+ * from the income statement (6–7), with the off-balance-sheet class (9) distinct
  * from both.
  */
 const CLASS_TONE: Record<LedgerAccountClass, "info" | "success" | "warning"> = {
@@ -40,6 +40,7 @@ const CLASS_TONE: Record<LedgerAccountClass, "info" | "success" | "warning"> = {
   tresorerie_interbancaire: "info",
   charges: "warning",
   produits: "success",
+  soldes_intermediaires_gestion: "info",
   hors_bilan: "warning",
 };
 

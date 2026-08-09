@@ -41,6 +41,11 @@ export type OperationAccountMapping = {
   agency_public_id: string | null;
   debit_ledger_account_public_id: string | null;
   credit_ledger_account_public_id: string | null;
+  /** Sent with the mapping, so labelling needs no lookup against the chart. */
+  debit_ledger_account_code: string | null;
+  debit_ledger_account_name: string | null;
+  credit_ledger_account_code: string | null;
+  credit_ledger_account_name: string | null;
   currency: string | null;
   effective_from: string | null;
   effective_to: string | null;

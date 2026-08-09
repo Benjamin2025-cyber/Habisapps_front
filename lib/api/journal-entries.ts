@@ -31,6 +31,9 @@ export type JournalLine = {
   public_id: string;
   journal_entry_public_id: string | null;
   ledger_account_public_id: string | null;
+  /** Sent with the line, so a label needs no lookup against the chart. */
+  ledger_account_code: string | null;
+  ledger_account_name: string | null;
   customer_account_public_id: string | null;
   debit_minor: number;
   credit_minor: number;
