@@ -597,6 +597,7 @@
         "sectors": "Business sectors",
         "journalEntries": "Miscellaneous entries",
         "exerciseClosings": "Exercise closing",
+        "resultAppropriations": "Result appropriation",
         "globalClientImage": "Global client image",
         "reportsPar": "PAR",
         "ledgerJournal": "Journal of entries",
@@ -4546,5 +4547,47 @@
       "year": "Enter the exercise as a four-digit year, for example 2026."
     },
     "forbidden": "Your profile does not have the rights required to view exercise closings."
+  },
+  "resultAppropriations": {
+    "title": "Result appropriation",
+    "description": "Allocate the exercise's result out of 131 (or 132) as the general assembly decided: legal reserve, other reserves, retained earnings, dividends.",
+    "allocate": "Record the appropriation",
+    "allocating": "Recording…",
+    "addLine": "Add a line",
+    "created": "Appropriation recorded. It must now be approved and posted from the journal entries.",
+    "ownAgency": "My agency",
+    "toAllocate": "To allocate:",
+    "remaining": "Remaining:",
+    "decidedOnHint": "Date of the assembly's decision.",
+    "noPostedClosing": "No posted closing found for this exercise and agency. The result must be closed and its transfer posted before it can be allocated.",
+    "preconditions": "The allocations must add up to exactly the result being allocated, and the accounting day of the decision date must be open. An exercise is allocated once.",
+    "awaitingNotice": "An appropriation awaiting review has moved nothing: the result is still held in 131 or 132. Approve and post the entry from the journal entries to complete it.",
+    "empty": "No result has been allocated yet.",
+    "forbidden": "Your profile does not have the rights required to view result appropriations.",
+    "fields": {
+      "agency": "Agency",
+      "fiscalYear": "Exercise",
+      "decidedOn": "Decided on",
+      "account": "Destination account",
+      "amount": "Amount"
+    },
+    "columns": {
+      "fiscalYear": "Exercise",
+      "agency": "Agency",
+      "decidedOn": "Decided on",
+      "amount": "Amount",
+      "source": "From",
+      "status": "Status"
+    },
+    "status": {
+      "posted": "Posted",
+      "awaitingReview": "Awaiting review"
+    },
+    "errors": {
+      "year": "Enter the exercise as a four-digit year, for example 2026.",
+      "decidedOn": "Give the date of the assembly's decision.",
+      "noAllocations": "Add at least one destination account with an amount.",
+      "amount": "Each amount must be greater than zero."
+    }
   }
 }

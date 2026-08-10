@@ -284,6 +284,12 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
         permissions: ["journal.entries.view"],
       },
       {
+        labelKey: "resultAppropriations",
+        href: "/accounting/result-appropriations",
+        available: true,
+        permissions: ["accounting.audit.view"],
+      },
+      {
         labelKey: "exerciseClosings",
         href: "/accounting/exercise-closings",
         available: true,
