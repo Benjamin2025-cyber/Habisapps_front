@@ -2875,6 +2875,7 @@
       "print": "Print / PDF",
       "openingBalance": "Opening balance",
       "closingBalance": "Closing balance",
+      "balanceSide": "Balance position",
       "totalDebit": "Total debit",
       "totalCredit": "Total credit",
       "empty": "No movement for this period.",

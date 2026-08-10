@@ -2875,6 +2875,7 @@
       "print": "Imprimer / PDF",
       "openingBalance": "Solde d'ouverture",
       "closingBalance": "Solde de clôture",
+      "balanceSide": "Position du solde",
       "totalDebit": "Total débit",
       "totalCredit": "Total crédit",
       "empty": "Aucun mouvement sur cette période.",

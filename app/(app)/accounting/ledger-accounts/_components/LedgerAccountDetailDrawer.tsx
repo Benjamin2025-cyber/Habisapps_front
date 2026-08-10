@@ -96,6 +96,18 @@ export function LedgerAccountDetailDrawer({ open, account, onClose }: Props) {
     return format.currencyMinor(minor, { currency: cur });
   }
 
+  /**
+   * The side the closing balance actually sits on this period — as opposed to
+   * the side the account is expected to sit on (`normal_balance_side`), which a
+   * bivalent account has none of. Without this, a bivalent account's closing
+   * balance renders as a bare signed number (debit-positive by convention) with
+   * nothing to say what a negative figure means.
+   */
+  function sideLabel(side: string | null | undefined): string | null {
+    if (side === undefined) return null;
+    return t(side ? `ledgerAccounts.side.${side}` : "ledgerAccounts.side.none");
+  }
+
   function handlePrint() {
     if (!account) return;
     openBrandedReport({
@@ -118,6 +130,10 @@ export function LedgerAccountDetailDrawer({ open, account, onClose }: Props) {
         {
           label: t("ledgerAccounts.detail.closingBalance"),
           value: money(statement?.closing_balance_minor),
+        },
+        {
+          label: t("ledgerAccounts.detail.balanceSide"),
+          value: sideLabel(statement?.balance_side) ?? "—",
         },
         {
           label: t("ledgerAccounts.detail.totalDebit"),
@@ -235,6 +251,11 @@ export function LedgerAccountDetailDrawer({ open, account, onClose }: Props) {
           <SummaryCard
             label={t("ledgerAccounts.detail.closingBalance")}
             value={money(statement?.closing_balance_minor)}
+            caption={
+              statement
+                ? `${t("ledgerAccounts.detail.balanceSide")} : ${sideLabel(statement.balance_side) ?? "—"}`
+                : undefined
+            }
             strong
           />
         </div>
@@ -354,10 +375,13 @@ export function LedgerAccountDetailDrawer({ open, account, onClose }: Props) {
 function SummaryCard({
   label,
   value,
+  caption,
   strong,
 }: {
   label: string;
   value: string;
+  /** Extra context under the value, e.g. which side a balance actually sits on. */
+  caption?: string;
   strong?: boolean;
 }) {
   return (
@@ -374,6 +398,9 @@ function SummaryCard({
       >
         {value}
       </span>
+      {caption ? (
+        <span className="text-[0.7rem] text-muted-foreground">{caption}</span>
+      ) : null}
     </div>
   );
 }

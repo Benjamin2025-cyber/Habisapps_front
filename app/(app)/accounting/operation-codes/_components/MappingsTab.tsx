@@ -90,7 +90,9 @@ export function MappingsTab() {
   // permission — holding create does not imply it.
   const approve = useCanAny(["operation.mappings.approve"]);
   const canApprove = isPlatformAdmin || approve;
-  const hasRowActions = canUpdate || canArchive;
+  // A reviewer holding only the approve permission still needs the row menu —
+  // that is the entire point of splitting maker from checker.
+  const hasRowActions = canUpdate || canArchive || canApprove;
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
@@ -181,28 +183,33 @@ export function MappingsTab() {
 
   const rows = data?.data ?? [];
 
-  async function decide(mapping: OperationAccountMapping, decision: "approve" | "reject") {
-    if (!token) return;
-    try {
-      if (decision === "approve") {
-        await approveOperationAccountMapping(token, mapping.public_id);
-      } else {
-        await rejectOperationAccountMapping(token, mapping.public_id);
+  // useCallback so the columns memo below (which closes over this) can list it
+  // as a dependency without recomputing on every render.
+  const decide = useCallback(
+    async (mapping: OperationAccountMapping, decision: "approve" | "reject") => {
+      if (!token) return;
+      try {
+        if (decision === "approve") {
+          await approveOperationAccountMapping(token, mapping.public_id);
+        } else {
+          await rejectOperationAccountMapping(token, mapping.public_id);
+        }
+        toast.success(
+          t(`operationCodes.mappings.toast.${decision}dTitle`),
+          t(`operationCodes.mappings.toast.${decision}dBody`),
+        );
+        refetch();
+      } catch (cause) {
+        // Chiefly the two the API enforces: 403 when the caller wrote the rule,
+        // 422 when it has already been decided. Both read clearly as-is.
+        toast.error(
+          t("operationCodes.mappings.toast.errorTitle"),
+          localizeApiError(cause).generalMessage,
+        );
       }
-      toast.success(
-        t(`operationCodes.mappings.toast.${decision}dTitle`),
-        t(`operationCodes.mappings.toast.${decision}dBody`),
-      );
-      refetch();
-    } catch (cause) {
-      // Chiefly the two the API enforces: 403 when the caller wrote the rule,
-      // 422 when it has already been decided. Both read clearly as-is.
-      toast.error(
-        t("operationCodes.mappings.toast.errorTitle"),
-        localizeApiError(cause).generalMessage,
-      );
-    }
-  }
+    },
+    [token, t, refetch, toast],
+  );
 
   async function handleArchive() {
     if (!token || !confirmArchive) return;
@@ -399,7 +406,17 @@ export function MappingsTab() {
           ]
         : []),
     ],
-    [t, hasRowActions, canUpdate, canArchive, codeLabel, accountLabel, agencyByPid],
+    [
+      t,
+      hasRowActions,
+      canUpdate,
+      canArchive,
+      canApprove,
+      decide,
+      codeLabel,
+      accountLabel,
+      agencyByPid,
+    ],
   );
 
   const pageMeta = data?.meta.pagination;
