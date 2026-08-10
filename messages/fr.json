@@ -3618,6 +3618,7 @@
       "trial_balance": "Balance des comptes",
       "general_ledger": "Grand livre",
       "emf_trial_balance": "Balance EMF (COBAC)",
+      "income_statement": "Compte de résultat",
       "credit_portfolio_outstanding": "Encours de crédit",
       "credit_par_delinquency": "Portefeuille à risque (PAR)",
       "credit_collection_performance": "Performance de recouvrement"
