@@ -2775,11 +2775,13 @@
       "tresorerie_interbancaire": "Classe 5 — Comptes de trésorerie et d'opérations interbancaires",
       "charges": "Classe 6 — Comptes de charges",
       "produits": "Classe 7 — Comptes de produits",
-      "hors_bilan": "Classe 8 — Comptes de hors bilan"
+      "hors_bilan": "Classe 9 — Comptes de hors bilan",
+      "soldes_intermediaires_gestion": "Classe 8 — Soldes intermédiaires de gestion"
     },
     "side": {
       "debit": "Débit",
-      "credit": "Crédit"
+      "credit": "Crédit",
+      "none": "Sans sens imposé (bivalent)"
     },
     "status": {
       "active": "Actif",
@@ -2825,7 +2827,8 @@
       "normalSideHint": "Sens d'augmentation du compte. Pré-rempli selon la classe.",
       "status": "Statut",
       "statusPlaceholder": "Statut",
-      "statusHint": "Un compte inactif ne peut plus être imputé."
+      "statusHint": "Un compte inactif ne peut plus être imputé.",
+      "classDerivedHint": "Déterminée par le code : dans le plan PCEMF, la classe est son premier chiffre (un code 5xxxxx relève de la classe 5)."
     },
     "drawer": {
       "titleCreate": "Nouveau compte général",
@@ -2872,6 +2875,7 @@
       "print": "Imprimer / PDF",
       "openingBalance": "Solde d'ouverture",
       "closingBalance": "Solde de clôture",
+      "balanceSide": "Position du solde",
       "totalDebit": "Total débit",
       "totalCredit": "Total crédit",
       "empty": "Aucun mouvement sur cette période.",
@@ -2887,6 +2891,10 @@
         "debit": "Débit",
         "credit": "Crédit"
       }
+    },
+    "picker": {
+      "noResults": "Aucun compte correspondant",
+      "searching": "Recherche…"
     }
   },
   "sectors": {
@@ -3840,7 +3848,9 @@
         "create": "Nouvelle imputation",
         "edit": "Modifier",
         "archive": "Archiver",
-        "menu": "Actions de l'imputation"
+        "menu": "Actions de l'imputation",
+        "approve": "Approuver",
+        "reject": "Rejeter"
       },
       "filters": {
         "search": "Recherche",
@@ -3885,7 +3895,11 @@
         "updatedBody": "L'imputation a été modifiée.",
         "archivedTitle": "Imputation archivée",
         "archivedBody": "L'imputation a été archivée.",
-        "errorTitle": "Action impossible"
+        "errorTitle": "Action impossible",
+        "approvedTitle": "Imputation approuvée",
+        "approvedBody": "La règle d'imputation est désormais en service.",
+        "rejectedTitle": "Imputation rejetée",
+        "rejectedBody": "La règle d'imputation n'a pas été approuvée."
       }
     }
   },

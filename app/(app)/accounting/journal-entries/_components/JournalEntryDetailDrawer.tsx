@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -21,11 +21,11 @@ import {
   submitJournalEntry,
   type JournalEntry,
 } from "@/lib/api/journal-entries";
+import { isPostableTarget } from "@/lib/api/ledger-accounts";
 import {
-  fetchLedgerAccounts,
-  isPostableTarget,
-  type LedgerAccount,
-} from "@/lib/api/ledger-accounts";
+  LedgerAccountPicker,
+  type LedgerAccountOption,
+} from "@/app/(app)/_components/LedgerAccountPicker";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useFormatter, useTranslations } from "@/lib/i18n/I18nProvider";
 import { useToast } from "@/lib/toast/ToastProvider";
@@ -69,10 +69,9 @@ export function JournalEntryDetailDrawer({
   const [entry, setEntry] = useState<JournalEntry | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [ledgerAccounts, setLedgerAccounts] = useState<LedgerAccount[]>([]);
 
   // Add-line form
-  const [laId, setLaId] = useState("");
+  const [account, setAccount] = useState<LedgerAccountOption | null>(null);
   const [side, setSide] = useState<Side>("debit");
   const [amount, setAmount] = useState("");
   const [memo, setMemo] = useState("");
@@ -107,7 +106,7 @@ export function JournalEntryDetailDrawer({
     if (!open) {
       setShowReject(false);
       setReason("");
-      setLaId("");
+      setAccount(null);
       setAmount("");
       setMemo("");
       setSide("debit");
@@ -115,42 +114,8 @@ export function JournalEntryDetailDrawer({
     }
   }, [open]);
 
-  useEffect(() => {
-    if (!open || !token) return;
-    let cancelled = false;
-    fetchLedgerAccounts(token, { perPage: 100 })
-      .then((res) => {
-        if (!cancelled) setLedgerAccounts(res.data);
-      })
-      .catch(() => {
-        if (!cancelled) setLedgerAccounts([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [open, token]);
 
-  const accountLabel = useMemo(() => {
-    const byId = new Map<string, string>();
-    for (const a of ledgerAccounts) byId.set(a.public_id, `${a.code} — ${a.name}`);
-    return (id: string | null) => (id ? (byId.get(id) ?? id) : "—");
-  }, [ledgerAccounts]);
 
-  // Only active, *postable* accounts of the entry's own agency can receive lines.
-  //
-  // Grouping accounts are excluded: they consolidate the accounts beneath them
-  // and the API refuses an entry on one (422 `ledger_account_not_postable`).
-  // That covers every institution-scoped account — which is also why the agency
-  // match is strict here: an account with no agency is institutional, never a
-  // posting target.
-  const accountOptions = useMemo(() => {
-    if (!entry) return [];
-    return ledgerAccounts
-      .filter(
-        (a) => isPostableTarget(a) && a.agency_public_id === entry.agency_public_id,
-      )
-      .map((a) => ({ value: a.public_id, label: `${a.code} — ${a.name}` }));
-  }, [ledgerAccounts, entry]);
 
   const totals = entry ? entryTotals(entry) : { debit: 0, credit: 0, balanced: false };
   const currency = entry?.lines[0]?.currency ?? CURRENCY;
@@ -171,7 +136,7 @@ export function JournalEntryDetailDrawer({
     if (!token || !entry) return;
     setAddError(null);
     const major = Number(amount.trim());
-    if (!laId || !Number.isFinite(major) || major <= 0) {
+    if (!account || !Number.isFinite(major) || major <= 0) {
       setAddError(t("journalEntries.detail.addLineInvalid"));
       return;
     }
@@ -180,7 +145,7 @@ export function JournalEntryDetailDrawer({
     try {
       await addJournalLine(token, {
         journal_entry_public_id: entry.public_id,
-        ledger_account_public_id: laId,
+        ledger_account_public_id: account.value,
         debit_minor: side === "debit" ? minor : 0,
         credit_minor: side === "credit" ? minor : 0,
         currency: CURRENCY,
@@ -332,7 +297,9 @@ export function JournalEntryDetailDrawer({
                       className="border-b border-border/60 last:border-0"
                     >
                       <td className="px-3 py-2 text-foreground">
-                        {accountLabel(line.ledger_account_public_id)}
+                        {line.ledger_account_code
+                          ? `${line.ledger_account_code} — ${line.ledger_account_name ?? ""}`
+                          : (line.ledger_account_public_id ?? "—")}
                       </td>
                       <td className="px-3 py-2 text-muted-foreground">
                         {line.line_memo ?? "—"}
@@ -403,16 +370,20 @@ export function JournalEntryDetailDrawer({
                 </p>
               ) : null}
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <Select
+                <LedgerAccountPicker
                   label={t("journalEntries.detail.lineAccount")}
-                  value={laId}
-                  options={accountOptions}
+                  value={account}
+                  onChange={setAccount}
                   placeholder={t("journalEntries.detail.lineAccountPlaceholder")}
-                  onChange={setLaId}
-                  hint={
-                    accountOptions.length === 0
-                      ? t("journalEntries.detail.noAccounts")
-                      : undefined
+                  resetKey={entry?.agency_public_id ?? "none"}
+                  // Only active, *postable* accounts of the entry's own agency can
+                  // receive a line. Grouping accounts consolidate what sits beneath
+                  // them and the API refuses an entry on one (422
+                  // `ledger_account_not_postable`); that covers every institution
+                  // account, which is why the agency match is strict.
+                  filter={(a) =>
+                    isPostableTarget(a) &&
+                    a.agency_public_id === (entry?.agency_public_id ?? null)
                   }
                 />
                 <Select

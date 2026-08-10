@@ -29,7 +29,7 @@ type Props = {
 
 /**
  * Tone per PCEMF class. Grouped so the balance sheet (classes 1–5) reads apart
- * from the income statement (6–7), with the off-balance-sheet class (8) distinct
+ * from the income statement (6–7), with the off-balance-sheet class (9) distinct
  * from both.
  */
 const CLASS_TONE: Record<LedgerAccountClass, "info" | "success" | "warning"> = {
@@ -40,6 +40,7 @@ const CLASS_TONE: Record<LedgerAccountClass, "info" | "success" | "warning"> = {
   tresorerie_interbancaire: "info",
   charges: "warning",
   produits: "success",
+  soldes_intermediaires_gestion: "info",
   hors_bilan: "warning",
 };
 
@@ -127,9 +128,11 @@ export function LedgerAccountsTable({
         header: t("ledgerAccounts.columns.normalSide"),
         cell: ({ getValue }) => {
           const value = getValue() as LedgerAccount["normal_balance_side"];
+          // Null is a bivalent account — no imposed side — not a missing value,
+          // so it gets its own label rather than `side.null`.
           return (
             <span className="text-muted-foreground">
-              {t(`ledgerAccounts.side.${value}`)}
+              {t(value ? `ledgerAccounts.side.${value}` : "ledgerAccounts.side.none")}
             </span>
           );
         },

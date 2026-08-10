@@ -40,8 +40,8 @@ import { getRequestLocale } from "./locale";
  * Remplace les natures IFRS (asset/liability/equity/revenue/expense), qui
  * décrivaient la nature d'un compte et non sa place dans le plan national. La
  * nature reste déductible : les classes 6 et 7 forment le compte de résultat, 8
- * le hors bilan, et pour les classes 1 à 5 le côté du bilan suit
- * `normal_balance_side`.
+ * les soldes intermédiaires de gestion, 9 le hors bilan, et pour les classes 1 à
+ * 5 le côté du bilan suit `normal_balance_side`.
  */
 export type LedgerAccountClass =
   /** Classe 1 — Comptes de capitaux permanents. */
@@ -58,7 +58,9 @@ export type LedgerAccountClass =
   | "charges"
   /** Classe 7 — Comptes de produits. */
   | "produits"
-  /** Classe 8 — Comptes de hors bilan. */
+  /** Classe 8 — Soldes intermédiaires de gestion (agrégats du compte de résultat). */
+  | "soldes_intermediaires_gestion"
+  /** Classe 9 — Comptes de hors bilan. */
   | "hors_bilan";
 
 export type LedgerNormalBalanceSide = "debit" | "credit";
@@ -83,11 +85,41 @@ export type LedgerAccount = {
   account_type: string | null;
   /** False for a grouping account: it consolidates its children and refuses entries. */
   is_postable: boolean;
-  normal_balance_side: LedgerNormalBalanceSide;
+  /**
+   * Null for a *bivalent* account — no imposed side. Comptes de liaison, de
+   * régularisation and hors bilan take entries both ways by nature, so the API
+   * reports the side they actually sit on rather than one they should match.
+   */
+  normal_balance_side: LedgerNormalBalanceSide | null;
   status: LedgerAccountStatus;
   created_at: string;
   updated_at: string;
 };
+
+/** The nine PCEMF classes, in class order (1 → 9). */
+export const LEDGER_ACCOUNT_CLASSES: LedgerAccountClass[] = [
+  "capitaux_permanents",
+  "valeurs_immobilisees",
+  "operations_clientele",
+  "tiers",
+  "tresorerie_interbancaire",
+  "charges",
+  "produits",
+  "soldes_intermediaires_gestion",
+  "hors_bilan",
+];
+
+/**
+ * The class a code belongs to, read from its leading digit — the PCEMF rule the
+ * API enforces. Returns null when the code does not start with a digit 1–9, in
+ * which case the class cannot be inferred and must be chosen.
+ */
+export function classFromCode(code: string): LedgerAccountClass | null {
+  const digit = Number(code.trim().charAt(0));
+  if (!Number.isInteger(digit) || digit < 1 || digit > 9) return null;
+  return LEDGER_ACCOUNT_CLASSES[digit - 1];
+}
+
 
 /** A grouping account can never be an entry target. */
 export function isPostableTarget(account: LedgerAccount): boolean {
@@ -116,7 +148,12 @@ export type LedgerAccountCreatePayload = {
   account_type?: string | null;
   is_postable?: boolean;
   parent_account_public_id?: string | null;
-  normal_balance_side: LedgerNormalBalanceSide;
+  /**
+   * Null creates a bivalent account: no imposed side. Distinct from omitting
+   * the key, which means the user never chose — the API's `present` rule
+   * rejects that with a field error rather than letting a side be guessed.
+   */
+  normal_balance_side?: LedgerNormalBalanceSide | null;
   status?: "active" | "inactive" | "suspended";
 };
 
@@ -130,7 +167,8 @@ export type LedgerAccountUpdatePayload = {
   account_type?: string | null;
   is_postable?: boolean;
   parent_account_public_id?: string | null;
-  normal_balance_side?: LedgerNormalBalanceSide;
+  /** Null makes the account bivalent: no imposed side. */
+  normal_balance_side?: LedgerNormalBalanceSide | null;
   status?: LedgerAccountStatus;
 };
 
@@ -153,6 +191,8 @@ export type LedgerAccountBalance = {
   credit_total_minor: number;
   balance_minor: number;
   normal_balance_side: LedgerNormalBalanceSide | null;
+  /** The side the account actually sits on this period; null when it nets to zero. */
+  balance_side: LedgerNormalBalanceSide | null;
 };
 
 /** Résumé du relevé (mouvements + soldes d'ouverture/clôture). */
@@ -167,6 +207,8 @@ export type LedgerStatement = {
   credit_total_minor: number;
   closing_balance_minor: number;
   normal_balance_side: LedgerNormalBalanceSide | null;
+  /** The side the account actually sits on this period; null when it nets to zero. */
+  balance_side: LedgerNormalBalanceSide | null;
 };
 
 export type LedgerMovement = {
@@ -196,16 +238,19 @@ const JSON_HEADERS = (token: string): Record<string, string> => ({
 });
 
 /**
- * Paginated list. The API does not expose server-side filters here, so
- * search / class / status filtering is applied client-side over the loaded
- * page (the chart of accounts is a bounded referential).
+ * Paginated list. `search` is applied **server-side** across code, name, class,
+ * type, normal side and status — use it rather than loading a page and
+ * filtering locally: `per_page` is capped at 100 by the API and a real PCEMF
+ * chart runs to ~1 400 accounts per agency, so a local filter would only ever
+ * see the first page.
  */
 export async function fetchLedgerAccounts(
   token: string,
-  options: { page?: number; perPage?: number } = {},
+  options: { page?: number; perPage?: number; search?: string } = {},
 ): Promise<PaginatedLedgerAccounts> {
   const query = new URLSearchParams();
   query.set("per_page", String(options.perPage ?? 100));
+  if (options.search) query.set("search", options.search);
   if (options.page && options.page > 0) query.set("page", String(options.page));
 
   const response = await fetch(`/api/v1/ledger-accounts?${query.toString()}`, {

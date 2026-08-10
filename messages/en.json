@@ -2775,11 +2775,13 @@
       "tresorerie_interbancaire": "Class 5 — Treasury & interbank operations",
       "charges": "Class 6 — Expenses",
       "produits": "Class 7 — Income",
-      "hors_bilan": "Class 8 — Off-balance sheet"
+      "hors_bilan": "Class 9 — Off-balance sheet",
+      "soldes_intermediaires_gestion": "Class 8 — Intermediate management balances"
     },
     "side": {
       "debit": "Debit",
-      "credit": "Credit"
+      "credit": "Credit",
+      "none": "No imposed side (bivalent)"
     },
     "status": {
       "active": "Active",
@@ -2825,7 +2827,8 @@
       "normalSideHint": "Side that increases the account. Pre-filled based on the class.",
       "status": "Status",
       "statusPlaceholder": "Status",
-      "statusHint": "An inactive account can no longer be posted to."
+      "statusHint": "An inactive account can no longer be posted to.",
+      "classDerivedHint": "Determined by the code: in the PCEMF chart the class is its leading digit (a 5xxxxx code is class 5)."
     },
     "drawer": {
       "titleCreate": "New general ledger account",
@@ -2872,6 +2875,7 @@
       "print": "Print / PDF",
       "openingBalance": "Opening balance",
       "closingBalance": "Closing balance",
+      "balanceSide": "Balance position",
       "totalDebit": "Total debit",
       "totalCredit": "Total credit",
       "empty": "No movement for this period.",
@@ -2887,6 +2891,10 @@
         "debit": "Debit",
         "credit": "Credit"
       }
+    },
+    "picker": {
+      "noResults": "No matching account",
+      "searching": "Searching…"
     }
   },
   "sectors": {
@@ -3840,7 +3848,9 @@
         "create": "New posting",
         "edit": "Edit",
         "archive": "Archive",
-        "menu": "Posting actions"
+        "menu": "Posting actions",
+        "approve": "Approve",
+        "reject": "Reject"
       },
       "filters": {
         "search": "Search",
@@ -3885,7 +3895,11 @@
         "updatedBody": "The posting has been updated.",
         "archivedTitle": "Posting archived",
         "archivedBody": "The posting has been archived.",
-        "errorTitle": "Action not allowed"
+        "errorTitle": "Action not allowed",
+        "approvedTitle": "Mapping approved",
+        "approvedBody": "The posting rule is now in service.",
+        "rejectedTitle": "Mapping rejected",
+        "rejectedBody": "The posting rule was not approved."
       }
     }
   },

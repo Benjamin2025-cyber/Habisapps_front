@@ -12,6 +12,7 @@ import { createReportRun, type ReportRun } from "@/lib/api/report-runs";
 import { localizeApiError } from "@/lib/api/errors";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
+import { useCanAny, useHasRole } from "@/lib/auth/permissions";
 
 type Props = {
   open: boolean;
@@ -97,6 +98,19 @@ export function GenerateReportDrawer({ open, onClose, definitions, onGenerated }
    */
   const supportsConsolidated =
     selected?.supported_parameters?.includes("consolidated") ?? false;
+
+  /**
+   * A consolidated run spans every agency, so the API requires institution-wide
+   * ledger read — the same grant that gates an institution account's balance.
+   * `accounting.audit.view`, which is all this page needs, does not confer it:
+   * auditor and compliance-officer hold one and not the other. Offering the
+   * choice to them would only produce a 403 on generate.
+   */
+  // Computed unconditionally, then OR'd: `a() || b()` would skip the second
+  // hook whenever the first is true.
+  const isPlatformAdmin = useHasRole(["platform-admin"]);
+  const hasInstitutionRead = useCanAny(["ledger.scope.institution.read"]);
+  const canConsolidate = isPlatformAdmin || hasInstitutionRead;
 
   /**
    * Consolidation is institution-wide by nature: with no agency the rollup spans
@@ -208,7 +222,7 @@ export function GenerateReportDrawer({ open, onClose, definitions, onGenerated }
           />
         ) : null}
 
-        {supportsConsolidated ? (
+        {supportsConsolidated && canConsolidate ? (
           <Select
             id="report-consolidated"
             label={t("reports.generateDrawer.consolidated")}

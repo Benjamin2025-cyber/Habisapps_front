@@ -29,6 +29,7 @@ const CLASSES: LedgerAccountClass[] = [
   "tresorerie_interbancaire",
   "charges",
   "produits",
+  "soldes_intermediaires_gestion",
   "hors_bilan",
 ];
 
