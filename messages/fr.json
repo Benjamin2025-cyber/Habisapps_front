@@ -596,6 +596,7 @@
         "operationCodes": "Codes opération & imputations",
         "sectors": "Secteurs d'activité",
         "journalEntries": "Opérations diverses",
+        "exerciseClosings": "Clôture de l'exercice",
         "globalClientImage": "Image globale client",
         "reportsPar": "PAR",
         "ledgerJournal": "Journal des écritures",
@@ -4511,5 +4512,38 @@
       "cancelToastTitle": "Plan annulé",
       "cancelToastBody": "Le plan de restauration a été annulé."
     }
+  },
+  "exerciseClosings": {
+    "title": "Clôture de l'exercice",
+    "description": "Solde les classes 6 et 7 et porte le résultat au 131 (bénéfice) ou au 132 (perte).",
+    "close": "Clôturer l'exercice",
+    "closing": "Clôture en cours…",
+    "created": "Clôture établie. Elle doit maintenant être approuvée puis comptabilisée depuis les écritures comptables.",
+    "ownAgency": "Mon agence",
+    "preconditions": "Les exercices se clôturent dans l'ordre, et la clôture précédente doit déjà être comptabilisée. L'écriture est datée du dernier jour de l'exercice : la journée comptable de cette date doit donc être ouverte.",
+    "awaitingNotice": "Une clôture en attente de revue n'a rien transféré : son exercice reste logé dans les classes 6 et 7. Approuvez puis comptabilisez l'écriture depuis les écritures comptables pour achever le transfert.",
+    "empty": "Aucun exercice n'a encore été clôturé.",
+    "benefice": "bénéfice",
+    "perte": "perte",
+    "fields": {
+      "agency": "Agence",
+      "fiscalYear": "Exercice"
+    },
+    "columns": {
+      "fiscalYear": "Exercice",
+      "agency": "Agence",
+      "period": "Période",
+      "result": "Résultat net",
+      "carriedTo": "Porté au",
+      "status": "Statut"
+    },
+    "status": {
+      "posted": "Comptabilisée",
+      "awaitingReview": "En attente de revue"
+    },
+    "errors": {
+      "year": "Saisissez l'exercice sous forme d'année à quatre chiffres, par exemple 2026."
+    },
+    "forbidden": "Votre profil ne dispose pas des droits nécessaires pour consulter les clôtures d'exercice."
   }
 }

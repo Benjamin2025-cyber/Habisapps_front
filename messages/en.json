@@ -596,6 +596,7 @@
         "operationCodes": "Operation codes & postings",
         "sectors": "Business sectors",
         "journalEntries": "Miscellaneous entries",
+        "exerciseClosings": "Exercise closing",
         "globalClientImage": "Global client image",
         "reportsPar": "PAR",
         "ledgerJournal": "Journal of entries",
@@ -4511,5 +4512,38 @@
       "cancelToastTitle": "Plan cancelled",
       "cancelToastBody": "The restore plan was cancelled."
     }
+  },
+  "exerciseClosings": {
+    "title": "Exercise closing",
+    "description": "Solde classes 6 and 7 and carry the result to 131 (profit) or 132 (loss).",
+    "close": "Close the exercise",
+    "closing": "Closing…",
+    "created": "Closing drawn up. It must now be approved and posted from the journal entries.",
+    "ownAgency": "My agency",
+    "preconditions": "Exercises are closed in order, and the previous closing must already be posted. The entry is dated the last day of the exercise, so that accounting day must be open.",
+    "awaitingNotice": "A closing awaiting review has transferred nothing: its exercise is still held in classes 6 and 7. Approve and post the entry from the journal entries to complete the transfer.",
+    "empty": "No exercise has been closed yet.",
+    "benefice": "profit",
+    "perte": "loss",
+    "fields": {
+      "agency": "Agency",
+      "fiscalYear": "Exercise"
+    },
+    "columns": {
+      "fiscalYear": "Exercise",
+      "agency": "Agency",
+      "period": "Period",
+      "result": "Net result",
+      "carriedTo": "Carried to",
+      "status": "Status"
+    },
+    "status": {
+      "posted": "Posted",
+      "awaitingReview": "Awaiting review"
+    },
+    "errors": {
+      "year": "Enter the exercise as a four-digit year, for example 2026."
+    },
+    "forbidden": "Your profile does not have the rights required to view exercise closings."
   }
 }

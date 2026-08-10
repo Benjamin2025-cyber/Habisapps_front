@@ -284,6 +284,14 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
         permissions: ["journal.entries.view"],
       },
       {
+        labelKey: "exerciseClosings",
+        href: "/accounting/exercise-closings",
+        available: true,
+        // Readable with audit.view; drawing a clôture needs
+        // accounting.exercise.close, which the page checks separately.
+        permissions: ["accounting.audit.view"],
+      },
+      {
         labelKey: "globalClientImage",
         href: "/accounting/global-client-image",
         available: true,
