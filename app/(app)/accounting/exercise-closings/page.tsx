@@ -176,7 +176,12 @@ export default function ExerciseClosingsPage() {
             {t("exerciseClosings.preconditions")}
           </p>
 
-          {formError ? <Alert variant="danger">{formError}</Alert> : null}
+          {/* Every refusal this endpoint returns is a legitimate state of the
+              books, not a failure: nothing to close, already closed, an earlier
+              exercise still open, the accounting day not open. Red reads as
+              "something is broken" and sends someone looking for a fault that is
+              not there. */}
+          {formError ? <Alert variant="warning">{formError}</Alert> : null}
         </form>
       ) : null}
 
