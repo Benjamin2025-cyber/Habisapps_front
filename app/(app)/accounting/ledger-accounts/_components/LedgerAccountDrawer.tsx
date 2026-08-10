@@ -8,7 +8,7 @@ import { TextField } from "@/components/ui/TextField";
 import { localizeApiError } from "@/lib/api/errors";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import type { Agency } from "@/lib/api/agencies";
-import { classFromCode, LEDGER_ACCOUNT_CLASSES } from "@/lib/api/ledger-accounts";
+import { classFromCode, SELECTABLE_LEDGER_ACCOUNT_CLASSES } from "@/lib/api/ledger-accounts";
 import {
   LedgerAccountPicker,
   type LedgerAccountOption,
@@ -74,7 +74,7 @@ const EMPTY: FormState = {
   status: "",
 };
 
-const CLASSES = LEDGER_ACCOUNT_CLASSES;
+const CLASSES = SELECTABLE_LEDGER_ACCOUNT_CLASSES;
 
 /**
  * The form marks "no imposed side" as `"none"` so the Select has something to

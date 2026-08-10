@@ -602,7 +602,8 @@
         "cashDraft": "Cash blotter",
         "reportsExigible": "Loan receivables",
         "reportsRelease": "Lien release",
-        "reportsBalance": "Trial balance"
+        "reportsBalance": "Trial balance",
+        "reportsIncomeStatement": "Income statement"
       }
     },
     "topBar": {
@@ -3645,6 +3646,10 @@
       "balance": {
         "title": "Trial balance",
         "description": "Trial balance, general ledger and EMF/COBAC balance."
+      },
+      "incomeStatement": {
+        "title": "Income statement",
+        "description": "The eight soldes intermédiaires de gestion (80 to 87), computed from classes 6 and 7."
       }
     },
     "release": {

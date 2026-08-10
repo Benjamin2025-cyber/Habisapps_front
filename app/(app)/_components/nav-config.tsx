@@ -335,6 +335,15 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
         available: true,
         permissions: ["accounting.audit.view"],
       },
+      {
+        labelKey: "reportsIncomeStatement",
+        href: "/reports/income-statement",
+        available: true,
+        // Same permission as the other accounting reports. Asking for the
+        // institution's result rather than one agency's needs
+        // ledger.scope.institution.read on top, which the API enforces.
+        permissions: ["accounting.audit.view"],
+      },
     ],
   },
 ];

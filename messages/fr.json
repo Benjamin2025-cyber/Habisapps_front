@@ -602,7 +602,8 @@
         "cashDraft": "Brouillard de caisse",
         "reportsExigible": "Exigible prêt",
         "reportsRelease": "Main levée",
-        "reportsBalance": "Balance des comptes"
+        "reportsBalance": "Balance des comptes",
+        "reportsIncomeStatement": "Compte de résultat"
       }
     },
     "topBar": {
@@ -3645,6 +3646,10 @@
       "balance": {
         "title": "Balance des comptes",
         "description": "Balance, grand livre et balance EMF/COBAC."
+      },
+      "incomeStatement": {
+        "title": "Compte de résultat",
+        "description": "Les huit soldes intermédiaires de gestion (80 à 87), calculés à partir des classes 6 et 7."
       }
     },
     "release": {
