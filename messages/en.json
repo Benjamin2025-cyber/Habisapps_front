@@ -633,7 +633,9 @@
         "cancelled": "Day cancelled",
         "none": "No open day",
         "loading": "Day status…",
-        "ariaLabel": "View accounting day"
+        "ariaLabel": "View accounting day",
+        "scopeInstitution": "Head office",
+        "scopeAgency": "Agency"
       }
     },
     "userMenu": {
@@ -4522,7 +4524,7 @@
     "closing": "Closing…",
     "created": "Closing drawn up. It must now be approved and posted from the journal entries.",
     "ownAgency": "My agency",
-    "preconditions": "Exercises are closed in order, and the previous closing must already be posted. The entry is dated the last day of the exercise, so that accounting day must be open.",
+    "preconditions": "Exercises are closed in order, and the previous closing must already be posted. The entry is dated the last day of the exercise, so that agency's accounting day for that date must be open — the head-office day is a separate one and does not stand in for it.",
     "awaitingNotice": "A closing awaiting review has transferred nothing: its exercise is still held in classes 6 and 7. Approve and post the entry from the journal entries to complete the transfer.",
     "empty": "No exercise has been closed yet.",
     "benefice": "profit",
@@ -4560,7 +4562,7 @@
     "remaining": "Remaining:",
     "decidedOnHint": "Date of the assembly's decision.",
     "noPostedClosing": "No posted closing found for this exercise and agency. The result must be closed and its transfer posted before it can be allocated.",
-    "preconditions": "The allocations must add up to exactly the result being allocated, and the accounting day of the decision date must be open. An exercise is allocated once.",
+    "preconditions": "The allocations must add up to exactly the result being allocated, and the agency's accounting day for the decision date must be open — the head-office day is a separate one. An exercise is allocated once.",
     "awaitingNotice": "An appropriation awaiting review has moved nothing: the result is still held in 131 or 132. Approve and post the entry from the journal entries to complete it.",
     "empty": "No result has been allocated yet.",
     "forbidden": "Your profile does not have the rights required to view result appropriations.",

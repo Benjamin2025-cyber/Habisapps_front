@@ -108,6 +108,23 @@ export function AccountingDayChip() {
     >
       <Icon className="h-3.5 w-3.5" />
       <span>{label}</span>
+      {/* Which day this is. There are two scopes — one per agency, and one for the
+          institution that head-office staff work in — and the status alone is the
+          same sentence for both. Two people side by side were reading "journée
+          ouverte" about different days, and an agency day being open says nothing
+          about the institution's, or the other way round. Taken from the day the
+          API returned rather than from the scope requested, so it says what is
+          actually on screen. */}
+      {day ? (
+        <>
+          <span aria-hidden className="h-3 w-px bg-current opacity-30" />
+          <span className="opacity-80">
+            {day.scope === "institution"
+              ? t("shell.topBar.accountingDay.scopeInstitution")
+              : t("shell.topBar.accountingDay.scopeAgency")}
+          </span>
+        </>
+      ) : null}
       {day?.business_date ? (
         <>
           <span aria-hidden className="h-3 w-px bg-current opacity-30" />

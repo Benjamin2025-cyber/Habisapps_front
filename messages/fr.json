@@ -633,7 +633,9 @@
         "cancelled": "Journée annulée",
         "none": "Aucune journée ouverte",
         "loading": "Statut journée…",
-        "ariaLabel": "Voir la journée comptable"
+        "ariaLabel": "Voir la journée comptable",
+        "scopeInstitution": "Siège",
+        "scopeAgency": "Agence"
       }
     },
     "userMenu": {
@@ -4522,7 +4524,7 @@
     "closing": "Clôture en cours…",
     "created": "Clôture établie. Elle doit maintenant être approuvée puis comptabilisée depuis les écritures comptables.",
     "ownAgency": "Mon agence",
-    "preconditions": "Les exercices se clôturent dans l'ordre, et la clôture précédente doit déjà être comptabilisée. L'écriture est datée du dernier jour de l'exercice : la journée comptable de cette date doit donc être ouverte.",
+    "preconditions": "Les exercices se clôturent dans l'ordre, et la clôture précédente doit déjà être comptabilisée. L'écriture est datée du dernier jour de l'exercice : la journée comptable de cette date, pour cette agence, doit donc être ouverte — celle du siège est une journée distincte et ne la remplace pas.",
     "awaitingNotice": "Une clôture en attente de revue n'a rien transféré : son exercice reste logé dans les classes 6 et 7. Approuvez puis comptabilisez l'écriture depuis les écritures comptables pour achever le transfert.",
     "empty": "Aucun exercice n'a encore été clôturé.",
     "benefice": "bénéfice",
@@ -4560,7 +4562,7 @@
     "remaining": "Reste à affecter :",
     "decidedOnHint": "Date de la décision de l'assemblée.",
     "noPostedClosing": "Aucune clôture comptabilisée pour cet exercice et cette agence. Le résultat doit être clôturé et son transfert comptabilisé avant de pouvoir être affecté.",
-    "preconditions": "Les affectations doivent totaliser exactement le résultat à répartir, et la journée comptable de la date de décision doit être ouverte. Un exercice ne s'affecte qu'une fois.",
+    "preconditions": "Les affectations doivent totaliser exactement le résultat à répartir, et la journée comptable de la date de décision, pour cette agence, doit être ouverte — celle du siège est une journée distincte. Un exercice ne s'affecte qu'une fois.",
     "awaitingNotice": "Une affectation en attente de revue n'a rien transféré : le résultat reste logé au 131 ou au 132. Approuvez puis comptabilisez l'écriture depuis les écritures comptables pour l'achever.",
     "empty": "Aucun résultat n'a encore été affecté.",
     "forbidden": "Votre profil ne dispose pas des droits nécessaires pour consulter les affectations du résultat.",
