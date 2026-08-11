@@ -4254,7 +4254,9 @@
       "dateHint": "Leave empty to derive the next business date automatically.",
       "submit": "Open the day",
       "submitting": "Opening…",
-      "errorTitle": "Could not open the day"
+      "errorTitle": "Could not open the day",
+      "dateFollowsInstitution": "An agency day opens on the institution's date. Head office moves that date for the whole network.",
+      "institutionNotOpen": "The institution has no accounting day open, so no agency day can be opened yet. Open the institution's date first — the whole network works within it."
     },
     "reopen": {
       "title": "Reopen the accounting day",

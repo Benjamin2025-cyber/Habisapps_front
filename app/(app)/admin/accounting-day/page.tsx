@@ -126,6 +126,21 @@ export default function AccountingDayPage() {
     refetch: refetchCurrent,
   } = useApi(currentFetcher, [token, canManageInstitutionScope, scopeValue]);
 
+  // Fetched regardless of the scope being viewed, because an agency day can only
+  // open on the institution's date and the drawer has to state that date whichever
+  // scope the page happens to be showing. Absent means the institution has no day
+  // open, which is a reason no agency day can be opened yet.
+  const institutionFetcher = useCallback(async () => {
+    if (!token) return null;
+
+    return fetchCurrentAccountingDay(token, { scope: "institution" });
+  }, [token]);
+
+  const { data: institutionDay, refetch: refetchInstitutionDay } = useApi(
+    institutionFetcher,
+    [token],
+  );
+
   const scopeOptions = useMemo(
     () => [
       { value: "institution", label: t("accountingDay.scope.institution") },
@@ -198,6 +213,9 @@ export default function AccountingDayPage() {
   function refetchAll() {
     refetchCurrent();
     refetchHistory();
+    // Opening or closing the institution day changes what agency days may do, so
+    // the drawer's reference date has to move with it.
+    refetchInstitutionDay();
   }
 
   async function handleOpen(payload: OpenAccountingDayPayload) {
@@ -432,6 +450,7 @@ export default function AccountingDayPage() {
           canOpenAnyAgency={isPlatformAdmin}
           hasOwnAgency={hasOwnAgency}
           agencies={agencies}
+          institutionBusinessDate={institutionDay?.business_date ?? null}
         />
       ) : null}
 

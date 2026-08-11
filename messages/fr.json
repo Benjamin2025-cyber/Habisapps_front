@@ -4254,7 +4254,9 @@
       "dateHint": "Laissez vide pour déduire automatiquement la prochaine date ouvrée.",
       "submit": "Ouvrir la journée",
       "submitting": "Ouverture…",
-      "errorTitle": "Échec de l'ouverture"
+      "errorTitle": "Échec de l'ouverture",
+      "dateFollowsInstitution": "Une journée d'agence s'ouvre à la date de l'institution. C'est le siège qui déplace cette date, pour tout le réseau.",
+      "institutionNotOpen": "L'institution n'a aucune journée comptable ouverte : aucune journée d'agence ne peut donc encore être ouverte. Ouvrez d'abord la date de l'institution — tout le réseau travaille à l'intérieur de celle-ci."
     },
     "reopen": {
       "title": "Rouvrir la journée comptable",
