@@ -55,6 +55,7 @@ export type JournalEntry = {
   status: JournalEntryStatus;
   description: string | null;
   submitted_at: string | null;
+  created_by_user_public_id: string | null;
   submitted_by_user_public_id: string | null;
   reviewed_at: string | null;
   reviewed_by_user_public_id: string | null;

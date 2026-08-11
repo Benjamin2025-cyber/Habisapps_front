@@ -34,6 +34,8 @@ type Props = {
    * the chart.
    */
   filter?: (account: LedgerAccount) => boolean;
+  /** Limits the server result to the chart of the document's agency. */
+  agencyPublicId?: string | null;
   /** Re-fetches the default list when it changes (e.g. the selected agency). */
   resetKey?: string;
   /**
@@ -53,7 +55,9 @@ type Props = {
 
 /**
  * Server-search ledger account picker. Queries `GET /ledger-accounts?search=`
- * (debounced) on `code`, `name`, class, type, side and status.
+ * (debounced) on `code`, `name`, class, type, side and status. When supplied,
+ * `agencyPublicId` is sent too, so the initial page is the selected agency's
+ * chart rather than institution grouping accounts.
  *
  * Exists because a real PCEMF chart is ~1 400 accounts per agency and the API
  * caps `per_page` at 100: loading one page and filtering it in the browser —
@@ -64,6 +68,7 @@ export function LedgerAccountPicker({
   value,
   onChange,
   filter,
+  agencyPublicId,
   resetKey,
   initialValuePublicId,
   id,
@@ -106,7 +111,11 @@ export function LedgerAccountPicker({
         callback([]);
         return;
       }
-      fetchLedgerAccounts(token, { search: input || undefined, perPage: 100 })
+      fetchLedgerAccounts(token, {
+        search: input || undefined,
+        perPage: 100,
+        agencyPublicId,
+      })
         .then((response) => {
           const rows = filter ? response.data.filter(filter) : response.data;
           callback(rows.map(toLedgerAccountOption));
@@ -114,7 +123,7 @@ export function LedgerAccountPicker({
         .catch(() => callback([]));
     };
     return debounce(run, 300);
-  }, [token, filter]);
+  }, [token, filter, agencyPublicId]);
 
   return (
     <AsyncSelect<LedgerAccountOption>

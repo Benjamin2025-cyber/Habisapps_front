@@ -257,15 +257,24 @@ const JSON_HEADERS = (token: string): Record<string, string> => ({
  * type, normal side and status — use it rather than loading a page and
  * filtering locally: `per_page` is capped at 100 by the API and a real PCEMF
  * chart runs to ~1 400 accounts per agency, so a local filter would only ever
- * see the first page.
+ * see the first page. `agencyPublicId` scopes the server result before that
+ * pagination when a form is editing an agency-owned document.
  */
 export async function fetchLedgerAccounts(
   token: string,
-  options: { page?: number; perPage?: number; search?: string } = {},
+  options: {
+    page?: number;
+    perPage?: number;
+    search?: string;
+    agencyPublicId?: string | null;
+  } = {},
 ): Promise<PaginatedLedgerAccounts> {
   const query = new URLSearchParams();
   query.set("per_page", String(options.perPage ?? 100));
   if (options.search) query.set("search", options.search);
+  if (options.agencyPublicId) {
+    query.set("agency_public_id", options.agencyPublicId);
+  }
   if (options.page && options.page > 0) query.set("page", String(options.page));
 
   const response = await fetch(`/api/v1/ledger-accounts?${query.toString()}`, {
