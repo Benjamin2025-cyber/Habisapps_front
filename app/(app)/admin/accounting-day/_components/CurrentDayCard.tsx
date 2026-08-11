@@ -322,12 +322,22 @@ function extractCloseControls(
     const code = row.procedure_code;
     if (typeof code !== "string") return [];
     const status = typeof row.status === "string" ? row.status : "unknown";
+    // A run that failed carries `failure_reason`; only the "no procedure
+    // configured" case carries `message`. Reading just one of them left a real
+    // failure showing its status and nothing about why, which is the one thing
+    // the operator needs in order to act.
+    const reason =
+      typeof row.failure_reason === "string" && row.failure_reason !== ""
+        ? row.failure_reason
+        : typeof row.message === "string" && row.message !== ""
+          ? row.message
+          : null;
 
     return [
       {
         code,
         status,
-        message: typeof row.message === "string" ? row.message : null,
+        message: reason,
         // Anything that is not an explicit success is treated as not passed:
         // "missing_procedure" is a failure the operator has to act on.
         passed: status === "completed" || status === "succeeded",
