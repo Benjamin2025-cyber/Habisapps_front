@@ -179,6 +179,12 @@ export function localizeApiError(
     // here would feed a stack-frame object into the localizer and crash.
     if (error.status === 422 && error.errors) {
       for (const [field, messages] of Object.entries(error.errors)) {
+        // `code` is a machine identifier, never a message. Domain refusals carry
+        // it alongside a localized top-level `message` — treating it as a field
+        // error made it the "specific" reason and toasts showed the operator
+        // `accounting_day_agencies_still_open` instead of the sentence explaining
+        // what to do. Every coded refusal in the app read that way.
+        if (field === "code") continue;
         const firstString = Array.isArray(messages)
           ? messages.find((m): m is string => typeof m === "string")
           : typeof messages === "string"
