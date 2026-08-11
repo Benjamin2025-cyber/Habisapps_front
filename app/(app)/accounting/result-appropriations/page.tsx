@@ -16,6 +16,10 @@ import {
   fetchResultAppropriations,
   type ResultAppropriation,
 } from "@/lib/api/result-appropriations";
+import {
+  approveJournalEntry,
+  postJournalEntry,
+} from "@/lib/api/journal-entries";
 import { localizeApiError } from "@/lib/api/errors";
 import { useCanAny, useHasRole } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
@@ -88,6 +92,8 @@ export default function ResultAppropriationsPage() {
     { key: 1, account: null, amount: "" },
   ]);
   const [submitting, setSubmitting] = useState(false);
+  // Which row is mid-action, so only its buttons show a busy state.
+  const [acting, setActing] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
   const agencyOptions = useMemo(
@@ -199,6 +205,32 @@ export default function ResultAppropriationsPage() {
       setFormError(localizeApiError(cause).generalMessage);
     } finally {
       setSubmitting(false);
+    }
+  }
+
+
+  /**
+   * Approve then post the entry that carries out this record, from here.
+   *
+   * The endpoints are the ordinary journal-entry ones and enforce the same
+   * maker-checker: whoever drew this up cannot approve it, and will be refused. It
+   * is done in place because the alternative was leaving the page, searching the
+   * journal entries for a reference by hand, acting, and coming back to see whether
+   * it took — for the one operation of the year that has to go right.
+   */
+  async function finish(entryPublicId: string | null) {
+    if (!token || !entryPublicId) return;
+
+    setActing(entryPublicId);
+    try {
+      await approveJournalEntry(token, entryPublicId);
+      await postJournalEntry(token, entryPublicId);
+      toast.success(t("resultAppropriations.finished"));
+    } catch (cause) {
+      toast.error(t("resultAppropriations.finishFailed"), localizeApiError(cause).generalMessage);
+    } finally {
+      setActing(null);
+      appropriations.refetch();
     }
   }
 
@@ -384,18 +416,21 @@ export default function ResultAppropriationsPage() {
               <th className="px-4 py-2 font-semibold">
                 {t("resultAppropriations.columns.status")}
               </th>
+              <th className="px-4 py-2 text-right font-semibold">
+                {t("resultAppropriations.columns.action")}
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {appropriations.loading && rows.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">
                   {t("common.loading")}
                 </td>
               </tr>
             ) : rows.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">
                   {t("resultAppropriations.empty")}
                 </td>
               </tr>
@@ -425,6 +460,21 @@ export default function ResultAppropriationsPage() {
                         ? t("resultAppropriations.status.posted")
                         : t("resultAppropriations.status.awaitingReview")}
                     </Badge>
+                  </td>
+                  <td className="px-4 py-2.5 text-right">
+                    {row.posted ? (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        onClick={() => finish(row.journal_entry_public_id)}
+                        disabled={acting !== null}
+                      >
+                        {acting === row.journal_entry_public_id
+                          ? t("resultAppropriations.finishing")
+                          : t("resultAppropriations.finish")}
+                      </Button>
+                    )}
                   </td>
                 </tr>
               ))

@@ -4225,7 +4225,11 @@
       "openSessionsBody": "Fermez toutes les sessions de caisse avant de démarrer la clôture. Sinon la journée reste bloquée en clôture (les sessions ne peuvent plus être fermées une fois la clôture lancée).",
       "openSessionsLink": "Aller aux sessions de caisse →",
       "openSessionsBlock": "Fermez d'abord les sessions de caisse ouvertes.",
-      "errorTitle": "Impossible de charger la journée comptable"
+      "errorTitle": "Impossible de charger la journée comptable",
+      "controlsPassed": "Les {count} contrôle(s) de clôture ont été exécutés et sont réussis. Vous pouvez finaliser la journée, ou annuler la clôture pour la réouvrir.",
+      "controlsFailed": "{count} contrôle(s) de clôture ont échoué. Corrigez la cause puis annulez la clôture pour remettre la journée à l'état ouvert, avant de la relancer.",
+      "controlOk": "réussi",
+      "controlKo": "échoué"
     },
     "fields": {
       "openedAt": "Ouverte le",
@@ -4541,7 +4545,8 @@
       "period": "Période",
       "result": "Résultat net",
       "carriedTo": "Porté au",
-      "status": "Statut"
+      "status": "Statut",
+      "action": "Action"
     },
     "status": {
       "posted": "Comptabilisée",
@@ -4550,7 +4555,11 @@
     "errors": {
       "year": "Saisissez l'exercice sous forme d'année à quatre chiffres, par exemple 2026."
     },
-    "forbidden": "Votre profil ne dispose pas des droits nécessaires pour consulter les clôtures d'exercice."
+    "forbidden": "Votre profil ne dispose pas des droits nécessaires pour consulter les clôtures d'exercice.",
+    "finish": "Approuver et comptabiliser",
+    "finishing": "Comptabilisation…",
+    "finished": "Clôture comptabilisée. Le résultat est porté à son compte.",
+    "finishFailed": "Impossible de comptabiliser la clôture"
   },
   "resultAppropriations": {
     "title": "Affectation du résultat",
@@ -4581,7 +4590,8 @@
       "decidedOn": "Décidé le",
       "amount": "Montant",
       "source": "Depuis",
-      "status": "Statut"
+      "status": "Statut",
+      "action": "Action"
     },
     "status": {
       "posted": "Comptabilisée",
@@ -4592,6 +4602,10 @@
       "decidedOn": "Indiquez la date de la décision de l'assemblée.",
       "noAllocations": "Ajoutez au moins un compte de destination avec un montant.",
       "amount": "Chaque montant doit être supérieur à zéro."
-    }
+    },
+    "finish": "Approuver et comptabiliser",
+    "finishing": "Comptabilisation…",
+    "finished": "Affectation comptabilisée. Le résultat a quitté le 131/132.",
+    "finishFailed": "Impossible de comptabiliser l'affectation"
   }
 }

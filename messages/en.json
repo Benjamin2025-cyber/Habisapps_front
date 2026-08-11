@@ -4225,7 +4225,11 @@
       "openSessionsBody": "Close every teller session before starting the day-close. Otherwise the day stays stuck in closing (sessions can no longer be closed once the close has started).",
       "openSessionsLink": "Go to teller sessions →",
       "openSessionsBlock": "Close the open teller sessions first.",
-      "errorTitle": "Could not load the accounting day"
+      "errorTitle": "Could not load the accounting day",
+      "controlsPassed": "The {count} close control(s) have run and passed. You can finalise the day, or cancel the closing to reopen it.",
+      "controlsFailed": "{count} close control(s) failed. Fix the cause and cancel the closing to return the day to open, then start it again.",
+      "controlOk": "passed",
+      "controlKo": "failed"
     },
     "fields": {
       "openedAt": "Opened at",
@@ -4541,7 +4545,8 @@
       "period": "Period",
       "result": "Net result",
       "carriedTo": "Carried to",
-      "status": "Status"
+      "status": "Status",
+      "action": "Action"
     },
     "status": {
       "posted": "Posted",
@@ -4550,7 +4555,11 @@
     "errors": {
       "year": "Enter the exercise as a four-digit year, for example 2026."
     },
-    "forbidden": "Your profile does not have the rights required to view exercise closings."
+    "forbidden": "Your profile does not have the rights required to view exercise closings.",
+    "finish": "Approve and post",
+    "finishing": "Posting…",
+    "finished": "Closing posted. The result is now carried to its account.",
+    "finishFailed": "Could not post the closing"
   },
   "resultAppropriations": {
     "title": "Result appropriation",
@@ -4581,7 +4590,8 @@
       "decidedOn": "Decided on",
       "amount": "Amount",
       "source": "From",
-      "status": "Status"
+      "status": "Status",
+      "action": "Action"
     },
     "status": {
       "posted": "Posted",
@@ -4592,6 +4602,10 @@
       "decidedOn": "Give the date of the assembly's decision.",
       "noAllocations": "Add at least one destination account with an amount.",
       "amount": "Each amount must be greater than zero."
-    }
+    },
+    "finish": "Approve and post",
+    "finishing": "Posting…",
+    "finished": "Appropriation posted. The result has left 131/132.",
+    "finishFailed": "Could not post the appropriation"
   }
 }

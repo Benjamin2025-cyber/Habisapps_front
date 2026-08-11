@@ -92,6 +92,8 @@ export function CurrentDayCard({
   const isClosing = day.status === "closing";
   const isClosed = day.status === "closed";
   const blockers = extractBlockers(day.close_summary);
+  const closeControls = extractCloseControls(day.close_summary);
+  const failedControls = closeControls.filter((control) => !control.passed);
   // Refuse start-close while teller sessions are still open. The backend now
   // rejects this safely (422 `open_teller_sessions`, no day-status change — D1
   // fixed via the start-close preflight), but we still block the attempt up
@@ -226,8 +228,36 @@ export function CurrentDayCard({
             {t("accountingDay.current.closingTitle")}
           </p>
           <p className="mt-1 text-foreground/80">
-            {t("accountingDay.current.closingBody")}
+            {closeControls.length === 0
+              ? t("accountingDay.current.closingBody")
+              : failedControls.length === 0
+                ? t("accountingDay.current.controlsPassed", {
+                    count: String(closeControls.length),
+                  })
+                : t("accountingDay.current.controlsFailed", {
+                    count: String(failedControls.length),
+                  })}
           </p>
+
+          {/* The outcomes themselves, so finalising or cancelling is a decision
+              made on this screen rather than by trying it. */}
+          {closeControls.length > 0 ? (
+            <ul className="mt-2 space-y-1">
+              {closeControls.map((control) => (
+                <li key={control.code} className="flex flex-wrap items-baseline gap-2">
+                  <Badge tone={control.passed ? "success" : "danger"}>
+                    {control.passed
+                      ? t("accountingDay.current.controlOk")
+                      : t("accountingDay.current.controlKo")}
+                  </Badge>
+                  <span className="font-medium text-foreground">{control.code}</span>
+                  {control.message ? (
+                    <span className="text-foreground/70">{control.message}</span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : null}
           {canClose ? (
             <p className="mt-1 text-foreground/80">
               {t("accountingDay.current.closingRecovery")}
@@ -264,6 +294,48 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
  * Best-effort extraction of human-readable blocker labels from the close
  * summary payload, whose shape is owned by the backend (readiness->toArray()).
  */
+type CloseControl = {
+  code: string;
+  status: string;
+  message: string | null;
+  passed: boolean;
+};
+
+/**
+ * Per-control outcomes from `close_summary.close_control_batches`.
+ *
+ * start-close runs the controls synchronously and stores the result, so by the
+ * time this card renders they have already finished. Not showing them left the
+ * operator told to "finalise once the controls have succeeded" with no way to know
+ * whether they had — the only route was to click Clôturer and find out.
+ */
+function extractCloseControls(
+  summary: Record<string, unknown> | null,
+): CloseControl[] {
+  if (!summary) return [];
+  const raw = summary.close_control_batches;
+  if (!Array.isArray(raw)) return [];
+
+  return raw.flatMap((entry) => {
+    if (!entry || typeof entry !== "object") return [];
+    const row = entry as Record<string, unknown>;
+    const code = row.procedure_code;
+    if (typeof code !== "string") return [];
+    const status = typeof row.status === "string" ? row.status : "unknown";
+
+    return [
+      {
+        code,
+        status,
+        message: typeof row.message === "string" ? row.message : null,
+        // Anything that is not an explicit success is treated as not passed:
+        // "missing_procedure" is a failure the operator has to act on.
+        passed: status === "completed" || status === "succeeded",
+      },
+    ];
+  });
+}
+
 function extractBlockers(summary: Record<string, unknown> | null): string[] {
   if (!summary) return [];
   const raw = summary.blockers;

@@ -12,6 +12,10 @@ import {
   fetchExerciseClosings,
   type ExerciseClosing,
 } from "@/lib/api/exercise-closings";
+import {
+  approveJournalEntry,
+  postJournalEntry,
+} from "@/lib/api/journal-entries";
 import { localizeApiError } from "@/lib/api/errors";
 import { useCanAny, useHasRole } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
@@ -62,6 +66,8 @@ export default function ExerciseClosingsPage() {
   const [agencyPublicId, setAgencyPublicId] = useState("");
   const [fiscalYear, setFiscalYear] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  // Which row is mid-action, so only its buttons show a busy state.
+  const [acting, setActing] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
   const agencyOptions = useMemo(
@@ -116,6 +122,32 @@ export default function ExerciseClosingsPage() {
       setFormError(localizeApiError(cause).generalMessage);
     } finally {
       setSubmitting(false);
+    }
+  }
+
+
+  /**
+   * Approve then post the entry that carries out this record, from here.
+   *
+   * The endpoints are the ordinary journal-entry ones and enforce the same
+   * maker-checker: whoever drew this up cannot approve it, and will be refused. It
+   * is done in place because the alternative was leaving the page, searching the
+   * journal entries for a reference by hand, acting, and coming back to see whether
+   * it took — for the one operation of the year that has to go right.
+   */
+  async function finish(entryPublicId: string | null) {
+    if (!token || !entryPublicId) return;
+
+    setActing(entryPublicId);
+    try {
+      await approveJournalEntry(token, entryPublicId);
+      await postJournalEntry(token, entryPublicId);
+      toast.success(t("exerciseClosings.finished"));
+    } catch (cause) {
+      toast.error(t("exerciseClosings.finishFailed"), localizeApiError(cause).generalMessage);
+    } finally {
+      setActing(null);
+      closings.refetch();
     }
   }
 
@@ -207,13 +239,16 @@ export default function ExerciseClosingsPage() {
               <th className="px-4 py-2 font-semibold">
                 {t("exerciseClosings.columns.status")}
               </th>
+              <th className="px-4 py-2 text-right font-semibold">
+                {t("exerciseClosings.columns.action")}
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {closings.loading && rows.length === 0 ? (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="px-4 py-10 text-center text-muted-foreground"
                 >
                   {t("common.loading")}
@@ -222,7 +257,7 @@ export default function ExerciseClosingsPage() {
             ) : rows.length === 0 ? (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="px-4 py-10 text-center text-muted-foreground"
                 >
                   {t("exerciseClosings.empty")}
@@ -260,6 +295,21 @@ export default function ExerciseClosingsPage() {
                         ? t("exerciseClosings.status.posted")
                         : t("exerciseClosings.status.awaitingReview")}
                     </Badge>
+                  </td>
+                  <td className="px-4 py-2.5 text-right">
+                    {closing.posted ? (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        onClick={() => finish(closing.journal_entry_public_id)}
+                        disabled={acting !== null}
+                      >
+                        {acting === closing.journal_entry_public_id
+                          ? t("exerciseClosings.finishing")
+                          : t("exerciseClosings.finish")}
+                      </Button>
+                    )}
                   </td>
                 </tr>
               ))
