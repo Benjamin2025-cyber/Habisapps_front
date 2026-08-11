@@ -192,9 +192,13 @@ export default function AccountingDayPage() {
     };
   }, [token, currentDay, isPlatformAdmin]);
 
-  // Agencies only matter for the platform-admin open form (scope = agency).
+  // Head office needs the agency list too, not just platform admins: it manages
+  // agency days on the same institution-scope permission that already lets it post
+  // into agency books, and the institution's own close waits on those days being
+  // closed. Without the list the scope selector offered only Établissement and the
+  // chef comptable could not reach the agencies he has to close.
   useEffect(() => {
-    if (!token || !isPlatformAdmin) return;
+    if (!token || !(isPlatformAdmin || canManageInstitutionScope)) return;
     let cancelled = false;
     fetchAgencies(token, { perPage: 100 })
       .then((response) => {
@@ -206,7 +210,7 @@ export default function AccountingDayPage() {
     return () => {
       cancelled = true;
     };
-  }, [token, isPlatformAdmin]);
+  }, [token, isPlatformAdmin, canManageInstitutionScope]);
 
   if (session.status !== "authenticated" || !canView) return null;
 
@@ -447,7 +451,9 @@ export default function AccountingDayPage() {
           onClose={() => setOpenDrawer(false)}
           onSubmit={handleOpen}
           canOpenInstitutionScope={canManageInstitutionScope}
-          canOpenAnyAgency={isPlatformAdmin}
+          // Opening another agency's day is head-office work, on the same
+          // permission as managing it.
+          canOpenAnyAgency={isPlatformAdmin || canManageInstitutionScope}
           hasOwnAgency={hasOwnAgency}
           agencies={agencies}
           institutionBusinessDate={institutionDay?.business_date ?? null}
