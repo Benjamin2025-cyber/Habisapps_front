@@ -596,13 +596,16 @@
         "operationCodes": "Codes opération & imputations",
         "sectors": "Secteurs d'activité",
         "journalEntries": "Opérations diverses",
+        "exerciseClosings": "Clôture de l'exercice",
+        "resultAppropriations": "Affectation du résultat",
         "globalClientImage": "Image globale client",
         "reportsPar": "PAR",
         "ledgerJournal": "Journal des écritures",
         "cashDraft": "Brouillard de caisse",
         "reportsExigible": "Exigible prêt",
         "reportsRelease": "Main levée",
-        "reportsBalance": "Balance des comptes"
+        "reportsBalance": "Balance des comptes",
+        "reportsIncomeStatement": "Compte de résultat"
       }
     },
     "topBar": {
@@ -630,7 +633,9 @@
         "cancelled": "Journée annulée",
         "none": "Aucune journée ouverte",
         "loading": "Statut journée…",
-        "ariaLabel": "Voir la journée comptable"
+        "ariaLabel": "Voir la journée comptable",
+        "scopeInstitution": "Siège",
+        "scopeAgency": "Agence"
       }
     },
     "userMenu": {
@@ -3616,6 +3621,7 @@
       "trial_balance": "Balance des comptes",
       "general_ledger": "Grand livre",
       "emf_trial_balance": "Balance EMF (COBAC)",
+      "income_statement": "Compte de résultat",
       "credit_portfolio_outstanding": "Encours de crédit",
       "credit_par_delinquency": "Portefeuille à risque (PAR)",
       "credit_collection_performance": "Performance de recouvrement"
@@ -3645,6 +3651,10 @@
       "balance": {
         "title": "Balance des comptes",
         "description": "Balance, grand livre et balance EMF/COBAC."
+      },
+      "incomeStatement": {
+        "title": "Compte de résultat",
+        "description": "Les huit soldes intermédiaires de gestion (80 à 87), calculés à partir des classes 6 et 7."
       }
     },
     "release": {
@@ -4215,7 +4225,11 @@
       "openSessionsBody": "Fermez toutes les sessions de caisse avant de démarrer la clôture. Sinon la journée reste bloquée en clôture (les sessions ne peuvent plus être fermées une fois la clôture lancée).",
       "openSessionsLink": "Aller aux sessions de caisse →",
       "openSessionsBlock": "Fermez d'abord les sessions de caisse ouvertes.",
-      "errorTitle": "Impossible de charger la journée comptable"
+      "errorTitle": "Impossible de charger la journée comptable",
+      "controlsPassed": "Les {count} contrôle(s) de clôture ont été exécutés et sont réussis. Vous pouvez finaliser la journée, ou annuler la clôture pour la réouvrir.",
+      "controlsFailed": "{count} contrôle(s) de clôture ont échoué. Corrigez la cause puis annulez la clôture pour remettre la journée à l'état ouvert, avant de la relancer.",
+      "controlOk": "réussi",
+      "controlKo": "échoué"
     },
     "fields": {
       "openedAt": "Ouverte le",
@@ -4244,7 +4258,9 @@
       "dateHint": "Laissez vide pour déduire automatiquement la prochaine date ouvrée.",
       "submit": "Ouvrir la journée",
       "submitting": "Ouverture…",
-      "errorTitle": "Échec de l'ouverture"
+      "errorTitle": "Échec de l'ouverture",
+      "dateFollowsInstitution": "Une journée d'agence s'ouvre à la date de l'institution. C'est le siège qui déplace cette date, pour tout le réseau.",
+      "institutionNotOpen": "L'institution n'a aucune journée comptable ouverte : aucune journée d'agence ne peut donc encore être ouverte. Ouvrez d'abord la date de l'institution — tout le réseau travaille à l'intérieur de celle-ci."
     },
     "reopen": {
       "title": "Rouvrir la journée comptable",
@@ -4506,5 +4522,90 @@
       "cancelToastTitle": "Plan annulé",
       "cancelToastBody": "Le plan de restauration a été annulé."
     }
+  },
+  "exerciseClosings": {
+    "title": "Clôture de l'exercice",
+    "description": "Solde les classes 6 et 7 et porte le résultat au 131 (bénéfice) ou au 132 (perte).",
+    "close": "Clôturer l'exercice",
+    "closing": "Clôture en cours…",
+    "created": "Clôture établie. Elle doit maintenant être approuvée puis comptabilisée depuis les écritures comptables.",
+    "ownAgency": "Mon agence",
+    "preconditions": "Les exercices se clôturent dans l'ordre, et la clôture précédente doit déjà être comptabilisée. L'écriture est datée du dernier jour de l'exercice : la journée comptable de cette date, pour cette agence, doit donc être ouverte — celle du siège est une journée distincte et ne la remplace pas.",
+    "awaitingNotice": "Une clôture en attente de revue n'a rien transféré : son exercice reste logé dans les classes 6 et 7. Approuvez puis comptabilisez l'écriture depuis les écritures comptables pour achever le transfert.",
+    "empty": "Aucun exercice n'a encore été clôturé.",
+    "benefice": "bénéfice",
+    "perte": "perte",
+    "fields": {
+      "agency": "Agence",
+      "fiscalYear": "Exercice"
+    },
+    "columns": {
+      "fiscalYear": "Exercice",
+      "agency": "Agence",
+      "period": "Période",
+      "result": "Résultat net",
+      "carriedTo": "Porté au",
+      "status": "Statut",
+      "action": "Action"
+    },
+    "status": {
+      "posted": "Comptabilisée",
+      "awaitingReview": "En attente de revue"
+    },
+    "errors": {
+      "year": "Saisissez l'exercice sous forme d'année à quatre chiffres, par exemple 2026."
+    },
+    "forbidden": "Votre profil ne dispose pas des droits nécessaires pour consulter les clôtures d'exercice.",
+    "finish": "Approuver et comptabiliser",
+    "finishing": "Comptabilisation…",
+    "finished": "Clôture comptabilisée. Le résultat est porté à son compte.",
+    "finishFailed": "Impossible de comptabiliser la clôture"
+  },
+  "resultAppropriations": {
+    "title": "Affectation du résultat",
+    "description": "Répartissez le résultat de l'exercice depuis le 131 (ou le 132) selon la décision de l'assemblée générale : réserve légale, autres réserves, report à nouveau, dividendes.",
+    "allocate": "Enregistrer l'affectation",
+    "allocating": "Enregistrement…",
+    "addLine": "Ajouter une ligne",
+    "created": "Affectation enregistrée. Elle doit maintenant être approuvée puis comptabilisée depuis les écritures comptables.",
+    "ownAgency": "Mon agence",
+    "toAllocate": "À répartir :",
+    "remaining": "Reste à affecter :",
+    "decidedOnHint": "Date de la décision de l'assemblée.",
+    "noPostedClosing": "Aucune clôture comptabilisée pour cet exercice et cette agence. Le résultat doit être clôturé et son transfert comptabilisé avant de pouvoir être affecté.",
+    "preconditions": "Les affectations doivent totaliser exactement le résultat à répartir, et la journée comptable de la date de décision, pour cette agence, doit être ouverte — celle du siège est une journée distincte. Un exercice ne s'affecte qu'une fois.",
+    "awaitingNotice": "Une affectation en attente de revue n'a rien transféré : le résultat reste logé au 131 ou au 132. Approuvez puis comptabilisez l'écriture depuis les écritures comptables pour l'achever.",
+    "empty": "Aucun résultat n'a encore été affecté.",
+    "forbidden": "Votre profil ne dispose pas des droits nécessaires pour consulter les affectations du résultat.",
+    "fields": {
+      "agency": "Agence",
+      "fiscalYear": "Exercice",
+      "decidedOn": "Décidé le",
+      "account": "Compte de destination",
+      "amount": "Montant"
+    },
+    "columns": {
+      "fiscalYear": "Exercice",
+      "agency": "Agence",
+      "decidedOn": "Décidé le",
+      "amount": "Montant",
+      "source": "Depuis",
+      "status": "Statut",
+      "action": "Action"
+    },
+    "status": {
+      "posted": "Comptabilisée",
+      "awaitingReview": "En attente de revue"
+    },
+    "errors": {
+      "year": "Saisissez l'exercice sous forme d'année à quatre chiffres, par exemple 2026.",
+      "decidedOn": "Indiquez la date de la décision de l'assemblée.",
+      "noAllocations": "Ajoutez au moins un compte de destination avec un montant.",
+      "amount": "Chaque montant doit être supérieur à zéro."
+    },
+    "finish": "Approuver et comptabiliser",
+    "finishing": "Comptabilisation…",
+    "finished": "Affectation comptabilisée. Le résultat a quitté le 131/132.",
+    "finishFailed": "Impossible de comptabiliser l'affectation"
   }
 }

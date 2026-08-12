@@ -126,6 +126,21 @@ export default function AccountingDayPage() {
     refetch: refetchCurrent,
   } = useApi(currentFetcher, [token, canManageInstitutionScope, scopeValue]);
 
+  // Fetched regardless of the scope being viewed, because an agency day can only
+  // open on the institution's date and the drawer has to state that date whichever
+  // scope the page happens to be showing. Absent means the institution has no day
+  // open, which is a reason no agency day can be opened yet.
+  const institutionFetcher = useCallback(async () => {
+    if (!token) return null;
+
+    return fetchCurrentAccountingDay(token, { scope: "institution" });
+  }, [token]);
+
+  const { data: institutionDay, refetch: refetchInstitutionDay } = useApi(
+    institutionFetcher,
+    [token],
+  );
+
   const scopeOptions = useMemo(
     () => [
       { value: "institution", label: t("accountingDay.scope.institution") },
@@ -177,9 +192,13 @@ export default function AccountingDayPage() {
     };
   }, [token, currentDay, isPlatformAdmin]);
 
-  // Agencies only matter for the platform-admin open form (scope = agency).
+  // Head office needs the agency list too, not just platform admins: it manages
+  // agency days on the same institution-scope permission that already lets it post
+  // into agency books, and the institution's own close waits on those days being
+  // closed. Without the list the scope selector offered only Établissement and the
+  // chef comptable could not reach the agencies he has to close.
   useEffect(() => {
-    if (!token || !isPlatformAdmin) return;
+    if (!token || !(isPlatformAdmin || canManageInstitutionScope)) return;
     let cancelled = false;
     fetchAgencies(token, { perPage: 100 })
       .then((response) => {
@@ -191,13 +210,16 @@ export default function AccountingDayPage() {
     return () => {
       cancelled = true;
     };
-  }, [token, isPlatformAdmin]);
+  }, [token, isPlatformAdmin, canManageInstitutionScope]);
 
   if (session.status !== "authenticated" || !canView) return null;
 
   function refetchAll() {
     refetchCurrent();
     refetchHistory();
+    // Opening or closing the institution day changes what agency days may do, so
+    // the drawer's reference date has to move with it.
+    refetchInstitutionDay();
   }
 
   async function handleOpen(payload: OpenAccountingDayPayload) {
@@ -429,9 +451,12 @@ export default function AccountingDayPage() {
           onClose={() => setOpenDrawer(false)}
           onSubmit={handleOpen}
           canOpenInstitutionScope={canManageInstitutionScope}
-          canOpenAnyAgency={isPlatformAdmin}
+          // Opening another agency's day is head-office work, on the same
+          // permission as managing it.
+          canOpenAnyAgency={isPlatformAdmin || canManageInstitutionScope}
           hasOwnAgency={hasOwnAgency}
           agencies={agencies}
+          institutionBusinessDate={institutionDay?.business_date ?? null}
         />
       ) : null}
 

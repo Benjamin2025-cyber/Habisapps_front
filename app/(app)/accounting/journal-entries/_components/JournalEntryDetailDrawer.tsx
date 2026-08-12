@@ -123,10 +123,10 @@ export function JournalEntryDetailDrawer({
   const isSubmitted = entry?.status === "submitted";
   const isApproved = entry?.status === "approved";
   const isPosted = entry?.status === "posted";
-  // Maker-checker: the submitter/creator cannot approve or reject their own entry.
+  // Maker-checker: neither the creator nor the submitter can approve/reject.
   const isMaker =
-    entry?.submitted_by_user_public_id != null &&
-    entry.submitted_by_user_public_id === currentUserPublicId;
+    entry?.created_by_user_public_id === currentUserPublicId ||
+    entry?.submitted_by_user_public_id === currentUserPublicId;
 
   function money(minor: number): string {
     return format.currencyMinor(minor, { currency });
@@ -374,6 +374,7 @@ export function JournalEntryDetailDrawer({
                   label={t("journalEntries.detail.lineAccount")}
                   value={account}
                   onChange={setAccount}
+                  agencyPublicId={entry?.agency_public_id}
                   placeholder={t("journalEntries.detail.lineAccountPlaceholder")}
                   resetKey={entry?.agency_public_id ?? "none"}
                   // Only active, *postable* accounts of the entry's own agency can
