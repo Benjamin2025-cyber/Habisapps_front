@@ -54,8 +54,15 @@ export default function ResultAppropriationsPage() {
   const isPlatformAdmin = useHasRole(["platform-admin"]);
   const canAllocatePerm = useCanAny(["accounting.exercise.appropriate"]);
   const canViewPerm = useCanAny(["accounting.audit.view"]);
+  const canReviewPerm = useCanAny(["journal.entries.review"]);
+  const canPostPerm = useCanAny(["journal.entries.post"]);
   const canAllocate = isPlatformAdmin || canAllocatePerm;
   const canView = isPlatformAdmin || canViewPerm;
+  // Finish calls approve then post on the resulting entry, so it needs both —
+  // the same permissions the journal-entries screen gates those actions on.
+  // accounting.audit.view alone (an auditor, say) sees the table but would
+  // always be refused by the API if the button were shown regardless.
+  const canFinish = isPlatformAdmin || (canReviewPerm && canPostPerm);
 
   const token = session.token;
 
@@ -462,7 +469,7 @@ export default function ResultAppropriationsPage() {
                     </Badge>
                   </td>
                   <td className="px-4 py-2.5 text-right">
-                    {row.posted ? (
+                    {row.posted || !canFinish ? (
                       <span className="text-xs text-muted-foreground">—</span>
                     ) : (
                       <Button
