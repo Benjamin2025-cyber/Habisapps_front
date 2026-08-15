@@ -80,8 +80,7 @@ type FormState = {
   interest_rate: string;
   tax_rate: string;
   insurance_rate: string;
-  fee_amount: string;
-  floor_amount: string;
+  fee_rate: string;
   guarantee_deposit_type: GuaranteeDepositType | "";
   guarantee_deposit_value: string;
   // Pénalité
@@ -123,8 +122,7 @@ const EMPTY: FormState = {
   interest_rate: "",
   tax_rate: "",
   insurance_rate: "",
-  fee_amount: "",
-  floor_amount: "",
+  fee_rate: "",
   guarantee_deposit_type: "",
   guarantee_deposit_value: "",
   penalty_grace_days: "",
@@ -235,8 +233,7 @@ export function LoanProductDrawer({
         interest_rate: initial.interest_rate ?? "",
         tax_rate: initial.tax_rate ?? "",
         insurance_rate: initial.insurance_rate ?? "",
-        fee_amount: fromMinor(initial.fee_amount_minor),
-        floor_amount: fromMinor(initial.floor_amount_minor),
+        fee_rate: initial.fee_rate ?? "",
         guarantee_deposit_type: initial.guarantee_deposit_type ?? "",
         guarantee_deposit_value: initial.guarantee_deposit_value ?? "",
         penalty_grace_days: fromNumber(initial.penalty_grace_days),
@@ -310,8 +307,7 @@ export function LoanProductDrawer({
       interest_rate: toNum(form.interest_rate),
       tax_rate: toNum(form.tax_rate),
       insurance_rate: toNum(form.insurance_rate),
-      fee_amount_minor: toMinor(form.fee_amount),
-      floor_amount_minor: toMinor(form.floor_amount),
+      fee_rate: toNum(form.fee_rate),
       guarantee_deposit_type: form.guarantee_deposit_type || null,
       guarantee_deposit_value: toNum(form.guarantee_deposit_value),
       penalty_grace_days: toInt(form.penalty_grace_days),
@@ -377,8 +373,7 @@ export function LoanProductDrawer({
         interest_rate: t("loanProducts.fields.interestRate"),
         tax_rate: t("loanProducts.fields.taxRate"),
         insurance_rate: t("loanProducts.fields.insuranceRate"),
-        fee_amount_minor: t("loanProducts.fields.feeAmount"),
-        floor_amount_minor: t("loanProducts.fields.floorAmount"),
+        fee_rate: t("loanProducts.fields.feeRate"),
         guarantee_deposit_value: t("loanProducts.fields.depositValue"),
         penalty_value: t("loanProducts.fields.penaltyValue"),
         status: t("loanProducts.fields.status"),
@@ -616,19 +611,16 @@ export function LoanProductDrawer({
             />
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <MoneyField
-              label={t("loanProducts.fields.feeAmount")}
-              value={form.fee_amount}
-              onChange={(event) => set("fee_amount", event.target.value)}
-              error={errors.fee_amount_minor}
-              hint={t("loanProducts.fields.amountHint")}
-            />
-            <MoneyField
-              label={t("loanProducts.fields.floorAmount")}
-              value={form.floor_amount}
-              onChange={(event) => set("floor_amount", event.target.value)}
-              error={errors.floor_amount_minor}
-              hint={t("loanProducts.fields.amountHint")}
+            {/* Percentage of the principal, and nothing else: no fixed amount and
+                no floor. « Le montant des frais de dossier doit être en pourcentage
+                et sans plancher. » */}
+            <TextField
+              label={t("loanProducts.fields.feeRate")}
+              value={form.fee_rate}
+              inputMode="decimal"
+              onChange={(event) => set("fee_rate", event.target.value)}
+              error={errors.fee_rate}
+              hint={t("loanProducts.fields.rateHint")}
             />
             <Select
               label={t("loanProducts.fields.depositType")}

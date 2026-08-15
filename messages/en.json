@@ -2338,8 +2338,6 @@
       "taxRate": "Tax rate",
       "insuranceRate": "Insurance rate",
       "rateHint": "Decimal value (per the API convention).",
-      "feeAmount": "Processing fee",
-      "floorAmount": "Floor amount",
       "depositType": "Guarantee deposit type",
       "depositTypePlaceholder": "Select…",
       "depositValue": "Guarantee deposit value",
@@ -2375,7 +2373,8 @@
       "policyGuaranteeDeposit": "Guarantee deposit policy",
       "status": "Status",
       "statusPlaceholder": "Default status (active)…",
-      "statusHint": "Archiving is done via the \"Archive\" action."
+      "statusHint": "Archiving is done via the \"Archive\" action.",
+      "feeRate": "Dossier fee rate (%)"
     },
     "penaltyValueTypeOptions": {
       "amount": "Flat amount",

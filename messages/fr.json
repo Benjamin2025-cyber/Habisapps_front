@@ -2338,8 +2338,6 @@
       "taxRate": "Taux de taxe",
       "insuranceRate": "Taux d'assurance",
       "rateHint": "Valeur décimale (selon la convention de l'API).",
-      "feeAmount": "Frais de dossier",
-      "floorAmount": "Montant plancher",
       "depositType": "Type de dépôt de garantie",
       "depositTypePlaceholder": "Sélectionner…",
       "depositValue": "Valeur du dépôt de garantie",
@@ -2375,7 +2373,8 @@
       "policyGuaranteeDeposit": "Politique de dépôt de garantie",
       "status": "Statut",
       "statusPlaceholder": "Statut par défaut (actif)…",
-      "statusHint": "L'archivage se fait via l'action « Archiver »."
+      "statusHint": "L'archivage se fait via l'action « Archiver ».",
+      "feeRate": "Taux des frais de dossier (%)"
     },
     "penaltyValueTypeOptions": {
       "amount": "Montant fixe",
