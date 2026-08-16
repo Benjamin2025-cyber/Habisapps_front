@@ -2094,7 +2094,8 @@
       "subSectorPlaceholder": "Sélectionner un sous-secteur…",
       "financedActivityCode": "Code activité financée",
       "activityAddress": "Adresse de l'activité",
-      "entrepreneurAddress": "Adresse de l'entrepreneur"
+      "entrepreneurAddress": "Adresse de l'entrepreneur",
+      "accountsNone": "Ce client n'a aucun compte. Ce n'est pas bloquant : ces comptes ne servent qu'au déblocage et aux remboursements, et le prêt s'enregistre sans eux."
     },
     "toast": {
       "createdTitle": "Prêt créé",
@@ -2177,7 +2178,8 @@
         "tax": "Taxe",
         "total": "Total",
         "remaining": "Capital restant"
-      }
+      },
+      "emptyNoPermission": "Aucun tableau généré, et votre profil ne permet pas de le générer. Demandez à un agent de crédit ou au chef d'agence."
     },
     "visa": {
       "title": "Circuit de visa",
@@ -4606,5 +4608,8 @@
     "finishing": "Comptabilisation…",
     "finished": "Affectation comptabilisée. Le résultat a quitté le 131/132.",
     "finishFailed": "Impossible de comptabiliser l'affectation"
+  },
+  "staffPicker": {
+    "empty": "Aucun membre du personnel éligible. Vérifiez que quelqu'un porte bien le rôle attendu dans cette agence."
   }
 }

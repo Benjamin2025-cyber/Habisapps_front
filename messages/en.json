@@ -2094,7 +2094,8 @@
       "subSectorPlaceholder": "Select a sub-sector…",
       "financedActivityCode": "Financed activity code",
       "activityAddress": "Activity address",
-      "entrepreneurAddress": "Entrepreneur address"
+      "entrepreneurAddress": "Entrepreneur address",
+      "accountsNone": "This client has no account. Not a blocker: these accounts are only used for disbursement and repayments, and the loan registers without them."
     },
     "toast": {
       "createdTitle": "Loan created",
@@ -2177,7 +2178,8 @@
         "tax": "Tax",
         "total": "Total",
         "remaining": "Outstanding principal"
-      }
+      },
+      "emptyNoPermission": "No schedule generated, and your profile cannot generate one. Ask a loan officer or the branch manager."
     },
     "visa": {
       "title": "Approval workflow",
@@ -4606,5 +4608,8 @@
     "finishing": "Posting…",
     "finished": "Appropriation posted. The result has left 131/132.",
     "finishFailed": "Could not post the appropriation"
+  },
+  "staffPicker": {
+    "empty": "No eligible staff member. Check that someone in this agency holds the expected role."
   }
 }
