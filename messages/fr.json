@@ -1558,7 +1558,9 @@
       "openedOn": "Date d'ouverture",
       "closedOn": "Date de clôture",
       "status": "Statut",
-      "statusPlaceholder": "Sélectionner un statut…"
+      "statusPlaceholder": "Sélectionner un statut…",
+      "noProducts": "Aucun produit de compte actif pour cette agence. Créez-en un dans « Produits de compte », ou vérifiez l'agence choisie.",
+      "ledgerAccountInherits": "Laissez vide : le compte reprendra le compte comptable par défaut de son produit. Choisir un compte ici demande un droit sur le plan comptable."
     },
     "toast": {
       "createdTitle": "Compte créé",

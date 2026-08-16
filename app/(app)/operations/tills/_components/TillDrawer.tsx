@@ -12,6 +12,10 @@ import { isPostableTarget } from "@/lib/api/ledger-accounts";
 import type { LedgerAccount } from "@/lib/api/ledger-accounts";
 import type { StaffUser } from "@/lib/api/staff-users";
 import type { Till, TillWritePayload } from "@/lib/api/tills";
+import {
+  LedgerAccountPicker,
+  type LedgerAccountOption,
+} from "@/app/(app)/_components/LedgerAccountPicker";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 
 export type TillDrawerMode = "create" | "edit";
@@ -22,7 +26,6 @@ type Props = {
   initial?: Till | null;
   agencies: ReadonlyArray<Agency>;
   tellers: ReadonlyArray<StaffUser>;
-  ledgerAccounts: ReadonlyArray<LedgerAccount>;
   onClose: () => void;
   onSubmit: (payload: TillWritePayload) => Promise<void>;
 };
@@ -63,7 +66,6 @@ export function TillDrawer({
   initial,
   agencies,
   tellers,
-  ledgerAccounts,
   onClose,
   onSubmit,
 }: Props) {
@@ -147,19 +149,8 @@ export function TillDrawer({
    * they are grouping accounts with no agency, so the API refuses them twice
    * over. They used to slip through this filter.
    */
-  const ledgerOptions = useMemo(
-    () =>
-      ledgerAccounts
-        .filter(
-          (a) =>
-            isPostableTarget(a) &&
-            a.account_class === "tresorerie_interbancaire" &&
-            a.agency_public_id !== null &&
-            (!agencyForFilter || a.agency_public_id === agencyForFilter),
-        )
-        .map((a) => ({ value: a.public_id, label: `${a.code} — ${a.name}` })),
-    [ledgerAccounts, agencyForFilter],
-  );
+  const [ledgerSelection, setLedgerSelection] =
+    useState<LedgerAccountOption | null>(null);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -314,13 +305,25 @@ export function TillDrawer({
                   : t("tills.fields.tellerHint")
               }
             />
-            <Select
+            {/* Searched on the server and scoped to the till's agency. The
+                filter below is the one documented above: postable treasury
+                accounts only, and never an institution grouping account. */}
+            <LedgerAccountPicker
               label={t("tills.fields.ledgerAccount")}
-              value={form.ledger_account_public_id}
-              options={ledgerOptions}
+              value={ledgerSelection}
+              onChange={(option) => {
+                setLedgerSelection(option);
+                set("ledger_account_public_id", option?.value ?? "");
+              }}
+              agencyPublicId={agencyForFilter || null}
+              resetKey={agencyForFilter ?? ""}
+              initialValuePublicId={initial?.ledger_account_public_id ?? null}
+              filter={(a) =>
+                isPostableTarget(a) &&
+                a.account_class === "tresorerie_interbancaire" &&
+                a.agency_public_id !== null
+              }
               placeholder={t("tills.fields.ledgerAccountPlaceholder")}
-              isClearable
-              onChange={(next) => set("ledger_account_public_id", next)}
               error={errors.ledger_account_public_id}
               hint={t("tills.fields.ledgerAccountHint")}
             />

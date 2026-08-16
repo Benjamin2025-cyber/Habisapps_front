@@ -1558,7 +1558,9 @@
       "openedOn": "Opening date",
       "closedOn": "Closing date",
       "status": "Status",
-      "statusPlaceholder": "Select a status…"
+      "statusPlaceholder": "Select a status…",
+      "noProducts": "No active account product for this agency. Create one under “Account products”, or check the agency you selected.",
+      "ledgerAccountInherits": "Leave empty: the account takes its product's default ledger account. Choosing one here requires chart-of-accounts access."
     },
     "toast": {
       "createdTitle": "Account created",

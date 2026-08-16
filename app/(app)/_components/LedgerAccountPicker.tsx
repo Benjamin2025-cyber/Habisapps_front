@@ -10,6 +10,7 @@ import {
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import { debounce } from "@/lib/debounce";
+import { localizeApiError } from "@/lib/api/errors";
 
 export type LedgerAccountOption = AsyncSelectOption & {
   account: LedgerAccount;
@@ -18,9 +19,20 @@ export type LedgerAccountOption = AsyncSelectOption & {
 export function toLedgerAccountOption(
   account: LedgerAccount,
 ): LedgerAccountOption {
+  /*
+   * The chart holds one row per agency for every detail account, so a reader
+   * with institution scope gets `3712 — Comptes courants clients` three times
+   * over with nothing to separate them. Naming the agency is what makes the
+   * choice a choice rather than a guess; institution-level grouping accounts
+   * carry no agency and need no suffix.
+   */
+  const agency = account.agency_code ?? account.agency_name ?? null;
+
   return {
     value: account.public_id,
-    label: `${account.code} — ${account.name}`,
+    label: agency
+      ? `${account.code} — ${account.name} · ${agency}`
+      : `${account.code} — ${account.name}`,
     account,
   };
 }
@@ -51,6 +63,8 @@ type Props = {
   hint?: string;
   disabled?: boolean;
   required?: boolean;
+  /** Reports why the chart could not be read, so the field can say so. */
+  onLoadError?: (message: string | null) => void;
 };
 
 /**
@@ -77,6 +91,7 @@ export function LedgerAccountPicker({
   error,
   hint,
   disabled,
+  onLoadError,
   required,
 }: Props) {
   const t = useTranslations();
@@ -118,12 +133,18 @@ export function LedgerAccountPicker({
       })
         .then((response) => {
           const rows = filter ? response.data.filter(filter) : response.data;
+          onLoadError?.(null);
           callback(rows.map(toLedgerAccountOption));
         })
-        .catch(() => callback([]));
+        .catch((cause: unknown) => {
+          // A refused chart used to arrive as "no matches", which reads as an
+          // empty chart rather than as a right the reader does not have.
+          onLoadError?.(localizeApiError(cause).generalMessage);
+          callback([]);
+        });
     };
     return debounce(run, 300);
-  }, [token, filter, agencyPublicId]);
+  }, [token, filter, agencyPublicId, onLoadError]);
 
   return (
     <AsyncSelect<LedgerAccountOption>

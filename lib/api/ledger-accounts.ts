@@ -78,6 +78,9 @@ export type LedgerAccount = {
   public_id: string;
   scope: LedgerAccountScope;
   agency_public_id: string | null;
+  /** Present so a chart shown across agencies can name which one each row is. */
+  agency_code?: string | null;
+  agency_name?: string | null;
   parent_account_public_id: string | null;
   code: string;
   name: string;

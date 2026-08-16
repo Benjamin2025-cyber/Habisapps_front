@@ -5,8 +5,6 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { fetchAgencies, type Agency } from "@/lib/api/agencies";
 import {
-  fetchLedgerAccounts,
-  type LedgerAccount,
 } from "@/lib/api/ledger-accounts";
 import { fetchClients, type Client } from "@/lib/api/clients";
 import {
@@ -24,7 +22,7 @@ import {
   type PaginatedCustomerAccounts,
 } from "@/lib/api/customer-accounts";
 import { localizeApiError, localizeApiMessage } from "@/lib/api/errors";
-import { useCan, useHasRole } from "@/lib/auth/permissions";
+import { useCan, useCanAny, useHasRole } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { usePermissionGuard } from "@/lib/auth/usePermissionGuard";
 import { useApi } from "@/lib/hooks/useApi";
@@ -55,7 +53,22 @@ export default function AccountsPage() {
   const session = useSession();
   const toast = useToast();
   const allowed = usePermissionGuard(["customer.accounts.view"]);
-  const canManage = useHasRole(["platform-admin"]);
+  const isPlatformAdmin = useHasRole(["platform-admin"]);
+  /*
+   * Gated on the permission, not on being the platform administrator. Opening a
+   * client account is counter work: the teller who holds
+   * `customer.accounts.create` could not see this button, because the check
+   * asked which role you had rather than what you were allowed to do. Everywhere
+   * else in the app pairs the admin bypass with a permission the way the API
+   * does; this screen was the one that did not.
+   */
+  const managePerm = useCanAny([
+    "customer.accounts.create",
+    "customer.accounts.update",
+  ]);
+  // Hook first, combine after: `isPlatformAdmin || useCanAny(...)` short-circuits
+  // the hook call and breaks the rules of hooks.
+  const canManage = isPlatformAdmin || managePerm;
   const canScopeInstitution = useCan("crm.scope.institution.read");
 
   const [filters, setFilters] = useState<AccountsFilterState>(
@@ -93,7 +106,7 @@ export default function AccountsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [products, setProducts] = useState<AccountProduct[]>([]);
-  const [ledgerAccounts, setLedgerAccounts] = useState<LedgerAccount[]>([]);
+  const [productsError, setProductsError] = useState<string | null>(null);
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
@@ -103,14 +116,27 @@ export default function AccountsPage() {
         scope: canScopeInstitution ? "all" : undefined,
       }).catch(() => null),
       fetchAgencies(token, { perPage: 100 }).catch(() => null),
-      fetchAccountProducts(token, { perPage: 100 }).catch(() => null),
-      fetchLedgerAccounts(token, { perPage: 100 }).catch(() => null),
-    ]).then(([clientsResponse, agenciesResponse, productsResponse, ledgerResponse]) => {
+      fetchAccountProducts(token, { perPage: 100 }).catch(
+        (cause: unknown) => cause,
+      ),
+    ]).then(([clientsResponse, agenciesResponse, productsResponse]) => {
       if (cancelled) return;
       setClients(clientsResponse?.data ?? []);
       setAgencies(agenciesResponse?.data ?? []);
-      setProducts(productsResponse?.data ?? []);
-      setLedgerAccounts(ledgerResponse?.data ?? []);
+      // A refused catalogue used to arrive as an empty list, which reads as "this
+      // institution has no products" — so the opening form looked broken rather
+      // than forbidden, and there was nothing on screen to say which.
+      if (
+        productsResponse &&
+        typeof productsResponse === "object" &&
+        "data" in productsResponse
+      ) {
+        setProducts(productsResponse.data as AccountProduct[]);
+        setProductsError(null);
+      } else {
+        setProducts([]);
+        setProductsError(localizeApiError(productsResponse).generalMessage);
+      }
     });
     return () => {
       cancelled = true;
@@ -304,7 +330,7 @@ export default function AccountsPage() {
           clients={clients}
           agencies={agencies}
           accountProducts={products}
-          ledgerAccounts={ledgerAccounts}
+          accountProductsError={productsError}
           onClose={closeDrawer}
           onSubmit={handleSubmit}
         />

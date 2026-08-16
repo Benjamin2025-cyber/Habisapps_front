@@ -6,8 +6,6 @@ import { Alert } from "@/components/ui/Alert";
 import { Tabs, TabsPanel, type TabItem } from "@/components/ui/Tabs";
 import { fetchAgencies, type Agency } from "@/lib/api/agencies";
 import {
-  fetchLedgerAccounts,
-  type LedgerAccount,
 } from "@/lib/api/ledger-accounts";
 import { fetchClients, type Client } from "@/lib/api/clients";
 import {
@@ -21,7 +19,7 @@ import {
   type CustomerAccountWritePayload,
 } from "@/lib/api/customer-accounts";
 import { localizeApiMessage } from "@/lib/api/errors";
-import { useCan, useHasRole } from "@/lib/auth/permissions";
+import { useCan, useCanAny, useHasRole } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { usePermissionGuard } from "@/lib/auth/usePermissionGuard";
 import { useApi } from "@/lib/hooks/useApi";
@@ -64,12 +62,26 @@ export default function AccountDetailPage(props: {
   const toast = useToast();
   const allowed = usePermissionGuard(["customer.accounts.view"]);
   const isPlatformAdmin = useHasRole(["platform-admin"]);
-  const canManage = isPlatformAdmin;
+  // Permission, not role — the same fix the accounts list needed. A teller holds
+  // customer.accounts.update and could not reach a single action here.
+  const managePerm = useCanAny([
+    "customer.accounts.create",
+    "customer.accounts.update",
+  ]);
+  const canManage = isPlatformAdmin || managePerm;
+  // Statements are gated apart from the account itself, so the tab has to be
+  // gated too: shown without the right, it opens onto a red "Interdit" that
+  // reads as a broken page rather than a screen not meant for you.
+  const statementPerm = useCan("customer.accounts.statement.view");
+  const canViewStatement = isPlatformAdmin || statementPerm;
   const canScopeInstitution = useCan("crm.scope.institution.read");
   const canViewProxies = useCan("crm.proxies.view");
   const canViewSignaturesPerm = useCan("customer.account-signatures.view");
   const canViewSignatures = isPlatformAdmin || canViewSignaturesPerm;
-  const canViewHolds = isPlatformAdmin;
+  // Four roles hold account.holds.view and none of them could open the tab: it
+  // asked for the platform-admin role instead of the permission named after it.
+  const holdsPerm = useCan("account.holds.view");
+  const canViewHolds = isPlatformAdmin || holdsPerm;
 
   const token = session.status === "authenticated" ? session.token : null;
 
@@ -93,7 +105,6 @@ export default function AccountDetailPage(props: {
   const [clients, setClients] = useState<Client[]>([]);
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [products, setProducts] = useState<AccountProduct[]>([]);
-  const [ledgerAccounts, setLedgerAccounts] = useState<LedgerAccount[]>([]);
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
@@ -104,13 +115,11 @@ export default function AccountDetailPage(props: {
       }).catch(() => null),
       fetchAgencies(token, { perPage: 100 }).catch(() => null),
       fetchAccountProducts(token, { perPage: 100 }).catch(() => null),
-      fetchLedgerAccounts(token, { perPage: 100 }).catch(() => null),
-    ]).then(([clientsResponse, agenciesResponse, productsResponse, ledgerResponse]) => {
+    ]).then(([clientsResponse, agenciesResponse, productsResponse]) => {
       if (cancelled) return;
       setClients(clientsResponse?.data ?? []);
       setAgencies(agenciesResponse?.data ?? []);
       setProducts(productsResponse?.data ?? []);
-      setLedgerAccounts(ledgerResponse?.data ?? []);
     });
     return () => {
       cancelled = true;
@@ -138,7 +147,11 @@ export default function AccountDetailPage(props: {
       hidden: !canViewProxies,
     },
     { id: "balances", label: t("accountDetail.tabs.balances") },
-    { id: "statement", label: t("accountDetail.tabs.statement") },
+    {
+      id: "statement",
+      label: t("accountDetail.tabs.statement"),
+      hidden: !canViewStatement,
+    },
     {
       id: "signatures",
       label: t("accountDetail.tabs.signatures"),
@@ -271,7 +284,6 @@ export default function AccountDetailPage(props: {
           clients={clients}
           agencies={agencies}
           accountProducts={products}
-          ledgerAccounts={ledgerAccounts}
           onClose={() => setDrawerOpen(false)}
           onSubmit={handleEditSubmit}
         />

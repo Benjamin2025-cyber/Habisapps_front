@@ -7,6 +7,10 @@ import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
 import { MoneyField } from "@/components/ui/MoneyField";
 import { localizeApiError } from "@/lib/api/errors";
+import {
+  LedgerAccountPicker,
+  type LedgerAccountOption,
+} from "@/app/(app)/_components/LedgerAccountPicker";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import type { Agency } from "@/lib/api/agencies";
 import type { LedgerAccount } from "@/lib/api/ledger-accounts";
@@ -23,7 +27,6 @@ type Props = {
   mode: AccountProductDrawerMode;
   initial?: AccountProduct | null;
   agencies: ReadonlyArray<Agency>;
-  ledgerAccounts: ReadonlyArray<LedgerAccount>;
   onClose: () => void;
   onSubmit: (payload: AccountProductWritePayload) => Promise<void>;
 };
@@ -65,7 +68,6 @@ export function AccountProductDrawer({
   mode,
   initial,
   agencies,
-  ledgerAccounts,
   onClose,
   onSubmit,
 }: Props) {
@@ -131,19 +133,8 @@ export function AccountProductDrawer({
   const ledgerAgency = isEdit
     ? (initial?.agency_public_id ?? null)
     : form.agency_public_id || null;
-  const ledgerOptions = useMemo(
-    () =>
-      ledgerAccounts
-        .filter(
-          (a) =>
-            a.status === "active" &&
-            (a.agency_public_id === null ||
-              !ledgerAgency ||
-              a.agency_public_id === ledgerAgency),
-        )
-        .map((a) => ({ value: a.public_id, label: `${a.code} — ${a.name}` })),
-    [ledgerAccounts, ledgerAgency],
-  );
+  const [ledgerSelection, setLedgerSelection] =
+    useState<LedgerAccountOption | null>(null);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -312,21 +303,28 @@ export function AccountProductDrawer({
               error={errors.currency}
               hint={t("accountProducts.fields.currencyHint")}
             />
-            <Select
-              label={t("accountProducts.fields.ledgerAccount")}
-              value={form.ledger_account_public_id}
-              options={ledgerOptions}
-              placeholder={t("accountProducts.fields.ledgerAccountPlaceholder")}
-              isClearable
-              onChange={(next) => set("ledger_account_public_id", next)}
-              error={errors.ledger_account_public_id}
-              hint={
-                ledgerOptions.length === 0
-                  ? t("accountProducts.fields.noLedgerAccounts")
-                  : t("accountProducts.fields.ledgerAccountHint")
-              }
-              className="sm:col-span-2"
-            />
+            {/* Server-searched rather than picked from a prefetched page: the
+                chart runs to a thousand accounts per agency and the first page
+                stops in class 2, so anything past it — 3712 Comptes courants
+                clients among them — was seeded, listed by the API, and simply
+                unreachable from this field. */}
+            <div className="sm:col-span-2">
+              <LedgerAccountPicker
+                label={t("accountProducts.fields.ledgerAccount")}
+                value={ledgerSelection}
+                onChange={(option) => {
+                  setLedgerSelection(option);
+                  set("ledger_account_public_id", option?.value ?? "");
+                }}
+                agencyPublicId={ledgerAgency}
+                resetKey={ledgerAgency ?? ""}
+                initialValuePublicId={initial?.ledger_account_public_id ?? null}
+                filter={(a) => a.status === "active"}
+                placeholder={t("accountProducts.fields.ledgerAccountPlaceholder")}
+                error={errors.ledger_account_public_id}
+                hint={t("accountProducts.fields.ledgerAccountHint")}
+              />
+            </div>
             <MoneyField
               label={t("accountProducts.fields.minimumBalance")}
               value={form.minimum_balance}

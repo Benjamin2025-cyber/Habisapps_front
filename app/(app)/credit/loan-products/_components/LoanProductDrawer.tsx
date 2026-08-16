@@ -10,6 +10,10 @@ import { localizeApiError } from "@/lib/api/errors";
 import { fetchFormulaPolicies } from "@/lib/api/reference";
 import { cn } from "@/lib/cn";
 import { useSession } from "@/lib/auth/SessionProvider";
+import {
+  LedgerAccountPicker,
+  type LedgerAccountOption,
+} from "@/app/(app)/_components/LedgerAccountPicker";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import {
   FEE_POLICY_VALUE,
@@ -52,7 +56,6 @@ type Props = {
   mode: LoanProductDrawerMode;
   initial?: LoanProduct | null;
   /** Active ledger accounts for the default-account picker (P16). */
-  ledgerAccounts: ReadonlyArray<LedgerAccount>;
   onClose: () => void;
   onSubmit: (payload: LoanProductWritePayload) => Promise<void>;
 };
@@ -145,7 +148,6 @@ export function LoanProductDrawer({
   open,
   mode,
   initial,
-  ledgerAccounts,
   onClose,
   onSubmit,
 }: Props) {
@@ -155,23 +157,8 @@ export function LoanProductDrawer({
 
   // Default-account options: active accounts, plus the currently-stored account
   // if it isn't in the active set (so editing never silently drops it).
-  const ledgerAccountOptions = useMemo<Array<{ value: string; label: string }>>(
-    () => {
-      const options = ledgerAccounts
-        .filter((a) => a.status === "active")
-        .map((a) => ({ value: a.public_id, label: `${a.code} — ${a.name}` }));
-      const current = initial?.ledger_account_public_id;
-      if (current && !options.some((o) => o.value === current)) {
-        const match = ledgerAccounts.find((a) => a.public_id === current);
-        options.push({
-          value: current,
-          label: match ? `${match.code} — ${match.name}` : current,
-        });
-      }
-      return options;
-    },
-    [ledgerAccounts, initial],
-  );
+  const [ledgerSelection, setLedgerSelection] =
+    useState<LedgerAccountOption | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -733,14 +720,20 @@ export function LoanProductDrawer({
 
         {/* Comptabilité */}
         <Section title={t("loanProducts.drawer.sectionAccounting")}>
-          <Select
+          {/* A loan product is institution-wide and names no agency, so this one
+              cannot be narrowed the way the account forms are. It is searched on
+              the server instead, and each result carries its agency, because the
+              chart holds the same code once per agency. */}
+          <LedgerAccountPicker
             label={t("loanProducts.fields.ledgerAccount")}
-            value={form.ledger_account_public_id}
-            options={ledgerAccountOptions}
+            value={ledgerSelection}
+            onChange={(option) => {
+              setLedgerSelection(option);
+              set("ledger_account_public_id", option?.value ?? "");
+            }}
+            initialValuePublicId={initial?.ledger_account_public_id ?? null}
+            filter={(a) => a.status === "active"}
             placeholder={t("loanProducts.fields.ledgerAccountPlaceholder")}
-            isClearable
-            isSearchable
-            onChange={(next) => set("ledger_account_public_id", next)}
             error={errors.ledger_account_public_id}
             hint={t("loanProducts.fields.ledgerAccountHint")}
           />

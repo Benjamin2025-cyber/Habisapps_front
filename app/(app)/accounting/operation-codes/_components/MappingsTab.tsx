@@ -119,20 +119,31 @@ export function MappingsTab() {
   // `*_public_id` references to readable codes/names (the API returns only ids).
   const [codes, setCodes] = useState<OperationCode[]>([]);
   const [agencies, setAgencies] = useState<Agency[]>([]);
+  const [codesError, setCodesError] = useState<string | null>(null);
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
-    Promise.all([
-      fetchOperationCodes(token, { perPage: 100 }).then((r) => r.data),
-      listAgencies(token),
-    ])
-      .then(([c, ag]) => {
-        if (cancelled) return;
-        setCodes(c);
-        setAgencies(ag);
+    /*
+     * Loaded independently. Under Promise.all a single refused list rejected the
+     * whole batch, so one missing permission on the operation codes also emptied
+     * the agency picker — two blank dropdowns, one cause, and nothing on screen
+     * connecting them. "Pickers degrade to ids" was only true for the list that
+     * actually failed.
+     */
+    fetchOperationCodes(token, { perPage: 100 })
+      .then((r) => {
+        if (!cancelled) setCodes(r.data);
+      })
+      .catch((cause: unknown) => {
+        if (!cancelled) setCodesError(localizeApiError(cause).generalMessage);
+      });
+
+    listAgencies(token)
+      .then((ag) => {
+        if (!cancelled) setAgencies(ag);
       })
       .catch(() => {
-        /* pickers degrade to ids; non-fatal */
+        /* the agency column falls back to ids; not worth a banner */
       });
     return () => {
       cancelled = true;
@@ -509,6 +520,7 @@ export function MappingsTab() {
           initial={drawer?.initial ?? null}
           codes={codes}
           agencies={agencies}
+          codesError={codesError}
           codeLabel={codeLabel}
           onClose={() => setDrawer(null)}
           onSubmit={handleSubmit}
@@ -536,6 +548,7 @@ function MappingDrawer({
   initial,
   codes,
   agencies,
+  codesError,
   codeLabel,
   onClose,
   onSubmit,
@@ -545,6 +558,7 @@ function MappingDrawer({
   initial: OperationAccountMapping | null;
   codes: OperationCode[];
   agencies: Agency[];
+  codesError?: string | null;
   codeLabel: (pid: string | null) => string;
   onClose: () => void;
   onSubmit: (
@@ -742,7 +756,10 @@ function MappingDrawer({
             onChange={(next) =>
               setForm((c) => ({ ...c, operation_code_public_id: next }))
             }
-            error={errors.operation_code_public_id}
+            /* A refused catalogue used to render as "no codes", which reads as an
+               institution with none configured rather than a right the reader
+               lacks. */
+            error={codesError ?? errors.operation_code_public_id}
           />
         )}
 
