@@ -94,6 +94,12 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
   const [sectors, setSectors] = useState<Sector[]>([]);
   const [subSectors, setSubSectors] = useState<SubSector[]>([]);
   const [accounts, setAccounts] = useState<CustomerAccount[]>([]);
+  /**
+   * A failed load fell back to an empty list, which reads exactly like a client
+   * who has no accounts — so a permission error would look like a data state and
+   * send the reader hunting for an account to create. Keep the reason.
+   */
+  const [accountsError, setAccountsError] = useState<string | null>(null);
 
   const isEdit = mode === "edit";
 
@@ -166,10 +172,14 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
     let cancelled = false;
     fetchCustomerAccounts(token, { clientPublicId, perPage: 100 })
       .then((response) => {
-        if (!cancelled) setAccounts(response.data);
+        if (cancelled) return;
+        setAccounts(response.data);
+        setAccountsError(null);
       })
-      .catch(() => {
-        if (!cancelled) setAccounts([]);
+      .catch((cause) => {
+        if (cancelled) return;
+        setAccounts([]);
+        setAccountsError(localizeApiError(cause).generalMessage);
       });
     return () => {
       cancelled = true;
@@ -233,9 +243,7 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
 
     const common: LoanWritePayload = {
       credit_agent_public_id: nullable(form.credit_agent_public_id),
-      applied_on: nullable(form.applied_on),
       requested_amount_minor: toMinor(form.requested_amount) ?? undefined,
-      currency: nullable(form.currency)?.toUpperCase() ?? undefined,
       number_of_installments: toInt(form.number_of_installments),
       tranche_duration: toInt(form.tranche_duration),
       grace_period_duration: toInt(form.grace_period_duration),
@@ -255,13 +263,24 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
       entrepreneur_address: nullable(form.entrepreneur_address),
     };
 
-    // client + product are create-only (immutable; the update endpoint rejects them).
+    /**
+     * Create-only fields. The API runs FormRequest::failOnUnknownFields(), so a
+     * field the update endpoint does not declare is not ignored — it is refused
+     * outright, and the refusal names that field rather than whatever the user
+     * was actually editing. Sending `currency` and `applied_on` on update made
+     * every edit fail with "the currency field is prohibited", which reads as a
+     * problem with the currency box the user never touched.
+     *
+     * Keep this list matched to UpdateLoanRequest's rules.
+     */
     const payload: LoanWritePayload = isEdit
       ? common
       : {
           ...common,
           client_public_id: form.client?.value,
           loan_product_public_id: form.loan_product_public_id || undefined,
+          currency: nullable(form.currency)?.toUpperCase() ?? undefined,
+          applied_on: nullable(form.applied_on),
         };
 
     try {
@@ -484,6 +503,14 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
 
         {/* Comptes rattachés */}
         <Section title={t("loans.drawer.sectionAccounts")}>
+          {accountsError ? (
+            <p className="text-xs text-destructive">{accountsError}</p>
+          ) : null}
+          {clientPublicId && !accountsError && accounts.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              {t("loans.fields.accountsNone")}
+            </p>
+          ) : null}
           {clientPublicId ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Select

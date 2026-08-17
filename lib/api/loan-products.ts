@@ -55,8 +55,8 @@ export type LoanProduct = {
   interest_rate: string | null;
   tax_rate: string | null;
   insurance_rate: string | null;
-  fee_amount_minor: number | null;
-  floor_amount_minor: number | null;
+  /** Dossier fee as a percentage of the principal. No fixed amount, no floor. */
+  fee_rate: string | null;
   tax_policy_key: string | null;
   insurance_policy_key: string | null;
   guarantee_deposit_policy_key: string | null;
@@ -111,8 +111,7 @@ export type LoanProductWritePayload = {
   interest_rate?: number | null;
   tax_rate?: number | null;
   insurance_rate?: number | null;
-  fee_amount_minor?: number | null;
-  floor_amount_minor?: number | null;
+  fee_rate?: number | null;
   tax_policy_key?: string | null;
   insurance_policy_key?: string | null;
   guarantee_deposit_policy_key?: string | null;

@@ -1558,7 +1558,9 @@
       "openedOn": "Opening date",
       "closedOn": "Closing date",
       "status": "Status",
-      "statusPlaceholder": "Select a status…"
+      "statusPlaceholder": "Select a status…",
+      "noProducts": "No active account product for this agency. Create one under “Account products”, or check the agency you selected.",
+      "ledgerAccountInherits": "Leave empty: the account takes its product's default ledger account. Choosing one here requires chart-of-accounts access."
     },
     "toast": {
       "createdTitle": "Account created",
@@ -2094,7 +2096,8 @@
       "subSectorPlaceholder": "Select a sub-sector…",
       "financedActivityCode": "Financed activity code",
       "activityAddress": "Activity address",
-      "entrepreneurAddress": "Entrepreneur address"
+      "entrepreneurAddress": "Entrepreneur address",
+      "accountsNone": "This client has no account. Not a blocker: these accounts are only used for disbursement and repayments, and the loan registers without them."
     },
     "toast": {
       "createdTitle": "Loan created",
@@ -2177,7 +2180,8 @@
         "tax": "Tax",
         "total": "Total",
         "remaining": "Outstanding principal"
-      }
+      },
+      "emptyNoPermission": "No schedule generated, and your profile cannot generate one. Ask a loan officer or the branch manager."
     },
     "visa": {
       "title": "Approval workflow",
@@ -2338,8 +2342,6 @@
       "taxRate": "Tax rate",
       "insuranceRate": "Insurance rate",
       "rateHint": "Decimal value (per the API convention).",
-      "feeAmount": "Processing fee",
-      "floorAmount": "Floor amount",
       "depositType": "Guarantee deposit type",
       "depositTypePlaceholder": "Select…",
       "depositValue": "Guarantee deposit value",
@@ -2375,7 +2377,8 @@
       "policyGuaranteeDeposit": "Guarantee deposit policy",
       "status": "Status",
       "statusPlaceholder": "Default status (active)…",
-      "statusHint": "Archiving is done via the \"Archive\" action."
+      "statusHint": "Archiving is done via the \"Archive\" action.",
+      "feeRate": "Dossier fee rate (%)"
     },
     "penaltyValueTypeOptions": {
       "amount": "Flat amount",
@@ -4528,10 +4531,10 @@
     "description": "Solde classes 6 and 7 and carry the result to 131 (profit) or 132 (loss).",
     "close": "Close the exercise",
     "closing": "Closing…",
-    "created": "Closing drawn up. It must now be approved and posted from the journal entries.",
+    "created": "Closing drawn up. Approve and post it with the “Approve and post” button on its row — as a different user from the one who just drew it up.",
     "ownAgency": "My agency",
     "preconditions": "Exercises are closed in order, and the previous closing must already be posted. The entry is dated the last day of the exercise, so that agency's accounting day for that date must be open — the head-office day is a separate one and does not stand in for it.",
-    "awaitingNotice": "A closing awaiting review has transferred nothing: its exercise is still held in classes 6 and 7. Approve and post the entry from the journal entries to complete the transfer.",
+    "awaitingNotice": "A closing awaiting review has transferred nothing: its exercise is still held in classes 6 and 7. The “Approve and post” button on its row completes the transfer, and must be used by someone other than whoever drew it up.",
     "empty": "No exercise has been closed yet.",
     "benefice": "profit",
     "perte": "loss",
@@ -4567,14 +4570,14 @@
     "allocate": "Record the appropriation",
     "allocating": "Recording…",
     "addLine": "Add a line",
-    "created": "Appropriation recorded. It must now be approved and posted from the journal entries.",
+    "created": "Appropriation recorded. Approve and post it with the “Approve and post” button on its row — as a different user from the one who just recorded it.",
     "ownAgency": "My agency",
     "toAllocate": "To allocate:",
     "remaining": "Remaining:",
     "decidedOnHint": "Date of the assembly's decision.",
     "noPostedClosing": "No posted closing found for this exercise and agency. The result must be closed and its transfer posted before it can be allocated.",
     "preconditions": "The allocations must add up to exactly the result being allocated, and the agency's accounting day for the decision date must be open — the head-office day is a separate one. An exercise is allocated once.",
-    "awaitingNotice": "An appropriation awaiting review has moved nothing: the result is still held in 131 or 132. Approve and post the entry from the journal entries to complete it.",
+    "awaitingNotice": "An appropriation awaiting review has moved nothing: the result is still held in 131 or 132. The “Approve and post” button on its row completes it, and must be used by someone other than whoever recorded it.",
     "empty": "No result has been allocated yet.",
     "forbidden": "Your profile does not have the rights required to view result appropriations.",
     "fields": {
@@ -4607,5 +4610,8 @@
     "finishing": "Posting…",
     "finished": "Appropriation posted. The result has left 131/132.",
     "finishFailed": "Could not post the appropriation"
+  },
+  "staffPicker": {
+    "empty": "No eligible staff member. Check that someone in this agency holds the expected role."
   }
 }

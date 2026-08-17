@@ -48,35 +48,35 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     if (stored) {
       setState({ status: "authenticated", user: stored.user, token: stored.token });
 
-      // Self-heal sessions persisted before the API shipped `permissions` /
-      // `direct_permissions`. We pull the up-to-date payload from `/me` in the
-      // background; on 401 we clear the session so the user re-logs in.
-      const legacy =
-        !Array.isArray(stored.user.permissions) ||
-        !Array.isArray(stored.user.direct_permissions);
-      if (legacy) {
-        fetchMeRequest(stored.token)
-          .then((response) => {
-            const next: StoredSession = {
-              token: stored.token,
-              user: response.user,
-            };
-            sessionStorageDriver.write(next);
-            setState({
-              status: "authenticated",
-              user: response.user,
-              token: stored.token,
-            });
-          })
-          .catch((cause: unknown) => {
-            if (cause instanceof ApiError && cause.status === 401) {
-              sessionStorageDriver.clear();
-              setState({ status: "anonymous", user: null, token: null });
-            }
-            // Other failures are silent — defensive guards in useCan keep the
-            // UI rendering until the next manual refresh.
+      // Refresh the payload from `/me` on every hydration, not only for sessions
+      // predating the `permissions` field. Roles get corrected while people are
+      // logged in, and a stored permission list never re-read is a list frozen at
+      // login: the grant lands, the button stays hidden, and nothing on screen
+      // suggests signing out would help. Rendering continues from the cached copy
+      // meanwhile, so this costs one background request and no flash.
+      //
+      // On 401 we clear the session so the user re-logs in.
+      fetchMeRequest(stored.token)
+        .then((response) => {
+          const next: StoredSession = {
+            token: stored.token,
+            user: response.user,
+          };
+          sessionStorageDriver.write(next);
+          setState({
+            status: "authenticated",
+            user: response.user,
+            token: stored.token,
           });
-      }
+        })
+        .catch((cause: unknown) => {
+          if (cause instanceof ApiError && cause.status === 401) {
+            sessionStorageDriver.clear();
+            setState({ status: "anonymous", user: null, token: null });
+          }
+          // Other failures are silent — defensive guards in useCan keep the
+          // UI rendering from the cached payload until the next load.
+        });
     } else {
       setState({ status: "anonymous", user: null, token: null });
     }

@@ -186,9 +186,13 @@ export function LoanScheduleTab({
         </div>
       ) : (
         <div className="rounded-[var(--radius-card)] border border-dashed border-border bg-background p-10 text-center text-sm text-muted-foreground">
-          {eligible
-            ? t("loanDetail.schedule.empty")
-            : t("loanDetail.schedule.emptyNotEligible")}
+          {/* Telling someone to click a button that is hidden from them reads as
+              a broken page rather than a missing right. Name the actual reason. */}
+          {!eligible
+            ? t("loanDetail.schedule.emptyNotEligible")
+            : canGenerate
+              ? t("loanDetail.schedule.empty")
+              : t("loanDetail.schedule.emptyNoPermission")}
         </div>
       )}
     </div>

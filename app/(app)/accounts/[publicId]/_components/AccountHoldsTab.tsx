@@ -25,7 +25,7 @@ import {
   type AccountHoldWritePayload,
 } from "@/lib/api/account-holds";
 import { localizeApiError, localizeApiMessage } from "@/lib/api/errors";
-import { useHasRole } from "@/lib/auth/permissions";
+import { useCanAny, useHasRole } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useApi } from "@/lib/hooks/useApi";
 import { useFormatter, useTranslations } from "@/lib/i18n/I18nProvider";
@@ -49,7 +49,16 @@ export function AccountHoldsTab({ accountPublicId, currency }: Props) {
   const session = useSession();
   const toast = useToast();
   const token = session.status === "authenticated" ? session.token : null;
-  const canManage = useHasRole(["platform-admin"]);
+  // Gated on the permission, not on the role. Blocking an account belongs to
+  // compliance; checking for platform-admin meant a compliance officer with
+  // account.holds.create still saw no button and had to ask an administrator.
+  const isPlatformAdmin = useHasRole(["platform-admin"]);
+  const canManagePerm = useCanAny([
+    "account.holds.create",
+    "account.holds.update",
+    "account.holds.release",
+  ]);
+  const canManage = isPlatformAdmin || canManagePerm;
   const ccy = currency ?? "XAF";
 
   const [drawer, setDrawer] = useState<{

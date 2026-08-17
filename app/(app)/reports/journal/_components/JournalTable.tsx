@@ -7,6 +7,7 @@ import {
   entryTotals,
   type JournalEntry,
   type JournalEntryStatus,
+  type JournalLine,
 } from "@/lib/api/journal-entries";
 import { useFormatter, useTranslations } from "@/lib/i18n/I18nProvider";
 
@@ -27,7 +28,7 @@ const STATUS_TONE: Record<
 type Props = {
   entries: ReadonlyArray<JournalEntry>;
   loading: boolean;
-  accountLabel: (publicId: string | null) => string;
+  accountLabel: (line: JournalLine) => string;
 };
 
 export function JournalTable({ entries, loading, accountLabel }: Props) {
@@ -142,7 +143,7 @@ export function JournalTable({ entries, loading, accountLabel }: Props) {
                           {entry.lines.map((line) => (
                             <tr key={line.public_id}>
                               <td className="py-1 pr-3 text-foreground">
-                                {accountLabel(line.ledger_account_public_id)}
+                                {accountLabel(line)}
                               </td>
                               <td className="py-1 pr-3 text-muted-foreground">
                                 {line.line_memo || "—"}
