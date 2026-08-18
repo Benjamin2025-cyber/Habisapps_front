@@ -25,9 +25,6 @@ export type AccountProduct = {
   account_family: AccountFamily;
   minimum_balance_minor: number | null;
   currency: string | null;
-  allows_recovery_debit: boolean | null;
-  is_recovery_account: boolean | null;
-  is_ordinary_savings: boolean | null;
   allows_overdraft: boolean | null;
   overdraft_limit_minor: number | null;
   status: AccountProductStatus;
@@ -57,9 +54,6 @@ export type AccountProductWritePayload = {
   account_family?: AccountFamily;
   minimum_balance_minor?: number | null;
   currency?: string | null;
-  allows_recovery_debit?: boolean;
-  is_recovery_account?: boolean;
-  is_ordinary_savings?: boolean;
   allows_overdraft?: boolean;
   overdraft_limit_minor?: number | null;
   /** Create accepts active/inactive; archive happens via DELETE. */

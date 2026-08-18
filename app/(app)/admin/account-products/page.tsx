@@ -90,15 +90,19 @@ export default function AccountProductsPage() {
   ]);
 
   const [agencies, setAgencies] = useState<Agency[]>([]);
+  const [agenciesError, setAgenciesError] = useState<string | null>(null);
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
-    Promise.all([
-      fetchAgencies(token, { perPage: 100 }).catch(() => ({ data: [] })),
-    ]).then(([ag]) => {
-      if (cancelled) return;
-      setAgencies(ag.data as Agency[]);
-    });
+    // One list, loaded on its own: a swallowed failure here used to leave the
+    // agency picker empty with nothing to say why.
+    fetchAgencies(token, { perPage: 100 })
+      .then((ag) => {
+        if (!cancelled) setAgencies(ag.data as Agency[]);
+      })
+      .catch((cause: unknown) => {
+        if (!cancelled) setAgenciesError(localizeApiError(cause).generalMessage);
+      });
     return () => {
       cancelled = true;
     };
@@ -257,6 +261,7 @@ export default function AccountProductsPage() {
           mode={drawerMode ?? "create"}
           initial={editing}
           agencies={agencies}
+          agenciesError={agenciesError}
           onClose={closeDrawer}
           onSubmit={handleSubmit}
         />
