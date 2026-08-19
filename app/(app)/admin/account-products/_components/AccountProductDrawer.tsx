@@ -27,6 +27,7 @@ type Props = {
   mode: AccountProductDrawerMode;
   initial?: AccountProduct | null;
   agencies: ReadonlyArray<Agency>;
+  agenciesError?: string | null;
   onClose: () => void;
   onSubmit: (payload: AccountProductWritePayload) => Promise<void>;
 };
@@ -41,9 +42,6 @@ type FormState = {
   minimum_balance: string;
   allows_overdraft: boolean;
   overdraft_limit: string;
-  is_ordinary_savings: boolean;
-  is_recovery_account: boolean;
-  allows_recovery_debit: boolean;
   status: "active" | "inactive" | "";
 };
 
@@ -57,9 +55,6 @@ const EMPTY: FormState = {
   minimum_balance: "",
   allows_overdraft: false,
   overdraft_limit: "",
-  is_ordinary_savings: false,
-  is_recovery_account: false,
-  allows_recovery_debit: false,
   status: "",
 };
 
@@ -68,6 +63,7 @@ export function AccountProductDrawer({
   mode,
   initial,
   agencies,
+  agenciesError,
   onClose,
   onSubmit,
 }: Props) {
@@ -94,9 +90,6 @@ export function AccountProductDrawer({
         minimum_balance: fromMinor(initial.minimum_balance_minor),
         allows_overdraft: initial.allows_overdraft ?? false,
         overdraft_limit: fromMinor(initial.overdraft_limit_minor),
-        is_ordinary_savings: initial.is_ordinary_savings ?? false,
-        is_recovery_account: initial.is_recovery_account ?? false,
-        allows_recovery_debit: initial.allows_recovery_debit ?? false,
         status: initial.status === "archived" ? "" : initial.status,
       });
     } else {
@@ -153,9 +146,6 @@ export function AccountProductDrawer({
       overdraft_limit_minor: form.allows_overdraft
         ? toMinor(form.overdraft_limit)
         : null,
-      is_ordinary_savings: form.is_ordinary_savings,
-      is_recovery_account: form.is_recovery_account,
-      allows_recovery_debit: form.allows_recovery_debit,
       status: form.status || undefined,
     };
 
@@ -290,7 +280,7 @@ export function AccountProductDrawer({
               placeholder={t("accountProducts.fields.agencyPlaceholder")}
               isClearable
               onChange={(next) => set("agency_public_id", next)}
-              error={errors.agency_public_id}
+              error={agenciesError ?? errors.agency_public_id}
               disabled={isEdit}
               hint={
                 isEdit ? t("accountProducts.fields.agencyEditHint") : undefined
@@ -338,21 +328,6 @@ export function AccountProductDrawer({
 
         <Section title={t("accountProducts.drawer.sectionRules")}>
           <div className="flex flex-col gap-2">
-            <CheckboxField
-              label={t("accountProducts.fields.isOrdinarySavings")}
-              checked={form.is_ordinary_savings}
-              onChange={(checked) => set("is_ordinary_savings", checked)}
-            />
-            <CheckboxField
-              label={t("accountProducts.fields.isRecoveryAccount")}
-              checked={form.is_recovery_account}
-              onChange={(checked) => set("is_recovery_account", checked)}
-            />
-            <CheckboxField
-              label={t("accountProducts.fields.allowsRecoveryDebit")}
-              checked={form.allows_recovery_debit}
-              onChange={(checked) => set("allows_recovery_debit", checked)}
-            />
             <CheckboxField
               label={t("accountProducts.fields.allowsOverdraft")}
               checked={form.allows_overdraft}
@@ -408,23 +383,31 @@ function Section({
 
 function CheckboxField({
   label,
+  hint,
   checked,
   onChange,
 }: {
   label: string;
+  /** Shown under the box — used here to say which flags nothing reads yet. */
+  hint?: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-        className="h-4 w-4 rounded border-input text-accent focus:ring-2 focus:ring-ring/20"
-      />
-      {label}
-    </label>
+    <div className="flex flex-col gap-1">
+      <label className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={(event) => onChange(event.target.checked)}
+          className="h-4 w-4 rounded border-input text-accent focus:ring-2 focus:ring-ring/20"
+        />
+        {label}
+      </label>
+      {hint ? (
+        <p className="pl-[26px] text-xs text-muted-foreground">{hint}</p>
+      ) : null}
+    </div>
   );
 }
 
