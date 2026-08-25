@@ -984,6 +984,19 @@
         "updatedBody": "Changes have been saved.",
         "statusChangedTitle": "Status changed",
         "statusChangedBody": "Action \"{action}\" applied."
+      },
+      "viewer": {
+        "visual": "Document",
+        "characteristics": "Characteristics",
+        "front": "Front",
+        "back": "Back",
+        "loading": "Loading…",
+        "unavailable": "File unavailable",
+        "noFile": "No file attached",
+        "openFile": "Open in a new tab",
+        "submittedAt": "Submitted on",
+        "verifiedAt": "Verified on",
+        "rejectionReason": "Rejection reason"
       }
     },
     "guarantors": {

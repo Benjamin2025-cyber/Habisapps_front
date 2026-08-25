@@ -984,6 +984,19 @@
         "updatedBody": "Les modifications ont été enregistrées.",
         "statusChangedTitle": "Statut modifié",
         "statusChangedBody": "Action « {action} » appliquée."
+      },
+      "viewer": {
+        "visual": "Document",
+        "characteristics": "Caractéristiques",
+        "front": "Recto",
+        "back": "Verso",
+        "loading": "Chargement…",
+        "unavailable": "Fichier indisponible",
+        "noFile": "Aucun fichier joint",
+        "openFile": "Ouvrir dans un nouvel onglet",
+        "submittedAt": "Soumis le",
+        "verifiedAt": "Vérifié le",
+        "rejectionReason": "Motif du rejet"
       }
     },
     "guarantors": {

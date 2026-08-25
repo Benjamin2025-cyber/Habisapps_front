@@ -1,4 +1,4 @@
-import { ApiError, notifyAuthExpired } from "./client";
+import { apiRequest, ApiError, notifyAuthExpired } from "./client";
 import { getRequestLocale } from "./locale";
 
 /**
@@ -16,6 +16,7 @@ export type DocumentRecord = {
   original_name: string | null;
   mime_type: string | null;
   size_bytes: number | null;
+  checksum_sha256: string | null;
   status: string;
   metadata: Record<string, unknown> | null;
   verified_at: string | null;
@@ -84,6 +85,21 @@ export async function uploadDocument(
   }
 
   return envelope?.data as DocumentRecord;
+}
+
+/**
+ * Metadata for one document (`GET /documents/{id}`). Needed before rendering a
+ * preview: KYC uploads may be PDF as well as JPEG/PNG, and the two cannot be
+ * shown with the same element.
+ */
+export async function fetchDocument(
+  token: string,
+  publicId: string,
+): Promise<DocumentRecord> {
+  return apiRequest<DocumentRecord>(`documents/${publicId}`, {
+    method: "GET",
+    token,
+  });
 }
 
 /**
