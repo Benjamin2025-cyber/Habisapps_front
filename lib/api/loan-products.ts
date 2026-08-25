@@ -14,16 +14,15 @@ import { getRequestLocale } from "./locale";
  *
  * Note: les taux (`interest_rate`, `tax_rate`, `dossier_fee_tax_rate`, …) sont des décimaux renvoyés
  * comme chaînes par l'API (colonnes `decimal`). Les montants sont stockés en
- * `*_minor` (scale 2). Les `*_policy_key` rattachent une politique de calcul
- * nommée (valeur d'enum fixe) au produit ; `null` = politique non rattachée.
+ * `*_minor` (scale 2). Les politiques de calcul ne figurent pas ici : elles
+ * sont identiques pour tous les crédits, imposées par le serveur, et ne sont
+ * ni sélectionnables ni renvoyées.
  */
 export type LoanProductStatus = "active" | "inactive" | "archived";
 
 export type TermUnit = "day" | "week" | "month";
 
 export type RepaymentFrequency = "daily" | "weekly" | "monthly" | "custom";
-
-export type GuaranteeDepositType = "percentage" | "fixed";
 
 export type LoanProduct = {
   public_id: string;
@@ -36,10 +35,6 @@ export type LoanProduct = {
   allowed_repayment_frequencies: RepaymentFrequency[] | null;
   requires_guarantor: boolean | null;
   requires_collateral: boolean | null;
-  interest_policy_key: string | null;
-  penalty_policy_key: string | null;
-  repayment_allocation_policy_key: string | null;
-  fee_policy_key: string | null;
   min_amount_minor: number | null;
   max_amount_minor: number | null;
   due_date_day: number | null;
@@ -52,10 +47,7 @@ export type LoanProduct = {
   /** Dossier fee as a percentage of the principal. No fixed amount, no floor. */
   fee_rate: string | null;
   dossier_fee_tax_rate: string | null;
-  tax_policy_key: string | null;
-  insurance_policy_key: string | null;
-  guarantee_deposit_policy_key: string | null;
-  guarantee_deposit_type: GuaranteeDepositType | null;
+  /** Percentage of the granted principal — never a franc amount. */
   guarantee_deposit_value: string | null;
   operation_type: string | null;
   constant_value: string | null;
@@ -99,7 +91,6 @@ export type LoanProductWritePayload = {
   insurance_rate?: number | null;
   fee_rate?: number | null;
   dossier_fee_tax_rate?: number | null;
-  guarantee_deposit_type?: GuaranteeDepositType | null;
   guarantee_deposit_value?: number | null;
 };
 

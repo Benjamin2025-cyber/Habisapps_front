@@ -10,7 +10,6 @@ import { localizeApiError } from "@/lib/api/errors";
 import { cn } from "@/lib/cn";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import type {
-  GuaranteeDepositType,
   LoanProduct,
   LoanProductWritePayload,
   RepaymentFrequency,
@@ -52,7 +51,6 @@ type FormState = {
   insurance_rate: string;
   fee_rate: string;
   dossier_fee_tax_rate: string;
-  guarantee_deposit_type: GuaranteeDepositType | "";
   guarantee_deposit_value: string;
   // Pénalité — seul le délai de grâce est paramétrable, la formule est
   // universelle (5 000 FCFA + 2 % de l'impayé).
@@ -83,7 +81,6 @@ const EMPTY: FormState = {
   insurance_rate: "",
   fee_rate: "",
   dossier_fee_tax_rate: "19.25",
-  guarantee_deposit_type: "",
   guarantee_deposit_value: "",
   penalty_grace_days: "",
   status: "",
@@ -133,7 +130,6 @@ export function LoanProductDrawer({
         insurance_rate: initial.insurance_rate ?? "",
         fee_rate: initial.fee_rate ?? "",
         dossier_fee_tax_rate: initial.dossier_fee_tax_rate ?? "19.25",
-        guarantee_deposit_type: initial.guarantee_deposit_type ?? "",
         guarantee_deposit_value: initial.guarantee_deposit_value ?? "",
         penalty_grace_days: fromNumber(initial.penalty_grace_days),
         status: initial.status === "archived" ? "" : initial.status,
@@ -152,12 +148,6 @@ export function LoanProductDrawer({
     { value: "week", label: t("loanProducts.termUnit.week") },
     { value: "month", label: t("loanProducts.termUnit.month") },
   ];
-
-  const depositTypeOptions: Array<{ value: GuaranteeDepositType; label: string }> =
-    [
-      { value: "percentage", label: t("loanProducts.depositType.percentage") },
-      { value: "fixed", label: t("loanProducts.depositType.fixed") },
-    ];
 
   const statusOptions: Array<{ value: "active" | "inactive"; label: string }> = [
     { value: "active", label: t("loanProducts.status.active") },
@@ -195,7 +185,6 @@ export function LoanProductDrawer({
       insurance_rate: toNum(form.insurance_rate),
       fee_rate: toNum(form.fee_rate),
       dossier_fee_tax_rate: toNum(form.dossier_fee_tax_rate),
-      guarantee_deposit_type: form.guarantee_deposit_type || null,
       guarantee_deposit_value: toNum(form.guarantee_deposit_value),
       penalty_grace_days: toInt(form.penalty_grace_days),
       status: form.status || undefined,
@@ -483,19 +472,12 @@ export function LoanProductDrawer({
               error={errors.dossier_fee_tax_rate}
               hint={t("loanProducts.fields.rateHint")}
             />
-            <Select
-              label={t("loanProducts.fields.depositType")}
-              value={form.guarantee_deposit_type}
-              options={depositTypeOptions}
-              placeholder={t("loanProducts.fields.depositTypePlaceholder")}
-              isClearable
-              onChange={(next) =>
-                set("guarantee_deposit_type", next as GuaranteeDepositType | "")
-              }
-              error={errors.guarantee_deposit_type}
-            />
-            <MoneyField
+            <TextField
               label={t("loanProducts.fields.depositValue")}
+              type="number"
+              min={0}
+              max={100}
+              step="0.01"
               value={form.guarantee_deposit_value}
               onChange={(event) =>
                 set("guarantee_deposit_value", event.target.value)

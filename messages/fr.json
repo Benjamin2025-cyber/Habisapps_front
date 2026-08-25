@@ -2274,10 +2274,6 @@
       "monthly": "Mensuelle",
       "custom": "Personnalisée"
     },
-    "depositType": {
-      "percentage": "Pourcentage",
-      "fixed": "Montant fixe"
-    },
     "filters": {
       "searchLabel": "Rechercher",
       "searchPlaceholder": "Code ou nom du produit…",
@@ -2336,16 +2332,14 @@
       "amountHint": "Montant en devise (XAF).",
       "dueDateDay": "Jour d'échéance",
       "dueDateDayHint": "Jour du mois (1–31).",
-      "minGrace": "Délai de grâce min. (jours)",
-      "maxGrace": "Délai de grâce max. (jours)",
+      "minGrace": "Différé de remboursement min. (jours)",
+      "maxGrace": "Différé de remboursement max. (jours)",
       "interestRate": "Taux d'intérêt",
       "taxRate": "TVA sur le principal",
       "insuranceRate": "Taux d'assurance",
       "rateHint": "Valeur décimale (selon la convention de l'API).",
-      "depositType": "Type de dépôt de garantie",
-      "depositTypePlaceholder": "Sélectionner…",
-      "depositValue": "Valeur du dépôt de garantie",
-      "depositValueHint": "Pourcentage ou montant selon le type choisi.",
+      "depositValue": "Dépôt de garantie (%)",
+      "depositValueHint": "Pourcentage du capital accordé. La politique approuvée est de 10 %.",
       "penaltyGraceDays": "Jours de grâce avant pénalité",
       "penaltyGraceDaysHint": "Délai (en jours) après l'échéance avant l'application d'une pénalité. Champ réellement utilisé par le moteur.",
       "dossierFeeTaxRate": "TVA sur les frais de dossier (%)",

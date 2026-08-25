@@ -2274,10 +2274,6 @@
       "monthly": "Monthly",
       "custom": "Custom"
     },
-    "depositType": {
-      "percentage": "Percentage",
-      "fixed": "Fixed amount"
-    },
     "filters": {
       "searchLabel": "Search",
       "searchPlaceholder": "Product code or name…",
@@ -2336,16 +2332,14 @@
       "amountHint": "Amount in currency (XAF).",
       "dueDateDay": "Due date day",
       "dueDateDayHint": "Day of the month (1–31).",
-      "minGrace": "Min. grace period (days)",
-      "maxGrace": "Max. grace period (days)",
+      "minGrace": "Min. repayment deferral (days)",
+      "maxGrace": "Max. repayment deferral (days)",
       "interestRate": "Interest rate",
       "taxRate": "VAT on principal",
       "insuranceRate": "Insurance rate",
       "rateHint": "Decimal value (per the API convention).",
-      "depositType": "Guarantee deposit type",
-      "depositTypePlaceholder": "Select…",
-      "depositValue": "Guarantee deposit value",
-      "depositValueHint": "Percentage or amount depending on the selected type.",
+      "depositValue": "Guarantee deposit (%)",
+      "depositValueHint": "Percentage of the granted principal. The approved policy is 10%.",
       "penaltyGraceDays": "Grace days before penalty",
       "penaltyGraceDaysHint": "Period (in days) after the due date before a penalty is applied. The field actually used by the engine.",
       "dossierFeeTaxRate": "VAT on dossier fees (%)",
