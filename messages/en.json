@@ -1550,6 +1550,7 @@
       "productHint": "Catalog managed in \"Account products\".",
       "legacyType": "Type (free text)",
       "ledgerAccount": "Ledger account",
+      "ledgerAccountCode": "Accounting account (GL code)",
       "ledgerAccountPlaceholder": "Inherit from product",
       "ledgerAccountHint": "Optional — if left blank, the account inherits the product's ledger account.",
       "noLedgerAccounts": "No active ledger account in this branch. Create one in Ledger accounts.",
@@ -1634,7 +1635,12 @@
         "phone": "Phone",
         "mandate": "Mandate type",
         "status": "Status",
-        "period": "Period"
+        "period": "Period",
+        "scope": "Scope"
+      },
+      "scope": {
+        "client": "All accounts",
+        "account": "This account"
       }
     },
     "signatures": {

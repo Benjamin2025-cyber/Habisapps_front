@@ -179,6 +179,7 @@ export default function AccountsPage() {
     return data.data.filter(
       (account) =>
         account.account_number.toLowerCase().includes(needle) ||
+        (account.ledger_account_code ?? "").toLowerCase().includes(needle) ||
         (account.account_title ?? "").toLowerCase().includes(needle) ||
         clientNameOf(account.client_public_id).toLowerCase().includes(needle),
     );

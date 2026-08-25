@@ -1550,6 +1550,7 @@
       "productHint": "Catalogue géré dans « Produits de compte ».",
       "legacyType": "Type (libellé libre)",
       "ledgerAccount": "Compte comptable",
+      "ledgerAccountCode": "Compte comptable (code)",
       "ledgerAccountPlaceholder": "Hériter du produit",
       "ledgerAccountHint": "Optionnel — laissé vide, le compte hérite du compte comptable du produit.",
       "noLedgerAccounts": "Aucun compte comptable actif dans cette agence. Créez-en dans Comptes généraux.",
@@ -1634,7 +1635,12 @@
         "phone": "Téléphone",
         "mandate": "Type de mandat",
         "status": "Statut",
-        "period": "Période"
+        "period": "Période",
+        "scope": "Portée"
+      },
+      "scope": {
+        "client": "Tous les comptes",
+        "account": "Ce compte"
       }
     },
     "signatures": {
