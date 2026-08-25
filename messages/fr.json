@@ -2081,6 +2081,7 @@
       "firstInstallment": "1re échéance",
       "trancheDuration": "Périodicité (jours)",
       "daysHint": "En jours.",
+      "derivedHint": "Calculé automatiquement à partir du nombre d'échéances et de la date de première échéance.",
       "gracePeriod": "Différé (jours)",
       "totalDuration": "Durée totale (jours)",
       "amortizationAccount": "Compte d'amortissement",
@@ -2094,7 +2095,6 @@
       "sectorPlaceholder": "Sélectionner un secteur…",
       "subSector": "Sous-secteur",
       "subSectorPlaceholder": "Sélectionner un sous-secteur…",
-      "financedActivityCode": "Code activité financée",
       "activityAddress": "Adresse de l'activité",
       "entrepreneurAddress": "Adresse de l'entrepreneur",
       "accountsNone": "Ce client n'a aucun compte. Ce n'est pas bloquant : ces comptes ne servent qu'au déblocage et aux remboursements, et le prêt s'enregistre sans eux."

@@ -2081,6 +2081,7 @@
       "firstInstallment": "1st installment",
       "trancheDuration": "Frequency (days)",
       "daysHint": "In days.",
+      "derivedHint": "Computed automatically from the number of installments and the first due date.",
       "gracePeriod": "Grace period (days)",
       "totalDuration": "Total term (days)",
       "amortizationAccount": "Amortization account",
@@ -2094,7 +2095,6 @@
       "sectorPlaceholder": "Select a sector…",
       "subSector": "Sub-sector",
       "subSectorPlaceholder": "Select a sub-sector…",
-      "financedActivityCode": "Financed activity code",
       "activityAddress": "Activity address",
       "entrepreneurAddress": "Entrepreneur address",
       "accountsNone": "This client has no account. Not a blocker: these accounts are only used for disbursement and repayments, and the loan registers without them."

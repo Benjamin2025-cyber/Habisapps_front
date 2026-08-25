@@ -106,11 +106,6 @@ export function LoanInfoTab({
             value={subSector ? `${subSector.code} — ${subSector.name}` : null}
           />
           <PlainField
-            label={t("loans.fields.financedActivityCode")}
-            value={loan.financed_activity_code}
-            mono
-          />
-          <PlainField
             label={t("loans.fields.activityAddress")}
             value={loan.activity_address}
           />
