@@ -5,8 +5,9 @@ import { getRequestLocale } from "./locale";
  * P10 — Produits de prêt (catalogue des « types de prêt »).
  *
  * Catalogue géré par le super-admin (`platform-admin` ou `loan.products.*`).
- * Un prêt (`loans.loan_product_public_id`) hérite des limites, frais, pénalités
- * et comptes comptables définis ici.
+ * Un prêt (`loans.loan_product_public_id`) hérite des limites, frais et
+ * pénalités définis ici. Il n'y a pas de compte comptable par défaut : chaque
+ * ligne de crédit ouvre ses propres comptes lors de la mise en place.
  *
  * API shape: LIST wraps under `data.loan_products` + `meta.pagination`;
  * SHOW / CREATE / UPDATE return the product directly under `data`.
@@ -26,7 +27,6 @@ export type GuaranteeDepositType = "percentage" | "fixed";
 
 export type LoanProduct = {
   public_id: string;
-  ledger_account_public_id: string | null;
   code: string;
   name: string;
   status: LoanProductStatus;
@@ -77,7 +77,6 @@ export type PaginatedLoanProducts = {
 };
 
 export type LoanProductWritePayload = {
-  ledger_account_public_id?: string | null;
   /** Immutable after creation (we disable it on edit). */
   code?: string;
   name?: string;

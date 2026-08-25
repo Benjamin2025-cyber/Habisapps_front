@@ -8,10 +8,6 @@ import { TextField } from "@/components/ui/TextField";
 import { MoneyField } from "@/components/ui/MoneyField";
 import { localizeApiError } from "@/lib/api/errors";
 import { cn } from "@/lib/cn";
-import {
-  LedgerAccountPicker,
-  type LedgerAccountOption,
-} from "@/app/(app)/_components/LedgerAccountPicker";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import type {
   GuaranteeDepositType,
@@ -27,7 +23,6 @@ type Props = {
   open: boolean;
   mode: LoanProductDrawerMode;
   initial?: LoanProduct | null;
-  /** Active ledger accounts for the default-account picker (P16). */
   onClose: () => void;
   onSubmit: (payload: LoanProductWritePayload) => Promise<void>;
 };
@@ -62,8 +57,6 @@ type FormState = {
   // Pénalité — seul le délai de grâce est paramétrable, la formule est
   // universelle (5 000 FCFA + 2 % de l'impayé).
   penalty_grace_days: string;
-  // Comptabilité
-  ledger_account_public_id: string;
   // Statut
   status: "active" | "inactive" | "";
 };
@@ -93,7 +86,6 @@ const EMPTY: FormState = {
   guarantee_deposit_type: "",
   guarantee_deposit_value: "",
   penalty_grace_days: "",
-  ledger_account_public_id: "",
   status: "",
 };
 
@@ -106,10 +98,6 @@ export function LoanProductDrawer({
 }: Props) {
   const t = useTranslations();
 
-  // Default-account options: active accounts, plus the currently-stored account
-  // if it isn't in the active set (so editing never silently drops it).
-  const [ledgerSelection, setLedgerSelection] =
-    useState<LedgerAccountOption | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -148,7 +136,6 @@ export function LoanProductDrawer({
         guarantee_deposit_type: initial.guarantee_deposit_type ?? "",
         guarantee_deposit_value: initial.guarantee_deposit_value ?? "",
         penalty_grace_days: fromNumber(initial.penalty_grace_days),
-        ledger_account_public_id: initial.ledger_account_public_id ?? "",
         status: initial.status === "archived" ? "" : initial.status,
       });
     } else {
@@ -211,7 +198,6 @@ export function LoanProductDrawer({
       guarantee_deposit_type: form.guarantee_deposit_type || null,
       guarantee_deposit_value: toNum(form.guarantee_deposit_value),
       penalty_grace_days: toInt(form.penalty_grace_days),
-      ledger_account_public_id: nullable(form.ledger_account_public_id),
       status: form.status || undefined,
     };
 
@@ -226,7 +212,6 @@ export function LoanProductDrawer({
       const fieldLabels: Record<string, string> = {
         code: t("loanProducts.fields.code"),
         name: t("loanProducts.fields.name"),
-        ledger_account_public_id: t("loanProducts.fields.ledgerAccount"),
         min_term_count: t("loanProducts.fields.minTerm"),
         max_term_count: t("loanProducts.fields.maxTerm"),
         term_unit: t("loanProducts.fields.termUnit"),
@@ -540,25 +525,13 @@ export function LoanProductDrawer({
           </p>
         </Section>
 
-        {/* Comptabilité */}
+        {/* Comptabilité — nothing to pick. « Il n'y a pas de compte comptable
+            par défaut car chaque ligne de crédit entraîne automatiquement la
+            création de plusieurs comptes lors de la mise en place. » */}
         <Section title={t("loanProducts.drawer.sectionAccounting")}>
-          {/* A loan product is institution-wide and names no agency, so this one
-              cannot be narrowed the way the account forms are. It is searched on
-              the server instead, and each result carries its agency, because the
-              chart holds the same code once per agency. */}
-          <LedgerAccountPicker
-            label={t("loanProducts.fields.ledgerAccount")}
-            value={ledgerSelection}
-            onChange={(option) => {
-              setLedgerSelection(option);
-              set("ledger_account_public_id", option?.value ?? "");
-            }}
-            initialValuePublicId={initial?.ledger_account_public_id ?? null}
-            filter={(a) => a.status === "active"}
-            placeholder={t("loanProducts.fields.ledgerAccountPlaceholder")}
-            error={errors.ledger_account_public_id}
-            hint={t("loanProducts.fields.ledgerAccountHint")}
-          />
+          <p className="rounded-[var(--radius-field)] border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+            {t("loanProducts.fields.accountsAutomaticHint")}
+          </p>
           <p className="rounded-[var(--radius-field)] border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
             {t("loanProducts.fields.policiesAutomaticHint")}
           </p>
