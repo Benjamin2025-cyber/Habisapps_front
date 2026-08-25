@@ -1,55 +1,27 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
 import { MoneyField } from "@/components/ui/MoneyField";
 import { localizeApiError } from "@/lib/api/errors";
-import { fetchFormulaPolicies } from "@/lib/api/reference";
 import { cn } from "@/lib/cn";
-import { useSession } from "@/lib/auth/SessionProvider";
 import {
   LedgerAccountPicker,
   type LedgerAccountOption,
 } from "@/app/(app)/_components/LedgerAccountPicker";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
-import {
-  FEE_POLICY_VALUE,
-  INTEREST_POLICY_VALUE,
-  PENALTY_POLICY_VALUE,
-  REPAYMENT_ALLOCATION_POLICY_VALUE,
-  type GuaranteeDepositType,
-  type LoanProduct,
-  type LoanProductWritePayload,
-  type RepaymentFrequency,
-  type TermUnit,
+import type {
+  GuaranteeDepositType,
+  LoanProduct,
+  LoanProductWritePayload,
+  RepaymentFrequency,
+  TermUnit,
 } from "@/lib/api/loan-products";
-import type { LedgerAccount } from "@/lib/api/ledger-accounts";
 
 export type LoanProductDrawerMode = "create" | "edit";
-
-/**
- * Penalty enums consumed by the arrears engine (issue #5 /
- * `LoanPenaltyTermsResolver`). `value_type` + `value` + `formula_base` drive the
- * per-period penalty; `formula_type` is descriptive metadata. Values must match
- * the backend exactly — an unknown string makes the engine fall back to the
- * global config policy.
- */
-const PENALTY_VALUE_TYPES = ["amount", "percentage"] as const;
-const PENALTY_FORMULA_BASES = [
-  "unpaid_scheduled_due",
-  "overdue_amount",
-  "principal",
-  "outstanding_principal",
-] as const;
-const PENALTY_FORMULA_TYPES = [
-  "fixed",
-  "flat_rate",
-  "percentage",
-  "variable_rate",
-] as const;
 
 type Props = {
   open: boolean;
@@ -84,23 +56,14 @@ type FormState = {
   tax_rate: string;
   insurance_rate: string;
   fee_rate: string;
+  dossier_fee_tax_rate: string;
   guarantee_deposit_type: GuaranteeDepositType | "";
   guarantee_deposit_value: string;
-  // Pénalité
+  // Pénalité — seul le délai de grâce est paramétrable, la formule est
+  // universelle (5 000 FCFA + 2 % de l'impayé).
   penalty_grace_days: string;
-  penalty_formula_type: string;
-  penalty_formula_base: string;
-  penalty_value_type: string;
-  penalty_value: string;
   // Comptabilité
   ledger_account_public_id: string;
-  policy_interest: boolean;
-  policy_penalty: boolean;
-  policy_repayment_allocation: boolean;
-  policy_fee: boolean;
-  policy_tax: boolean;
-  policy_insurance: boolean;
-  policy_guarantee_deposit: boolean;
   // Statut
   status: "active" | "inactive" | "";
 };
@@ -126,21 +89,11 @@ const EMPTY: FormState = {
   tax_rate: "",
   insurance_rate: "",
   fee_rate: "",
+  dossier_fee_tax_rate: "19.25",
   guarantee_deposit_type: "",
   guarantee_deposit_value: "",
   penalty_grace_days: "",
-  penalty_formula_type: "",
-  penalty_formula_base: "",
-  penalty_value_type: "",
-  penalty_value: "",
   ledger_account_public_id: "",
-  policy_interest: false,
-  policy_penalty: false,
-  policy_repayment_allocation: false,
-  policy_fee: false,
-  policy_tax: false,
-  policy_insurance: false,
-  policy_guarantee_deposit: false,
   status: "",
 };
 
@@ -152,8 +105,6 @@ export function LoanProductDrawer({
   onSubmit,
 }: Props) {
   const t = useTranslations();
-  const session = useSession();
-  const token = session.status === "authenticated" ? session.token : null;
 
   // Default-account options: active accounts, plus the currently-stored account
   // if it isn't in the active set (so editing never silently drops it).
@@ -163,34 +114,6 @@ export function LoanProductDrawer({
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
-
-  // Formula-policy catalog (back-issue #20): drives which policy toggles are
-  // selectable. Unapproved policies (e.g. penalties_and_arrears) are disabled
-  // here instead of being hardcoded, and never submitted.
-  const [policyApproved, setPolicyApproved] = useState<Map<string, boolean>>(
-    new Map(),
-  );
-  useEffect(() => {
-    if (!open || !token) return;
-    let cancelled = false;
-    fetchFormulaPolicies(token)
-      .then((policies) => {
-        if (!cancelled) {
-          setPolicyApproved(
-            new Map(policies.map((p) => [p.key, p.approved])),
-          );
-        }
-      })
-      .catch(() => {
-        /* leave empty — toggles stay enabled until we know otherwise */
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [open, token]);
-
-  // A policy is selectable unless the catalog explicitly marks it unapproved.
-  const policyEnabled = (key: string): boolean => policyApproved.get(key) !== false;
 
   const isEdit = mode === "edit";
 
@@ -221,22 +144,11 @@ export function LoanProductDrawer({
         tax_rate: initial.tax_rate ?? "",
         insurance_rate: initial.insurance_rate ?? "",
         fee_rate: initial.fee_rate ?? "",
+        dossier_fee_tax_rate: initial.dossier_fee_tax_rate ?? "19.25",
         guarantee_deposit_type: initial.guarantee_deposit_type ?? "",
         guarantee_deposit_value: initial.guarantee_deposit_value ?? "",
         penalty_grace_days: fromNumber(initial.penalty_grace_days),
-        penalty_formula_type: initial.penalty_formula_type ?? "",
-        penalty_formula_base: initial.penalty_formula_base ?? "",
-        penalty_value_type: initial.penalty_value_type ?? "",
-        penalty_value: initial.penalty_value ?? "",
         ledger_account_public_id: initial.ledger_account_public_id ?? "",
-        policy_interest: initial.interest_policy_key !== null,
-        policy_penalty: initial.penalty_policy_key !== null,
-        policy_repayment_allocation:
-          initial.repayment_allocation_policy_key !== null,
-        policy_fee: initial.fee_policy_key !== null,
-        policy_tax: initial.tax_policy_key !== null,
-        policy_insurance: initial.insurance_policy_key !== null,
-        policy_guarantee_deposit: initial.guarantee_deposit_policy_key !== null,
         status: initial.status === "archived" ? "" : initial.status,
       });
     } else {
@@ -295,47 +207,11 @@ export function LoanProductDrawer({
       tax_rate: toNum(form.tax_rate),
       insurance_rate: toNum(form.insurance_rate),
       fee_rate: toNum(form.fee_rate),
+      dossier_fee_tax_rate: toNum(form.dossier_fee_tax_rate),
       guarantee_deposit_type: form.guarantee_deposit_type || null,
       guarantee_deposit_value: toNum(form.guarantee_deposit_value),
       penalty_grace_days: toInt(form.penalty_grace_days),
-      penalty_formula_type: nullable(form.penalty_formula_type),
-      penalty_formula_base: nullable(form.penalty_formula_base),
-      penalty_value_type: nullable(form.penalty_value_type),
-      penalty_value: toNum(form.penalty_value),
       ledger_account_public_id: nullable(form.ledger_account_public_id),
-      interest_policy_key:
-        form.policy_interest && policyEnabled(INTEREST_POLICY_VALUE)
-          ? INTEREST_POLICY_VALUE
-          : null,
-      // Only attach a policy the catalog reports as approved — attaching an
-      // unapproved one (e.g. penalties_and_arrears) makes loan creation 422
-      // (back-issues #16/#20). penalties_and_arrears is approved=false, so this
-      // stays null until the backend approves it.
-      penalty_policy_key:
-        form.policy_penalty && policyEnabled(PENALTY_POLICY_VALUE)
-          ? PENALTY_POLICY_VALUE
-          : null,
-      repayment_allocation_policy_key:
-        form.policy_repayment_allocation &&
-        policyEnabled(REPAYMENT_ALLOCATION_POLICY_VALUE)
-          ? REPAYMENT_ALLOCATION_POLICY_VALUE
-          : null,
-      fee_policy_key:
-        form.policy_fee && policyEnabled(FEE_POLICY_VALUE)
-          ? FEE_POLICY_VALUE
-          : null,
-      tax_policy_key:
-        form.policy_tax && policyEnabled(FEE_POLICY_VALUE)
-          ? FEE_POLICY_VALUE
-          : null,
-      insurance_policy_key:
-        form.policy_insurance && policyEnabled(FEE_POLICY_VALUE)
-          ? FEE_POLICY_VALUE
-          : null,
-      guarantee_deposit_policy_key:
-        form.policy_guarantee_deposit && policyEnabled(FEE_POLICY_VALUE)
-          ? FEE_POLICY_VALUE
-          : null,
       status: form.status || undefined,
     };
 
@@ -361,8 +237,8 @@ export function LoanProductDrawer({
         tax_rate: t("loanProducts.fields.taxRate"),
         insurance_rate: t("loanProducts.fields.insuranceRate"),
         fee_rate: t("loanProducts.fields.feeRate"),
+        dossier_fee_tax_rate: t("loanProducts.fields.dossierFeeTaxRate"),
         guarantee_deposit_value: t("loanProducts.fields.depositValue"),
-        penalty_value: t("loanProducts.fields.penaltyValue"),
         status: t("loanProducts.fields.status"),
       };
       const { generalMessage, fieldErrors } = localizeApiError(
@@ -609,6 +485,19 @@ export function LoanProductDrawer({
               error={errors.fee_rate}
               hint={t("loanProducts.fields.rateHint")}
             />
+            <TextField
+              label={t("loanProducts.fields.dossierFeeTaxRate")}
+              type="number"
+              min={0}
+              max={100}
+              step="0.01"
+              value={form.dossier_fee_tax_rate}
+              onChange={(event) =>
+                set("dossier_fee_tax_rate", event.target.value)
+              }
+              error={errors.dossier_fee_tax_rate}
+              hint={t("loanProducts.fields.rateHint")}
+            />
             <Select
               label={t("loanProducts.fields.depositType")}
               value={form.guarantee_deposit_type}
@@ -643,79 +532,12 @@ export function LoanProductDrawer({
             hint={t("loanProducts.fields.penaltyGraceDaysHint")}
           />
 
-          {/*
-           * Penalty terms are now consumed by the arrears engine (issue #5):
-           * `penalty_value_type` + `penalty_value` + `penalty_formula_base`
-           * drive the per-period penalty, with snapshot → product → global
-           * config precedence. `penalty_formula_type` is descriptive metadata
-           * snapshotted onto the loan. Selects keep the values to the exact
-           * enums the engine matches (a free-text typo would silently fall back
-           * to the global config policy).
-           */}
+          {/* The penalty formula is not a product choice: the accounting team
+              set one hybrid rule for every credit. Only the grace period above
+              varies, so this states the rule instead of offering a selector. */}
           <p className="rounded-[var(--radius-field)] border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
             {t("loanProducts.fields.penaltyHint")}
           </p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Select
-              label={t("loanProducts.fields.penaltyValueType")}
-              value={form.penalty_value_type}
-              options={PENALTY_VALUE_TYPES.map((value) => ({
-                value,
-                label: t(`loanProducts.penaltyValueTypeOptions.${value}`),
-              }))}
-              placeholder={t("loanProducts.fields.penaltyValueTypePlaceholder")}
-              onChange={(value) => set("penalty_value_type", value)}
-              error={errors.penalty_value_type}
-              hint={t("loanProducts.fields.penaltyValueTypeHint")}
-              isClearable
-            />
-            <TextField
-              label={t("loanProducts.fields.penaltyValue")}
-              type="number"
-              value={form.penalty_value}
-              onChange={(event) => set("penalty_value", event.target.value)}
-              error={errors.penalty_value}
-              hint={
-                form.penalty_value_type === "percentage"
-                  ? t("loanProducts.fields.penaltyValueRateHint")
-                  : form.penalty_value_type === "amount"
-                    ? t("loanProducts.fields.penaltyValueAmountHint")
-                    : undefined
-              }
-            />
-            {form.penalty_value_type === "percentage" ? (
-              <Select
-                label={t("loanProducts.fields.penaltyFormulaBase")}
-                value={form.penalty_formula_base}
-                options={PENALTY_FORMULA_BASES.map((value) => ({
-                  value,
-                  label: t(`loanProducts.penaltyFormulaBaseOptions.${value}`),
-                }))}
-                placeholder={t(
-                  "loanProducts.fields.penaltyFormulaBasePlaceholder",
-                )}
-                onChange={(value) => set("penalty_formula_base", value)}
-                error={errors.penalty_formula_base}
-                hint={t("loanProducts.fields.penaltyFormulaBaseHint")}
-                isClearable
-                className="sm:col-span-2"
-              />
-            ) : null}
-            <Select
-              label={t("loanProducts.fields.penaltyFormulaType")}
-              value={form.penalty_formula_type}
-              options={PENALTY_FORMULA_TYPES.map((value) => ({
-                value,
-                label: t(`loanProducts.penaltyFormulaTypeOptions.${value}`),
-              }))}
-              placeholder={t("loanProducts.fields.penaltyFormulaTypePlaceholder")}
-              onChange={(value) => set("penalty_formula_type", value)}
-              error={errors.penalty_formula_type}
-              hint={t("loanProducts.fields.penaltyFormulaTypeHint")}
-              isClearable
-              className="sm:col-span-2"
-            />
-          </div>
         </Section>
 
         {/* Comptabilité */}
@@ -737,77 +559,9 @@ export function LoanProductDrawer({
             error={errors.ledger_account_public_id}
             hint={t("loanProducts.fields.ledgerAccountHint")}
           />
-          <div className="mt-1 flex flex-col gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {t("loanProducts.fields.policiesLabel")}
-            </span>
-            <p className="text-xs text-muted-foreground">
-              {t("loanProducts.fields.policiesHint")}
-            </p>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <CheckboxField
-                label={t("loanProducts.fields.policyInterest")}
-                checked={form.policy_interest}
-                onChange={(checked) => set("policy_interest", checked)}
-                disabled={!policyEnabled(INTEREST_POLICY_VALUE)}
-                hint={
-                  policyEnabled(INTEREST_POLICY_VALUE)
-                    ? undefined
-                    : t("loanProducts.fields.policyUnapprovedHint")
-                }
-              />
-              <CheckboxField
-                label={t("loanProducts.fields.policyPenalty")}
-                checked={form.policy_penalty && policyEnabled(PENALTY_POLICY_VALUE)}
-                onChange={(checked) => set("policy_penalty", checked)}
-                disabled={!policyEnabled(PENALTY_POLICY_VALUE)}
-                hint={
-                  policyEnabled(PENALTY_POLICY_VALUE)
-                    ? undefined
-                    : t("loanProducts.fields.policyUnapprovedHint")
-                }
-              />
-              <CheckboxField
-                label={t("loanProducts.fields.policyRepaymentAllocation")}
-                checked={form.policy_repayment_allocation}
-                onChange={(checked) =>
-                  set("policy_repayment_allocation", checked)
-                }
-                disabled={!policyEnabled(REPAYMENT_ALLOCATION_POLICY_VALUE)}
-                hint={
-                  policyEnabled(REPAYMENT_ALLOCATION_POLICY_VALUE)
-                    ? undefined
-                    : t("loanProducts.fields.policyUnapprovedHint")
-                }
-              />
-              <CheckboxField
-                label={t("loanProducts.fields.policyFee")}
-                checked={form.policy_fee}
-                onChange={(checked) => set("policy_fee", checked)}
-                disabled={!policyEnabled(FEE_POLICY_VALUE)}
-              />
-              <CheckboxField
-                label={t("loanProducts.fields.policyTax")}
-                checked={form.policy_tax}
-                onChange={(checked) => set("policy_tax", checked)}
-                disabled={!policyEnabled(FEE_POLICY_VALUE)}
-              />
-              <CheckboxField
-                label={t("loanProducts.fields.policyInsurance")}
-                checked={form.policy_insurance}
-                onChange={(checked) => set("policy_insurance", checked)}
-                disabled={!policyEnabled(FEE_POLICY_VALUE)}
-              />
-              <CheckboxField
-                label={t("loanProducts.fields.policyGuaranteeDeposit")}
-                checked={form.policy_guarantee_deposit}
-                onChange={(checked) =>
-                  set("policy_guarantee_deposit", checked)
-                }
-                disabled={!policyEnabled(FEE_POLICY_VALUE)}
-              />
-            </div>
-          </div>
+          <p className="rounded-[var(--radius-field)] border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+            {t("loanProducts.fields.policiesAutomaticHint")}
+          </p>
         </Section>
 
         {/* Statut */}

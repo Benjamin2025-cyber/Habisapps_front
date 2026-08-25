@@ -11,7 +11,7 @@ import { getRequestLocale } from "./locale";
  * API shape: LIST wraps under `data.loan_products` + `meta.pagination`;
  * SHOW / CREATE / UPDATE return the product directly under `data`.
  *
- * Note: les taux (`interest_rate`, `tax_rate`, …) sont des décimaux renvoyés
+ * Note: les taux (`interest_rate`, `tax_rate`, `dossier_fee_tax_rate`, …) sont des décimaux renvoyés
  * comme chaînes par l'API (colonnes `decimal`). Les montants sont stockés en
  * `*_minor` (scale 2). Les `*_policy_key` rattachent une politique de calcul
  * nommée (valeur d'enum fixe) au produit ; `null` = politique non rattachée.
@@ -23,12 +23,6 @@ export type TermUnit = "day" | "week" | "month";
 export type RepaymentFrequency = "daily" | "weekly" | "monthly" | "custom";
 
 export type GuaranteeDepositType = "percentage" | "fixed";
-
-/** Valeurs d'enum acceptées par l'API pour chaque clé de politique. */
-export const INTEREST_POLICY_VALUE = "loan_interest_method";
-export const PENALTY_POLICY_VALUE = "penalties_and_arrears";
-export const REPAYMENT_ALLOCATION_POLICY_VALUE = "repayment_allocation_order";
-export const FEE_POLICY_VALUE = "fees_taxes_insurance";
 
 export type LoanProduct = {
   public_id: string;
@@ -57,15 +51,12 @@ export type LoanProduct = {
   insurance_rate: string | null;
   /** Dossier fee as a percentage of the principal. No fixed amount, no floor. */
   fee_rate: string | null;
+  dossier_fee_tax_rate: string | null;
   tax_policy_key: string | null;
   insurance_policy_key: string | null;
   guarantee_deposit_policy_key: string | null;
   guarantee_deposit_type: GuaranteeDepositType | null;
   guarantee_deposit_value: string | null;
-  penalty_formula_type: string | null;
-  penalty_formula_base: string | null;
-  penalty_value_type: string | null;
-  penalty_value: string | null;
   operation_type: string | null;
   constant_value: string | null;
   rules: Record<string, unknown> | null;
@@ -98,10 +89,6 @@ export type LoanProductWritePayload = {
   allowed_repayment_frequencies?: RepaymentFrequency[] | null;
   requires_guarantor?: boolean;
   requires_collateral?: boolean;
-  interest_policy_key?: string | null;
-  penalty_policy_key?: string | null;
-  repayment_allocation_policy_key?: string | null;
-  fee_policy_key?: string | null;
   min_amount_minor?: number | null;
   max_amount_minor?: number | null;
   due_date_day?: number | null;
@@ -112,15 +99,9 @@ export type LoanProductWritePayload = {
   tax_rate?: number | null;
   insurance_rate?: number | null;
   fee_rate?: number | null;
-  tax_policy_key?: string | null;
-  insurance_policy_key?: string | null;
-  guarantee_deposit_policy_key?: string | null;
+  dossier_fee_tax_rate?: number | null;
   guarantee_deposit_type?: GuaranteeDepositType | null;
   guarantee_deposit_value?: number | null;
-  penalty_formula_type?: string | null;
-  penalty_formula_base?: string | null;
-  penalty_value_type?: string | null;
-  penalty_value?: number | null;
 };
 
 /**
