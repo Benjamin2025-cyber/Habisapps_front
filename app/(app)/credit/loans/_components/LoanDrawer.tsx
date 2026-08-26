@@ -367,7 +367,7 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
           {isEdit ? (
             <TextField
               label={t("loans.fields.client")}
-              value={initial?.client_public_id ?? ""}
+              value={initial?.client_display_name ?? initial?.client_public_id ?? ""}
               onChange={() => undefined}
               disabled
               hint={t("loans.fields.clientEditHint")}

@@ -1,5 +1,6 @@
 "use client";
 
+import { clientDisplayName } from "@/lib/format/clientName";
 import { useMemo } from "react";
 import { AsyncSelect, type AsyncSelectOption } from "@/components/ui/AsyncSelect";
 import { fetchClients, type Client } from "@/lib/api/clients";
@@ -108,10 +109,7 @@ export function toClientOption(client: Client): ClientOption {
 }
 
 function toOption(client: Client): ClientOption {
-  const name =
-    [client.last_name?.toUpperCase(), client.first_name]
-      .filter((part): part is string => !!part && part.length > 0)
-      .join(" ") || client.public_id;
+  const name = clientDisplayName(client) || client.public_id;
   return {
     value: client.public_id,
     label: client.client_reference ? `${name} — ${client.client_reference}` : name,

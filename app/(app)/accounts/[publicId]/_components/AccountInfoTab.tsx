@@ -1,5 +1,6 @@
 "use client";
 
+import { clientDisplayName } from "@/lib/format/clientName";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -45,11 +46,7 @@ export function AccountInfoTab({
   const holderName =
     account.client_display_name ??
     (holder
-      ? [holder.last_name?.toUpperCase(), holder.first_name, holder.middle_name]
-          .filter((part): part is string => !!part && part.length > 0)
-          .join(" ") ||
-        holder.client_reference ||
-        holder.public_id
+      ? clientDisplayName(holder) || holder.client_reference || holder.public_id
       : account.client_public_id);
 
   const product = accountProducts.find(

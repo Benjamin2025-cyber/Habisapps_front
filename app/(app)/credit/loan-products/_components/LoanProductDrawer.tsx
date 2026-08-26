@@ -125,12 +125,12 @@ export function LoanProductDrawer({
         due_date_day: fromNumber(initial.due_date_day),
         min_grace_period_days: fromNumber(initial.min_grace_period_days),
         max_grace_period_days: fromNumber(initial.max_grace_period_days),
-        interest_rate: initial.interest_rate ?? "",
-        tax_rate: initial.tax_rate ?? "",
-        insurance_rate: initial.insurance_rate ?? "",
-        fee_rate: initial.fee_rate ?? "",
-        dossier_fee_tax_rate: initial.dossier_fee_tax_rate ?? "19.25",
-        guarantee_deposit_value: initial.guarantee_deposit_value ?? "",
+        interest_rate: fromRate(initial.interest_rate),
+        tax_rate: fromRate(initial.tax_rate),
+        insurance_rate: fromRate(initial.insurance_rate),
+        fee_rate: fromRate(initial.fee_rate),
+        dossier_fee_tax_rate: fromRate(initial.dossier_fee_tax_rate) || "19.25",
+        guarantee_deposit_value: fromRate(initial.guarantee_deposit_value),
         penalty_grace_days: fromNumber(initial.penalty_grace_days),
         status: initial.status === "archived" ? "" : initial.status,
       });
@@ -630,6 +630,23 @@ function toMinor(value: string): number | null {
 function fromMinor(minor: number | null | undefined): string {
   if (minor === null || minor === undefined) return "";
   return String(minor / 100);
+}
+
+/**
+ * A rate as the operator typed it, not as the column stores it.
+ *
+ * The rate columns are `numeric(12,6)`, so Postgres hands back `9.000000` and
+ * the API passes the string through untouched. Prefilling the form with it made
+ * every reopened product read `10.000000` where `10` had been entered — which
+ * looks like the value was altered, and makes "check it saved what you typed"
+ * impossible to do at a glance. Trailing zeros only: `19.250000` → `19.25`,
+ * never a rounding.
+ */
+function fromRate(value: string | null | undefined): string {
+  const raw = (value ?? "").trim();
+  if (raw === "" || !raw.includes(".")) return raw;
+
+  return raw.replace(/\.?0+$/, "");
 }
 
 function fromNumber(value: number | null | undefined): string {

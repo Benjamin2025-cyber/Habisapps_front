@@ -1,5 +1,6 @@
 "use client";
 
+import { clientDisplayName } from "@/lib/format/clientName";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
@@ -38,10 +39,7 @@ const KYC_TONE: Record<
 export function IdentityTab({ client, canEdit, onEdit }: Props) {
   const t = useTranslations();
 
-  const fullName =
-    [client.last_name?.toUpperCase(), client.first_name, client.middle_name]
-      .filter((value): value is string => !!value && value.length > 0)
-      .join(" ") || "—";
+  const fullName = clientDisplayName(client) || "—";
 
   const initials =
     [client.last_name, client.first_name]

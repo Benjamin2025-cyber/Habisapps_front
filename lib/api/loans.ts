@@ -179,6 +179,8 @@ export type Loan = {
   status: LoanStatus;
   processing_level: string | null;
   client_public_id: string | null;
+  /** NOM Prénoms, resolved server-side. */
+  client_display_name: string | null;
   agency_public_id: string | null;
   loan_product_public_id: string | null;
   credit_agent_public_id: string | null;

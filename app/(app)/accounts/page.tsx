@@ -1,5 +1,6 @@
 "use client";
 
+import { clientDisplayName } from "@/lib/format/clientName";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
@@ -147,11 +148,7 @@ export default function AccountsPage() {
     const byId = new Map<string, string>();
     for (const client of clients) {
       const name =
-        [client.last_name?.toUpperCase(), client.first_name]
-          .filter((part): part is string => !!part && part.length > 0)
-          .join(" ") ||
-        client.client_reference ||
-        client.public_id;
+        clientDisplayName(client) || client.client_reference || client.public_id;
       byId.set(client.public_id, name);
     }
     return (publicId: string | null) =>
