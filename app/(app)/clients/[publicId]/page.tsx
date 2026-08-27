@@ -1,5 +1,6 @@
 "use client";
 
+import { clientDisplayName } from "@/lib/format/clientName";
 import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Alert } from "@/components/ui/Alert";
@@ -289,13 +290,7 @@ export default function ClientDetailPage(props: {
 }
 
 function clientHeading(client: Client): string {
-  return [
-    client.last_name?.toUpperCase(),
-    client.first_name,
-    client.middle_name,
-  ]
-    .filter((value): value is string => !!value && value.length > 0)
-    .join(" ");
+  return clientDisplayName(client);
 }
 
 function PlaceholderCard({ title, body }: { title: string; body: string }) {

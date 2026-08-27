@@ -1,5 +1,6 @@
 "use client";
 
+import { clientDisplayName } from "@/lib/format/clientName";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
@@ -119,11 +120,7 @@ export function AccountDrawer({
     const id = initial?.client_public_id;
     if (!id) return null;
     const client = clients.find((c) => c.public_id === id);
-    const name = client
-      ? [client.last_name?.toUpperCase(), client.first_name]
-          .filter((part): part is string => !!part && part.length > 0)
-          .join(" ") || id
-      : id;
+    const name = client ? clientDisplayName(client) || id : id;
     return {
       value: id,
       label:

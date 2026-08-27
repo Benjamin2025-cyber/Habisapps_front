@@ -984,6 +984,19 @@
         "updatedBody": "Les modifications ont été enregistrées.",
         "statusChangedTitle": "Statut modifié",
         "statusChangedBody": "Action « {action} » appliquée."
+      },
+      "viewer": {
+        "visual": "Document",
+        "characteristics": "Caractéristiques",
+        "front": "Recto",
+        "back": "Verso",
+        "loading": "Chargement…",
+        "unavailable": "Fichier indisponible",
+        "noFile": "Aucun fichier joint",
+        "openFile": "Ouvrir dans un nouvel onglet",
+        "submittedAt": "Soumis le",
+        "verifiedAt": "Vérifié le",
+        "rejectionReason": "Motif du rejet"
       }
     },
     "guarantors": {
@@ -1550,6 +1563,7 @@
       "productHint": "Catalogue géré dans « Produits de compte ».",
       "legacyType": "Type (libellé libre)",
       "ledgerAccount": "Compte comptable",
+      "ledgerAccountCode": "Compte comptable (code)",
       "ledgerAccountPlaceholder": "Hériter du produit",
       "ledgerAccountHint": "Optionnel — laissé vide, le compte hérite du compte comptable du produit.",
       "noLedgerAccounts": "Aucun compte comptable actif dans cette agence. Créez-en dans Comptes généraux.",
@@ -1634,7 +1648,12 @@
         "phone": "Téléphone",
         "mandate": "Type de mandat",
         "status": "Statut",
-        "period": "Période"
+        "period": "Période",
+        "scope": "Portée"
+      },
+      "scope": {
+        "client": "Tous les comptes",
+        "account": "Ce compte"
       }
     },
     "signatures": {
@@ -2081,6 +2100,7 @@
       "firstInstallment": "1re échéance",
       "trancheDuration": "Périodicité (jours)",
       "daysHint": "En jours.",
+      "derivedHint": "Calculé automatiquement à partir du nombre d'échéances et de la date de première échéance.",
       "gracePeriod": "Différé (jours)",
       "totalDuration": "Durée totale (jours)",
       "amortizationAccount": "Compte d'amortissement",
@@ -2094,7 +2114,6 @@
       "sectorPlaceholder": "Sélectionner un secteur…",
       "subSector": "Sous-secteur",
       "subSectorPlaceholder": "Sélectionner un sous-secteur…",
-      "financedActivityCode": "Code activité financée",
       "activityAddress": "Adresse de l'activité",
       "entrepreneurAddress": "Adresse de l'entrepreneur",
       "accountsNone": "Ce client n'a aucun compte. Ce n'est pas bloquant : ces comptes ne servent qu'au déblocage et aux remboursements, et le prêt s'enregistre sans eux."
@@ -2274,10 +2293,6 @@
       "monthly": "Mensuelle",
       "custom": "Personnalisée"
     },
-    "depositType": {
-      "percentage": "Pourcentage",
-      "fixed": "Montant fixe"
-    },
     "filters": {
       "searchLabel": "Rechercher",
       "searchPlaceholder": "Code ou nom du produit…",
@@ -2336,65 +2351,24 @@
       "amountHint": "Montant en devise (XAF).",
       "dueDateDay": "Jour d'échéance",
       "dueDateDayHint": "Jour du mois (1–31).",
-      "minGrace": "Délai de grâce min. (jours)",
-      "maxGrace": "Délai de grâce max. (jours)",
+      "minGrace": "Différé de remboursement min. (jours)",
+      "maxGrace": "Différé de remboursement max. (jours)",
       "interestRate": "Taux d'intérêt",
-      "taxRate": "Taux de taxe",
+      "taxRate": "TVA sur le principal",
       "insuranceRate": "Taux d'assurance",
       "rateHint": "Valeur décimale (selon la convention de l'API).",
-      "depositType": "Type de dépôt de garantie",
-      "depositTypePlaceholder": "Sélectionner…",
-      "depositValue": "Valeur du dépôt de garantie",
-      "depositValueHint": "Pourcentage ou montant selon le type choisi.",
+      "depositValue": "Dépôt de garantie (%)",
+      "depositValueHint": "Pourcentage du capital accordé. La politique approuvée est de 10 %.",
       "penaltyGraceDays": "Jours de grâce avant pénalité",
       "penaltyGraceDaysHint": "Délai (en jours) après l'échéance avant l'application d'une pénalité. Champ réellement utilisé par le moteur.",
-      "penaltyHint": "Pénalité appliquée à chaque période d'arriéré. Le moteur utilise le type de valeur, la valeur et la base ; la valeur figée à la création du prêt prime sur les modifications ultérieures du produit.",
-      "penaltyValue": "Valeur de pénalité",
-      "penaltyValueAmountHint": "Montant fixe en FCFA prélevé à chaque période d'arriéré.",
-      "penaltyValueRateHint": "Taux en pourcentage (ex. 2 = 2 %) appliqué à la base choisie à chaque période.",
-      "penaltyValueType": "Type de valeur de pénalité",
-      "penaltyValueTypeHint": "Montant fixe ou pourcentage de la base.",
-      "penaltyValueTypePlaceholder": "Sélectionner un type…",
-      "penaltyFormulaType": "Type de formule (descriptif)",
-      "penaltyFormulaTypeHint": "Étiquette descriptive figée sur le prêt ; n'affecte pas le calcul.",
-      "penaltyFormulaTypePlaceholder": "Sélectionner une formule…",
-      "penaltyFormulaBase": "Base de la formule de pénalité",
-      "penaltyFormulaBaseHint": "Montant auquel le pourcentage s'applique.",
-      "penaltyFormulaBasePlaceholder": "Sélectionner une base…",
-      "ledgerAccount": "Compte comptable par défaut",
-      "ledgerAccountHint": "Compte comptable (plan comptable P16) hérité par défaut par les prêts créés avec ce produit.",
-      "ledgerAccountPlaceholder": "Sélectionner un compte…",
-      "policiesLabel": "Politiques de calcul rattachées",
-      "policiesHint": "Active une politique de calcul nommée (formule paramétrée côté back). Laisser décoché si non utilisée.",
-      "policyInterest": "Politique d'intérêt",
-      "policyPenalty": "Politique de pénalités & arriérés",
-      "policyPenaltyDisabledHint": "Non disponible : cette politique n'est pas approuvée côté back (la rattacher fait échouer la création de prêt). Voir back-issues #16.",
-      "policyUnapprovedHint": "Non disponible : politique non approuvée côté back (catalogue formula-policies). La rattacher fait échouer la création de prêt.",
-      "policyRepaymentAllocation": "Ordre d'imputation des remboursements",
-      "policyFee": "Politique de frais",
-      "policyTax": "Politique de taxe",
-      "policyInsurance": "Politique d'assurance",
-      "policyGuaranteeDeposit": "Politique de dépôt de garantie",
+      "dossierFeeTaxRate": "TVA sur les frais de dossier (%)",
+      "penaltyHint": "La pénalité est la même pour tous les crédits : une partie fixe de 5 000 FCFA plus une partie variable de 2 % du montant impayé, appliquées ensemble par le moteur des arriérés. Elle n'est pas paramétrable par produit — seul le délai de grâce ci-dessus l'est.",
+      "accountsAutomaticHint": "Aucun compte comptable par défaut : chaque ligne de crédit ouvre automatiquement ses propres comptes lors de la mise en place — une créance pour le principal et, si une garantie est prise, un compte de dépôt qui la porte — sous les comptes de regroupement mappés pour l'agence.",
+      "policiesAutomaticHint": "Les politiques de crédit — intérêts, échéancier, imputation, frais, taxes, assurance, garantie et pénalités — sont appliquées automatiquement à tous les prêts.",
       "status": "Statut",
       "statusPlaceholder": "Statut par défaut (actif)…",
       "statusHint": "L'archivage se fait via l'action « Archiver ».",
       "feeRate": "Taux des frais de dossier (%)"
-    },
-    "penaltyValueTypeOptions": {
-      "amount": "Montant fixe",
-      "percentage": "Pourcentage"
-    },
-    "penaltyFormulaBaseOptions": {
-      "unpaid_scheduled_due": "Échéance impayée restante",
-      "overdue_amount": "Montant échu (brut)",
-      "principal": "Principal de l'échéance",
-      "outstanding_principal": "Principal restant dû"
-    },
-    "penaltyFormulaTypeOptions": {
-      "fixed": "Forfaitaire",
-      "flat_rate": "Taux fixe",
-      "percentage": "Pourcentage",
-      "variable_rate": "Taux variable"
     },
     "toast": {
       "createdTitle": "Produit créé",
@@ -2718,7 +2692,8 @@
       "needSource": "Choisissez d’abord la source de paiement.",
       "types": {
         "dossier_fee": "Frais de dossier",
-        "dossier_fee_tax": "Taxe sur frais de dossier",
+        "principal_tax": "TVA sur le principal",
+        "dossier_fee_tax": "TVA sur les frais de dossier",
         "guarantee_deposit": "Dépôt de garantie"
       },
       "status": {

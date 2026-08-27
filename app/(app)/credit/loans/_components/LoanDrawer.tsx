@@ -51,7 +51,6 @@ type FormState = {
   purpose: string;
   sector_public_id: string;
   sub_sector_public_id: string;
-  financed_activity_code: string;
   activity_address: string;
   entrepreneur_address: string;
 };
@@ -75,7 +74,6 @@ const EMPTY: FormState = {
   purpose: "",
   sector_public_id: "",
   sub_sector_public_id: "",
-  financed_activity_code: "",
   activity_address: "",
   entrepreneur_address: "",
 };
@@ -129,7 +127,6 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
         purpose: initial.purpose ?? "",
         sector_public_id: initial.sector_public_id ?? "",
         sub_sector_public_id: initial.sub_sector_public_id ?? "",
-        financed_activity_code: initial.financed_activity_code ?? "",
         activity_address: initial.activity_address ?? "",
         entrepreneur_address: initial.entrepreneur_address ?? "",
       });
@@ -245,9 +242,6 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
       credit_agent_public_id: nullable(form.credit_agent_public_id),
       requested_amount_minor: toMinor(form.requested_amount) ?? undefined,
       number_of_installments: toInt(form.number_of_installments),
-      tranche_duration: toInt(form.tranche_duration),
-      grace_period_duration: toInt(form.grace_period_duration),
-      total_loan_duration: toInt(form.total_loan_duration),
       first_installment_date: nullable(form.first_installment_date),
       amortization_account_public_id: nullable(
         form.amortization_account_public_id,
@@ -258,7 +252,6 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
       purpose: nullable(form.purpose),
       sector_public_id: nullable(form.sector_public_id),
       sub_sector_public_id: nullable(form.sub_sector_public_id),
-      financed_activity_code: nullable(form.financed_activity_code),
       activity_address: nullable(form.activity_address),
       entrepreneur_address: nullable(form.entrepreneur_address),
     };
@@ -293,9 +286,7 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
         currency: t("loans.fields.currency"),
         credit_agent_public_id: t("loans.fields.creditAgent"),
         number_of_installments: t("loans.fields.installments"),
-        tranche_duration: t("loans.fields.trancheDuration"),
         grace_period_duration: t("loans.fields.gracePeriod"),
-        total_loan_duration: t("loans.fields.totalDuration"),
         first_installment_date: t("loans.fields.firstInstallment"),
         amortization_account_public_id: t("loans.fields.amortizationAccount"),
         unpaid_account_public_id: t("loans.fields.unpaidAccount"),
@@ -376,7 +367,7 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
           {isEdit ? (
             <TextField
               label={t("loans.fields.client")}
-              value={initial?.client_public_id ?? ""}
+              value={initial?.client_display_name ?? initial?.client_public_id ?? ""}
               onChange={() => undefined}
               disabled
               hint={t("loans.fields.clientEditHint")}
@@ -469,33 +460,34 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
               }
               error={errors.first_installment_date}
             />
+            {/* Périodicité, différé et durée totale ne se saisissent plus :
+                le serveur les déduit du nombre d'échéances et de la date de
+                première échéance. En lecture seule pour que l'agent voie ce que
+                sa saisie implique, sans redupliquer le calendrier côté client. */}
             <TextField
               label={t("loans.fields.trancheDuration")}
               type="number"
               value={form.tranche_duration}
-              onChange={(event) => set("tranche_duration", event.target.value)}
-              error={errors.tranche_duration}
-              hint={t("loans.fields.daysHint")}
+              readOnly
+              disabled
+              hint={t("loans.fields.derivedHint")}
             />
             <TextField
               label={t("loans.fields.gracePeriod")}
               type="number"
               value={form.grace_period_duration}
-              onChange={(event) =>
-                set("grace_period_duration", event.target.value)
-              }
+              readOnly
+              disabled
               error={errors.grace_period_duration}
-              hint={t("loans.fields.daysHint")}
+              hint={t("loans.fields.derivedHint")}
             />
             <TextField
               label={t("loans.fields.totalDuration")}
               type="number"
               value={form.total_loan_duration}
-              onChange={(event) =>
-                set("total_loan_duration", event.target.value)
-              }
-              error={errors.total_loan_duration}
-              hint={t("loans.fields.daysHint")}
+              readOnly
+              disabled
+              hint={t("loans.fields.derivedHint")}
               className="sm:col-span-2"
             />
           </div>
@@ -596,14 +588,6 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
               disabled={!form.sector_public_id}
             />
           </div>
-          <TextField
-            label={t("loans.fields.financedActivityCode")}
-            value={form.financed_activity_code}
-            onChange={(event) =>
-              set("financed_activity_code", event.target.value)
-            }
-            error={errors.financed_activity_code}
-          />
           <TextField
             label={t("loans.fields.activityAddress")}
             value={form.activity_address}

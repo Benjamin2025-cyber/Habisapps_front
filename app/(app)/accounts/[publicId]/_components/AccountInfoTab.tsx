@@ -1,5 +1,6 @@
 "use client";
 
+import { clientDisplayName } from "@/lib/format/clientName";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -39,14 +40,14 @@ export function AccountInfoTab({
 }: Props) {
   const t = useTranslations();
 
+  // Server-resolved: the local `clients` list is capped at 100 rows, so the
+  // lookup misses for any holder past it and used to fall back to a raw ULID.
   const holder = clients.find((c) => c.public_id === account.client_public_id);
-  const holderName = holder
-    ? [holder.last_name?.toUpperCase(), holder.first_name]
-        .filter((part): part is string => !!part && part.length > 0)
-        .join(" ") ||
-      holder.client_reference ||
-      holder.public_id
-    : account.client_public_id;
+  const holderName =
+    account.client_display_name ??
+    (holder
+      ? clientDisplayName(holder) || holder.client_reference || holder.public_id
+      : account.client_public_id);
 
   const product = accountProducts.find(
     (p) => p.public_id === account.account_product_public_id,
@@ -106,7 +107,7 @@ export function AccountInfoTab({
           </Field>
           <PlainField
             label={t("accounts.fields.agency")}
-            value={account.agency_public_id}
+            value={account.agency_name ?? account.agency_public_id}
             mono
           />
         </Grid>
@@ -143,9 +144,12 @@ export function AccountInfoTab({
 
       <Section title={t("accounts.drawer.sectionAccounting")}>
         <Grid>
+          {/* The code, not the ULID: this is the number the accountant keys
+              when posting, and having to look it up is the chore the rule
+              exists to remove. */}
           <PlainField
-            label={t("accounts.fields.ledgerAccount")}
-            value={account.ledger_account_public_id}
+            label={t("accounts.fields.ledgerAccountCode")}
+            value={account.ledger_account_code}
             mono
           />
         </Grid>

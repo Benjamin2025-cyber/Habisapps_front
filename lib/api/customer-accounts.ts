@@ -23,8 +23,13 @@ export type CustomerAccountStatus =
 export type CustomerAccount = {
   public_id: string;
   client_public_id: string | null;
+  /** NOM Prénoms, resolved server-side — no client-side lookup list to miss. */
+  client_display_name: string | null;
   agency_public_id: string | null;
+  agency_name: string | null;
   ledger_account_public_id: string | null;
+  /** GL code the entries carry — the client's own number. */
+  ledger_account_code: string | null;
   account_product_public_id: string | null;
   account_number: string;
   account_title: string | null;

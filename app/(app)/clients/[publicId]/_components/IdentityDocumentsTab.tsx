@@ -35,6 +35,7 @@ import {
 } from "@/lib/api/reference";
 import { isKnownIdentityDocumentType } from "@/lib/catalogs/identity-document-types";
 import { ImageUploadField } from "../../../_components/ImageUploadField";
+import { IdentityDocumentViewerDrawer } from "./IdentityDocumentViewerDrawer";
 import { SubResourceActionDrawer } from "./SubResourceActionDrawer";
 
 type Props = {
@@ -112,6 +113,7 @@ export function IdentityDocumentsTab({
   const token = session.status === "authenticated" ? session.token : null;
 
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [viewing, setViewing] = useState<ClientIdentityDocument | null>(null);
   const [editing, setEditing] = useState<ClientIdentityDocument | null>(null);
   const [actionDrawer, setActionDrawer] = useState<{
     doc: ClientIdentityDocument;
@@ -348,7 +350,11 @@ export function IdentityDocumentsTab({
                 }
                 if (items.length === 0) return null;
                 return (
-                  <div className="flex justify-end">
+                  // The row opens the viewer; the menu must not do both.
+                  <div
+                    className="flex justify-end"
+                    onClick={(event) => event.stopPropagation()}
+                  >
                     <DropdownMenu
                       trigger={<MoreVerticalIcon className="h-4 w-4" />}
                       triggerLabel={t("clientDetail.identityDocs.actions.menu")}
@@ -373,8 +379,18 @@ export function IdentityDocumentsTab({
         loading={loading && !data}
         emptyMessage={t("clientDetail.identityDocs.empty")}
         getRowId={(row) => row.public_id}
+        onRowClick={(row) => setViewing(row)}
         title={t("clientDetail.identityDocs.title")}
         titleAside={t("clientDetail.identityDocs.count", { count: data?.length ?? 0 })}
+      />
+
+      <IdentityDocumentViewerDrawer
+        open={viewing !== null}
+        onClose={() => setViewing(null)}
+        doc={viewing}
+        typeLabel={
+          viewing ? identityTypeLabel(viewing.document_type, t, typeByKey) : ""
+        }
       />
 
       {canCreate ? (

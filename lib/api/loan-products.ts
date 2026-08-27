@@ -5,16 +5,18 @@ import { getRequestLocale } from "./locale";
  * P10 — Produits de prêt (catalogue des « types de prêt »).
  *
  * Catalogue géré par le super-admin (`platform-admin` ou `loan.products.*`).
- * Un prêt (`loans.loan_product_public_id`) hérite des limites, frais, pénalités
- * et comptes comptables définis ici.
+ * Un prêt (`loans.loan_product_public_id`) hérite des limites, frais et
+ * pénalités définis ici. Il n'y a pas de compte comptable par défaut : chaque
+ * ligne de crédit ouvre ses propres comptes lors de la mise en place.
  *
  * API shape: LIST wraps under `data.loan_products` + `meta.pagination`;
  * SHOW / CREATE / UPDATE return the product directly under `data`.
  *
- * Note: les taux (`interest_rate`, `tax_rate`, …) sont des décimaux renvoyés
+ * Note: les taux (`interest_rate`, `tax_rate`, `dossier_fee_tax_rate`, …) sont des décimaux renvoyés
  * comme chaînes par l'API (colonnes `decimal`). Les montants sont stockés en
- * `*_minor` (scale 2). Les `*_policy_key` rattachent une politique de calcul
- * nommée (valeur d'enum fixe) au produit ; `null` = politique non rattachée.
+ * `*_minor` (scale 2). Les politiques de calcul ne figurent pas ici : elles
+ * sont identiques pour tous les crédits, imposées par le serveur, et ne sont
+ * ni sélectionnables ni renvoyées.
  */
 export type LoanProductStatus = "active" | "inactive" | "archived";
 
@@ -22,17 +24,8 @@ export type TermUnit = "day" | "week" | "month";
 
 export type RepaymentFrequency = "daily" | "weekly" | "monthly" | "custom";
 
-export type GuaranteeDepositType = "percentage" | "fixed";
-
-/** Valeurs d'enum acceptées par l'API pour chaque clé de politique. */
-export const INTEREST_POLICY_VALUE = "loan_interest_method";
-export const PENALTY_POLICY_VALUE = "penalties_and_arrears";
-export const REPAYMENT_ALLOCATION_POLICY_VALUE = "repayment_allocation_order";
-export const FEE_POLICY_VALUE = "fees_taxes_insurance";
-
 export type LoanProduct = {
   public_id: string;
-  ledger_account_public_id: string | null;
   code: string;
   name: string;
   status: LoanProductStatus;
@@ -42,10 +35,6 @@ export type LoanProduct = {
   allowed_repayment_frequencies: RepaymentFrequency[] | null;
   requires_guarantor: boolean | null;
   requires_collateral: boolean | null;
-  interest_policy_key: string | null;
-  penalty_policy_key: string | null;
-  repayment_allocation_policy_key: string | null;
-  fee_policy_key: string | null;
   min_amount_minor: number | null;
   max_amount_minor: number | null;
   due_date_day: number | null;
@@ -57,15 +46,9 @@ export type LoanProduct = {
   insurance_rate: string | null;
   /** Dossier fee as a percentage of the principal. No fixed amount, no floor. */
   fee_rate: string | null;
-  tax_policy_key: string | null;
-  insurance_policy_key: string | null;
-  guarantee_deposit_policy_key: string | null;
-  guarantee_deposit_type: GuaranteeDepositType | null;
+  dossier_fee_tax_rate: string | null;
+  /** Percentage of the granted principal — never a franc amount. */
   guarantee_deposit_value: string | null;
-  penalty_formula_type: string | null;
-  penalty_formula_base: string | null;
-  penalty_value_type: string | null;
-  penalty_value: string | null;
   operation_type: string | null;
   constant_value: string | null;
   rules: Record<string, unknown> | null;
@@ -86,7 +69,6 @@ export type PaginatedLoanProducts = {
 };
 
 export type LoanProductWritePayload = {
-  ledger_account_public_id?: string | null;
   /** Immutable after creation (we disable it on edit). */
   code?: string;
   name?: string;
@@ -98,10 +80,6 @@ export type LoanProductWritePayload = {
   allowed_repayment_frequencies?: RepaymentFrequency[] | null;
   requires_guarantor?: boolean;
   requires_collateral?: boolean;
-  interest_policy_key?: string | null;
-  penalty_policy_key?: string | null;
-  repayment_allocation_policy_key?: string | null;
-  fee_policy_key?: string | null;
   min_amount_minor?: number | null;
   max_amount_minor?: number | null;
   due_date_day?: number | null;
@@ -112,15 +90,8 @@ export type LoanProductWritePayload = {
   tax_rate?: number | null;
   insurance_rate?: number | null;
   fee_rate?: number | null;
-  tax_policy_key?: string | null;
-  insurance_policy_key?: string | null;
-  guarantee_deposit_policy_key?: string | null;
-  guarantee_deposit_type?: GuaranteeDepositType | null;
+  dossier_fee_tax_rate?: number | null;
   guarantee_deposit_value?: number | null;
-  penalty_formula_type?: string | null;
-  penalty_formula_base?: string | null;
-  penalty_value_type?: string | null;
-  penalty_value?: number | null;
 };
 
 /**

@@ -179,6 +179,8 @@ export type Loan = {
   status: LoanStatus;
   processing_level: string | null;
   client_public_id: string | null;
+  /** NOM Prénoms, resolved server-side. */
+  client_display_name: string | null;
   agency_public_id: string | null;
   loan_product_public_id: string | null;
   credit_agent_public_id: string | null;
@@ -196,12 +198,12 @@ export type Loan = {
   purpose: string | null;
   sector_public_id: string | null;
   sub_sector_public_id: string | null;
-  financed_activity_code: string | null;
   activity_address: string | null;
   entrepreneur_address: string | null;
   first_installment_date: string | null;
   number_of_installments: number | null;
   grace_period_duration: number | null;
+  /** Server-derived from the installments and the first due date. Read-only. */
   tranche_duration: number | null;
   total_loan_duration: number | null;
   dossier_fees_minor: number | null;
@@ -258,14 +260,11 @@ export type LoanWritePayload = {
   purpose?: string | null;
   sector_public_id?: string | null;
   sub_sector_public_id?: string | null;
-  financed_activity_code?: string | null;
   activity_address?: string | null;
   entrepreneur_address?: string | null;
   first_installment_date?: string | null;
   number_of_installments?: number | null;
   grace_period_duration?: number | null;
-  tranche_duration?: number | null;
-  total_loan_duration?: number | null;
 };
 
 export type LoanScheduleLine = {

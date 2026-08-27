@@ -258,8 +258,13 @@ export function SetupChargesPanel({
     );
   }
 
+  // Mirrors the backend's waivable set in LoanSetupChargeWorkflow
+  // (decideSetupChargeException). A charge the customer cannot pay and that is
+  // not waivable here holds the loan out of disbursement with no way out.
   const canWaiveType = (type: string) =>
-    type === "dossier_fee" || type === "dossier_fee_tax";
+    type === "dossier_fee" ||
+    type === "principal_tax" ||
+    type === "dossier_fee_tax";
 
   return (
     <section className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-border bg-background p-3">
