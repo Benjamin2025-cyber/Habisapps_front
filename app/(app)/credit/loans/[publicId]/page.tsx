@@ -119,10 +119,16 @@ export default function LoanDetailPage(props: {
     };
   }, [token, loan?.client_public_id]);
 
+  // Server-sent name first: `staff` is fetched via the `users.view`-gated
+  // directory, which the accountant and compliance-officer — both visa
+  // signers on this page — do not hold, so the lookup missed and the field
+  // fell back to the agent's ULID.
   const creditAgentId = loan?.credit_agent_public_id ?? null;
-  const creditAgentName = creditAgentId
-    ? (staff.find((s) => s.public_id === creditAgentId)?.name ?? null)
-    : null;
+  const creditAgentName =
+    loan?.credit_agent_name ??
+    (creditAgentId
+      ? (staff.find((s) => s.public_id === creditAgentId)?.name ?? null)
+      : null);
 
   async function handleEditSubmit(payload: LoanWritePayload) {
     if (!token || !loan) return;

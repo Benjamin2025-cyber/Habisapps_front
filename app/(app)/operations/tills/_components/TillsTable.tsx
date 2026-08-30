@@ -17,7 +17,7 @@ type Props = {
   loading: boolean;
   pagination?: DataTablePagination;
   canManage: boolean;
-  tellerNameOf: (publicId: string | null) => string;
+  tellerNameOf: (publicId: string | null, serverName?: string | null) => string;
   onEdit: (till: Till) => void;
   onSetStatus: (till: Till, next: TillStatus) => void;
 };
@@ -56,7 +56,10 @@ export function TillsTable({
         header: t("tills.columns.teller"),
         cell: ({ row }) => (
           <span className="text-muted-foreground">
-            {tellerNameOf(row.original.assigned_user_public_id)}
+            {tellerNameOf(
+              row.original.assigned_user_public_id,
+              row.original.assigned_user_name,
+            )}
           </span>
         ),
       },

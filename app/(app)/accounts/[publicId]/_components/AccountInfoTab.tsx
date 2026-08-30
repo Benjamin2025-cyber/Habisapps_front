@@ -49,12 +49,20 @@ export function AccountInfoTab({
       ? clientDisplayName(holder) || holder.client_reference || holder.public_id
       : account.client_public_id);
 
+  // Server-resolved for the same reason: listing the catalogue needs
+  // `account.products.view`, which the loan-officer — the role that opens this
+  // sheet — does not hold, so `accountProducts` arrived empty and the label
+  // fell through to the product's ULID.
   const product = accountProducts.find(
     (p) => p.public_id === account.account_product_public_id,
   );
-  const productLabel = product
-    ? `${product.name} — ${t(`accountProducts.family.${product.account_family}`)}`
-    : account.account_product_public_id;
+  const withFamily = (name: string, family: string | null) =>
+    family ? `${name} — ${t(`accountProducts.family.${family}`)}` : name;
+  const productLabel = account.account_product_name
+    ? withFamily(account.account_product_name, account.account_product_family)
+    : product
+      ? withFamily(product.name, product.account_family)
+      : account.account_product_public_id;
 
   return (
     <div className="flex flex-col gap-4">

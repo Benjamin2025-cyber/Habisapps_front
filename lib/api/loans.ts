@@ -183,7 +183,14 @@ export type Loan = {
   client_display_name: string | null;
   agency_public_id: string | null;
   loan_product_public_id: string | null;
+  /** « CODE — Nom », resolved server-side: listing the catalogue needs
+   *  `loan.products.view`, which the accountant and compliance-officer lack
+   *  even though both open this file to sign their visa. */
+  loan_product_label: string | null;
   credit_agent_public_id: string | null;
+  /** Resolved server-side: the staff directory needs `users.view`, which the
+   *  accountant and compliance-officer lack even though both sign a visa here. */
+  credit_agent_name: string | null;
   amortization_account_public_id: string | null;
   unpaid_account_public_id: string | null;
   recovery_account_public_id: string | null;
@@ -197,7 +204,12 @@ export type Loan = {
   closed_on: string | null;
   purpose: string | null;
   sector_public_id: string | null;
+  /** « CODE — Nom », resolved server-side. The sector lists need
+   *  `sectors.view` / `sub-sectors.view`, held only by the agency-manager and
+   *  the kyc-officer, so for everyone else these rendered blank. */
+  sector_label: string | null;
   sub_sector_public_id: string | null;
+  sub_sector_label: string | null;
   activity_address: string | null;
   entrepreneur_address: string | null;
   first_installment_date: string | null;

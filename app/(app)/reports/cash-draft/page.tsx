@@ -64,9 +64,13 @@ export default function CashDraftPage() {
     },
     [tills],
   );
+  // `serverName` first: the staff directory needs `users.view`, which the
+  // teller — who reads this brouillard — does not hold, so `tellers` comes back
+  // empty for them and the name fell through to a raw ULID.
   const tellerNameOf = useCallback(
-    (id: string | null) =>
-      id ? (tellers.find((u) => u.public_id === id)?.name ?? id) : "—",
+    (id: string | null, serverName?: string | null) =>
+      serverName ??
+      (id ? (tellers.find((u) => u.public_id === id)?.name ?? id) : "—"),
     [tellers],
   );
 
@@ -107,7 +111,7 @@ export default function CashDraftPage() {
       rows: rows.map((s) => [
         s.business_date ?? "—",
         tillLabelOf(s.till_public_id),
-        tellerNameOf(s.teller_user_public_id),
+        tellerNameOf(s.teller_user_public_id, s.teller_user_name),
         money(s.opening_declaration_minor, s.currency ?? "XAF"),
         money(s.summary?.expected_cash_balance_minor, s.currency ?? "XAF"),
         money(s.closing_declaration_minor, s.currency ?? "XAF"),
@@ -164,7 +168,7 @@ export default function CashDraftPage() {
                 <tr key={s.public_id}>
                   <td className="px-4 py-2.5 tabular-nums text-foreground">{s.business_date ?? "—"}</td>
                   <td className="px-4 py-2.5 text-foreground">{tillLabelOf(s.till_public_id)}</td>
-                  <td className="px-4 py-2.5 text-muted-foreground">{tellerNameOf(s.teller_user_public_id)}</td>
+                  <td className="px-4 py-2.5 text-muted-foreground">{tellerNameOf(s.teller_user_public_id, s.teller_user_name)}</td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{money(s.opening_declaration_minor, s.currency ?? "XAF")}</td>
                   <td className="px-4 py-2.5 text-right font-semibold tabular-nums text-foreground">{money(s.summary?.expected_cash_balance_minor, s.currency ?? "XAF")}</td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-foreground">{money(s.closing_declaration_minor, s.currency ?? "XAF")}</td>
