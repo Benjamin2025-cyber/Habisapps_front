@@ -155,6 +155,9 @@ export default function AccountsPage() {
       publicId ? byId.get(publicId) ?? publicId : "—";
   }, [clients]);
 
+  // `serverName` first: the catalogue fetch above needs
+  // `account.products.view`, which the loan-officer lacks, so `products` came
+  // back empty for them and this column printed the product's ULID.
   const productNameOf = useMemo(() => {
     const byId = new Map<string, string>();
     for (const product of products) {
@@ -163,8 +166,18 @@ export default function AccountsPage() {
         `${product.name} — ${t(`accountProducts.family.${product.account_family}`)}`,
       );
     }
-    return (publicId: string | null) =>
-      publicId ? byId.get(publicId) ?? publicId : "—";
+    return (
+      publicId: string | null,
+      serverName?: string | null,
+      serverFamily?: string | null,
+    ) => {
+      if (serverName) {
+        return serverFamily
+          ? `${serverName} — ${t(`accountProducts.family.${serverFamily}`)}`
+          : serverName;
+      }
+      return publicId ? byId.get(publicId) ?? publicId : "—";
+    };
   }, [products, t]);
 
   // Client-side text filter: the index supports `status` server-side but no

@@ -22,8 +22,13 @@ type Props = {
   pagination?: DataTablePagination;
   /** Resolve a client public_id to a display name (falls back to the id). */
   clientNameOf: (publicId: string | null) => string;
-  /** Resolve an account-product public_id to its display name. */
-  productNameOf: (publicId: string | null) => string;
+  /** Resolve an account-product public_id to its display name. The server-sent
+   *  name and family win when present — the catalogue fetch is privileged. */
+  productNameOf: (
+    publicId: string | null,
+    serverName?: string | null,
+    serverFamily?: string | null,
+  ) => string;
   /** Platform-admin-only management actions (edit / status / archive). */
   canManage: boolean;
   onEdit: (account: CustomerAccount) => void;
@@ -90,7 +95,11 @@ export function AccountsTable({
         header: t("accounts.columns.type"),
         cell: ({ row }) => (
           <span className="text-muted-foreground">
-            {productNameOf(row.original.account_product_public_id)}
+            {productNameOf(
+              row.original.account_product_public_id,
+              row.original.account_product_name,
+              row.original.account_product_family,
+            )}
           </span>
         ),
       },

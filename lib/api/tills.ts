@@ -31,6 +31,9 @@ export type Till = {
   max_withdrawal_limit_minor: number | null;
   currency: string | null;
   assigned_user_public_id: string | null;
+  /** Resolved server-side, so screens the teller works do not have to call the
+   *  staff directory (which needs `users.view`, a permission they lack). */
+  assigned_user_name: string | null;
   ledger_account_public_id: string | null;
   created_at: string;
   updated_at: string;

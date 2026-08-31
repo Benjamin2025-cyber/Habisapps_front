@@ -140,9 +140,12 @@ export default function CashInspectionPage() {
     },
     [tills],
   );
+  // `serverName` first: the staff directory needs `users.view`, so for a role
+  // without it `tellers` is empty and the name fell through to a raw ULID.
   const tellerNameOf = useCallback(
-    (id: string | null) =>
-      id ? (tellers.find((u) => u.public_id === id)?.name ?? id) : "—",
+    (id: string | null, serverName?: string | null) =>
+      serverName ??
+      (id ? (tellers.find((u) => u.public_id === id)?.name ?? id) : "—"),
     [tellers],
   );
 
@@ -216,7 +219,7 @@ export default function CashInspectionPage() {
       heading: t("cashInspection.print.heading"),
       subheading: `${tillLabelOf(selected.till_public_id)} · ${selected.business_date ?? ""}`,
       meta: [
-        { label: t("cashInspection.fields.teller"), value: tellerNameOf(selected.teller_user_public_id) },
+        { label: t("cashInspection.fields.teller"), value: tellerNameOf(selected.teller_user_public_id, selected.teller_user_name) },
         { label: t("cashInspection.fields.status"), value: selected.status },
         { label: t("cashInspection.fields.opening"), value: money(selected.opening_declaration_minor) },
         { label: t("cashInspection.fields.currentBalance"), value: money(selected.summary?.expected_cash_balance_minor) },
@@ -384,7 +387,7 @@ export default function CashInspectionPage() {
           {/* Session detail */}
           <section className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-[var(--radius-card)] border border-border bg-background p-5 sm:grid-cols-4">
             <Field label={t("cashInspection.fields.till")} value={tillLabelOf(selected.till_public_id)} />
-            <Field label={t("cashInspection.fields.teller")} value={tellerNameOf(selected.teller_user_public_id)} />
+            <Field label={t("cashInspection.fields.teller")} value={tellerNameOf(selected.teller_user_public_id, selected.teller_user_name)} />
             <Field label={t("cashInspection.fields.businessDate")} value={selected.business_date ?? "—"} />
             <div className="flex flex-col gap-0.5">
               <span className="text-[0.7rem] uppercase tracking-wider text-muted-foreground">

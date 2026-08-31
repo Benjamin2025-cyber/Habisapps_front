@@ -86,8 +86,12 @@ export default function TillsPage() {
     };
   }, [token]);
 
+  // Prefer the name the till carries. The staff directory below needs
+  // `users.view`, which the teller lacks — and the teller can read this
+  // caisse list — so `tellers` is empty for them and the column showed a ULID.
   const tellerNameOf = useCallback(
-    (publicId: string | null) => {
+    (publicId: string | null, serverName?: string | null) => {
+      if (serverName) return serverName;
       if (!publicId) return "—";
       return tellers.find((u) => u.public_id === publicId)?.name ?? publicId;
     },
