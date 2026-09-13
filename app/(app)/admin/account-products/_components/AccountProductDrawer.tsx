@@ -24,6 +24,7 @@ type Props = {
   initial?: AccountProduct | null;
   agencies: ReadonlyArray<Agency>;
   ledgerAccounts: ReadonlyArray<LedgerAccount>;
+  onLedgerAccountSearch: (search: string, agencyPublicId: string) => Promise<void>;
   onClose: () => void;
   onSubmit: (payload: AccountProductWritePayload) => Promise<void>;
 };
@@ -36,11 +37,10 @@ type FormState = {
   agency_public_id: string;
   ledger_account_public_id: string;
   minimum_balance: string;
+  opening_fee: string;
+  opening_fee_ledger_account_public_id: string;
   allows_overdraft: boolean;
   overdraft_limit: string;
-  is_ordinary_savings: boolean;
-  is_recovery_account: boolean;
-  allows_recovery_debit: boolean;
   status: "active" | "inactive" | "";
 };
 
@@ -52,11 +52,10 @@ const EMPTY: FormState = {
   agency_public_id: "",
   ledger_account_public_id: "",
   minimum_balance: "",
+  opening_fee: "",
+  opening_fee_ledger_account_public_id: "",
   allows_overdraft: false,
   overdraft_limit: "",
-  is_ordinary_savings: false,
-  is_recovery_account: false,
-  allows_recovery_debit: false,
   status: "",
 };
 
@@ -66,6 +65,7 @@ export function AccountProductDrawer({
   initial,
   agencies,
   ledgerAccounts,
+  onLedgerAccountSearch,
   onClose,
   onSubmit,
 }: Props) {
@@ -90,11 +90,11 @@ export function AccountProductDrawer({
         agency_public_id: initial.agency_public_id ?? "",
         ledger_account_public_id: initial.ledger_account_public_id ?? "",
         minimum_balance: fromMinor(initial.minimum_balance_minor),
+        opening_fee: fromMinor(initial.opening_fee_minor),
+        opening_fee_ledger_account_public_id:
+          initial.opening_fee_ledger_account_public_id ?? "",
         allows_overdraft: initial.allows_overdraft ?? false,
         overdraft_limit: fromMinor(initial.overdraft_limit_minor),
-        is_ordinary_savings: initial.is_ordinary_savings ?? false,
-        is_recovery_account: initial.is_recovery_account ?? false,
-        allows_recovery_debit: initial.allows_recovery_debit ?? false,
         status: initial.status === "archived" ? "" : initial.status,
       });
     } else {
@@ -145,6 +145,15 @@ export function AccountProductDrawer({
     [ledgerAccounts, ledgerAgency],
   );
 
+  // Load the relevant agency's chart as soon as the drawer opens, so the two
+  // account pickers are not empty before the user has typed anything.
+  useEffect(() => {
+    if (!open) return;
+    const agency = ledgerAgency ?? form.agency_public_id;
+    if (!agency) return;
+    void onLedgerAccountSearch("", agency);
+  }, [open, ledgerAgency, form.agency_public_id, onLedgerAccountSearch]);
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setSubmitting(true);
@@ -158,13 +167,14 @@ export function AccountProductDrawer({
       currency: nullable(form.currency)?.toUpperCase() ?? undefined,
       ledger_account_public_id: nullable(form.ledger_account_public_id),
       minimum_balance_minor: toMinor(form.minimum_balance),
+      opening_fee_minor: toMinor(form.opening_fee),
+      opening_fee_ledger_account_public_id: nullable(
+        form.opening_fee_ledger_account_public_id,
+      ),
       allows_overdraft: form.allows_overdraft,
       overdraft_limit_minor: form.allows_overdraft
         ? toMinor(form.overdraft_limit)
         : null,
-      is_ordinary_savings: form.is_ordinary_savings,
-      is_recovery_account: form.is_recovery_account,
-      allows_recovery_debit: form.allows_recovery_debit,
       status: form.status || undefined,
     };
 
@@ -189,6 +199,10 @@ export function AccountProductDrawer({
         agency_public_id: t("accountProducts.fields.agency"),
         ledger_account_public_id: t("accountProducts.fields.ledgerAccount"),
         minimum_balance_minor: t("accountProducts.fields.minimumBalance"),
+        opening_fee_minor: t("accountProducts.fields.openingFee"),
+        opening_fee_ledger_account_public_id: t(
+          "accountProducts.fields.openingFeeLedgerAccount",
+        ),
         overdraft_limit_minor: t("accountProducts.fields.overdraftLimit"),
         status: t("accountProducts.fields.status"),
       };
@@ -318,6 +332,10 @@ export function AccountProductDrawer({
               options={ledgerOptions}
               placeholder={t("accountProducts.fields.ledgerAccountPlaceholder")}
               isClearable
+              isSearchable
+              onInputChange={(search) =>
+                void onLedgerAccountSearch(search, ledgerAgency ?? form.agency_public_id)
+              }
               onChange={(next) => set("ledger_account_public_id", next)}
               error={errors.ledger_account_public_id}
               hint={
@@ -333,28 +351,53 @@ export function AccountProductDrawer({
               onChange={(event) => set("minimum_balance", event.target.value)}
               error={errors.minimum_balance_minor}
               hint={t("accountProducts.fields.amountHint")}
-              className="sm:col-span-2"
             />
+            {/*
+              « Frais d'ouverture de compte ». The first counter operation on an
+              account carrying this product sweeps the fee to income account
+              7611 on its own, so this box is the only place the amount is ever
+              decided — leave it empty and the product charges nothing.
+            */}
+            <MoneyField
+              label={t("accountProducts.fields.openingFee")}
+              value={form.opening_fee}
+              onChange={(event) => set("opening_fee", event.target.value)}
+              error={errors.opening_fee_minor}
+              hint={t("accountProducts.fields.openingFeeHint")}
+            />
+            {/*
+              7611 may carry one sub-account per account type. Left empty, the
+              product falls back to the agency's `account_opening_fee` mapping,
+              which is what a structure running a single income account wants.
+            */}
+            {(toMinor(form.opening_fee) ?? 0) > 0 ? (
+              <Select
+                label={t("accountProducts.fields.openingFeeLedgerAccount")}
+                value={form.opening_fee_ledger_account_public_id}
+                options={ledgerOptions}
+                placeholder={t("accountProducts.fields.openingFeeLedgerAccountPlaceholder")}
+                isClearable
+                isSearchable
+                onInputChange={(search) =>
+                  void onLedgerAccountSearch(search, ledgerAgency ?? form.agency_public_id)
+                }
+                onChange={(next) =>
+                  set("opening_fee_ledger_account_public_id", next)
+                }
+                error={errors.opening_fee_ledger_account_public_id}
+                hint={
+                  ledgerOptions.length === 0
+                    ? t("accountProducts.fields.noLedgerAccounts")
+                    : t("accountProducts.fields.openingFeeLedgerAccountHint")
+                }
+                className="sm:col-span-2"
+              />
+            ) : null}
           </div>
         </Section>
 
         <Section title={t("accountProducts.drawer.sectionRules")}>
           <div className="flex flex-col gap-2">
-            <CheckboxField
-              label={t("accountProducts.fields.isOrdinarySavings")}
-              checked={form.is_ordinary_savings}
-              onChange={(checked) => set("is_ordinary_savings", checked)}
-            />
-            <CheckboxField
-              label={t("accountProducts.fields.isRecoveryAccount")}
-              checked={form.is_recovery_account}
-              onChange={(checked) => set("is_recovery_account", checked)}
-            />
-            <CheckboxField
-              label={t("accountProducts.fields.allowsRecoveryDebit")}
-              checked={form.allows_recovery_debit}
-              onChange={(checked) => set("allows_recovery_debit", checked)}
-            />
             <CheckboxField
               label={t("accountProducts.fields.allowsOverdraft")}
               checked={form.allows_overdraft}

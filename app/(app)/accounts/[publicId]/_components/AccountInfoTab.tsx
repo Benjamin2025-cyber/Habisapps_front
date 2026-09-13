@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
-import { useTranslations } from "@/lib/i18n/I18nProvider";
+import { useFormatter, useTranslations } from "@/lib/i18n/I18nProvider";
 import type { Client } from "@/lib/api/clients";
 import type { AccountProduct } from "@/lib/api/account-products";
 import type {
@@ -38,20 +38,25 @@ export function AccountInfoTab({
   onEdit,
 }: Props) {
   const t = useTranslations();
+  const format = useFormatter();
 
   const holder = clients.find((c) => c.public_id === account.client_public_id);
-  const holderName = holder
+  const holderName = account.client_display_name || (holder
     ? [holder.last_name?.toUpperCase(), holder.first_name]
         .filter((part): part is string => !!part && part.length > 0)
         .join(" ") ||
       holder.client_reference ||
       holder.public_id
-    : account.client_public_id;
+    : account.client_public_id);
 
   const product = accountProducts.find(
     (p) => p.public_id === account.account_product_public_id,
   );
-  const productLabel = product
+  const productLabel = account.account_product_name
+    ? `${account.account_product_name} — ${t(
+        `accountProducts.family.${account.account_product_family ?? product?.account_family ?? "savings"}`,
+      )}`
+    : product
     ? `${product.name} — ${t(`accountProducts.family.${product.account_family}`)}`
     : account.account_product_public_id;
 
@@ -106,8 +111,7 @@ export function AccountInfoTab({
           </Field>
           <PlainField
             label={t("accounts.fields.agency")}
-            value={account.agency_public_id}
-            mono
+            value={account.agency_name ?? account.agency_public_id}
           />
         </Grid>
       </Section>
@@ -145,9 +149,29 @@ export function AccountInfoTab({
         <Grid>
           <PlainField
             label={t("accounts.fields.ledgerAccount")}
-            value={account.ledger_account_public_id}
+            value={account.ledger_account_code ?? account.ledger_account_public_id}
             mono
           />
+          {/*
+            The « frais d'ouverture » this account owes, fixed at the tariff of
+            the day it was opened. Shown even at zero: when someone asks whether
+            an existing account will be charged after a tariff change, the useful
+            answer is a plain "nothing to take", not an absent field.
+          */}
+          <PlainField
+            label={t("accounts.fields.pendingOpeningFee")}
+            value={format.currencyMinor(account.pending_opening_fee_minor ?? 0, {
+              currency: account.currency ?? "XAF",
+            })}
+            mono
+          />
+          {account.opening_fee_collected_at ? (
+            <PlainField
+              label={t("accounts.fields.openingFeeCollectedAt")}
+              value={account.opening_fee_collected_at.slice(0, 10)}
+              mono
+            />
+          ) : null}
         </Grid>
       </Section>
 

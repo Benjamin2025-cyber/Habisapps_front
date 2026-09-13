@@ -18,6 +18,7 @@ import {
   type TellerTransaction,
 } from "@/lib/api/teller-transactions";
 import { localizeApiError } from "@/lib/api/errors";
+import { printCashReceipt } from "@/lib/print/cashReceipt";
 import { useCanAny, useHasRole } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useFormatter, useTranslations } from "@/lib/i18n/I18nProvider";
@@ -170,6 +171,41 @@ export default function CashTransactionsPage() {
     );
     void loadTransactions(sessionId); // reconcile with server
     void refreshSummary(sessionId);
+  }
+
+  /**
+   * Reprint the receipt of any operation of the session. The opening-fee line
+   * is deliberately absent here: the sweep is reported on the response of the
+   * operation that triggered it, and this list does not carry it — printing a
+   * fee figure it cannot verify would be worse than leaving it off the reprint.
+   */
+  function handlePrintReceipt(tx: TellerTransaction) {
+    const printed = printCashReceipt({
+      transaction: tx,
+      labels: {
+        fileName: t("cashTx.receipt.fileName"),
+        heading: t("cashTx.receipt.heading"),
+        reference: t("cashTx.receipt.reference"),
+        date: t("cashTx.receipt.date"),
+        type: t("cashTx.receipt.type"),
+        typeLabel: t(`cashTx.txType.${tx.transaction_type}`),
+        account: t("cashTx.receipt.account"),
+        holder: t("cashTx.receipt.holder"),
+        amount: t("cashTx.receipt.amount"),
+        openingFee: t("cashTx.receipt.openingFee"),
+        detail: t("cashTx.receipt.label"),
+        value: t("cashTx.receipt.value"),
+        generatedOn: t("common.generatedOn"),
+        status: t("cashTx.recent.status"),
+        statusLabel: t(`cashTx.status.${tx.status}`),
+      },
+      formattedAmount: format.currencyMinor(tx.amount_minor, {
+        currency: tx.currency ?? "XAF",
+      }),
+    });
+    if (!printed) {
+      window.alert(t("cashTx.receipt.printError"));
+    }
   }
 
   async function confirmReverse() {
@@ -357,17 +393,30 @@ export default function CashTransactionsPage() {
                         </Badge>
                       </td>
                       <td className="px-4 py-2.5 text-right">
-                        {canReverse && tx.status !== "reversed" ? (
+                        <div className="flex items-center justify-end gap-3">
+                          {/*
+                            « IMPRIMER le reçu après toute opération saisie » —
+                            any operation of the session, not only the one still
+                            on screen: the teller has usually moved on by the
+                            time the customer asks for the slip.
+                          */}
                           <button
                             type="button"
-                            onClick={() => setReverseTarget(tx)}
-                            className="text-xs font-semibold text-danger hover:underline"
+                            onClick={() => handlePrintReceipt(tx)}
+                            className="text-xs font-semibold text-accent hover:underline"
                           >
-                            {t("cashTx.recent.reverse")}
+                            {t("cashTx.recent.print")}
                           </button>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
+                          {canReverse && tx.status !== "reversed" ? (
+                            <button
+                              type="button"
+                              onClick={() => setReverseTarget(tx)}
+                              className="text-xs font-semibold text-danger hover:underline"
+                            >
+                              {t("cashTx.recent.reverse")}
+                            </button>
+                          ) : null}
+                        </div>
                       </td>
                     </tr>
                   ))}

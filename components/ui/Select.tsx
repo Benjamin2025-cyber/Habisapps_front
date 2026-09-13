@@ -28,6 +28,9 @@ type SelectProps = {
   isClearable?: boolean;
   /** Show the search input inside the dropdown. */
   isSearchable?: boolean;
+  /** Notify callers so large remote option lists can be searched server-side. */
+  onInputChange?: (value: string) => void;
+  isLoading?: boolean;
   disabled?: boolean;
   required?: boolean;
   className?: string;
@@ -112,6 +115,8 @@ export function Select({
   size = "md",
   isClearable = false,
   isSearchable = true,
+  onInputChange,
+  isLoading = false,
   disabled,
   required,
   className,
@@ -143,6 +148,11 @@ export function Select({
         placeholder={placeholder ?? "—"}
         isClearable={isClearable}
         isSearchable={isSearchable}
+        onInputChange={(inputValue) => {
+          onInputChange?.(inputValue);
+          return inputValue;
+        }}
+        isLoading={isLoading}
         isDisabled={disabled}
         required={required}
         aria-describedby={helperId}

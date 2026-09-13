@@ -81,18 +81,25 @@ export function AccountsTable({
         header: t("accounts.columns.holder"),
         cell: ({ row }) => (
           <span className="text-muted-foreground">
-            {clientNameOf(row.original.client_public_id)}
+            {row.original.client_display_name ??
+              clientNameOf(row.original.client_public_id)}
           </span>
         ),
       },
       {
         id: "product",
         header: t("accounts.columns.type"),
-        cell: ({ row }) => (
-          <span className="text-muted-foreground">
-            {productNameOf(row.original.account_product_public_id)}
-          </span>
-        ),
+        cell: ({ row }) => {
+          const account = row.original;
+          const apiProductName = account.account_product_name
+            ? `${account.account_product_name}${account.account_product_family ? ` — ${t(`accountProducts.family.${account.account_product_family}`)}` : ""}`
+            : null;
+          return (
+            <span className="text-muted-foreground">
+              {apiProductName ?? productNameOf(account.account_product_public_id)}
+            </span>
+          );
+        },
       },
       {
         accessorKey: "currency",

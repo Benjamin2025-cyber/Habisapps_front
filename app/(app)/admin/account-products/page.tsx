@@ -109,6 +109,42 @@ export default function AccountProductsPage() {
     };
   }, [token]);
 
+  /*
+   * The picker's list. Two things make a naive load useless here: the chart
+   * runs to several hundred accounts across agencies, and the endpoint orders
+   * by recency — so the first page is entirely per-dossier divisionaries
+   * (`3222.LN-…`, `CLI000001`) created by the last loans and clients, and the
+   * account someone actually wants is never in it.
+   *
+   * So an empty term is allowed as long as an agency is given: opening the
+   * drawer loads that agency's accounts rather than a global first hundred that
+   * may belong to another agency entirely and filter down to nothing. Typing
+   * then searches the whole chart server-side.
+   */
+  const searchLedgerAccounts = useCallback(
+    async (search: string, agencyPublicId: string) => {
+      if (!token) return;
+      const term = search.trim();
+      if (term.length < 2 && !agencyPublicId) return;
+      try {
+        const response = await fetchLedgerAccounts(token, {
+          perPage: 100,
+          search: term.length >= 2 ? term : undefined,
+          agencyPublicId: agencyPublicId || undefined,
+          excludeDivisionary: true,
+        });
+        setLedgerAccounts((current) => {
+          const merged = new Map(current.map((account) => [account.public_id, account]));
+          response.data.forEach((account) => merged.set(account.public_id, account));
+          return Array.from(merged.values());
+        });
+      } catch {
+        // Keep the already loaded referential available if lookup fails.
+      }
+    },
+    [token],
+  );
+
   const visibleProducts = useMemo(() => {
     if (!data) return [];
     const needle = filters.query.trim().toLowerCase();
@@ -263,6 +299,7 @@ export default function AccountProductsPage() {
           initial={editing}
           agencies={agencies}
           ledgerAccounts={ledgerAccounts}
+          onLedgerAccountSearch={searchLedgerAccounts}
           onClose={closeDrawer}
           onSubmit={handleSubmit}
         />

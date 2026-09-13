@@ -41,6 +41,15 @@ export type OperationAccountMapping = {
   agency_public_id: string | null;
   debit_ledger_account_public_id: string | null;
   credit_ledger_account_public_id: string | null;
+  /**
+   * The chart code and name of each leg, served alongside the ids so a mapping
+   * can be labelled without resolving the ULID against a fetched page of
+   * accounts — a lookup that fails as soon as the chart outgrows one page.
+   */
+  debit_ledger_account_code: string | null;
+  debit_ledger_account_name: string | null;
+  credit_ledger_account_code: string | null;
+  credit_ledger_account_name: string | null;
   currency: string | null;
   effective_from: string | null;
   effective_to: string | null;
@@ -149,6 +158,17 @@ export async function updateOperationAccountMapping(
   return apiRequest<OperationAccountMapping>(
     `operation-account-mappings/${publicId}`,
     { method: "PATCH", token, body: stripUndefined(payload) },
+  );
+}
+
+/** Approves a draft/submitted mapping so the posting resolver can use it. */
+export async function approveOperationAccountMapping(
+  token: string,
+  publicId: string,
+): Promise<OperationAccountMapping> {
+  return apiRequest<OperationAccountMapping>(
+    `operation-account-mappings/${publicId}/approve`,
+    { method: "POST", token },
   );
 }
 

@@ -24,7 +24,7 @@ import {
   type PaginatedCustomerAccounts,
 } from "@/lib/api/customer-accounts";
 import { localizeApiError, localizeApiMessage } from "@/lib/api/errors";
-import { useCan, useHasRole } from "@/lib/auth/permissions";
+import { useCan, useCanAny, useHasRole } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { usePermissionGuard } from "@/lib/auth/usePermissionGuard";
 import { useApi } from "@/lib/hooks/useApi";
@@ -55,7 +55,12 @@ export default function AccountsPage() {
   const session = useSession();
   const toast = useToast();
   const allowed = usePermissionGuard(["customer.accounts.view"]);
-  const canManage = useHasRole(["platform-admin"]);
+  const canManagePerm = useCanAny([
+    "customer.accounts.create",
+    "customer.accounts.update",
+    "customer.accounts.close",
+  ]);
+  const canManage = useHasRole(["platform-admin"]) || canManagePerm;
   const canScopeInstitution = useCan("crm.scope.institution.read");
 
   const [filters, setFilters] = useState<AccountsFilterState>(
@@ -121,7 +126,7 @@ export default function AccountsPage() {
     const byId = new Map<string, string>();
     for (const client of clients) {
       const name =
-        [client.last_name?.toUpperCase(), client.first_name]
+        [client.last_name?.toUpperCase(), client.first_name, client.middle_name]
           .filter((part): part is string => !!part && part.length > 0)
           .join(" ") ||
         client.client_reference ||

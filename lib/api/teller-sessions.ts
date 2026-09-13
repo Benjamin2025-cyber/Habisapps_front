@@ -39,6 +39,7 @@ export type TellerSession = {
   agency_public_id: string | null;
   till_public_id: string | null;
   teller_user_public_id: string | null;
+  teller_user_name: string | null;
   business_date: string | null;
   opened_at: string | null;
   closed_at: string | null;

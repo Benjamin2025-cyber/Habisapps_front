@@ -14,6 +14,7 @@ import { localizeApiMessage } from "@/lib/api/errors";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useApi } from "@/lib/hooks/useApi";
 import { useFormatter, useTranslations } from "@/lib/i18n/I18nProvider";
+import { openBrandedReport } from "@/lib/print/report";
 
 type Props = {
   accountPublicId: string;
@@ -30,6 +31,7 @@ export function AccountStatementTab({ accountPublicId, currency }: Props) {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [page, setPage] = useState(1);
+  const [printing, setPrinting] = useState(false);
 
   const fetcher = useCallback(
     async (signal: AbortSignal): Promise<AccountStatement> => {
@@ -83,9 +85,18 @@ export function AccountStatementTab({ accountPublicId, currency }: Props) {
       {
         accessorKey: "line_memo",
         header: t("accountDetail.statement.columns.memo"),
-        cell: ({ getValue }) => (
+        cell: ({ row }) => (
           <span className="text-foreground">
-            {(getValue() as string | null) ?? "—"}
+            {memoLabel(row.original.line_memo)}
+            {/*
+              Both halves of an annulled pair print. Without this the reader is
+              left to work out that a 10 000 deposit and a −10 000 line cancel.
+            */}
+            {row.original.reversed ? (
+              <span className="ml-2 rounded bg-warning/15 px-1.5 py-0.5 text-[0.7rem] font-semibold text-warning">
+                {t("accountDetail.statement.reversed")}
+              </span>
+            ) : null}
           </span>
         ),
       },
@@ -121,8 +132,119 @@ export function AccountStatementTab({ accountPublicId, currency }: Props) {
     [t, ccy],
   );
 
+  /**
+   * The libellé of a movement, in the reader's language.
+   *
+   * System postings carry an English memo written at posting time — "Cash
+   * deposited to customer account" — because the wording is persisted with the
+   * entry and freezing a locale into the ledger would be worse than translating
+   * on the way out. A relevé handed to a customer cannot print it, so the known
+   * system memos are mapped here; anything a human typed passes through
+   * untouched.
+   */
+  function memoLabel(memo: string | null): string {
+    if (!memo) return "—";
+    const exact = t(`accountDetail.statement.memos.${memo}`);
+    if (exact !== `accountDetail.statement.memos.${memo}`) return exact;
+    // Some memos carry a trailing detail ("Loan setup charge collected: TVA").
+    const separator = memo.indexOf(":");
+    if (separator > 0) {
+      const head = memo.slice(0, separator).trim();
+      const label = t(`accountDetail.statement.memos.${head}`);
+      if (label !== `accountDetail.statement.memos.${head}`) {
+        return `${label}${memo.slice(separator)}`;
+      }
+    }
+    return memo;
+  }
+
   const summary = data?.statement;
   const pageMeta = data?.pagination;
+
+  /**
+   * Every movement of the filtered period, walked page by page at the API's
+   * maximum page size. Bounded so a mis-set filter on a very old account
+   * cannot turn a print click into an unbounded request loop; the header
+   * prints the number of lines actually collected, so a truncated statement
+   * never claims to be complete.
+   */
+  async function fetchAllMovements(): Promise<AccountMovement[]> {
+    if (!token) return [];
+    const PER_PAGE = 100;
+    const MAX_PAGES = 50;
+    const collected: AccountMovement[] = [];
+    for (let current = 1; current <= MAX_PAGES; current += 1) {
+      const slice = await fetchAccountStatement(token, accountPublicId, {
+        currency: ccy,
+        from: from || undefined,
+        to: to || undefined,
+        page: current,
+        perPage: PER_PAGE,
+      });
+      collected.push(...slice.movements);
+      if (current >= (slice.pagination?.last_page ?? 1)) break;
+    }
+    return collected;
+  }
+
+  /**
+   * IMPRIMER — the accounting team's print button on the statement tab. Prints
+   * the period the tab is showing, summary above, movements below.
+   *
+   * The whole period, not the page on screen: a relevé that printed 50 lines
+   * under a header announcing 300 movements is a document the counter cannot
+   * hand to a customer. The pages are walked at the API's maximum page size
+   * before the print window opens.
+   */
+  async function handlePrint() {
+    if (!summary || !token || printing) return;
+    setPrinting(true);
+    let movements: AccountMovement[];
+    try {
+      movements = await fetchAllMovements();
+    } catch (cause) {
+      setPrinting(false);
+      window.alert(localizeApiMessage(cause instanceof Error ? cause.message : ""));
+      return;
+    }
+    setPrinting(false);
+
+    const printed = openBrandedReport({
+      documentTitle: t("accountDetail.statement.print.fileName"),
+      heading: t("accountDetail.statement.print.heading"),
+      subheading:
+        from || to ? `${from || "…"} → ${to || "…"}` : t("accountDetail.statement.print.allPeriods"),
+      meta: [
+        { label: t("accountDetail.statement.opening"), value: money(summary.opening_balance_minor) },
+        { label: t("accountDetail.statement.totalDebit"), value: money(summary.debit_total_minor) },
+        { label: t("accountDetail.statement.totalCredit"), value: money(summary.credit_total_minor) },
+        { label: t("accountDetail.statement.closing"), value: money(summary.closing_balance_minor) },
+        { label: t("accountDetail.statement.print.count"), value: String(movements.length) },
+      ],
+      columns: [
+        t("accountDetail.statement.columns.date"),
+        t("accountDetail.statement.columns.reference"),
+        t("accountDetail.statement.columns.memo"),
+        t("accountDetail.statement.columns.debit"),
+        t("accountDetail.statement.columns.credit"),
+      ],
+      rows: movements.map((m) => [
+        m.business_date?.slice(0, 10) ?? "—",
+        m.reference ?? "—",
+        m.reversed
+          ? `${memoLabel(m.line_memo)} (${t("accountDetail.statement.reversed")})`
+          : memoLabel(m.line_memo),
+        m.debit_minor ? money(m.debit_minor) : "—",
+        m.credit_minor ? money(m.credit_minor) : "—",
+      ]),
+      numericColumns: [3, 4],
+      generatedLabel: t("common.generatedOn"),
+      emptyLabel: t("accountDetail.statement.empty"),
+    });
+    if (!printed) {
+      window.alert(t("accountDetail.statement.print.printError"));
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -152,6 +274,16 @@ export function AccountStatementTab({ accountPublicId, currency }: Props) {
         <p className="text-xs text-muted-foreground sm:ml-auto">
           {t("accountDetail.balances.currencyNote", { currency: ccy })}
         </p>
+        <button
+          type="button"
+          onClick={() => void handlePrint()}
+          disabled={!summary || loading || printing}
+          className="shrink-0 rounded-[var(--radius-field)] border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-muted/50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {printing
+            ? t("common.loading")
+            : t("accountDetail.statement.print.action")}
+        </button>
       </section>
 
       {summary ? (

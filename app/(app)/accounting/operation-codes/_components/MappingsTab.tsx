@@ -17,6 +17,7 @@ import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
 import {
   createOperationAccountMapping,
+  approveOperationAccountMapping,
   deleteOperationAccountMapping,
   fetchOperationAccountMappings,
   updateOperationAccountMapping,
@@ -89,10 +90,12 @@ export function MappingsTab() {
   const create = useCanAny(["operation.mappings.create"]);
   const update = useCanAny(["operation.mappings.update"]);
   const archive = useCanAny(["operation.mappings.archive"]);
+  const approve = useCanAny(["operation.mappings.approve"]);
   const canCreate = isPlatformAdmin || create;
   const canUpdate = isPlatformAdmin || update;
   const canArchive = isPlatformAdmin || archive;
-  const hasRowActions = canUpdate || canArchive;
+  const canApprove = isPlatformAdmin || approve;
+  const hasRowActions = canUpdate || canArchive || canApprove;
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
@@ -106,6 +109,7 @@ export function MappingsTab() {
   const [confirmArchive, setConfirmArchive] =
     useState<OperationAccountMapping | null>(null);
   const [archiving, setArchiving] = useState(false);
+  const [approving, setApproving] = useState<string | null>(null);
 
   useEffect(() => {
     const handle = setTimeout(() => {
@@ -141,6 +145,27 @@ export function MappingsTab() {
       cancelled = true;
     };
   }, [token]);
+
+  const searchLedgerAccounts = useCallback(
+    async (search: string, agencyPublicId: string) => {
+      if (!token || search.trim().length < 2) return;
+      try {
+        const response = await fetchLedgerAccounts(token, {
+          perPage: 100,
+          search,
+          agencyPublicId: agencyPublicId || undefined,
+        });
+        setAccounts((current) => {
+          const merged = new Map(current.map((account) => [account.public_id, account]));
+          response.data.forEach((account) => merged.set(account.public_id, account));
+          return Array.from(merged.values());
+        });
+      } catch {
+        // The base account list remains usable when a remote lookup fails.
+      }
+    },
+    [token],
+  );
 
   const codeByPid = useMemo(
     () => new Map(codes.map((c) => [c.public_id, c])),
@@ -220,6 +245,26 @@ export function MappingsTab() {
     }
   }
 
+  async function handleApprove(mapping: OperationAccountMapping) {
+    if (!token) return;
+    setApproving(mapping.public_id);
+    try {
+      await approveOperationAccountMapping(token, mapping.public_id);
+      toast.success(
+        t("operationCodes.mappings.toast.approvedTitle"),
+        t("operationCodes.mappings.toast.approvedBody"),
+      );
+      refetch();
+    } catch (cause) {
+      toast.error(
+        t("operationCodes.mappings.toast.errorTitle"),
+        localizeApiError(cause).generalMessage,
+      );
+    } finally {
+      setApproving(null);
+    }
+  }
+
   async function handleSubmit(
     payload: MappingWritePayload,
     mode: "create" | "edit",
@@ -274,14 +319,20 @@ export function MappingsTab() {
       {
         accessorKey: "debit_ledger_account_public_id",
         header: t("operationCodes.mappings.columns.debit"),
-        cell: ({ getValue }) => {
-          const pid = getValue() as string | null;
+        cell: ({ row }) => {
+          const pid = row.original.debit_ledger_account_public_id;
+          // The code the API serves, not a client-side lookup: resolving the
+          // ULID against a fetched page of accounts stops working the moment
+          // the chart is longer than that page, and the column then prints the
+          // identifier — which is no use to anyone reading a mapping.
+          const code = row.original.debit_ledger_account_code ?? accountLabel(pid);
+          const name = row.original.debit_ledger_account_name ?? accountName(pid);
           return (
             <span
               className="font-mono text-xs tabular-nums text-muted-foreground"
-              title={accountName(pid)}
+              title={name ?? undefined}
             >
-              {accountLabel(pid)}
+              {code ?? "—"}
             </span>
           );
         },
@@ -289,14 +340,20 @@ export function MappingsTab() {
       {
         accessorKey: "credit_ledger_account_public_id",
         header: t("operationCodes.mappings.columns.credit"),
-        cell: ({ getValue }) => {
-          const pid = getValue() as string | null;
+        cell: ({ row }) => {
+          const pid = row.original.credit_ledger_account_public_id;
+          // The code the API serves, not a client-side lookup: resolving the
+          // ULID against a fetched page of accounts stops working the moment
+          // the chart is longer than that page, and the column then prints the
+          // identifier — which is no use to anyone reading a mapping.
+          const code = row.original.credit_ledger_account_code ?? accountLabel(pid);
+          const name = row.original.credit_ledger_account_name ?? accountName(pid);
           return (
             <span
               className="font-mono text-xs tabular-nums text-muted-foreground"
-              title={accountName(pid)}
+              title={name ?? undefined}
             >
-              {accountLabel(pid)}
+              {code ?? "—"}
             </span>
           );
         },
@@ -349,6 +406,17 @@ export function MappingsTab() {
                     onClick: () => setDrawer({ mode: "edit", initial: m }),
                   });
                 }
+                if (
+                  canApprove &&
+                  ["draft", "submitted"].includes(m.approval_status)
+                ) {
+                  if (items.length > 0) items.push({ kind: "separator" });
+                  items.push({
+                    label: t("operationCodes.mappings.actions.approve"),
+                    onClick: () => void handleApprove(m),
+                    disabled: approving === m.public_id,
+                  });
+                }
                 if (canArchive && m.status !== "archived") {
                   if (items.length > 0) items.push({ kind: "separator" });
                   items.push({
@@ -373,7 +441,19 @@ export function MappingsTab() {
           ]
         : []),
     ],
-    [t, hasRowActions, canUpdate, canArchive, codeLabel, accountLabel, accountName, agencyByPid],
+    [
+      t,
+      hasRowActions,
+      canUpdate,
+      canApprove,
+      canArchive,
+      approving,
+      codeLabel,
+      accountLabel,
+      accountName,
+      agencyByPid,
+      handleApprove,
+    ],
   );
 
   const pageMeta = data?.meta.pagination;
@@ -468,6 +548,7 @@ export function MappingsTab() {
           accounts={accounts}
           agencies={agencies}
           codeLabel={codeLabel}
+          onAccountSearch={searchLedgerAccounts}
           onClose={() => setDrawer(null)}
           onSubmit={handleSubmit}
         />
@@ -496,6 +577,7 @@ function MappingDrawer({
   accounts,
   agencies,
   codeLabel,
+  onAccountSearch,
   onClose,
   onSubmit,
 }: {
@@ -506,6 +588,7 @@ function MappingDrawer({
   accounts: LedgerAccount[];
   agencies: Agency[];
   codeLabel: (pid: string | null) => string;
+  onAccountSearch: (search: string, agencyPublicId: string) => Promise<void>;
   onClose: () => void;
   onSubmit: (
     payload: MappingWritePayload,
@@ -725,6 +808,7 @@ function MappingDrawer({
           placeholder={t("operationCodes.mappings.fields.accountPlaceholder")}
           isClearable
           isSearchable
+          onInputChange={(search) => void onAccountSearch(search, form.agency_public_id)}
           onChange={(next) =>
             setForm((c) => ({ ...c, debit_ledger_account_public_id: next }))
           }
@@ -737,6 +821,7 @@ function MappingDrawer({
           placeholder={t("operationCodes.mappings.fields.accountPlaceholder")}
           isClearable
           isSearchable
+          onInputChange={(search) => void onAccountSearch(search, form.agency_public_id)}
           onChange={(next) =>
             setForm((c) => ({ ...c, credit_ledger_account_public_id: next }))
           }

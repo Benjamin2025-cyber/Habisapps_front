@@ -30,6 +30,14 @@ export type BrandedReportOptions = {
   emptyLabel: string;
   /** App/brand name shown next to the logo. */
   brandName?: string;
+  /**
+   * Page orientation. Portrait suits a statement's five columns; a wide sheet
+   * such as the ten-column brouillard de caisse needs `landscape`, or A4 leaves
+   * each column about 18 mm and the references and amounts wrap into an
+   * unreadable block. Landscape also tightens the type, since a table is only
+   * that wide because it has a lot to say.
+   */
+  orientation?: "portrait" | "landscape";
 };
 
 function esc(value: unknown): string {
@@ -59,7 +67,10 @@ export function openBrandedReport(options: BrandedReportOptions): boolean {
     generatedLabel,
     emptyLabel,
     brandName = "HabisLoan",
+    orientation = "portrait",
   } = options;
+
+  const isLandscape = orientation === "landscape";
 
   const origin = window.location.origin;
   const logoUrl = `${origin}/brand/logo-icon.png`;
@@ -107,7 +118,7 @@ export function openBrandedReport(options: BrandedReportOptions): boolean {
     font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     color: #1a1a2e;
     padding: 28px 32px;
-    font-size: 12px;
+    font-size: ${isLandscape ? "10px" : "12px"};
   }
   .brand { display: flex; align-items: center; gap: 12px; border-bottom: 2px solid #e5e7eb; padding-bottom: 14px; }
   .brand img { width: 48px; height: 48px; object-fit: contain; }
@@ -125,14 +136,18 @@ export function openBrandedReport(options: BrandedReportOptions): boolean {
   table { width: 100%; border-collapse: collapse; }
   thead th {
     text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em;
-    color: #6b7280; border-bottom: 1.5px solid #d1d5db; padding: 8px 10px; background: #f9fafb;
+    color: #6b7280; border-bottom: 1.5px solid #d1d5db; padding: ${isLandscape ? '6px 6px' : '8px 10px'}; background: #f9fafb;
   }
-  tbody td { padding: 8px 10px; border-bottom: 1px solid #eef0f3; vertical-align: top; }
+  tbody td { padding: ${isLandscape ? '5px 6px' : '8px 10px'}; border-bottom: 1px solid #eef0f3; vertical-align: top; }
+  /* A long sheet repeats its header on every page; the accounting team signs
+     each one, and an unlabelled page 3 is not a document. */
+  thead { display: table-header-group; }
+  tbody tr { break-inside: avoid; page-break-inside: avoid; }
   .num { text-align: right; font-variant-numeric: tabular-nums; }
   .empty { text-align: center; color: #9ca3af; padding: 28px 10px; }
   tbody tr:nth-child(even) { background: #fcfcfd; }
   .foot { margin-top: 22px; border-top: 1px solid #e5e7eb; padding-top: 8px; color: #9ca3af; font-size: 9px; display: flex; justify-content: space-between; }
-  @page { size: A4; margin: 14mm; }
+  @page { size: A4 ${orientation}; margin: ${isLandscape ? "10mm" : "14mm"}; }
   @media print { body { padding: 0; } .num, tbody tr:nth-child(even) { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 </style>
 </head>

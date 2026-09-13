@@ -108,7 +108,7 @@ export function toClientOption(client: Client): ClientOption {
 
 function toOption(client: Client): ClientOption {
   const name =
-    [client.last_name?.toUpperCase(), client.first_name]
+    [client.last_name?.toUpperCase(), client.first_name, client.middle_name]
       .filter((part): part is string => !!part && part.length > 0)
       .join(" ") || client.public_id;
   return {

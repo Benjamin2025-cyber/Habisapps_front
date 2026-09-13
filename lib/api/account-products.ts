@@ -24,10 +24,19 @@ export type AccountProduct = {
   name: string;
   account_family: AccountFamily;
   minimum_balance_minor: number | null;
+  /**
+   * « Frais d'ouverture de compte », in minor units. The first counter
+   * operation on an account carrying this product sweeps it to income account
+   * 7611 on its own; 0 means the product charges none.
+   */
+  opening_fee_minor: number | null;
+  /**
+   * The 7611 sub-account this product's fee is credited to, when the institution
+   * splits « Produits sur opérations d'ouverture de comptes » by account type.
+   * Null falls back to the agency's `account_opening_fee` mapping.
+   */
+  opening_fee_ledger_account_public_id: string | null;
   currency: string | null;
-  allows_recovery_debit: boolean | null;
-  is_recovery_account: boolean | null;
-  is_ordinary_savings: boolean | null;
   allows_overdraft: boolean | null;
   overdraft_limit_minor: number | null;
   status: AccountProductStatus;
@@ -56,10 +65,9 @@ export type AccountProductWritePayload = {
   name?: string;
   account_family?: AccountFamily;
   minimum_balance_minor?: number | null;
+  opening_fee_minor?: number | null;
+  opening_fee_ledger_account_public_id?: string | null;
   currency?: string | null;
-  allows_recovery_debit?: boolean;
-  is_recovery_account?: boolean;
-  is_ordinary_savings?: boolean;
   allows_overdraft?: boolean;
   overdraft_limit_minor?: number | null;
   /** Create accepts active/inactive; archive happens via DELETE. */
