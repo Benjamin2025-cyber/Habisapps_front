@@ -1573,6 +1573,8 @@
       "closedOn": "Closing date",
       "status": "Status",
       "statusPlaceholder": "Select a status…",
+      "pendingOpeningFee": "Opening fee to collect",
+      "openingFeeCollectedAt": "Opening fee collected on",
       "noProducts": "No active account product for this agency. Create one under “Account products”, or check the agency you selected.",
       "ledgerAccountInherits": "Leave empty: the account takes its product's default ledger account. Choosing one here requires chart-of-accounts access."
     },
@@ -1608,14 +1610,16 @@
       "errorTitle": "Unable to load balances",
       "accounting": "Ledger balance",
       "available": "Available balance",
+      "real": "Real balance",
+      "realNote": "Real balance is what the account actually holds. Available balance is what can leave the counter: the real balance less the minimum balance, the amounts held and the amounts made unavailable, plus any authorised overdraft.",
       "activeHolds": "Active holds",
       "minimum": "Minimum balance",
       "unavailable": "Amount unavailable",
-      "accountingFloor": "Ledger basis",
       "movementsTitle": "Transaction totals",
       "totalDebit": "Total debits",
       "totalCredit": "Total credits",
-      "currencyNote": "Amounts expressed in {currency}."
+      "currencyNote": "Amounts expressed in {currency}.",
+      "overdraftLimit": "Authorised overdraft"
     },
     "statement": {
       "errorTitle": "Unable to load statement",
@@ -1628,12 +1632,30 @@
       "title": "Account transactions",
       "count": "{count} transaction(s)",
       "empty": "No transactions for the period.",
+      "reversed": "Reversed",
+      "print": {
+        "action": "Print",
+        "fileName": "account-statement",
+        "heading": "Account statement",
+        "allPeriods": "All periods",
+        "count": "Transaction count",
+        "printError": "Could not open the print window (blocked by the browser)."
+      },
       "columns": {
         "date": "Date",
         "reference": "Reference",
         "memo": "Description",
         "debit": "Debit",
         "credit": "Credit"
+      },
+      "memos": {
+        "Cash deposited to customer account": "Cash deposit",
+        "Cash withdrawn from customer account": "Cash withdrawal",
+        "Account opening fee debited from customer account": "Account opening fee",
+        "Loan repayment debited from customer account": "Loan repayment",
+        "Loan principal disbursed": "Loan disbursement",
+        "Loan setup charge collected": "Loan setup charge",
+        "Loan repayment allocated to": "Repayment allocated to"
       }
     },
     "proxies": {
@@ -2410,6 +2432,7 @@
       "name": "Name",
       "family": "Family",
       "minimumBalance": "Minimum balance",
+      "openingFee": "Opening fee",
       "currency": "Currency",
       "status": "Status",
       "actions": "Actions"
@@ -2452,9 +2475,14 @@
       "currencyHint": "Three-letter ISO code (e.g. XAF).",
       "ledgerAccount": "Default ledger account",
       "ledgerAccountPlaceholder": "Choose an account",
-      "ledgerAccountHint": "Ledger account inherited by default by accounts created with this product.",
-      "noLedgerAccounts": "No active ledger account in this agency. Create one under General accounts.",
+      "ledgerAccountHint": "Type a code or a name to search the chart of accounts (e.g. “3712”, “cash”).",
+      "noLedgerAccounts": "Type at least 2 characters to search the chart of accounts.",
       "minimumBalance": "Minimum balance",
+      "openingFee": "Account opening fee",
+      "openingFeeHint": "Swept to the institution's account-opening commission account by the first counter operation. Leave empty for no fee.",
+      "openingFeeLedgerAccount": "Opening fee income account",
+      "openingFeeLedgerAccountPlaceholder": "Use the agency mapping",
+      "openingFeeLedgerAccountHint": "Leave empty to use the agency-wide opening fee mapping. Otherwise type a code to pick a commission sub-account dedicated to this account type.",
       "amountHint": "Amount in the product currency.",
       "allowsOverdraft": "Allows overdraft",
       "overdraftLimit": "Overdraft limit",
@@ -3202,6 +3230,8 @@
       "till": "Till",
       "teller": "Teller",
       "businessDate": "Date",
+      "openedAt": "Opened at",
+      "closedAt": "Closed at",
       "opening": "Opening fund",
       "currentBalance": "Theoretical balance",
       "closing": "Closing fund",
@@ -3348,7 +3378,8 @@
       "account": "Account no.",
       "holder": "Holder",
       "amount": "Amount",
-      "feesNote": "Any fees are applied when the transaction is posted."
+      "feesNote": "Any fees are applied when the transaction is posted.",
+      "openingFeeNote": "Charged only if the account balance can carry it; swept to the account-opening commission account in its own posting."
     },
     "tips": {
       "title": "Teller tips",
@@ -3363,6 +3394,25 @@
     "confirm": {
       "title": "Confirm transaction",
       "body": "Review the information below before submitting the cash transaction."
+    },
+    "receipt": {
+      "title": "Transaction receipt",
+      "print": "Print receipt",
+      "newOperation": "New operation",
+      "postedNote": "Operation recorded and posted to the ledger.",
+      "reference": "Voucher no.",
+      "date": "Date",
+      "type": "Operation",
+      "account": "Account",
+      "holder": "Holder",
+      "amount": "Amount",
+      "amountInWords": "Amount in words",
+      "openingFee": "Account opening fee",
+      "label": "Detail",
+      "value": "Value",
+      "fileName": "operation-receipt",
+      "heading": "Cash receipt",
+      "printError": "Could not open the print window (blocked by the browser)."
     },
     "submit": {
       "deposit": "Record deposit",
@@ -3387,7 +3437,8 @@
       "amount": "Amount",
       "status": "Status",
       "actions": "Actions",
-      "reverse": "Reverse"
+      "reverse": "Reverse",
+      "print": "Print"
     },
     "sessionSummary": {
       "deposits": "Deposits",
@@ -3470,33 +3521,49 @@
   },
   "cashDraft": {
     "pageTitle": "Cash blotter",
-    "pageDescription": "Day-by-day view of cash sessions: opening/closing fund and status.",
+    "pageDescription": "All cash operations of a till, line by line, with a running balance.",
     "filters": {
       "from": "From",
-      "to": "To"
-    },
-    "count": "{count} session(s)",
-    "columns": {
-      "date": "Date",
+      "to": "To",
       "till": "Till",
+      "tillPlaceholder": "Select a till"
+    },
+    "count": "{count} line(s)",
+    "columns": {
+      "sequence": "Order no.",
+      "reference": "Reference / Voucher no.",
+      "date": "Date",
+      "account": "Account no.",
+      "label": "Label",
+      "debit": "Debited",
+      "credit": "Credited",
+      "runningBalance": "Running balance",
+      "guichetCode": "Branch code",
+      "tillCode": "Till code",
       "teller": "Teller",
-      "opening": "Opening fund",
-      "currentBalance": "Theoretical balance",
-      "closing": "Closing fund",
       "status": "Status"
     },
-    "status": {
-      "open": "Open",
-      "closed": "Closed"
+    "txType": {
+      "cash_deposit": "Deposit",
+      "cash_withdrawal": "Withdrawal",
+      "cash_reversal": "Reversal",
+      "cash_manual_journal": "Cash journal entry"
     },
-    "empty": "No session for this period.",
-    "lineLevelNote": "Line-by-line cash movements will be available once the teller-transactions list endpoint is delivered.",
+    "status": {
+      "posted": "Posted",
+      "reversed": "Reversed"
+    },
+    "empty": "No cash operation for this selection.",
+    "pickTill": "Select a till to display its blotter.",
     "print": {
       "action": "Print / PDF",
       "fileName": "cash-blotter",
       "heading": "Cash blotter",
       "allPeriods": "All periods",
-      "count": "Session count"
+      "till": "Till",
+      "openingBalance": "Opening balance",
+      "count": "Operation count",
+      "printError": "Could not open the print window (blocked by the browser)."
     }
   },
   "globalClientImage": {
@@ -3832,6 +3899,7 @@
       "actions": {
         "create": "New posting",
         "edit": "Edit",
+        "approve": "Approve",
         "archive": "Archive",
         "menu": "Posting actions",
         "approve": "Approve",

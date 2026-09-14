@@ -326,7 +326,10 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
         labelKey: "cashDraft",
         href: "/reports/cash-draft",
         available: true,
-        permissions: ["cash.reconciliations.view"],
+        // The brouillard reads the till referential and the teller transactions
+        // behind it, not the reconciliations it used to be built from — whose
+        // permission would now advertise a page the user lands on empty.
+        permissions: ["cash.tills.view", "cash.transactions.view"],
       },
       {
         labelKey: "reportsExigible",

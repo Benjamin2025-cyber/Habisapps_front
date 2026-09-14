@@ -106,6 +106,7 @@ export function MappingsTab() {
   const [confirmArchive, setConfirmArchive] =
     useState<OperationAccountMapping | null>(null);
   const [archiving, setArchiving] = useState(false);
+  const [approving, setApproving] = useState<string | null>(null);
 
   useEffect(() => {
     const handle = setTimeout(() => {
@@ -149,6 +150,7 @@ export function MappingsTab() {
       cancelled = true;
     };
   }, [token]);
+
 
   const codeByPid = useMemo(
     () => new Map(codes.map((c) => [c.public_id, c])),
@@ -240,6 +242,26 @@ export function MappingsTab() {
       );
     } finally {
       setArchiving(false);
+    }
+  }
+
+  async function handleApprove(mapping: OperationAccountMapping) {
+    if (!token) return;
+    setApproving(mapping.public_id);
+    try {
+      await approveOperationAccountMapping(token, mapping.public_id);
+      toast.success(
+        t("operationCodes.mappings.toast.approvedTitle"),
+        t("operationCodes.mappings.toast.approvedBody"),
+      );
+      refetch();
+    } catch (cause) {
+      toast.error(
+        t("operationCodes.mappings.toast.errorTitle"),
+        localizeApiError(cause).generalMessage,
+      );
+    } finally {
+      setApproving(null);
     }
   }
 

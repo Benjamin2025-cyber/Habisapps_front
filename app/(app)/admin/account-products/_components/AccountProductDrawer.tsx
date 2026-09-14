@@ -40,6 +40,8 @@ type FormState = {
   agency_public_id: string;
   ledger_account_public_id: string;
   minimum_balance: string;
+  opening_fee: string;
+  opening_fee_ledger_account_public_id: string;
   allows_overdraft: boolean;
   overdraft_limit: string;
   status: "active" | "inactive" | "";
@@ -53,6 +55,8 @@ const EMPTY: FormState = {
   agency_public_id: "",
   ledger_account_public_id: "",
   minimum_balance: "",
+  opening_fee: "",
+  opening_fee_ledger_account_public_id: "",
   allows_overdraft: false,
   overdraft_limit: "",
   status: "",
@@ -88,6 +92,9 @@ export function AccountProductDrawer({
         agency_public_id: initial.agency_public_id ?? "",
         ledger_account_public_id: initial.ledger_account_public_id ?? "",
         minimum_balance: fromMinor(initial.minimum_balance_minor),
+        opening_fee: fromMinor(initial.opening_fee_minor),
+        opening_fee_ledger_account_public_id:
+          initial.opening_fee_ledger_account_public_id ?? "",
         allows_overdraft: initial.allows_overdraft ?? false,
         overdraft_limit: fromMinor(initial.overdraft_limit_minor),
         status: initial.status === "archived" ? "" : initial.status,
@@ -128,6 +135,8 @@ export function AccountProductDrawer({
     : form.agency_public_id || null;
   const [ledgerSelection, setLedgerSelection] =
     useState<LedgerAccountOption | null>(null);
+  const [feeLedgerSelection, setFeeLedgerSelection] =
+    useState<LedgerAccountOption | null>(null);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -142,6 +151,10 @@ export function AccountProductDrawer({
       currency: nullable(form.currency)?.toUpperCase() ?? undefined,
       ledger_account_public_id: nullable(form.ledger_account_public_id),
       minimum_balance_minor: toMinor(form.minimum_balance),
+      opening_fee_minor: toMinor(form.opening_fee),
+      opening_fee_ledger_account_public_id: nullable(
+        form.opening_fee_ledger_account_public_id,
+      ),
       allows_overdraft: form.allows_overdraft,
       overdraft_limit_minor: form.allows_overdraft
         ? toMinor(form.overdraft_limit)
@@ -170,6 +183,10 @@ export function AccountProductDrawer({
         agency_public_id: t("accountProducts.fields.agency"),
         ledger_account_public_id: t("accountProducts.fields.ledgerAccount"),
         minimum_balance_minor: t("accountProducts.fields.minimumBalance"),
+        opening_fee_minor: t("accountProducts.fields.openingFee"),
+        opening_fee_ledger_account_public_id: t(
+          "accountProducts.fields.openingFeeLedgerAccount",
+        ),
         overdraft_limit_minor: t("accountProducts.fields.overdraftLimit"),
         status: t("accountProducts.fields.status"),
       };
@@ -321,8 +338,52 @@ export function AccountProductDrawer({
               onChange={(event) => set("minimum_balance", event.target.value)}
               error={errors.minimum_balance_minor}
               hint={t("accountProducts.fields.amountHint")}
-              className="sm:col-span-2"
             />
+            {/*
+              « Frais d'ouverture de compte ». The first counter operation on an
+              account carrying this product sweeps the fee to income account
+              7611 on its own, so this box is the only place the amount is ever
+              decided — leave it empty and the product charges nothing.
+            */}
+            <MoneyField
+              label={t("accountProducts.fields.openingFee")}
+              value={form.opening_fee}
+              onChange={(event) => set("opening_fee", event.target.value)}
+              error={errors.opening_fee_minor}
+              hint={t("accountProducts.fields.openingFeeHint")}
+            />
+            {/*
+              7611 may carry one sub-account per account type. Left empty, the
+              product falls back to the agency's `account_opening_fee` mapping,
+              which is what a structure running a single income account wants.
+            */}
+            {(toMinor(form.opening_fee) ?? 0) > 0 ? (
+              <div className="sm:col-span-2">
+                {/*
+                  Same server-searched picker as the account above, for the same
+                  reason: the chart runs to a thousand accounts per agency, and
+                  the commission account this field wants sits well past the
+                  first page.
+                */}
+                <LedgerAccountPicker
+                  label={t("accountProducts.fields.openingFeeLedgerAccount")}
+                  value={feeLedgerSelection}
+                  onChange={(option) => {
+                    setFeeLedgerSelection(option);
+                    set("opening_fee_ledger_account_public_id", option?.value ?? "");
+                  }}
+                  agencyPublicId={ledgerAgency}
+                  resetKey={ledgerAgency ?? ""}
+                  initialValuePublicId={
+                    initial?.opening_fee_ledger_account_public_id ?? null
+                  }
+                  filter={(a) => a.status === "active"}
+                  placeholder={t("accountProducts.fields.openingFeeLedgerAccountPlaceholder")}
+                  error={errors.opening_fee_ledger_account_public_id}
+                  hint={t("accountProducts.fields.openingFeeLedgerAccountHint")}
+                />
+              </div>
+            ) : null}
           </div>
         </Section>
 

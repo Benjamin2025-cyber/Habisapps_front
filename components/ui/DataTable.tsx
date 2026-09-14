@@ -42,6 +42,17 @@ type Props<TRow> = {
   getRowId?: (row: TRow, index: number) => string;
   /** Optional row click handler. */
   onRowClick?: (row: TRow) => void;
+  /**
+   * Minimum table width, as a Tailwind class (e.g. `min-w-[72rem]`).
+   *
+   * A table with many columns squeezes them until the content wraps — a till
+   * code breaking across five lines, a header across three — because the
+   * wrapper is `overflow-x-auto` but the table itself is only `w-full` and so
+   * never grows past it. Setting a floor lets the columns take their natural
+   * width and hands the overflow to the scroller, which is what that wrapper
+   * was there for. Omit it and nothing changes.
+   */
+  minWidthClass?: string;
   className?: string;
 };
 
@@ -66,6 +77,7 @@ export function DataTable<TRow>({
   pagination,
   getRowId,
   onRowClick,
+  minWidthClass,
   className,
 }: Props<TRow>) {
   const t = useTranslations();
@@ -97,7 +109,7 @@ export function DataTable<TRow>({
         ) : null}
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className={cn("w-full text-sm", minWidthClass)}>
             <thead className="border-b border-border">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>

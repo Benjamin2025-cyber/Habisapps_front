@@ -143,6 +143,125 @@ export async function updateTill(
   });
 }
 
+/**
+ * P22 — Édition › Brouillard de caisse. Ligne-à-ligne des opérations de caisse
+ * d'une caisse, avec solde progressif calculé par l'API sur l'historique
+ * complet de la caisse (indépendant des filtres et de la pagination).
+ * `GET tills/{till}/cash-journal`.
+ */
+export type TillCashJournalLine = {
+  sequence_number: number;
+  reference: string | null;
+  event_number: string | null;
+  transaction_date: string | null;
+  transaction_type: string;
+  status: string;
+  operation_code: string | null;
+  /** What the teller typed; null when they typed nothing. */
+  label: string | null;
+  journal_description: string | null;
+  amount_minor: number;
+  currency: string;
+  customer_account_number: string | null;
+  ledger_account_code: string | null;
+  cash_debit_minor: number;
+  cash_credit_minor: number;
+  running_balance_minor: number;
+  /** « Code guichet » — the branch code of a RIB, not the caisse's own code. */
+  agency_code: string | null;
+  till_code: string;
+  till_name: string;
+  teller_name: string | null;
+  teller_session_public_id: string;
+  public_id: string;
+};
+
+export type TillCashJournal = {
+  till: {
+    public_id: string;
+    code: string;
+    name: string;
+    agency_public_id: string | null;
+    agency_code: string | null;
+  };
+  opening_balance_minor: number;
+  lines: TillCashJournalLine[];
+  pagination: Pagination;
+};
+
+export async function fetchTillCashJournal(
+  token: string,
+  tillPublicId: string,
+  options: {
+    from?: string;
+    to?: string;
+    transactionType?: string;
+    page?: number;
+    perPage?: number;
+  } = {},
+): Promise<{
+  till: TillCashJournal["till"];
+  openingBalanceMinor: number;
+  lines: TillCashJournalLine[];
+  pagination: Pagination;
+}> {
+  const query = new URLSearchParams();
+  query.set("per_page", String(options.perPage ?? 100));
+  if (options.page && options.page > 0) query.set("page", String(options.page));
+  if (options.from) query.set("filter[transaction_date_from]", options.from);
+  if (options.to) query.set("filter[transaction_date_to]", options.to);
+  if (options.transactionType)
+    query.set("filter[transaction_type]", options.transactionType);
+
+  const response = await fetch(
+    `/api/v1/tills/${tillPublicId}/cash-journal?${query.toString()}`,
+    {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "X-API-Version": process.env.NEXT_PUBLIC_API_VERSION ?? "1",
+        "X-Locale": getRequestLocale(),
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "omit",
+    },
+  );
+
+  const text = await response.text();
+  if (!response.ok || text.length === 0) {
+    if (response.status === 401) notifyAuthExpired();
+    throw new Error(`Failed to fetch the cash journal (HTTP ${response.status})`);
+  }
+
+  const envelope = JSON.parse(text) as {
+    data?: {
+      till?: TillCashJournal["till"];
+      opening_balance_minor?: number;
+      lines?: TillCashJournalLine[];
+    };
+    meta?: { pagination?: Partial<Pagination> } & Partial<Pagination>;
+  };
+  const m = envelope.meta?.pagination ?? envelope.meta ?? {};
+
+  return {
+    till: envelope.data?.till ?? {
+      public_id: tillPublicId,
+      code: "",
+      name: "",
+      agency_public_id: null,
+      agency_code: null,
+    },
+    openingBalanceMinor: envelope.data?.opening_balance_minor ?? 0,
+    lines: envelope.data?.lines ?? [],
+    pagination: {
+      current_page: m.current_page ?? 1,
+      per_page: m.per_page ?? options.perPage ?? 25,
+      total: m.total ?? 0,
+      last_page: m.last_page ?? 1,
+    },
+  };
+}
+
 function stripUndefined<T extends Record<string, unknown>>(input: T): Partial<T> {
   const result: Partial<T> = {};
   for (const [key, value] of Object.entries(input)) {

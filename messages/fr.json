@@ -1573,6 +1573,8 @@
       "closedOn": "Date de clôture",
       "status": "Statut",
       "statusPlaceholder": "Sélectionner un statut…",
+      "pendingOpeningFee": "Frais d'ouverture à prélever",
+      "openingFeeCollectedAt": "Frais d'ouverture prélevés le",
       "noProducts": "Aucun produit de compte actif pour cette agence. Créez-en un dans « Produits de compte », ou vérifiez l'agence choisie.",
       "ledgerAccountInherits": "Laissez vide : le compte reprendra le compte comptable par défaut de son produit. Choisir un compte ici demande un droit sur le plan comptable."
     },
@@ -1608,14 +1610,16 @@
       "errorTitle": "Impossible de charger les soldes",
       "accounting": "Solde comptable",
       "available": "Solde disponible",
+      "real": "Solde réel",
+      "realNote": "Le solde réel est ce que le compte détient effectivement. Le solde disponible est ce qui peut sortir du guichet : le solde réel diminué du minimum en compte, des mises en attente et des montants indisponibles, augmenté du découvert autorisé.",
       "activeHolds": "Mises en attente actives",
       "minimum": "Solde minimum",
       "unavailable": "Montant indisponible",
-      "accountingFloor": "Base comptable",
       "movementsTitle": "Cumuls de mouvements",
       "totalDebit": "Total débits",
       "totalCredit": "Total crédits",
-      "currencyNote": "Montants exprimés en {currency}."
+      "currencyNote": "Montants exprimés en {currency}.",
+      "overdraftLimit": "Découvert autorisé"
     },
     "statement": {
       "errorTitle": "Impossible de charger le relevé",
@@ -1628,12 +1632,30 @@
       "title": "Mouvements du compte",
       "count": "{count} mouvement(s)",
       "empty": "Aucun mouvement sur la période.",
+      "reversed": "Extournée",
+      "print": {
+        "action": "Imprimer",
+        "fileName": "releve-compte",
+        "heading": "Relevé de compte",
+        "allPeriods": "Toutes périodes",
+        "count": "Nombre de mouvements",
+        "printError": "Impossible d'ouvrir la fenêtre d'impression (bloquée par le navigateur)."
+      },
       "columns": {
         "date": "Date",
         "reference": "Référence",
         "memo": "Libellé",
         "debit": "Débit",
         "credit": "Crédit"
+      },
+      "memos": {
+        "Cash deposited to customer account": "Versement d'espèces",
+        "Cash withdrawn from customer account": "Retrait d'espèces",
+        "Account opening fee debited from customer account": "Frais d'ouverture de compte",
+        "Loan repayment debited from customer account": "Remboursement de prêt",
+        "Loan principal disbursed": "Déblocage du principal",
+        "Loan setup charge collected": "Frais de mise en place",
+        "Loan repayment allocated to": "Remboursement affecté à"
       }
     },
     "proxies": {
@@ -2410,6 +2432,7 @@
       "name": "Nom",
       "family": "Famille",
       "minimumBalance": "Solde minimum",
+      "openingFee": "Frais d'ouverture",
       "currency": "Devise",
       "status": "Statut",
       "actions": "Actions"
@@ -2452,9 +2475,14 @@
       "currencyHint": "Code ISO à 3 lettres (ex. XAF).",
       "ledgerAccount": "Compte comptable par défaut",
       "ledgerAccountPlaceholder": "Choisir un compte",
-      "ledgerAccountHint": "Compte comptable hérité par défaut par les comptes créés avec ce produit.",
-      "noLedgerAccounts": "Aucun compte comptable actif dans cette agence. Créez-en dans Comptes généraux.",
+      "ledgerAccountHint": "Tapez un code ou un nom pour chercher dans le plan comptable (ex. « 3712 », « caisse »).",
+      "noLedgerAccounts": "Tapez au moins 2 caractères pour chercher un compte du plan comptable.",
       "minimumBalance": "Solde minimum",
+      "openingFee": "Frais d'ouverture de compte",
+      "openingFeeHint": "Virés au compte de commissions d'ouverture de l'institution par la première opération de caisse. Laisser vide si aucun frais.",
+      "openingFeeLedgerAccount": "Compte de produits des frais d'ouverture",
+      "openingFeeLedgerAccountPlaceholder": "Utiliser le mappage de l'agence",
+      "openingFeeLedgerAccountHint": "Laissez vide pour utiliser le mappage « frais d'ouverture » de l'agence. Sinon, tapez un code pour choisir un sous-compte de commissions dédié à ce type de compte.",
       "amountHint": "Montant dans la devise du produit.",
       "allowsOverdraft": "Autorise le découvert",
       "overdraftLimit": "Plafond de découvert",
@@ -3202,6 +3230,8 @@
       "till": "Caisse",
       "teller": "Caissier",
       "businessDate": "Date",
+      "openedAt": "Heure d'ouverture",
+      "closedAt": "Heure de clôture",
       "opening": "Fonds d'ouverture",
       "currentBalance": "Solde théorique",
       "closing": "Fonds de clôture",
@@ -3348,7 +3378,8 @@
       "account": "N° de compte",
       "holder": "Titulaire",
       "amount": "Montant",
-      "feesNote": "Les frais éventuels sont appliqués lors de la comptabilisation."
+      "feesNote": "Les frais éventuels sont appliqués lors de la comptabilisation.",
+      "openingFeeNote": "Prélevés uniquement si le solde du compte peut les supporter ; virés au compte de commissions d'ouverture dans une écriture distincte."
     },
     "tips": {
       "title": "Conseils caissier",
@@ -3363,6 +3394,25 @@
     "confirm": {
       "title": "Confirmer l'opération",
       "body": "Vérifiez les informations ci-dessous avant de valider l'opération de caisse."
+    },
+    "receipt": {
+      "title": "Reçu de l'opération",
+      "print": "Imprimer le reçu",
+      "newOperation": "Nouvelle opération",
+      "postedNote": "Opération enregistrée et comptabilisée.",
+      "reference": "N° de pièce",
+      "date": "Date",
+      "type": "Opération",
+      "account": "Compte",
+      "holder": "Titulaire",
+      "amount": "Montant",
+      "amountInWords": "Montant en lettres",
+      "openingFee": "Frais d'ouverture de compte",
+      "label": "Détail",
+      "value": "Valeur",
+      "fileName": "recu-operation",
+      "heading": "Reçu de caisse",
+      "printError": "Impossible d'ouvrir la fenêtre d'impression (bloquée par le navigateur)."
     },
     "submit": {
       "deposit": "Enregistrer le versement",
@@ -3387,7 +3437,8 @@
       "amount": "Montant",
       "status": "Statut",
       "actions": "Actions",
-      "reverse": "Extourner"
+      "reverse": "Extourner",
+      "print": "Imprimer"
     },
     "sessionSummary": {
       "deposits": "Versements",
@@ -3470,33 +3521,49 @@
   },
   "cashDraft": {
     "pageTitle": "Brouillard de caisse",
-    "pageDescription": "Vue jour-par-jour des sessions de caisse : fonds d'ouverture/clôture et statut.",
+    "pageDescription": "Toutes les opérations de caisse d'une caisse, ligne par ligne, avec solde progressif.",
     "filters": {
       "from": "Du",
-      "to": "Au"
-    },
-    "count": "{count} session(s)",
-    "columns": {
-      "date": "Date",
+      "to": "Au",
       "till": "Caisse",
+      "tillPlaceholder": "Sélectionnez une caisse"
+    },
+    "count": "{count} ligne(s)",
+    "columns": {
+      "sequence": "N° d'ordre",
+      "reference": "Référence / N° de pièce",
+      "date": "Date",
+      "account": "N° de compte",
+      "label": "Libellé",
+      "debit": "Montant débité",
+      "credit": "Montant crédité",
+      "runningBalance": "Solde progressif",
+      "guichetCode": "Code guichet",
+      "tillCode": "Code caisse",
       "teller": "Caissier",
-      "opening": "Fonds d'ouverture",
-      "currentBalance": "Solde théorique",
-      "closing": "Fonds de clôture",
       "status": "Statut"
     },
-    "status": {
-      "open": "Ouverte",
-      "closed": "Clôturée"
+    "txType": {
+      "cash_deposit": "Versement",
+      "cash_withdrawal": "Retrait",
+      "cash_reversal": "Extourne",
+      "cash_manual_journal": "OD caisse"
     },
-    "empty": "Aucune session sur cette période.",
-    "lineLevelNote": "Le détail ligne-à-ligne des mouvements sera disponible une fois l'endpoint de liste des opérations de caisse livré.",
+    "status": {
+      "posted": "Comptabilisée",
+      "reversed": "Extournée"
+    },
+    "empty": "Aucune opération de caisse sur cette sélection.",
+    "pickTill": "Sélectionnez une caisse pour afficher son brouillard.",
     "print": {
       "action": "Imprimer / PDF",
       "fileName": "brouillard-caisse",
       "heading": "Brouillard de caisse",
       "allPeriods": "Toutes périodes",
-      "count": "Nombre de sessions"
+      "till": "Caisse",
+      "openingBalance": "Solde d'ouverture",
+      "count": "Nombre d'opérations",
+      "printError": "Impossible d'ouvrir la fenêtre d'impression (bloquée par le navigateur)."
     }
   },
   "globalClientImage": {
@@ -3832,6 +3899,7 @@
       "actions": {
         "create": "Nouvelle imputation",
         "edit": "Modifier",
+        "approve": "Approuver",
         "archive": "Archiver",
         "menu": "Actions de l'imputation",
         "approve": "Approuver",

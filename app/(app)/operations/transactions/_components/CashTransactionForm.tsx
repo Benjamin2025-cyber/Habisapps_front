@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -23,11 +23,13 @@ import {
   type InitiatorType,
   type SignatureVerificationMethod,
   type TellerTransaction,
+  type TransactionEnvelope,
 } from "@/lib/api/teller-transactions";
 import type { TellerSession } from "@/lib/api/teller-sessions";
 import { getTill } from "@/lib/api/tills";
 import { localizeApiError } from "@/lib/api/errors";
 import { amountInWords } from "@/lib/format/amountInWords";
+import { printCashReceipt } from "@/lib/print/cashReceipt";
 import {
   DenominationCounter,
   type DenominationLine,
@@ -95,6 +97,62 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
+
+  /**
+   * The receipt of the last posted operation — the accounting team asked for a
+   * standing APERÇU + IMPRIMER flow after every entry. Kept until the teller
+   * starts a new operation.
+   */
+  const receiptRef = useRef<HTMLElement | null>(null);
+  const [receipt, setReceipt] = useState<{
+    tx: TellerTransaction;
+    openingFeeMinor: number | null;
+    currency: string;
+    direction: Direction;
+    accountNumber: string;
+    holder: string;
+    amountMinor: number;
+    amountWords: string;
+  } | null>(null);
+
+  /*
+   * The receipt renders under the whole form — client, amount, the fourteen
+   * denomination rows — so on a laptop it appears some 2 000 px below the fold
+   * and the teller, who has just been told the operation is posted, sees the
+   * page sit perfectly still. Bring it into view when it appears.
+   */
+  useEffect(() => {
+    if (!receipt) return;
+
+    /*
+     * Posting does three things at once: it shows the receipt, clears the form,
+     * and remounts the fourteen-row denomination counter above it. Each of those
+     * lands in its own commit and moves the receipt, so a single scroll on the
+     * first one is undone by the next and the panel settles just under the fold
+     * — which for the teller is indistinguishable from nothing having happened.
+     *
+     * So hold it: re-scroll while the receipt is out of view, for a second at
+     * most, and stop as soon as it is where the teller can see it.
+     */
+    const deadline = Date.now() + 1500;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const keepInView = () => {
+      const node = receiptRef.current;
+      if (!node) return;
+      const box = node.getBoundingClientRect();
+      const visible = box.top >= 0 && box.bottom <= window.innerHeight;
+      if (!visible) {
+        node.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      if (!visible && Date.now() < deadline) {
+        timer = setTimeout(keepInView, 150);
+      }
+    };
+
+    timer = setTimeout(keepInView, 0);
+    return () => clearTimeout(timer);
+  }, [receipt]);
 
   // Load the selected client's accounts (scoped to the session agency).
   useEffect(() => {
@@ -182,7 +240,19 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
   );
 
   const selectedAccount = accounts.find((a) => a.public_id === accountId) ?? null;
-  const holderName = client?.label ?? selectedAccount?.account_title ?? "—";
+  // Keep the preview and receipt's human name free of the client's reference;
+  // the account number already identifies the account, and the reference is
+  // not a substitute for the holder's name. ClientPicker keeps the plain name
+  // separately from the searchable option label for this purpose.
+  const holderName = client?.holderName ?? selectedAccount?.account_title ?? "—";
+
+  /*
+   * The « frais d'ouverture » this operation will sweep to 7611 if it is the
+   * account's first. Announced in the aperçu rather than discovered on the
+   * receipt: the deduction is automatic, so the only question is whether the
+   * teller can tell the customer about it before confirming.
+   */
+  const pendingOpeningFeeMinor = selectedAccount?.pending_opening_fee_minor ?? 0;
 
   const amountMinor = useMemo(() => {
     const v = Number(amount.trim());
@@ -223,9 +293,9 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
     setErrors({});
     setGeneralError(null);
     try {
-      let tx: TellerTransaction;
+      let envelope: TransactionEnvelope;
       if (isWithdrawal) {
-        tx = await storeCashWithdrawal(token, session.public_id, {
+        envelope = await storeCashWithdrawal(token, session.public_id, {
           customer_account_public_id: accountId,
           amount_minor: amountMinor,
           currency,
@@ -236,7 +306,7 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
           denomination_counts: requiresDenominations ? denomLines : undefined,
         });
       } else {
-        tx = await storeCashDeposit(token, session.public_id, {
+        envelope = await storeCashDeposit(token, session.public_id, {
           customer_account_public_id: accountId,
           amount_minor: amountMinor,
           currency,
@@ -248,7 +318,17 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
         });
       }
       setConfirmOpen(false);
-      onDone(tx, direction);
+      onDone(envelope.teller_transaction, direction);
+      setReceipt({
+        tx: envelope.teller_transaction,
+        openingFeeMinor: envelope.opening_fee?.amount_minor ?? null,
+        currency,
+        direction,
+        accountNumber: selectedAccount?.account_number ?? "—",
+        holder: holderName,
+        amountMinor,
+        amountWords,
+      });
       resetAfterDone();
     } catch (cause) {
       const { generalMessage, fieldErrors } = localizeApiError(cause, {
@@ -262,6 +342,50 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
       setConfirmOpen(false);
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  /**
+   * IMPRIMER LE REÇU — the accounting team's print button after every cash
+   * entry. The receipt repeats the operation's identity (pièce de caisse,
+   * date, account, holder, amount) and, when the API swept an account opening
+   * fee on this first transaction, that line too.
+   */
+  function printReceipt() {
+    if (!receipt) return;
+    const printed = printCashReceipt({
+      transaction: receipt.tx,
+      labels: {
+        fileName: t("cashTx.receipt.fileName"),
+        heading: t("cashTx.receipt.heading"),
+        reference: t("cashTx.receipt.reference"),
+        date: t("cashTx.receipt.date"),
+        type: t("cashTx.receipt.type"),
+        typeLabel: t(`cashTx.txType.${receipt.tx.transaction_type}`),
+        account: t("cashTx.receipt.account"),
+        holder: t("cashTx.receipt.holder"),
+        amount: t("cashTx.receipt.amount"),
+        amountInWords: t("cashTx.receipt.amountInWords"),
+        openingFee: t("cashTx.receipt.openingFee"),
+        detail: t("cashTx.receipt.label"),
+        value: t("cashTx.receipt.value"),
+        generatedOn: t("common.generatedOn"),
+        status: t("cashTx.recent.status"),
+        statusLabel: t(`cashTx.status.${receipt.tx.status}`),
+      },
+      formattedAmount: format.currencyMinor(receipt.amountMinor, {
+        currency: receipt.currency,
+      }),
+      amountInWords: receipt.amountWords || undefined,
+      formattedOpeningFee:
+        receipt.openingFeeMinor !== null
+          ? format.currencyMinor(receipt.openingFeeMinor, {
+              currency: receipt.currency,
+            })
+          : undefined,
+    });
+    if (!printed) {
+      window.alert(t("cashTx.receipt.printError"));
     }
   }
 
@@ -507,6 +631,7 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
               resetAfterDone();
               setErrors({});
               setGeneralError(null);
+              setReceipt(null);
             }}
           >
             {t("cashTx.actions.clear")}
@@ -521,6 +646,101 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
             {t("cashTx.actions.preview")}
           </Button>
         </div>
+
+        {/* ---- Receipt of the last posted operation ---- */}
+        {receipt ? (
+          <section
+            ref={receiptRef}
+            className="flex flex-col gap-4 rounded-[var(--radius-card)] border border-success/40 bg-success/5 p-5"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-col gap-0.5">
+                <h3 className="text-sm font-semibold text-success">
+                  {t("cashTx.receipt.title")}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {t("cashTx.receipt.postedNote")}{" "}
+                  <span className="font-mono text-foreground">
+                    {receipt.tx.reference ?? "—"}
+                  </span>
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={printReceipt}
+                >
+                  {t("cashTx.receipt.print")}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  onClick={() => {
+                    setReceipt(null);
+                    setClient(null);
+                    setAccountId("");
+                    resetAfterDone();
+                  }}
+                >
+                  {t("cashTx.receipt.newOperation")}
+                </Button>
+              </div>
+            </div>
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+              {/*
+                The API's own account number and holder, with the form's as a
+                fallback — the printed receipt reads the same two fields, and a
+                panel sourced differently would eventually disagree with the
+                slip handed to the customer.
+              */}
+              <SummaryRow
+                label={t("cashTx.receipt.account")}
+                value={receipt.tx.customer_account_number ?? receipt.accountNumber}
+              />
+              <SummaryRow
+                label={t("cashTx.receipt.holder")}
+                value={receipt.tx.client_display_name ?? receipt.holder}
+              />
+              <SummaryRow
+                label={t("cashTx.receipt.amount")}
+                value={
+                  <span className="font-semibold tabular-nums">
+                    {format.currencyMinor(receipt.amountMinor, {
+                      currency: receipt.currency,
+                    })}
+                  </span>
+                }
+              />
+              <SummaryRow
+                label={t("cashTx.receipt.date")}
+                value={receipt.tx.transaction_date ?? "—"}
+              />
+              <SummaryRow
+                label={t("cashTx.receipt.type")}
+                value={t(`cashTx.txType.${receipt.tx.transaction_type}`)}
+              />
+              <SummaryRow
+                label={t("cashTx.receipt.reference")}
+                value={receipt.tx.reference ?? "—"}
+              />
+              {receipt.openingFeeMinor !== null ? (
+                <SummaryRow
+                  label={t("cashTx.receipt.openingFee")}
+                  value={
+                    <span className="font-semibold tabular-nums text-warning">
+                      {format.currencyMinor(receipt.openingFeeMinor, {
+                        currency: receipt.currency,
+                      })}
+                    </span>
+                  }
+                />
+              ) : null}
+            </dl>
+          </section>
+        ) : null}
       </div>
 
       {/* ---- Right: live summary + tips ---- */}
@@ -618,6 +838,21 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
           />
           {amountWords ? (
             <p className="text-xs italic text-muted-foreground">{amountWords}</p>
+          ) : null}
+          {pendingOpeningFeeMinor > 0 ? (
+            <>
+              <SummaryRow
+                label={t("cashTx.receipt.openingFee")}
+                value={
+                  <span className="font-semibold tabular-nums text-warning">
+                    {format.currencyMinor(pendingOpeningFeeMinor, { currency })}
+                  </span>
+                }
+              />
+              <p className="text-xs text-muted-foreground">
+                {t("cashTx.summary.openingFeeNote")}
+              </p>
+            </>
           ) : null}
         </div>
       </ConfirmDialog>

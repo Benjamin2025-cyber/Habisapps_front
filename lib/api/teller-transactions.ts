@@ -41,6 +41,13 @@ export type TellerTransaction = {
   teller_session_public_id: string | null;
   till_public_id: string | null;
   customer_account_public_id: string | null;
+  /**
+   * The account number and the holder's name a reçu de caisse has to carry.
+   * Served by the API, not resolved on screen: the teller printing the receipt
+   * does not hold `accounts.view`, so a client-side lookup came back empty.
+   */
+  customer_account_number: string | null;
+  client_display_name: string | null;
   journal_entry_public_id: string | null;
   transaction_date: string | null;
   transaction_type: TellerTransactionType;
@@ -188,33 +195,44 @@ export type CashWithdrawalPayload = {
  * deposits / withdrawals / reverse all return the transaction nested under
  * `data.teller_transaction` (alongside `data.journal_entry`), so unwrap it.
  */
-type TransactionEnvelope = {
+/**
+ * The deposit/withdrawal response envelope. When the account's product charges
+ * an opening fee (7611) and this is the account's first transaction, the API
+ * sweeps it in the same write and describes the sweep here so the receipt can
+ * print it as its own line.
+ */
+export type TransactionEnvelope = {
   teller_transaction: TellerTransaction;
   journal_entry?: unknown;
+  opening_fee?:
+    | {
+        amount_minor: number;
+        currency: string;
+        journal_entry_public_id: string;
+      }
+    | null;
 };
 
 export async function storeCashDeposit(
   token: string,
   sessionPublicId: string,
   payload: CashDepositPayload,
-): Promise<TellerTransaction> {
-  const data = await apiRequest<TransactionEnvelope>(
+): Promise<TransactionEnvelope> {
+  return apiRequest<TransactionEnvelope>(
     `teller-sessions/${sessionPublicId}/deposits`,
     { method: "POST", token, body: stripUndefined(payload) },
   );
-  return data.teller_transaction;
 }
 
 export async function storeCashWithdrawal(
   token: string,
   sessionPublicId: string,
   payload: CashWithdrawalPayload,
-): Promise<TellerTransaction> {
-  const data = await apiRequest<TransactionEnvelope>(
+): Promise<TransactionEnvelope> {
+  return apiRequest<TransactionEnvelope>(
     `teller-sessions/${sessionPublicId}/withdrawals`,
     { method: "POST", token, body: stripUndefined(payload) },
   );
-  return data.teller_transaction;
 }
 
 export async function reverseTellerTransaction(

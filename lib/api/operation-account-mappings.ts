@@ -172,7 +172,6 @@ export async function updateOperationAccountMapping(
   );
 }
 
-/** Archives the mapping (status → archived). */
 /**
  * Approve a mapping — the decision that puts the posting rule into service.
  * Requires `operation.mappings.approve`, and the API refuses the author: 403

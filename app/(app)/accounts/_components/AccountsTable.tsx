@@ -86,7 +86,8 @@ export function AccountsTable({
         header: t("accounts.columns.holder"),
         cell: ({ row }) => (
           <span className="text-muted-foreground">
-            {clientNameOf(row.original.client_public_id)}
+            {row.original.client_display_name ??
+              clientNameOf(row.original.client_public_id)}
           </span>
         ),
       },

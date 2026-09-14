@@ -37,13 +37,29 @@ export function SessionsTable({
   const t = useTranslations();
   const format = useFormatter();
 
+  /**
+   * `HH:mm` in the viewer's timezone — the ISO timestamp carries UTC, and the
+   * control question ("who opened late?") is answered in local hours.
+   */
+  function timeOnly(iso: string | null): string {
+    if (!iso) return "—";
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return "—";
+    return `${String(date.getHours()).padStart(2, "0")}:${String(
+      date.getMinutes(),
+    ).padStart(2, "0")}`;
+  }
+
   const columns = useMemo<ColumnDef<TellerSession, unknown>[]>(
     () => [
       {
         id: "till",
         header: t("sessions.columns.till"),
         cell: ({ row }) => (
-          <span className="font-semibold text-foreground">
+          <span
+            className="block max-w-[14rem] truncate font-semibold text-foreground"
+            title={tillLabelOf(row.original.till_public_id)}
+          >
             {tillLabelOf(row.original.till_public_id)}
           </span>
         ),
@@ -52,7 +68,7 @@ export function SessionsTable({
         id: "teller",
         header: t("sessions.columns.teller"),
         cell: ({ row }) => (
-          <span className="text-muted-foreground">
+          <span className="block max-w-[10rem] truncate text-muted-foreground">
             {tellerNameOf(
               row.original.teller_user_public_id,
               row.original.teller_user_name,
@@ -64,8 +80,32 @@ export function SessionsTable({
         accessorKey: "business_date",
         header: t("sessions.columns.businessDate"),
         cell: ({ getValue }) => (
-          <span className="tabular-nums text-muted-foreground">
+          <span className="whitespace-nowrap tabular-nums text-muted-foreground">
             {(getValue() as string | null) ?? "—"}
+          </span>
+        ),
+      },
+      {
+        // The accounting team asked for the opening/closing hours in the table
+        // to reinforce internal control: who opened late, who closed late.
+        id: "openedAt",
+        header: () => (
+          <span className="whitespace-nowrap">{t("sessions.columns.openedAt")}</span>
+        ),
+        cell: ({ row }) => (
+          <span className="whitespace-nowrap tabular-nums text-muted-foreground">
+            {timeOnly(row.original.opened_at)}
+          </span>
+        ),
+      },
+      {
+        id: "closedAt",
+        header: () => (
+          <span className="whitespace-nowrap">{t("sessions.columns.closedAt")}</span>
+        ),
+        cell: ({ row }) => (
+          <span className="whitespace-nowrap tabular-nums text-muted-foreground">
+            {timeOnly(row.original.closed_at)}
           </span>
         ),
       },
@@ -170,6 +210,11 @@ export function SessionsTable({
       loading={loading}
       emptyMessage={t("sessions.list.empty")}
       getRowId={(row) => row.public_id}
+      // Ten columns — caisse, caissier, date, the two hours, three amounts,
+      // statut, actions — do not fit a laptop without squeezing the till name
+      // down to five wrapped lines. Let the columns breathe and the wrapper
+      // scroll, which is what it is for.
+      minWidthClass="min-w-[72rem]"
       pagination={pagination}
       title={t("sessions.list.titleHeader")}
       titleAside={t("sessions.list.count", {

@@ -92,6 +92,24 @@ export function AccountProductsTable({
         },
       },
       {
+        // The fee the first counter operation sweeps to 7611 — visible in the
+        // list, since it is charged without anyone posting it by hand.
+        accessorKey: "opening_fee_minor",
+        header: t("accountProducts.columns.openingFee"),
+        meta: { align: "right" },
+        cell: ({ row }) => {
+          const value = row.original.opening_fee_minor;
+          if (!value) return <span className="text-muted-foreground">—</span>;
+          return (
+            <span className="tabular-nums text-foreground">
+              {format.currencyMinor(value, {
+                currency: row.original.currency ?? "XAF",
+              })}
+            </span>
+          );
+        },
+      },
+      {
         accessorKey: "currency",
         header: t("accountProducts.columns.currency"),
         cell: ({ getValue }) => (

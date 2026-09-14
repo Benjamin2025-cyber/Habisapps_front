@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
-import { useTranslations } from "@/lib/i18n/I18nProvider";
+import { useFormatter, useTranslations } from "@/lib/i18n/I18nProvider";
 import type { Client } from "@/lib/api/clients";
 import type { AccountProduct } from "@/lib/api/account-products";
 import type {
@@ -39,6 +39,7 @@ export function AccountInfoTab({
   onEdit,
 }: Props) {
   const t = useTranslations();
+  const format = useFormatter();
 
   // Server-resolved: the local `clients` list is capped at 100 rows, so the
   // lookup misses for any holder past it and used to fall back to a raw ULID.
@@ -160,6 +161,26 @@ export function AccountInfoTab({
             value={account.ledger_account_code}
             mono
           />
+          {/*
+            The « frais d'ouverture » this account owes, fixed at the tariff of
+            the day it was opened. Shown even at zero: when someone asks whether
+            an existing account will be charged after a tariff change, the useful
+            answer is a plain "nothing to take", not an absent field.
+          */}
+          <PlainField
+            label={t("accounts.fields.pendingOpeningFee")}
+            value={format.currencyMinor(account.pending_opening_fee_minor ?? 0, {
+              currency: account.currency ?? "XAF",
+            })}
+            mono
+          />
+          {account.opening_fee_collected_at ? (
+            <PlainField
+              label={t("accounts.fields.openingFeeCollectedAt")}
+              value={account.opening_fee_collected_at.slice(0, 10)}
+              mono
+            />
+          ) : null}
         </Grid>
       </Section>
 

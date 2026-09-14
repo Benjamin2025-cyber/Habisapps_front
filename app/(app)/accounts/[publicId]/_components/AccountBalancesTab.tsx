@@ -85,9 +85,16 @@ export function AccountBalancesTab({ accountPublicId, currency }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {/*
+          The accounting team's two figures per account, in their order: what
+          the account really holds, then what can actually leave the counter.
+          Both are served by the available-balance endpoint — the real balance
+          is not re-derived here, because `disponible + minimum` drifts from the
+          ledger as soon as a hold or an authorised overdraft exists.
+        */}
         <Stat
-          label={t("accountDetail.balances.accounting")}
-          value={money(data.balance.balance_minor)}
+          label={t("accountDetail.balances.real")}
+          value={money(data.available.real_balance_minor)}
           emphasis
         />
         <Stat
@@ -96,22 +103,30 @@ export function AccountBalancesTab({ accountPublicId, currency }: Props) {
           emphasis
         />
         <Stat
-          label={t("accountDetail.balances.activeHolds")}
-          value={money(data.available.active_hold_amount_minor)}
+          label={t("accountDetail.balances.accounting")}
+          value={money(data.balance.balance_minor)}
         />
         <Stat
           label={t("accountDetail.balances.minimum")}
           value={money(data.available.minimum_balance_minor)}
         />
         <Stat
+          label={t("accountDetail.balances.activeHolds")}
+          value={money(data.available.active_hold_amount_minor)}
+        />
+        <Stat
           label={t("accountDetail.balances.unavailable")}
           value={money(data.available.unavailable_amount_minor)}
         />
         <Stat
-          label={t("accountDetail.balances.accountingFloor")}
-          value={money(data.available.accounting_balance_minor)}
+          label={t("accountDetail.balances.overdraftLimit")}
+          value={money(data.available.overdraft_limit_minor)}
         />
       </div>
+
+      <p className="text-xs text-muted-foreground">
+        {t("accountDetail.balances.realNote")}
+      </p>
 
       <section className="rounded-[var(--radius-card)] border border-border bg-background">
         <header className="border-b border-border border-l-4 border-l-accent bg-accent/5 px-4 py-2.5">

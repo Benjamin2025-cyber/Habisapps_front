@@ -270,15 +270,22 @@ export async function fetchLedgerAccounts(
     perPage?: number;
     search?: string;
     agencyPublicId?: string | null;
+    /**
+     * Leave out the per-dossier divisionaries (`3222.LN-…`, `CLI000001`) that
+     * every loan and client opens under a control account. Account pickers want
+     * the chart; without this the newest dossiers fill the whole first page.
+     */
+    excludeDivisionary?: boolean;
   } = {},
 ): Promise<PaginatedLedgerAccounts> {
   const query = new URLSearchParams();
   query.set("per_page", String(options.perPage ?? 100));
-  if (options.search) query.set("search", options.search);
+  if (options.page && options.page > 0) query.set("page", String(options.page));
+  if (options.search?.trim()) query.set("search", options.search.trim());
+  if (options.excludeDivisionary) query.set("exclude_divisionary", "1");
   if (options.agencyPublicId) {
     query.set("agency_public_id", options.agencyPublicId);
   }
-  if (options.page && options.page > 0) query.set("page", String(options.page));
 
   const response = await fetch(`/api/v1/ledger-accounts?${query.toString()}`, {
     method: "GET",
