@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn";
-import type { InputHTMLAttributes, ReactNode } from "react";
+import type { InputHTMLAttributes, ReactNode, WheelEventHandler } from "react";
 
 type TextFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   label: string;
@@ -19,8 +19,20 @@ export function TextField({
   hint,
   className,
   type = "text",
+  onWheel,
   ...props
 }: TextFieldProps) {
+  // A focused `<input type="number">` treats the mouse wheel as a stepper, so
+  // scrolling a long form past one silently changes it — by `step`, with no
+  // visible cause. It cost a loan product a 10 % interest rate turned into 9 %
+  // and a 10 % guarantee deposit turned into 9,99 % just by scrolling down to
+  // the fields below. Blurring hands the wheel back to the page; the arrows and
+  // keyboard still step deliberately.
+  const handleWheel: WheelEventHandler<HTMLInputElement> = (event) => {
+    if (type === "number") event.currentTarget.blur();
+    onWheel?.(event);
+  };
+
   const helperId = error
     ? `${id ?? props.name ?? "field"}-error`
     : hint
@@ -53,6 +65,7 @@ export function TextField({
           )}
           aria-invalid={error ? true : undefined}
           aria-describedby={helperId}
+          onWheel={handleWheel}
           {...props}
         />
 

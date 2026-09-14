@@ -8,10 +8,16 @@ import { TextField } from "@/components/ui/TextField";
 import { localizeApiError } from "@/lib/api/errors";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import type { Agency } from "@/lib/api/agencies";
+import { classFromCode, SELECTABLE_LEDGER_ACCOUNT_CLASSES } from "@/lib/api/ledger-accounts";
+import {
+  LedgerAccountPicker,
+  type LedgerAccountOption,
+} from "@/app/(app)/_components/LedgerAccountPicker";
 import type {
   LedgerAccount,
   LedgerAccountClass,
   LedgerAccountCreatePayload,
+  LedgerAccountScope,
   LedgerAccountUpdatePayload,
   LedgerNormalBalanceSide,
 } from "@/lib/api/ledger-accounts";
@@ -23,26 +29,41 @@ type Props = {
   mode: LedgerAccountDrawerMode;
   initial?: LedgerAccount | null;
   agencies: ReadonlyArray<Agency>;
-  /** Existing accounts offered as parent (the current one is excluded). */
-  parentChoices: ReadonlyArray<LedgerAccount>;
+  /**
+   * May create/maintain institution-level grouping accounts
+   * (`ledger.scope.institution.manage`). Without it the scope choice is not
+   * offered at all, since only agency accounts are permitted.
+   */
+  canManageInstitutionScope: boolean;
   onClose: () => void;
   onSubmit: (
     payload: LedgerAccountCreatePayload | LedgerAccountUpdatePayload,
   ) => Promise<void>;
 };
 
+/**
+ * `grouping` is `is_postable: false` — the account consolidates the accounts
+ * beneath it and refuses entries of its own. Expressed as a named nature rather
+ * than a raw flag because that is the accounting concept users are choosing.
+ */
+type AccountNature = "postable" | "grouping";
+
 type FormState = {
+  scope: LedgerAccountScope;
+  nature: AccountNature;
   code: string;
   name: string;
   account_class: LedgerAccountClass | "";
   account_type: string;
   agency_public_id: string;
   parent_account_public_id: string;
-  normal_balance_side: LedgerNormalBalanceSide | "";
+  normal_balance_side: LedgerNormalBalanceSide | "none" | "";
   status: "active" | "inactive" | "suspended" | "";
 };
 
 const EMPTY: FormState = {
+  scope: "agency",
+  nature: "postable",
   code: "",
   name: "",
   account_class: "",
@@ -53,21 +74,38 @@ const EMPTY: FormState = {
   status: "",
 };
 
-const CLASSES: LedgerAccountClass[] = [
-  "asset",
-  "liability",
-  "equity",
-  "revenue",
-  "expense",
-];
+const CLASSES = SELECTABLE_LEDGER_ACCOUNT_CLASSES;
 
-/** Conventional normal balance side for each class (suggested, overridable). */
+/**
+ * The form marks "no imposed side" as `"none"` so the Select has something to
+ * hold; the API expects an explicit `null`. `""` means untouched.
+ */
+function sideForPayload(
+  value: LedgerNormalBalanceSide | "none" | "",
+): LedgerNormalBalanceSide | null | undefined {
+  if (value === "") return undefined;
+
+  return value === "none" ? null : value;
+}
+
+/**
+ * Conventional normal balance side for each class (suggested, overridable).
+ *
+ * Classes 3, 4, 5 and 9 legitimately go both ways — client lending is a
+ * debit-side class 3 while client deposits are credit-side, treasury holds both
+ * cash and borrowings, and commitments given differ from those received. The
+ * suggestion here is only the more common case; the field stays editable.
+ */
 const SIDE_BY_CLASS: Record<LedgerAccountClass, LedgerNormalBalanceSide> = {
-  asset: "debit",
-  expense: "debit",
-  liability: "credit",
-  equity: "credit",
-  revenue: "credit",
+  capitaux_permanents: "credit",
+  valeurs_immobilisees: "debit",
+  operations_clientele: "credit",
+  tiers: "credit",
+  tresorerie_interbancaire: "debit",
+  charges: "debit",
+  produits: "credit",
+  soldes_intermediaires_gestion: "credit",
+  hors_bilan: "debit",
 };
 
 export function LedgerAccountDrawer({
@@ -75,12 +113,13 @@ export function LedgerAccountDrawer({
   mode,
   initial,
   agencies,
-  parentChoices,
+  canManageInstitutionScope,
   onClose,
   onSubmit,
 }: Props) {
   const t = useTranslations();
   const [form, setForm] = useState<FormState>(EMPTY);
+  const [parent, setParent] = useState<LedgerAccountOption | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
@@ -93,22 +132,45 @@ export function LedgerAccountDrawer({
     setGeneralError(null);
     if (isEdit && initial) {
       setForm({
+        scope: initial.scope,
+        nature: initial.is_postable ? "postable" : "grouping",
         code: initial.code ?? "",
         name: initial.name ?? "",
         account_class: initial.account_class,
         account_type: initial.account_type ?? "",
         agency_public_id: initial.agency_public_id ?? "",
         parent_account_public_id: initial.parent_account_public_id ?? "",
-        normal_balance_side: initial.normal_balance_side,
+        // '' is the drawer's empty marker; null is a real value meaning
+        // bivalent, so it maps to the explicit 'none' option.
+        normal_balance_side: initial.normal_balance_side ?? "none",
         status: initial.status === "archived" ? "" : initial.status,
       });
     } else {
       setForm(EMPTY);
     }
+    if (!isEdit) setParent(null);
   }, [open, isEdit, initial]);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
+  }
+
+  /**
+   * In PCEMF the class is the leading digit of the code, and the API refuses any
+   * other combination — so deriving it here removes a choice that could only be
+   * made wrongly. A code that starts with something else leaves the field alone.
+   */
+  function onCodeChange(next: string) {
+    const derived = classFromCode(next);
+    setForm((current) => ({
+      ...current,
+      code: next,
+      account_class: derived ?? current.account_class,
+      normal_balance_side:
+        derived && current.normal_balance_side === ""
+          ? SIDE_BY_CLASS[derived]
+          : current.normal_balance_side,
+    }));
   }
 
   /** Picking a class on creation pre-fills the normal side if still empty. */
@@ -123,6 +185,26 @@ export function LedgerAccountDrawer({
     }));
   }
 
+  /**
+   * An institution account carries no agency and is always a grouping account
+   * (the API rejects either combination), so switching scope clears both rather
+   * than letting the user submit something that cannot be accepted.
+   */
+  function onScopeChange(next: LedgerAccountScope) {
+    setForm((current) => ({
+      ...current,
+      scope: next,
+      agency_public_id: next === "institution" ? "" : current.agency_public_id,
+      nature: next === "institution" ? "grouping" : current.nature,
+      // A parent legal under the old scope may be illegal under the new one.
+      parent_account_public_id: "",
+    }));
+    // A parent legal under the old scope may be illegal under the new one.
+    setParent(null);
+  }
+
+  const isInstitutionScope = form.scope === "institution";
+
   const agencyOptions = useMemo(
     () =>
       agencies.map((agency) => ({
@@ -132,16 +214,11 @@ export function LedgerAccountDrawer({
     [agencies],
   );
 
-  const parentOptions = useMemo(
-    () =>
-      parentChoices
-        .filter((account) => account.public_id !== initial?.public_id)
-        .map((account) => ({
-          value: account.public_id,
-          label: `${account.code} — ${account.name}`,
-        })),
-    [parentChoices, initial?.public_id],
-  );
+
+  const natureOptions: Array<{ value: AccountNature; label: string }> = [
+    { value: "postable", label: t("ledgerAccounts.nature.postable") },
+    { value: "grouping", label: t("ledgerAccounts.nature.grouping") },
+  ];
 
   const statusOptions: Array<{
     value: "active" | "inactive" | "suspended";
@@ -162,21 +239,49 @@ export function LedgerAccountDrawer({
     if (isEdit) {
       payload = {
         name: form.name.trim(),
+        // Only send the class when it changed. A class picked by mistake must be
+        // fixable — PCEMF codes cannot be reinvented, so an uncorrectable class
+        // would strand its code. The API accepts the change while the account has
+        // no movements and refuses it afterwards, because reclassifying would
+        // restate figures already reported.
+        account_class:
+          initial && form.account_class && initial.account_class !== form.account_class
+            ? (form.account_class as LedgerAccountClass)
+            : undefined,
         account_type: nullable(form.account_type),
+        // Only send is_postable when it actually changed: an unchanged grouping
+        // account would otherwise be re-asserted as postable and rejected.
+        is_postable:
+          initial && initial.is_postable !== (form.nature === "postable")
+            ? form.nature === "postable"
+            : undefined,
         parent_account_public_id: nullable(form.parent_account_public_id),
-        normal_balance_side: form.normal_balance_side || undefined,
+        // "none" is bivalent, which the API expects as an explicit null —
+        // `|| undefined` would drop it and leave the side unchanged.
+        normal_balance_side: sideForPayload(form.normal_balance_side),
         status: form.status || undefined,
       } satisfies LedgerAccountUpdatePayload;
     } else {
       payload = {
-        agency_public_id: nullable(form.agency_public_id),
+        scope: form.scope,
+        // An institution account never carries an agency, and the API refuses
+        // the pair outright rather than ignoring it.
+        agency_public_id: isInstitutionScope
+          ? undefined
+          : nullable(form.agency_public_id),
         code: form.code.trim(),
         name: form.name.trim(),
-        account_class: (form.account_class || "asset") as LedgerAccountClass,
+        // No default: a PCEMF class is an accounting decision, not something to
+        // guess. Left empty, the API's `required` rule returns a field error
+        // that handleSubmit's catch already surfaces on this input.
+        account_class: form.account_class as LedgerAccountClass,
         account_type: nullable(form.account_type),
+        is_postable: isInstitutionScope ? undefined : form.nature === "postable",
         parent_account_public_id: nullable(form.parent_account_public_id),
-        normal_balance_side: (form.normal_balance_side ||
-          "debit") as LedgerNormalBalanceSide,
+        // Same as the edit branch: "none" must reach the API as an explicit
+        // null. Defaulting to "debit" here would take a bivalent account the
+        // user asked for and quietly create a debit one instead.
+        normal_balance_side: sideForPayload(form.normal_balance_side),
         status: form.status || undefined,
       } satisfies LedgerAccountCreatePayload;
     }
@@ -190,6 +295,8 @@ export function LedgerAccountDrawer({
         account_class: t("ledgerAccounts.fields.class"),
         account_type: t("ledgerAccounts.fields.type"),
         agency_public_id: t("ledgerAccounts.fields.agency"),
+        scope: t("ledgerAccounts.fields.scope"),
+        is_postable: t("ledgerAccounts.fields.nature"),
         parent_account_public_id: t("ledgerAccounts.fields.parent"),
         normal_balance_side: t("ledgerAccounts.fields.normalSide"),
         status: t("ledgerAccounts.fields.status"),
@@ -266,7 +373,7 @@ export function LedgerAccountDrawer({
             <TextField
               label={t("ledgerAccounts.fields.code")}
               value={form.code}
-              onChange={(event) => set("code", event.target.value)}
+              onChange={(event) => onCodeChange(event.target.value)}
               error={errors.code}
               disabled={isEdit}
               required={!isEdit}
@@ -283,8 +390,11 @@ export function LedgerAccountDrawer({
               onChange={(next) => onClassChange(next as LedgerAccountClass | "")}
               error={errors.account_class}
               required
-              disabled={isEdit}
-              hint={isEdit ? t("ledgerAccounts.fields.classEditHint") : undefined}
+              hint={
+                isEdit
+                  ? t("ledgerAccounts.fields.classEditHint")
+                  : t("ledgerAccounts.fields.classDerivedHint")
+              }
             />
             <TextField
               label={t("ledgerAccounts.fields.name")}
@@ -299,7 +409,24 @@ export function LedgerAccountDrawer({
 
         <Section title={t("ledgerAccounts.drawer.sectionStructure")}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {!isEdit ? (
+            {!isEdit && canManageInstitutionScope ? (
+              <Select
+                label={t("ledgerAccounts.fields.scope")}
+                value={form.scope}
+                options={[
+                  { value: "agency", label: t("ledgerAccounts.scope.agency") },
+                  {
+                    value: "institution",
+                    label: t("ledgerAccounts.scope.institution"),
+                  },
+                ]}
+                isSearchable={false}
+                onChange={(next) => onScopeChange(next as LedgerAccountScope)}
+                error={errors.scope}
+                hint={t("ledgerAccounts.fields.scopeHint")}
+              />
+            ) : null}
+            {!isEdit && !isInstitutionScope ? (
               <Select
                 label={t("ledgerAccounts.fields.agency")}
                 value={form.agency_public_id}
@@ -311,15 +438,50 @@ export function LedgerAccountDrawer({
                 hint={t("ledgerAccounts.fields.agencyHint")}
               />
             ) : null}
-            <Select
+            {isInstitutionScope ? (
+              <p className="text-xs text-muted-foreground sm:col-span-2">
+                {t("ledgerAccounts.drawer.institutionGroupingNote")}
+              </p>
+            ) : (
+              <Select
+                label={t("ledgerAccounts.fields.nature")}
+                value={form.nature}
+                options={natureOptions}
+                isSearchable={false}
+                onChange={(next) => set("nature", next as AccountNature)}
+                error={errors.is_postable}
+                hint={t("ledgerAccounts.fields.natureHint")}
+              />
+            )}
+            <LedgerAccountPicker
               label={t("ledgerAccounts.fields.parent")}
-              value={form.parent_account_public_id}
-              options={parentOptions}
+              value={parent}
+              onChange={(option) => {
+                setParent(option);
+                set("parent_account_public_id", option?.value ?? "");
+              }}
+              initialValuePublicId={initial?.parent_account_public_id ?? null}
               placeholder={t("ledgerAccounts.fields.parentPlaceholder")}
-              isClearable
-              onChange={(next) => set("parent_account_public_id", next)}
               error={errors.parent_account_public_id}
               hint={t("ledgerAccounts.fields.parentHint")}
+              resetKey={`${form.scope}:${form.agency_public_id}`}
+              /*
+               * A consolidated chart flows one way: agency detail accounts roll up
+               * into institution grouping accounts. So an institution account may
+               * only sit under another institution account, and an agency account
+               * under an institution account or one of its own agency — never
+               * under another agency's. Offering an illegal parent would only
+               * produce a 422 on save.
+               */
+              filter={(account) => {
+                if (account.public_id === initial?.public_id) return false;
+                if (isInstitutionScope) return account.scope === "institution";
+                return (
+                  account.scope === "institution" ||
+                  (form.agency_public_id !== "" &&
+                    account.agency_public_id === form.agency_public_id)
+                );
+              }}
             />
             <TextField
               label={t("ledgerAccounts.fields.type")}
@@ -340,10 +502,17 @@ export function LedgerAccountDrawer({
               options={[
                 { value: "debit", label: t("ledgerAccounts.side.debit") },
                 { value: "credit", label: t("ledgerAccounts.side.credit") },
+                // Bivalent: comptes de liaison, de régularisation and hors
+                // bilan take entries both ways, so imposing a side would make
+                // half their balances read negative.
+                { value: "none", label: t("ledgerAccounts.side.none") },
               ]}
               placeholder={t("ledgerAccounts.fields.normalSidePlaceholder")}
               onChange={(next) =>
-                set("normal_balance_side", next as LedgerNormalBalanceSide | "")
+                set(
+                  "normal_balance_side",
+                  next as LedgerNormalBalanceSide | "none" | "",
+                )
               }
               error={errors.normal_balance_side}
               required

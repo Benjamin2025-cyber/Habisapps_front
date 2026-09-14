@@ -51,7 +51,6 @@ type FormState = {
   purpose: string;
   sector_public_id: string;
   sub_sector_public_id: string;
-  financed_activity_code: string;
   activity_address: string;
   entrepreneur_address: string;
 };
@@ -75,7 +74,6 @@ const EMPTY: FormState = {
   purpose: "",
   sector_public_id: "",
   sub_sector_public_id: "",
-  financed_activity_code: "",
   activity_address: "",
   entrepreneur_address: "",
 };
@@ -94,6 +92,12 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
   const [sectors, setSectors] = useState<Sector[]>([]);
   const [subSectors, setSubSectors] = useState<SubSector[]>([]);
   const [accounts, setAccounts] = useState<CustomerAccount[]>([]);
+  /**
+   * A failed load fell back to an empty list, which reads exactly like a client
+   * who has no accounts — so a permission error would look like a data state and
+   * send the reader hunting for an account to create. Keep the reason.
+   */
+  const [accountsError, setAccountsError] = useState<string | null>(null);
 
   const isEdit = mode === "edit";
 
@@ -123,7 +127,6 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
         purpose: initial.purpose ?? "",
         sector_public_id: initial.sector_public_id ?? "",
         sub_sector_public_id: initial.sub_sector_public_id ?? "",
-        financed_activity_code: initial.financed_activity_code ?? "",
         activity_address: initial.activity_address ?? "",
         entrepreneur_address: initial.entrepreneur_address ?? "",
       });
@@ -166,10 +169,14 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
     let cancelled = false;
     fetchCustomerAccounts(token, { clientPublicId, perPage: 100 })
       .then((response) => {
-        if (!cancelled) setAccounts(response.data);
+        if (cancelled) return;
+        setAccounts(response.data);
+        setAccountsError(null);
       })
-      .catch(() => {
-        if (!cancelled) setAccounts([]);
+      .catch((cause) => {
+        if (cancelled) return;
+        setAccounts([]);
+        setAccountsError(localizeApiError(cause).generalMessage);
       });
     return () => {
       cancelled = true;
@@ -233,13 +240,8 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
 
     const common: LoanWritePayload = {
       credit_agent_public_id: nullable(form.credit_agent_public_id),
-      applied_on: nullable(form.applied_on),
       requested_amount_minor: toMinor(form.requested_amount) ?? undefined,
-      currency: nullable(form.currency)?.toUpperCase() ?? undefined,
       number_of_installments: toInt(form.number_of_installments),
-      tranche_duration: toInt(form.tranche_duration),
-      grace_period_duration: toInt(form.grace_period_duration),
-      total_loan_duration: toInt(form.total_loan_duration),
       first_installment_date: nullable(form.first_installment_date),
       amortization_account_public_id: nullable(
         form.amortization_account_public_id,
@@ -250,18 +252,28 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
       purpose: nullable(form.purpose),
       sector_public_id: nullable(form.sector_public_id),
       sub_sector_public_id: nullable(form.sub_sector_public_id),
-      financed_activity_code: nullable(form.financed_activity_code),
       activity_address: nullable(form.activity_address),
       entrepreneur_address: nullable(form.entrepreneur_address),
     };
 
-    // client + product are create-only (immutable; the update endpoint rejects them).
+    /**
+     * Create-only fields. The API runs FormRequest::failOnUnknownFields(), so a
+     * field the update endpoint does not declare is not ignored — it is refused
+     * outright, and the refusal names that field rather than whatever the user
+     * was actually editing. Sending `currency` and `applied_on` on update made
+     * every edit fail with "the currency field is prohibited", which reads as a
+     * problem with the currency box the user never touched.
+     *
+     * Keep this list matched to UpdateLoanRequest's rules.
+     */
     const payload: LoanWritePayload = isEdit
       ? common
       : {
           ...common,
           client_public_id: form.client?.value,
           loan_product_public_id: form.loan_product_public_id || undefined,
+          currency: nullable(form.currency)?.toUpperCase() ?? undefined,
+          applied_on: nullable(form.applied_on),
         };
 
     try {
@@ -274,9 +286,7 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
         currency: t("loans.fields.currency"),
         credit_agent_public_id: t("loans.fields.creditAgent"),
         number_of_installments: t("loans.fields.installments"),
-        tranche_duration: t("loans.fields.trancheDuration"),
         grace_period_duration: t("loans.fields.gracePeriod"),
-        total_loan_duration: t("loans.fields.totalDuration"),
         first_installment_date: t("loans.fields.firstInstallment"),
         amortization_account_public_id: t("loans.fields.amortizationAccount"),
         unpaid_account_public_id: t("loans.fields.unpaidAccount"),
@@ -357,7 +367,7 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
           {isEdit ? (
             <TextField
               label={t("loans.fields.client")}
-              value={initial?.client_public_id ?? ""}
+              value={initial?.client_display_name ?? initial?.client_public_id ?? ""}
               onChange={() => undefined}
               disabled
               hint={t("loans.fields.clientEditHint")}
@@ -450,33 +460,34 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
               }
               error={errors.first_installment_date}
             />
+            {/* Périodicité, différé et durée totale ne se saisissent plus :
+                le serveur les déduit du nombre d'échéances et de la date de
+                première échéance. En lecture seule pour que l'agent voie ce que
+                sa saisie implique, sans redupliquer le calendrier côté client. */}
             <TextField
               label={t("loans.fields.trancheDuration")}
               type="number"
               value={form.tranche_duration}
-              onChange={(event) => set("tranche_duration", event.target.value)}
-              error={errors.tranche_duration}
-              hint={t("loans.fields.daysHint")}
+              readOnly
+              disabled
+              hint={t("loans.fields.derivedHint")}
             />
             <TextField
               label={t("loans.fields.gracePeriod")}
               type="number"
               value={form.grace_period_duration}
-              onChange={(event) =>
-                set("grace_period_duration", event.target.value)
-              }
+              readOnly
+              disabled
               error={errors.grace_period_duration}
-              hint={t("loans.fields.daysHint")}
+              hint={t("loans.fields.derivedHint")}
             />
             <TextField
               label={t("loans.fields.totalDuration")}
               type="number"
               value={form.total_loan_duration}
-              onChange={(event) =>
-                set("total_loan_duration", event.target.value)
-              }
-              error={errors.total_loan_duration}
-              hint={t("loans.fields.daysHint")}
+              readOnly
+              disabled
+              hint={t("loans.fields.derivedHint")}
               className="sm:col-span-2"
             />
           </div>
@@ -484,6 +495,14 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
 
         {/* Comptes rattachés */}
         <Section title={t("loans.drawer.sectionAccounts")}>
+          {accountsError ? (
+            <p className="text-xs text-destructive">{accountsError}</p>
+          ) : null}
+          {clientPublicId && !accountsError && accounts.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              {t("loans.fields.accountsNone")}
+            </p>
+          ) : null}
           {clientPublicId ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Select
@@ -569,14 +588,6 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
               disabled={!form.sector_public_id}
             />
           </div>
-          <TextField
-            label={t("loans.fields.financedActivityCode")}
-            value={form.financed_activity_code}
-            onChange={(event) =>
-              set("financed_activity_code", event.target.value)
-            }
-            error={errors.financed_activity_code}
-          />
           <TextField
             label={t("loans.fields.activityAddress")}
             value={form.activity_address}

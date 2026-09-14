@@ -1,5 +1,6 @@
 "use client";
 
+import { clientDisplayName } from "@/lib/format/clientName";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -91,12 +92,7 @@ export function ClientsTable({
         header: t("clients.columns.fullName"),
         cell: ({ row }) => {
           const client = row.original;
-          const parts = [
-            client.last_name?.toUpperCase(),
-            client.first_name,
-            client.middle_name,
-          ].filter((value): value is string => !!value && value.length > 0);
-          const name = parts.length === 0 ? "—" : parts.join(" ");
+          const name = clientDisplayName(client) || "—";
           const initials =
             [client.last_name, client.first_name]
               .map((n) => (n && n.trim().length > 0 ? n.trim()[0] : ""))

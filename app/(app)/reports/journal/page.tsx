@@ -1,21 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { SearchIcon } from "@/components/ui/icons";
 import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
 import {
-  entryTotals,
   fetchJournalEntries,
-  type JournalEntry,
   type JournalEntryStatus,
   type PaginatedJournalEntries,
+  type JournalLine,
 } from "@/lib/api/journal-entries";
 import {
-  fetchLedgerAccounts,
-  type LedgerAccount,
 } from "@/lib/api/ledger-accounts";
 import { localizeApiMessage } from "@/lib/api/errors";
 import { useCanAny, useHasRole } from "@/lib/auth/permissions";
@@ -79,30 +76,20 @@ export default function JournalPage() {
     pageSize,
   ]);
 
-  const [ledgerAccounts, setLedgerAccounts] = useState<LedgerAccount[]>([]);
-  useEffect(() => {
-    if (!token) return;
-    let cancelled = false;
-    fetchLedgerAccounts(token, { perPage: 100 })
-      .then((res) => {
-        if (!cancelled) setLedgerAccounts(res.data);
-      })
-      .catch(() => {
-        if (!cancelled) setLedgerAccounts([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [token]);
+  /*
+   * The line carries its own code and name, so read them. This used to look the
+   * account up in a prefetched page of the chart — which holds thousands of rows
+   * — and fell back to printing a raw public_id for every account past the first
+   * hundred. A journal that prints identifiers instead of account names is not a
+   * journal anyone can read.
+   */
+  const accountLabel = useCallback((line: JournalLine) => {
+    if (line.ledger_account_code && line.ledger_account_name) {
+      return `${line.ledger_account_code} — ${line.ledger_account_name}`;
+    }
 
-  const accountLabel = useCallback(
-    (publicId: string | null) => {
-      if (!publicId) return "—";
-      const a = ledgerAccounts.find((x) => x.public_id === publicId);
-      return a ? `${a.code} — ${a.name}` : publicId;
-    },
-    [ledgerAccounts],
-  );
+    return line.ledger_account_code ?? line.ledger_account_public_id ?? "—";
+  }, []);
 
   const filtered = useMemo(() => {
     const rows = data?.data ?? [];
@@ -133,7 +120,7 @@ export default function JournalPage() {
         rows.push([
           entry.business_date,
           entry.reference,
-          accountLabel(line.ledger_account_public_id),
+          accountLabel(line),
           line.line_memo || "—",
           line.debit_minor
             ? format.currencyMinor(line.debit_minor, { currency: line.currency })

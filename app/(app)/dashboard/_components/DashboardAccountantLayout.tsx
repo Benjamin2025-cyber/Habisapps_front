@@ -76,6 +76,12 @@ export function DashboardAccountantLayout() {
   const canDisburse = useCan("loans.disburse");
   const canManageDay = useCan("accounting.days.view");
   const canSeeAudit = useCan("audit.view");
+  // A head-office accountant (chief-accountant) carries no agency assignment, so
+  // an unscoped "current day" request cannot be resolved and would 422 — leaving
+  // the period card blank for the very role that owns the period. Name the
+  // institution scope instead, which is the day that role opens and closes.
+  const hasOwnAgency =
+    session.status === "authenticated" && session.user.agency_public_id != null;
 
   const fetcher = useCallback(
     async (signal: AbortSignal): Promise<AccountantAggregate> => {
@@ -91,17 +97,21 @@ export function DashboardAccountantLayout() {
           safeArray(() =>
             fetchLoans(token, { perPage: 6, awaitingDisbursement: true }).then((r) => r.data),
           ),
-          safeNullable(() => fetchCurrentAccountingDay(token)),
+          safeNullable(() =>
+            hasOwnAgency
+              ? fetchCurrentAccountingDay(token)
+              : fetchCurrentAccountingDay(token, { scope: "institution" }),
+          ),
           canSeeAudit
             ? safeArray(() => listAuditEvents(token, { perPage: 10 }).then((r) => r.data))
             : [],
         ]);
       return { summary, journalStats, submittedQueue, disburseQueue, currentDay, recentEvents };
     },
-    [token, canSeeAudit],
+    [token, canSeeAudit, hasOwnAgency],
   );
 
-  const { data, loading } = useApi(fetcher, [token, canSeeAudit]);
+  const { data, loading } = useApi(fetcher, [token, canSeeAudit, hasOwnAgency]);
 
   if (session.status !== "authenticated") return null;
 

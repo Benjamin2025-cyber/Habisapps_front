@@ -5,9 +5,15 @@ import { getRequestLocale } from "./locale";
  * P24 — Édition › Rapports (report-runs). Un rapport est CALCULÉ à la génération
  * (POST) à partir d'une **définition** de rapport (le type), et son résultat est
  * stocké dans `summary` (pas d'endpoint de téléchargement séparé). Types pris en
- * charge : trial_balance, general_ledger, emf_trial_balance,
+ * charge : trial_balance, general_ledger, emf_trial_balance, income_statement,
  * credit_portfolio_outstanding, credit_par_delinquency,
  * credit_collection_performance.
+ *
+ * `income_statement` (compte de résultat) renvoie les huit soldes intermédiaires
+ * de gestion (80 à 87) dans `summary.rows`, chacun avec son `balance_side` —
+ * crédit pour un bénéfice, débit pour une perte. Sans `agency_public_id` le
+ * rapport est celui de l'institution, ce qui exige
+ * `ledger.scope.institution.read`.
  *
  * ⚠️ Génération bloquée côté UI : pas d'endpoint `GET /report-definitions` pour
  * lister les définitions (cf back-issue #28). On peut LISTER, PRÉVISUALISER et

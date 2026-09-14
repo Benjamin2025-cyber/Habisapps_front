@@ -7,6 +7,10 @@ import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
 import { MoneyField } from "@/components/ui/MoneyField";
 import { localizeApiError } from "@/lib/api/errors";
+import {
+  LedgerAccountPicker,
+  type LedgerAccountOption,
+} from "@/app/(app)/_components/LedgerAccountPicker";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import type { Agency } from "@/lib/api/agencies";
 import type { LedgerAccount } from "@/lib/api/ledger-accounts";
@@ -23,8 +27,7 @@ type Props = {
   mode: AccountProductDrawerMode;
   initial?: AccountProduct | null;
   agencies: ReadonlyArray<Agency>;
-  ledgerAccounts: ReadonlyArray<LedgerAccount>;
-  onLedgerAccountSearch: (search: string, agencyPublicId: string) => Promise<void>;
+  agenciesError?: string | null;
   onClose: () => void;
   onSubmit: (payload: AccountProductWritePayload) => Promise<void>;
 };
@@ -64,8 +67,7 @@ export function AccountProductDrawer({
   mode,
   initial,
   agencies,
-  ledgerAccounts,
-  onLedgerAccountSearch,
+  agenciesError,
   onClose,
   onSubmit,
 }: Props) {
@@ -131,28 +133,10 @@ export function AccountProductDrawer({
   const ledgerAgency = isEdit
     ? (initial?.agency_public_id ?? null)
     : form.agency_public_id || null;
-  const ledgerOptions = useMemo(
-    () =>
-      ledgerAccounts
-        .filter(
-          (a) =>
-            a.status === "active" &&
-            (a.agency_public_id === null ||
-              !ledgerAgency ||
-              a.agency_public_id === ledgerAgency),
-        )
-        .map((a) => ({ value: a.public_id, label: `${a.code} — ${a.name}` })),
-    [ledgerAccounts, ledgerAgency],
-  );
-
-  // Load the relevant agency's chart as soon as the drawer opens, so the two
-  // account pickers are not empty before the user has typed anything.
-  useEffect(() => {
-    if (!open) return;
-    const agency = ledgerAgency ?? form.agency_public_id;
-    if (!agency) return;
-    void onLedgerAccountSearch("", agency);
-  }, [open, ledgerAgency, form.agency_public_id, onLedgerAccountSearch]);
+  const [ledgerSelection, setLedgerSelection] =
+    useState<LedgerAccountOption | null>(null);
+  const [feeLedgerSelection, setFeeLedgerSelection] =
+    useState<LedgerAccountOption | null>(null);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -313,7 +297,7 @@ export function AccountProductDrawer({
               placeholder={t("accountProducts.fields.agencyPlaceholder")}
               isClearable
               onChange={(next) => set("agency_public_id", next)}
-              error={errors.agency_public_id}
+              error={agenciesError ?? errors.agency_public_id}
               disabled={isEdit}
               hint={
                 isEdit ? t("accountProducts.fields.agencyEditHint") : undefined
@@ -326,25 +310,28 @@ export function AccountProductDrawer({
               error={errors.currency}
               hint={t("accountProducts.fields.currencyHint")}
             />
-            <Select
-              label={t("accountProducts.fields.ledgerAccount")}
-              value={form.ledger_account_public_id}
-              options={ledgerOptions}
-              placeholder={t("accountProducts.fields.ledgerAccountPlaceholder")}
-              isClearable
-              isSearchable
-              onInputChange={(search) =>
-                void onLedgerAccountSearch(search, ledgerAgency ?? form.agency_public_id)
-              }
-              onChange={(next) => set("ledger_account_public_id", next)}
-              error={errors.ledger_account_public_id}
-              hint={
-                ledgerOptions.length === 0
-                  ? t("accountProducts.fields.noLedgerAccounts")
-                  : t("accountProducts.fields.ledgerAccountHint")
-              }
-              className="sm:col-span-2"
-            />
+            {/* Server-searched rather than picked from a prefetched page: the
+                chart runs to a thousand accounts per agency and the first page
+                stops in class 2, so anything past it — 3712 Comptes courants
+                clients among them — was seeded, listed by the API, and simply
+                unreachable from this field. */}
+            <div className="sm:col-span-2">
+              <LedgerAccountPicker
+                label={t("accountProducts.fields.ledgerAccount")}
+                value={ledgerSelection}
+                onChange={(option) => {
+                  setLedgerSelection(option);
+                  set("ledger_account_public_id", option?.value ?? "");
+                }}
+                agencyPublicId={ledgerAgency}
+                resetKey={ledgerAgency ?? ""}
+                initialValuePublicId={initial?.ledger_account_public_id ?? null}
+                filter={(a) => a.status === "active"}
+                placeholder={t("accountProducts.fields.ledgerAccountPlaceholder")}
+                error={errors.ledger_account_public_id}
+                hint={t("accountProducts.fields.ledgerAccountHint")}
+              />
+            </div>
             <MoneyField
               label={t("accountProducts.fields.minimumBalance")}
               value={form.minimum_balance}
@@ -371,27 +358,31 @@ export function AccountProductDrawer({
               which is what a structure running a single income account wants.
             */}
             {(toMinor(form.opening_fee) ?? 0) > 0 ? (
-              <Select
-                label={t("accountProducts.fields.openingFeeLedgerAccount")}
-                value={form.opening_fee_ledger_account_public_id}
-                options={ledgerOptions}
-                placeholder={t("accountProducts.fields.openingFeeLedgerAccountPlaceholder")}
-                isClearable
-                isSearchable
-                onInputChange={(search) =>
-                  void onLedgerAccountSearch(search, ledgerAgency ?? form.agency_public_id)
-                }
-                onChange={(next) =>
-                  set("opening_fee_ledger_account_public_id", next)
-                }
-                error={errors.opening_fee_ledger_account_public_id}
-                hint={
-                  ledgerOptions.length === 0
-                    ? t("accountProducts.fields.noLedgerAccounts")
-                    : t("accountProducts.fields.openingFeeLedgerAccountHint")
-                }
-                className="sm:col-span-2"
-              />
+              <div className="sm:col-span-2">
+                {/*
+                  Same server-searched picker as the account above, for the same
+                  reason: the chart runs to a thousand accounts per agency, and
+                  the commission account this field wants sits well past the
+                  first page.
+                */}
+                <LedgerAccountPicker
+                  label={t("accountProducts.fields.openingFeeLedgerAccount")}
+                  value={feeLedgerSelection}
+                  onChange={(option) => {
+                    setFeeLedgerSelection(option);
+                    set("opening_fee_ledger_account_public_id", option?.value ?? "");
+                  }}
+                  agencyPublicId={ledgerAgency}
+                  resetKey={ledgerAgency ?? ""}
+                  initialValuePublicId={
+                    initial?.opening_fee_ledger_account_public_id ?? null
+                  }
+                  filter={(a) => a.status === "active"}
+                  placeholder={t("accountProducts.fields.openingFeeLedgerAccountPlaceholder")}
+                  error={errors.opening_fee_ledger_account_public_id}
+                  hint={t("accountProducts.fields.openingFeeLedgerAccountHint")}
+                />
+              </div>
             ) : null}
           </div>
         </Section>
@@ -453,23 +444,31 @@ function Section({
 
 function CheckboxField({
   label,
+  hint,
   checked,
   onChange,
 }: {
   label: string;
+  /** Shown under the box — used here to say which flags nothing reads yet. */
+  hint?: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-        className="h-4 w-4 rounded border-input text-accent focus:ring-2 focus:ring-ring/20"
-      />
-      {label}
-    </label>
+    <div className="flex flex-col gap-1">
+      <label className="flex cursor-pointer items-center gap-2.5 text-sm text-foreground">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={(event) => onChange(event.target.checked)}
+          className="h-4 w-4 rounded border-input text-accent focus:ring-2 focus:ring-ring/20"
+        />
+        {label}
+      </label>
+      {hint ? (
+        <p className="pl-[26px] text-xs text-muted-foreground">{hint}</p>
+      ) : null}
+    </div>
   );
 }
 

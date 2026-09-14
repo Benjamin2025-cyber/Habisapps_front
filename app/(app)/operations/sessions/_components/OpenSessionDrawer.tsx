@@ -80,7 +80,13 @@ export function OpenSessionDrawer({
       return [
         {
           value: selectedTill.assigned_user_public_id,
-          label: u?.name ?? selectedTill.assigned_user_public_id,
+          // The till carries its cashier's name: the `tellers` directory needs
+          // `users.view`, which the teller opening the session does not hold,
+          // so `u` is undefined for them and the field showed a raw ULID.
+          label:
+            selectedTill.assigned_user_name ??
+            u?.name ??
+            selectedTill.assigned_user_public_id,
         },
       ];
     }

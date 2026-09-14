@@ -32,6 +32,9 @@ const PRESET_BY_ROLE: ReadonlyArray<readonly [string, DashboardPreset]> = [
   ["compliance-officer", "compliance"],
   ["auditor", "auditor"],
   ["regional-manager", "regional"],
+  // Head-office accounting shares the accountant layout: same panels, but its
+  // period card resolves the institution day since the role has no agency.
+  ["chief-accountant", "accountant"],
   ["accountant", "accountant"],
   ["loan-officer", "officer"],
   ["kyc-officer", "kyc"],

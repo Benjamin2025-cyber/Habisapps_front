@@ -18,6 +18,7 @@ import {
 import { localizeApiError, localizeApiMessage } from "@/lib/api/errors";
 import { useCanAny, useHasRole } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
+import { useDebouncedValue } from "@/lib/hooks/useDebouncedValue";
 import { useApi } from "@/lib/hooks/useApi";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import { useToast } from "@/lib/toast/ToastProvider";
@@ -56,6 +57,10 @@ export default function LedgerAccountsPage() {
   ]);
   const canView = isPlatformAdmin || canViewPerm;
   const canManage = isPlatformAdmin || canManagePerm;
+  // Minting institution grouping accounts governs every agency chart below, so
+  // it is its own permission: an agency accountant maintains only its own chart.
+  const canInstitutionScopePerm = useCanAny(["ledger.scope.institution.manage"]);
+  const canManageInstitutionScope = isPlatformAdmin || canInstitutionScopePerm;
 
   const [filters, setFilters] = useState<LedgerAccountsFilterState>(
     EMPTY_LEDGER_ACCOUNTS_FILTERS,
@@ -72,19 +77,33 @@ export default function LedgerAccountsPage() {
 
   const token = session.status === "authenticated" ? session.token : null;
 
+  // Account codes can be beyond the first API page (the seeded chart has more
+  // than 1,400 rows), so the free-text search must be sent to the server rather
+  // than applied only to the currently loaded page. Debouncing keeps typing from
+  // issuing one request per character.
+  const debouncedQuery = useDebouncedValue(filters.query.trim(), 300);
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQuery]);
+
   const fetcher = useCallback(
     async (signal: AbortSignal): Promise<PaginatedLedgerAccounts> => {
       if (!token) throw new Error("Missing session token");
       void signal;
-      return fetchLedgerAccounts(token, { page, perPage: pageSize });
+      return fetchLedgerAccounts(token, {
+        page,
+        perPage: pageSize,
+        search: debouncedQuery || undefined,
+      });
     },
-    [token, page, pageSize],
+    [token, page, pageSize, debouncedQuery],
   );
 
   const { data, loading, error, refetch } = useApi(fetcher, [
     token,
     page,
     pageSize,
+    debouncedQuery,
   ]);
 
   const [agencies, setAgencies] = useState<Agency[]>([]);
@@ -103,28 +122,19 @@ export default function LedgerAccountsPage() {
     };
   }, [token]);
 
-  // Filtering is client-side: the index endpoint exposes no server filters,
-  // and the chart of accounts is a bounded referential.
+  // Class/status remain local filters. Free-text search has already been
+  // applied by the API, so filtering it again against only code/name could
+  // incorrectly hide matches on class/type/side/status.
   const visibleAccounts = useMemo(() => {
     if (!data) return [];
-    const needle = filters.query.trim().toLowerCase();
     return data.data.filter((account) => {
       if (filters.accountClass && account.account_class !== filters.accountClass)
         return false;
       if (filters.status && account.status !== filters.status) return false;
-      if (needle.length === 0) return true;
-      return (
-        account.code.toLowerCase().includes(needle) ||
-        account.name.toLowerCase().includes(needle)
-      );
+      return true;
     });
-  }, [data, filters]);
+  }, [data, filters.accountClass, filters.status]);
 
-  // Parent choices come from active accounts on the loaded page.
-  const parentChoices = useMemo(
-    () => (data?.data ?? []).filter((a) => a.status !== "archived"),
-    [data],
-  );
 
   if (session.status !== "authenticated" || !canView) return null;
 
@@ -170,6 +180,9 @@ export default function LedgerAccountsPage() {
       );
     }
     closeDrawer();
+    // Refetch rather than patching locally: giving an account its first child
+    // turns the *parent* into a grouping account server-side (its `is_postable`
+    // flips to false), a change the client never asked for and cannot infer.
     refetch();
   }
 
@@ -282,7 +295,7 @@ export default function LedgerAccountsPage() {
           mode={drawerMode ?? "create"}
           initial={editing}
           agencies={agencies}
-          parentChoices={parentChoices}
+          canManageInstitutionScope={canManageInstitutionScope}
           onClose={closeDrawer}
           onSubmit={handleSubmit}
         />

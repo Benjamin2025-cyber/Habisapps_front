@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { TextField } from "@/components/ui/TextField";
+import { ApiError } from "@/lib/api/client";
 import { localizeApiMessage } from "@/lib/api/errors";
 import {
   fetchLedgerAccountMovements,
@@ -35,6 +36,13 @@ export function LedgerAccountDetailDrawer({ open, account, onClose }: Props) {
   const [result, setResult] = useState<LedgerAccountMovements | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /**
+   * An institution grouping account is readable — agency accounts have to be
+   * filed under it — but its figures consolidate every agency, so reading them
+   * needs `ledger.scope.institution.read`. A 403 here is therefore an expected
+   * outcome for agency staff, not a failure, and must not read as one.
+   */
+  const [forbidden, setForbidden] = useState(false);
 
   // Reset filters whenever a different account is opened.
   useEffect(() => {
@@ -45,12 +53,14 @@ export function LedgerAccountDetailDrawer({ open, account, onClose }: Props) {
     setPage(1);
     setResult(null);
     setError(null);
+    setForbidden(false);
   }, [open, account?.public_id]);
 
   const load = useCallback(async () => {
     if (!open || !token || !account) return;
     setLoading(true);
     setError(null);
+    setForbidden(false);
     try {
       const data = await fetchLedgerAccountMovements(token, account.public_id, {
         currency: currency.trim().toUpperCase() || "XAF",
@@ -61,7 +71,11 @@ export function LedgerAccountDetailDrawer({ open, account, onClose }: Props) {
       });
       setResult(data);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "error");
+      if (cause instanceof ApiError && cause.status === 403) {
+        setForbidden(true);
+      } else {
+        setError(cause instanceof Error ? cause.message : "error");
+      }
       setResult(null);
     } finally {
       setLoading(false);
@@ -80,6 +94,18 @@ export function LedgerAccountDetailDrawer({ open, account, onClose }: Props) {
   function money(minor: number | null | undefined): string {
     if (minor === null || minor === undefined) return "—";
     return format.currencyMinor(minor, { currency: cur });
+  }
+
+  /**
+   * The side the closing balance actually sits on this period — as opposed to
+   * the side the account is expected to sit on (`normal_balance_side`), which a
+   * bivalent account has none of. Without this, a bivalent account's closing
+   * balance renders as a bare signed number (debit-positive by convention) with
+   * nothing to say what a negative figure means.
+   */
+  function sideLabel(side: string | null | undefined): string | null {
+    if (side === undefined) return null;
+    return t(side ? `ledgerAccounts.side.${side}` : "ledgerAccounts.side.none");
   }
 
   function handlePrint() {
@@ -104,6 +130,10 @@ export function LedgerAccountDetailDrawer({ open, account, onClose }: Props) {
         {
           label: t("ledgerAccounts.detail.closingBalance"),
           value: money(statement?.closing_balance_minor),
+        },
+        {
+          label: t("ledgerAccounts.detail.balanceSide"),
+          value: sideLabel(statement?.balance_side) ?? "—",
         },
         {
           label: t("ledgerAccounts.detail.totalDebit"),
@@ -192,6 +222,18 @@ export function LedgerAccountDetailDrawer({ open, account, onClose }: Props) {
           </div>
         </div>
 
+        {forbidden ? (
+          <p className="rounded-[var(--radius-field)] border border-info/20 bg-info/10 px-3 py-2 text-xs text-info">
+            {t("ledgerAccounts.detail.consolidatedForbidden")}
+          </p>
+        ) : null}
+
+        {statement?.scope === "ledger_account_consolidated" ? (
+          <p className="rounded-[var(--radius-field)] border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
+            {t("ledgerAccounts.detail.consolidatedNote")}
+          </p>
+        ) : null}
+
         {/* Balance summary */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <SummaryCard
@@ -209,6 +251,11 @@ export function LedgerAccountDetailDrawer({ open, account, onClose }: Props) {
           <SummaryCard
             label={t("ledgerAccounts.detail.closingBalance")}
             value={money(statement?.closing_balance_minor)}
+            caption={
+              statement
+                ? `${t("ledgerAccounts.detail.balanceSide")} : ${sideLabel(statement.balance_side) ?? "—"}`
+                : undefined
+            }
             strong
           />
         </div>
@@ -328,10 +375,13 @@ export function LedgerAccountDetailDrawer({ open, account, onClose }: Props) {
 function SummaryCard({
   label,
   value,
+  caption,
   strong,
 }: {
   label: string;
   value: string;
+  /** Extra context under the value, e.g. which side a balance actually sits on. */
+  caption?: string;
   strong?: boolean;
 }) {
   return (
@@ -348,6 +398,9 @@ function SummaryCard({
       >
         {value}
       </span>
+      {caption ? (
+        <span className="text-[0.7rem] text-muted-foreground">{caption}</span>
+      ) : null}
     </div>
   );
 }

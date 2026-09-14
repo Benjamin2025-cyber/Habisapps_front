@@ -106,6 +106,12 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     defaultExpanded: false,
     items: [
       {
+        labelKey: "institution",
+        href: "/settings/institution",
+        available: true,
+        permissions: ["institution.profile.view"],
+      },
+      {
         labelKey: "denominations",
         href: "/settings/denominations",
         available: true,
@@ -278,6 +284,20 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
         permissions: ["journal.entries.view"],
       },
       {
+        labelKey: "resultAppropriations",
+        href: "/accounting/result-appropriations",
+        available: true,
+        permissions: ["accounting.audit.view"],
+      },
+      {
+        labelKey: "exerciseClosings",
+        href: "/accounting/exercise-closings",
+        available: true,
+        // Readable with audit.view; drawing a clôture needs
+        // accounting.exercise.close, which the page checks separately.
+        permissions: ["accounting.audit.view"],
+      },
+      {
         labelKey: "globalClientImage",
         href: "/accounting/global-client-image",
         available: true,
@@ -330,6 +350,15 @@ export const NAV_GROUPS: ReadonlyArray<NavGroup> = [
         labelKey: "reportsBalance",
         href: "/reports/balance",
         available: true,
+        permissions: ["accounting.audit.view"],
+      },
+      {
+        labelKey: "reportsIncomeStatement",
+        href: "/reports/income-statement",
+        available: true,
+        // Same permission as the other accounting reports. Asking for the
+        // institution's result rather than one agency's needs
+        // ledger.scope.institution.read on top, which the API enforces.
         permissions: ["accounting.audit.view"],
       },
     ],

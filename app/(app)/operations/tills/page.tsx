@@ -7,8 +7,6 @@ import { SearchIcon } from "@/components/ui/icons";
 import { Select } from "@/components/ui/Select";
 import { fetchAgencies, type Agency } from "@/lib/api/agencies";
 import {
-  fetchLedgerAccounts,
-  type LedgerAccount,
 } from "@/lib/api/ledger-accounts";
 import { fetchStaffUsers, type StaffUser } from "@/lib/api/staff-users";
 import {
@@ -72,27 +70,28 @@ export default function TillsPage() {
 
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [tellers, setTellers] = useState<StaffUser[]>([]);
-  const [ledgerAccounts, setLedgerAccounts] = useState<LedgerAccount[]>([]);
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
     Promise.all([
       fetchAgencies(token, { perPage: 100 }).catch(() => ({ data: [] })),
       fetchStaffUsers(token, { perPage: 100 }).catch(() => ({ data: [] })),
-      fetchLedgerAccounts(token, { perPage: 100 }).catch(() => ({ data: [] })),
-    ]).then(([ag, st, la]) => {
+    ]).then(([ag, st]) => {
       if (cancelled) return;
       setAgencies(ag.data as Agency[]);
       setTellers(st.data as StaffUser[]);
-      setLedgerAccounts(la.data as LedgerAccount[]);
     });
     return () => {
       cancelled = true;
     };
   }, [token]);
 
+  // Prefer the name the till carries. The staff directory below needs
+  // `users.view`, which the teller lacks — and the teller can read this
+  // caisse list — so `tellers` is empty for them and the column showed a ULID.
   const tellerNameOf = useCallback(
-    (publicId: string | null) => {
+    (publicId: string | null, serverName?: string | null) => {
+      if (serverName) return serverName;
       if (!publicId) return "—";
       return tellers.find((u) => u.public_id === publicId)?.name ?? publicId;
     },
@@ -273,7 +272,6 @@ export default function TillsPage() {
           initial={editing}
           agencies={agencies}
           tellers={tellers}
-          ledgerAccounts={ledgerAccounts}
           onClose={closeDrawer}
           onSubmit={handleSubmit}
         />

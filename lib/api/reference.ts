@@ -32,29 +32,3 @@ export async function fetchIdentityDocumentTypes(
   });
   return data.identity_document_types ?? [];
 }
-
-/** One formula policy from the catalog (loan-product UI). */
-export type FormulaPolicy = {
-  key: string;
-  label: string;
-  category: string;
-  approved: boolean;
-  owner: string | null;
-  approved_at: string | null;
-  /** Loan-product field names this policy is selectable for. */
-  product_fields: string[];
-};
-
-/**
- * `GET /formula-policies`. Used to drive the loan-product form: only
- * `approved` policies should be selectable; unapproved ones are disabled.
- */
-export async function fetchFormulaPolicies(
-  token: string,
-): Promise<FormulaPolicy[]> {
-  const data = await apiRequest<{ formula_policies?: FormulaPolicy[] }>(
-    `formula-policies`,
-    { method: "GET", token, query: { per_page: 100 } },
-  );
-  return data.formula_policies ?? [];
-}

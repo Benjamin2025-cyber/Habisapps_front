@@ -1,4 +1,4 @@
-import { apiRequest, notifyAuthExpired } from "./client";
+import { ApiError, apiRequest, notifyAuthExpired } from "./client";
 import { getRequestLocale } from "./locale";
 
 /**
@@ -19,13 +19,49 @@ import { getRequestLocale } from "./locale";
  * Le scope agence est appliqué côté API : un compte sans agence (`agency_id`
  * null) est institutionnel et visible par tous ; sinon il est limité à son
  * agence (sauf `platform-admin` / `ledger.scope.institution.read`).
+ *
+ * Plan comptable consolidé : un compte **de regroupement** (`is_postable`
+ * false) ne reçoit aucune écriture — son solde est la consolidation des comptes
+ * de détail placés sous lui. C'est le cas de tout compte institutionnel
+ * (`scope: "institution"`, ex. `571000 Caisse Globale` regroupant `571001`,
+ * `571002`… par agence) et de tout compte d'agence ayant acquis un
+ * sous-compte : l'API bascule alors automatiquement son `is_postable` à false.
+ * Ne jamais proposer un compte non imputable comme cible d'écriture.
+ *
+ * Le solde d'un compte de regroupement est consolidé par défaut ; `consolidated`
+ * force le comportement (`false` = mouvements propres uniquement). Le champ
+ * `scope` de la réponse indique lequel des deux a été renvoyé.
+ */
+/**
+ * Classes du PCEMF (Plan Comptable des Établissements de Microfinance,
+ * CEMAC/COBAC) — le plan qu'un EMF camerounais est tenu de tenir. La classe est
+ * le premier chiffre du code : `571001` est un compte de classe 5.
+ *
+ * Remplace les natures IFRS (asset/liability/equity/revenue/expense), qui
+ * décrivaient la nature d'un compte et non sa place dans le plan national. La
+ * nature reste déductible : les classes 6 et 7 forment le compte de résultat, 8
+ * les soldes intermédiaires de gestion, 9 le hors bilan, et pour les classes 1 à
+ * 5 le côté du bilan suit `normal_balance_side`.
  */
 export type LedgerAccountClass =
-  | "asset"
-  | "liability"
-  | "equity"
-  | "revenue"
-  | "expense";
+  /** Classe 1 — Comptes de capitaux permanents. */
+  | "capitaux_permanents"
+  /** Classe 2 — Comptes de valeurs immobilisées. */
+  | "valeurs_immobilisees"
+  /** Classe 3 — Comptes d'opérations avec la clientèle. */
+  | "operations_clientele"
+  /** Classe 4 — Comptes de tiers. */
+  | "tiers"
+  /** Classe 5 — Comptes de trésorerie et d'opérations interbancaires. */
+  | "tresorerie_interbancaire"
+  /** Classe 6 — Comptes de charges. */
+  | "charges"
+  /** Classe 7 — Comptes de produits. */
+  | "produits"
+  /** Classe 8 — Soldes intermédiaires de gestion (agrégats du compte de résultat). */
+  | "soldes_intermediaires_gestion"
+  /** Classe 9 — Comptes de hors bilan. */
+  | "hors_bilan";
 
 export type LedgerNormalBalanceSide = "debit" | "credit";
 
@@ -35,19 +71,78 @@ export type LedgerAccountStatus =
   | "suspended"
   | "archived";
 
+/** `institution` == `agency_public_id === null`; the API sends both. */
+export type LedgerAccountScope = "agency" | "institution";
+
 export type LedgerAccount = {
   public_id: string;
+  scope: LedgerAccountScope;
   agency_public_id: string | null;
+  /** Present so a chart shown across agencies can name which one each row is. */
+  agency_code?: string | null;
+  agency_name?: string | null;
   parent_account_public_id: string | null;
   code: string;
   name: string;
   account_class: LedgerAccountClass;
   account_type: string | null;
-  normal_balance_side: LedgerNormalBalanceSide;
+  /** False for a grouping account: it consolidates its children and refuses entries. */
+  is_postable: boolean;
+  /**
+   * Null for a *bivalent* account — no imposed side. Comptes de liaison, de
+   * régularisation and hors bilan take entries both ways by nature, so the API
+   * reports the side they actually sit on rather than one they should match.
+   */
+  normal_balance_side: LedgerNormalBalanceSide | null;
   status: LedgerAccountStatus;
   created_at: string;
   updated_at: string;
 };
+
+/** The nine PCEMF classes, in class order (1 → 9). */
+export const LEDGER_ACCOUNT_CLASSES: LedgerAccountClass[] = [
+  "capitaux_permanents",
+  "valeurs_immobilisees",
+  "operations_clientele",
+  "tiers",
+  "tresorerie_interbancaire",
+  "charges",
+  "produits",
+  "soldes_intermediaires_gestion",
+  "hors_bilan",
+];
+
+/**
+ * The classes a user may pick when creating or filtering an account — the nine
+ * less class 8.
+ *
+ * Class 8 is a real PCEMF class and stays in LEDGER_ACCOUNT_CLASSES, which
+ * classFromCode indexes by leading digit. But the soldes intermédiaires de
+ * gestion are computed from classes 6 and 7 when the compte de résultat is drawn
+ * and never carry entries, so the API refuses to create an account for them.
+ * Offering the class in a form would produce a 422 every time it was chosen, and
+ * offering it as a filter would return nothing at all and read as a broken
+ * filter.
+ */
+export const SELECTABLE_LEDGER_ACCOUNT_CLASSES: LedgerAccountClass[] =
+  LEDGER_ACCOUNT_CLASSES.filter((c) => c !== "soldes_intermediaires_gestion");
+
+/**
+ * The class a code belongs to, read from its leading digit — the PCEMF rule the
+ * API enforces. Returns null when the code does not start with a digit 1–9, in
+ * which case the class cannot be inferred and must be chosen.
+ */
+export function classFromCode(code: string): LedgerAccountClass | null {
+  const digit = Number(code.trim().charAt(0));
+  if (!Number.isInteger(digit) || digit < 1 || digit > 9) return null;
+  return LEDGER_ACCOUNT_CLASSES[digit - 1];
+}
+
+
+/** A grouping account can never be an entry target. */
+export function isPostableTarget(account: LedgerAccount): boolean {
+  return account.status === "active" && account.is_postable;
+}
 
 export type Pagination = {
   current_page: number;
@@ -62,28 +157,50 @@ export type PaginatedLedgerAccounts = {
 };
 
 export type LedgerAccountCreatePayload = {
+  /** Defaults to `agency` API-side. `institution` requires ledger.scope.institution.manage. */
+  scope?: LedgerAccountScope;
   agency_public_id?: string | null;
   code: string;
   name: string;
   account_class: LedgerAccountClass;
   account_type?: string | null;
+  is_postable?: boolean;
   parent_account_public_id?: string | null;
-  normal_balance_side: LedgerNormalBalanceSide;
+  /**
+   * Null creates a bivalent account: no imposed side. Distinct from omitting
+   * the key, which means the user never chose — the API's `present` rule
+   * rejects that with a field error rather than letting a side be guessed.
+   */
+  normal_balance_side?: LedgerNormalBalanceSide | null;
   status?: "active" | "inactive" | "suspended";
 };
 
-/** Update is partial; `code`, `account_class` and `agency` are immutable. */
+/**
+ * Update is partial. `code` and `agency` are immutable; `account_class` is
+ * correctable only while the account carries no movements (API-enforced).
+ */
 export type LedgerAccountUpdatePayload = {
   name?: string;
+  account_class?: LedgerAccountClass;
   account_type?: string | null;
+  is_postable?: boolean;
   parent_account_public_id?: string | null;
-  normal_balance_side?: LedgerNormalBalanceSide;
+  /** Null makes the account bivalent: no imposed side. */
+  normal_balance_side?: LedgerNormalBalanceSide | null;
   status?: LedgerAccountStatus;
 };
 
+/**
+ * `ledger_account_consolidated` means the figure includes the whole subtree, so
+ * it must be labelled as consolidated rather than shown as own movements.
+ */
+export type LedgerBalanceScope =
+  | "ledger_account"
+  | "ledger_account_consolidated";
+
 /** Solde agrégé d'un compte sur une période (montants en *_minor, scale 2). */
 export type LedgerAccountBalance = {
-  scope: string;
+  scope: LedgerBalanceScope;
   public_id: string;
   currency: string;
   from: string | null;
@@ -92,11 +209,13 @@ export type LedgerAccountBalance = {
   credit_total_minor: number;
   balance_minor: number;
   normal_balance_side: LedgerNormalBalanceSide | null;
+  /** The side the account actually sits on this period; null when it nets to zero. */
+  balance_side: LedgerNormalBalanceSide | null;
 };
 
 /** Résumé du relevé (mouvements + soldes d'ouverture/clôture). */
 export type LedgerStatement = {
-  scope: string;
+  scope: LedgerBalanceScope;
   public_id: string;
   currency: string;
   from: string | null;
@@ -106,6 +225,8 @@ export type LedgerStatement = {
   credit_total_minor: number;
   closing_balance_minor: number;
   normal_balance_side: LedgerNormalBalanceSide | null;
+  /** The side the account actually sits on this period; null when it nets to zero. */
+  balance_side: LedgerNormalBalanceSide | null;
 };
 
 export type LedgerMovement = {
@@ -135,9 +256,12 @@ const JSON_HEADERS = (token: string): Record<string, string> => ({
 });
 
 /**
- * Paginated list. The API does not expose server-side filters here, so
- * search / class / status filtering is applied client-side over the loaded
- * page (the chart of accounts is a bounded referential).
+ * Paginated list. `search` is applied **server-side** across code, name, class,
+ * type, normal side and status — use it rather than loading a page and
+ * filtering locally: `per_page` is capped at 100 by the API and a real PCEMF
+ * chart runs to ~1 400 accounts per agency, so a local filter would only ever
+ * see the first page. `agencyPublicId` scopes the server result before that
+ * pagination when a form is editing an agency-owned document.
  */
 export async function fetchLedgerAccounts(
   token: string,
@@ -145,7 +269,7 @@ export async function fetchLedgerAccounts(
     page?: number;
     perPage?: number;
     search?: string;
-    agencyPublicId?: string;
+    agencyPublicId?: string | null;
     /**
      * Leave out the per-dossier divisionaries (`3222.LN-…`, `CLI000001`) that
      * every loan and client opens under a control account. Account pickers want
@@ -172,7 +296,13 @@ export async function fetchLedgerAccounts(
   const text = await response.text();
   if (!response.ok || text.length === 0) {
     if (response.status === 401) notifyAuthExpired();
-    throw new Error(`Failed to fetch ledger accounts (HTTP ${response.status})`);
+    // ApiError rather than Error: callers need the status to tell a permission
+    // refusal (403) apart from a real failure.
+    throw new ApiError(
+      `Failed to fetch ledger accounts (HTTP ${response.status})`,
+      response.status,
+      null,
+    );
   }
 
   // The ledger-accounts endpoint returns Laravel's default paginated shape:
@@ -252,7 +382,13 @@ export async function deleteLedgerAccount(
 export async function getLedgerAccountBalance(
   token: string,
   publicId: string,
-  options: { currency?: string; from?: string; to?: string } = {},
+  options: {
+    currency?: string;
+    from?: string;
+    to?: string;
+    /** Omit to let the API decide from `is_postable`. */
+    consolidated?: boolean;
+  } = {},
 ): Promise<LedgerAccountBalance> {
   return apiRequest<LedgerAccountBalance>(`ledger-accounts/${publicId}/balance`, {
     method: "GET",
@@ -261,6 +397,7 @@ export async function getLedgerAccountBalance(
       currency: options.currency,
       from: options.from,
       to: options.to,
+      consolidated: options.consolidated,
     },
   });
 }
@@ -272,6 +409,8 @@ export async function fetchLedgerAccountMovements(
     currency?: string;
     from?: string;
     to?: string;
+    /** Omit to let the API decide from `is_postable`. */
+    consolidated?: boolean;
     page?: number;
     perPage?: number;
   } = {},
@@ -280,6 +419,9 @@ export async function fetchLedgerAccountMovements(
   if (options.currency) query.set("currency", options.currency);
   if (options.from) query.set("from", options.from);
   if (options.to) query.set("to", options.to);
+  if (options.consolidated !== undefined) {
+    query.set("consolidated", String(options.consolidated));
+  }
   query.set("per_page", String(options.perPage ?? 25));
   if (options.page && options.page > 0) query.set("page", String(options.page));
 
@@ -291,8 +433,12 @@ export async function fetchLedgerAccountMovements(
   const text = await response.text();
   if (!response.ok || text.length === 0) {
     if (response.status === 401) notifyAuthExpired();
-    throw new Error(
+    // A grouping account's statement consolidates every agency beneath it, so
+    // 403 here is an expected permission outcome, not a fault: keep the status.
+    throw new ApiError(
       `Failed to fetch ledger movements (HTTP ${response.status})`,
+      response.status,
+      null,
     );
   }
 

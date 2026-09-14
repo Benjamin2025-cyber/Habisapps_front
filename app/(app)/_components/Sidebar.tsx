@@ -17,11 +17,21 @@ import { useSession } from "@/lib/auth/SessionProvider";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import { NAV_GROUPS, NAV_SOLO_ITEMS, type NavItem } from "./nav-config";
 
-/** True iff the item has no permission gate, or the user holds at least one. */
+/**
+ * True iff the item has no permission gate, or the user holds at least one.
+ *
+ * `isPlatformAdmin` short-circuits because every page gates itself as
+ * `isPlatformAdmin || <permission>`. Without the same override here a platform
+ * admin can reach a page by URL but never sees its link — which is how a newly
+ * added permission goes missing from the sidebar until the roles are re-seeded.
+ * `available` is a separate gate, so this never reveals an unbuilt page.
+ */
 function itemAllowed(
   item: { permissions?: ReadonlyArray<string> },
   ownedPermissions: ReadonlyArray<string>,
+  isPlatformAdmin: boolean,
 ): boolean {
+  if (isPlatformAdmin) return true;
   if (!item.permissions || item.permissions.length === 0) return true;
   return item.permissions.some((permission) =>
     ownedPermissions.includes(permission),
@@ -105,12 +115,17 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   // permissions. Items with no permission gate stay visible.
   const ownedPermissions =
     session.status === "authenticated" ? (session.user.permissions ?? []) : [];
+  const isPlatformAdmin =
+    session.status === "authenticated" &&
+    session.user.roles.includes("platform-admin");
   const visibleSoloItems = NAV_SOLO_ITEMS.filter((item) =>
-    itemAllowed(item, ownedPermissions),
+    itemAllowed(item, ownedPermissions, isPlatformAdmin),
   );
   const visibleGroups = NAV_GROUPS.map((group) => ({
     ...group,
-    items: group.items.filter((item) => itemAllowed(item, ownedPermissions)),
+    items: group.items.filter((item) =>
+      itemAllowed(item, ownedPermissions, isPlatformAdmin),
+    ),
   })).filter((group) => group.items.length > 0);
 
   return (

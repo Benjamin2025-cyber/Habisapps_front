@@ -28,10 +28,16 @@ const VERIFICATION_TONE: Record<
 };
 
 /**
- * Read-only view of the proxies (mandataires) attached to THIS account. Proxies
+ * Read-only view of the mandataires who may operate THIS account. Proxies
  * belong to the client and have no account-scoped endpoint, so we fetch the
- * client's proxies and filter by `customer_account_public_id`. Management lives
- * in the client fiche (P6.2).
+ * client's proxies. Management lives in the client fiche (P6.2).
+ *
+ * `customer_account_id` is nullable: a mandataire registered while creating the
+ * client profile is client-level and may act on every account they hold, while
+ * one registered against an account is limited to it. Keeping only the second
+ * kind reported "aucun mandataire" on accounts whose holder had in fact
+ * registered one — the common case, since the client form is where they are
+ * usually captured. Both kinds are listed, and the scope column says which.
  */
 export function AccountProxiesTab({ accountPublicId, clientPublicId }: Props) {
   const t = useTranslations();
@@ -44,7 +50,11 @@ export function AccountProxiesTab({ accountPublicId, clientPublicId }: Props) {
       if (!clientPublicId) return [];
       void signal;
       const rows = await fetchProxies(token, clientPublicId, { perPage: 100 });
-      return rows.filter((p) => p.customer_account_public_id === accountPublicId);
+      return rows.filter(
+        (p) =>
+          p.customer_account_public_id === accountPublicId ||
+          p.customer_account_public_id === null,
+      );
     },
     [token, clientPublicId, accountPublicId],
   );
@@ -64,6 +74,21 @@ export function AccountProxiesTab({ accountPublicId, clientPublicId }: Props) {
           <span className="font-semibold text-foreground">
             {(getValue() as string | null) ?? "—"}
           </span>
+        ),
+      },
+      {
+        id: "scope",
+        header: t("accountDetail.proxies.columns.scope"),
+        cell: ({ row }) => (
+          <Badge
+            tone={row.original.customer_account_public_id === null ? "info" : "neutral"}
+          >
+            {t(
+              row.original.customer_account_public_id === null
+                ? "accountDetail.proxies.scope.client"
+                : "accountDetail.proxies.scope.account",
+            )}
+          </Badge>
         ),
       },
       {

@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Select } from "@/components/ui/Select";
+import { useTranslations } from "@/lib/i18n/I18nProvider";
+import { localizeApiError } from "@/lib/api/errors";
 import { fetchStaffUsers, type StaffUser } from "@/lib/api/staff-users";
 import { useSession } from "@/lib/auth/SessionProvider";
 
@@ -39,19 +41,31 @@ export function StaffUserPicker({
   disabled,
   filterRoles,
 }: Props) {
+  const t = useTranslations();
   const session = useSession();
   const token = session.status === "authenticated" ? session.token : null;
   const [users, setUsers] = useState<StaffUser[]>([]);
+  /**
+   * A failed load used to fall back to an empty list, which is indistinguishable
+   * from an institution with no eligible staff — so a role missing `users.view`
+   * showed up as a field that simply listed nothing, with nowhere to read why.
+   * Keep the reason and put it under the field.
+   */
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
     fetchStaffUsers(token, { perPage: 100 })
       .then((response) => {
-        if (!cancelled) setUsers(response.data);
+        if (cancelled) return;
+        setUsers(response.data);
+        setLoadError(null);
       })
-      .catch(() => {
-        if (!cancelled) setUsers([]);
+      .catch((cause) => {
+        if (cancelled) return;
+        setUsers([]);
+        setLoadError(localizeApiError(cause).generalMessage);
       });
     return () => {
       cancelled = true;
@@ -85,8 +99,12 @@ export function StaffUserPicker({
       placeholder={placeholder}
       isClearable
       onChange={onChange}
-      error={error}
-      hint={hint}
+      error={error ?? loadError}
+      hint={
+        !loadError && !error && options.length === 0
+          ? t("staffPicker.empty")
+          : hint
+      }
       disabled={disabled}
     />
   );

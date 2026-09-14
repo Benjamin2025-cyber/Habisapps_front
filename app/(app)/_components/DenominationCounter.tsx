@@ -115,6 +115,11 @@ export function DenominationCounter({ currency = "XAF", targetMinor, onChange }:
                   type="number"
                   min={0}
                   value={counts[d.public_id] ?? ""}
+                  // A focused number input treats the wheel as a stepper, so
+                  // scrolling the coupure list past one silently turns 100
+                  // billets into 99 — during a cash count, with nothing on
+                  // screen to say it happened.
+                  onWheel={(e) => e.currentTarget.blur()}
                   onChange={(e) => setCounts((c) => ({ ...c, [d.public_id]: e.target.value }))}
                   placeholder="0"
                   className="h-8 w-16 shrink-0 rounded-[var(--radius-field)] border border-input bg-background px-2 text-sm tabular-nums text-foreground focus:outline-none focus:ring-2 focus:ring-ring/20"

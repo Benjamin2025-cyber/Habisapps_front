@@ -179,9 +179,18 @@ export type Loan = {
   status: LoanStatus;
   processing_level: string | null;
   client_public_id: string | null;
+  /** NOM Prénoms, resolved server-side. */
+  client_display_name: string | null;
   agency_public_id: string | null;
   loan_product_public_id: string | null;
+  /** « CODE — Nom », resolved server-side: listing the catalogue needs
+   *  `loan.products.view`, which the accountant and compliance-officer lack
+   *  even though both open this file to sign their visa. */
+  loan_product_label: string | null;
   credit_agent_public_id: string | null;
+  /** Resolved server-side: the staff directory needs `users.view`, which the
+   *  accountant and compliance-officer lack even though both sign a visa here. */
+  credit_agent_name: string | null;
   amortization_account_public_id: string | null;
   unpaid_account_public_id: string | null;
   recovery_account_public_id: string | null;
@@ -195,13 +204,18 @@ export type Loan = {
   closed_on: string | null;
   purpose: string | null;
   sector_public_id: string | null;
+  /** « CODE — Nom », resolved server-side. The sector lists need
+   *  `sectors.view` / `sub-sectors.view`, held only by the agency-manager and
+   *  the kyc-officer, so for everyone else these rendered blank. */
+  sector_label: string | null;
   sub_sector_public_id: string | null;
-  financed_activity_code: string | null;
+  sub_sector_label: string | null;
   activity_address: string | null;
   entrepreneur_address: string | null;
   first_installment_date: string | null;
   number_of_installments: number | null;
   grace_period_duration: number | null;
+  /** Server-derived from the installments and the first due date. Read-only. */
   tranche_duration: number | null;
   total_loan_duration: number | null;
   dossier_fees_minor: number | null;
@@ -258,14 +272,11 @@ export type LoanWritePayload = {
   purpose?: string | null;
   sector_public_id?: string | null;
   sub_sector_public_id?: string | null;
-  financed_activity_code?: string | null;
   activity_address?: string | null;
   entrepreneur_address?: string | null;
   first_installment_date?: string | null;
   number_of_installments?: number | null;
   grace_period_duration?: number | null;
-  tranche_duration?: number | null;
-  total_loan_duration?: number | null;
 };
 
 export type LoanScheduleLine = {

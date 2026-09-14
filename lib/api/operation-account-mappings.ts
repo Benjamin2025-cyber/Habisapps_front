@@ -29,10 +29,25 @@ export type MappingApprovalStatus =
   | "archived";
 
 /** Approval values accepted on create (the full set is allowed on update). */
-export const MAPPING_CREATE_APPROVAL_STATUSES = [
+/**
+ * What an author may set. `approved` and `rejected` are decisions, taken through
+ * the approve/reject endpoints by someone other than the author — the API
+ * refuses them here.
+ */
+export const MAPPING_CREATE_APPROVAL_STATUSES = ["draft", "submitted"] as const;
+
+/**
+ * What an edit may set: everything except the two decisions. Withdrawing,
+ * suspending or revoking only takes a rule out of service, so it needs no
+ * countersignature.
+ */
+export const MAPPING_EDIT_APPROVAL_STATUSES = [
   "draft",
   "submitted",
-  "approved",
+  "suspended",
+  "revoked",
+  "expired",
+  "archived",
 ] as const;
 
 export type OperationAccountMapping = {
@@ -41,11 +56,7 @@ export type OperationAccountMapping = {
   agency_public_id: string | null;
   debit_ledger_account_public_id: string | null;
   credit_ledger_account_public_id: string | null;
-  /**
-   * The chart code and name of each leg, served alongside the ids so a mapping
-   * can be labelled without resolving the ULID against a fetched page of
-   * accounts — a lookup that fails as soon as the chart outgrows one page.
-   */
+  /** Sent with the mapping, so labelling needs no lookup against the chart. */
   debit_ledger_account_code: string | null;
   debit_ledger_account_name: string | null;
   credit_ledger_account_code: string | null;
@@ -161,7 +172,11 @@ export async function updateOperationAccountMapping(
   );
 }
 
-/** Approves a draft/submitted mapping so the posting resolver can use it. */
+/**
+ * Approve a mapping — the decision that puts the posting rule into service.
+ * Requires `operation.mappings.approve`, and the API refuses the author: 403
+ * when the caller wrote it, 422 when it has already been decided.
+ */
 export async function approveOperationAccountMapping(
   token: string,
   publicId: string,
@@ -172,7 +187,16 @@ export async function approveOperationAccountMapping(
   );
 }
 
-/** Archives the mapping (status → archived). */
+export async function rejectOperationAccountMapping(
+  token: string,
+  publicId: string,
+): Promise<OperationAccountMapping> {
+  return apiRequest<OperationAccountMapping>(
+    `operation-account-mappings/${publicId}/reject`,
+    { method: "POST", token },
+  );
+}
+
 export async function deleteOperationAccountMapping(
   token: string,
   publicId: string,

@@ -1,5 +1,6 @@
 "use client";
 
+import { clientDisplayName } from "@/lib/format/clientName";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -40,25 +41,29 @@ export function AccountInfoTab({
   const t = useTranslations();
   const format = useFormatter();
 
+  // Server-resolved: the local `clients` list is capped at 100 rows, so the
+  // lookup misses for any holder past it and used to fall back to a raw ULID.
   const holder = clients.find((c) => c.public_id === account.client_public_id);
-  const holderName = account.client_display_name || (holder
-    ? [holder.last_name?.toUpperCase(), holder.first_name]
-        .filter((part): part is string => !!part && part.length > 0)
-        .join(" ") ||
-      holder.client_reference ||
-      holder.public_id
-    : account.client_public_id);
+  const holderName =
+    account.client_display_name ??
+    (holder
+      ? clientDisplayName(holder) || holder.client_reference || holder.public_id
+      : account.client_public_id);
 
+  // Server-resolved for the same reason: listing the catalogue needs
+  // `account.products.view`, which the loan-officer — the role that opens this
+  // sheet — does not hold, so `accountProducts` arrived empty and the label
+  // fell through to the product's ULID.
   const product = accountProducts.find(
     (p) => p.public_id === account.account_product_public_id,
   );
+  const withFamily = (name: string, family: string | null) =>
+    family ? `${name} — ${t(`accountProducts.family.${family}`)}` : name;
   const productLabel = account.account_product_name
-    ? `${account.account_product_name} — ${t(
-        `accountProducts.family.${account.account_product_family ?? product?.account_family ?? "savings"}`,
-      )}`
+    ? withFamily(account.account_product_name, account.account_product_family)
     : product
-    ? `${product.name} — ${t(`accountProducts.family.${product.account_family}`)}`
-    : account.account_product_public_id;
+      ? withFamily(product.name, product.account_family)
+      : account.account_product_public_id;
 
   return (
     <div className="flex flex-col gap-4">
@@ -112,6 +117,7 @@ export function AccountInfoTab({
           <PlainField
             label={t("accounts.fields.agency")}
             value={account.agency_name ?? account.agency_public_id}
+            mono
           />
         </Grid>
       </Section>
@@ -147,9 +153,12 @@ export function AccountInfoTab({
 
       <Section title={t("accounts.drawer.sectionAccounting")}>
         <Grid>
+          {/* The code, not the ULID: this is the number the accountant keys
+              when posting, and having to look it up is the chore the rule
+              exists to remove. */}
           <PlainField
-            label={t("accounts.fields.ledgerAccount")}
-            value={account.ledger_account_code ?? account.ledger_account_public_id}
+            label={t("accounts.fields.ledgerAccountCode")}
+            value={account.ledger_account_code}
             mono
           />
           {/*

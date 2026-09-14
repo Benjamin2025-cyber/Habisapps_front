@@ -23,6 +23,21 @@ export function localizeValidationMessage(
     return `Le champ ${label} est invalide.`;
   }
 
+  // Only rewrite *machine-generated* validation messages. The rules below match
+  // on a phrase appearing anywhere, so without this gate a domain message is
+  // silently reduced to a generic one: "Ce code est déjà utilisé dans le plan
+  // comptable de HABIS Test Agency." would collapse to "Le champ Code est déjà
+  // utilisé.", dropping the part that tells you where the clash is. Laravel's
+  // messages always open with a known prefix in either locale; anything else is
+  // a business rule from `respondUnprocessable` and must survive verbatim.
+  const trimmed = rawMessage.trim();
+  const isGeneratedValidationMessage =
+    /^the\s/i.test(trimmed) ||
+    /^(le champ|la valeur|le format du champ)/i.test(trimmed);
+  if (!isGeneratedValidationMessage) {
+    return rawMessage;
+  }
+
   if (/is required/i.test(rawMessage)) {
     return `Le champ ${label} est obligatoire.`;
   }
@@ -164,6 +179,12 @@ export function localizeApiError(
     // here would feed a stack-frame object into the localizer and crash.
     if (error.status === 422 && error.errors) {
       for (const [field, messages] of Object.entries(error.errors)) {
+        // `code` is a machine identifier, never a message. Domain refusals carry
+        // it alongside a localized top-level `message` — treating it as a field
+        // error made it the "specific" reason and toasts showed the operator
+        // `accounting_day_agencies_still_open` instead of the sentence explaining
+        // what to do. Every coded refusal in the app read that way.
+        if (field === "code") continue;
         const firstString = Array.isArray(messages)
           ? messages.find((m): m is string => typeof m === "string")
           : typeof messages === "string"

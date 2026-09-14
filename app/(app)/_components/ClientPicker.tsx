@@ -1,11 +1,13 @@
 "use client";
 
+import { clientDisplayName } from "@/lib/format/clientName";
 import { useMemo } from "react";
 import { AsyncSelect, type AsyncSelectOption } from "@/components/ui/AsyncSelect";
 import { fetchClients, type Client } from "@/lib/api/clients";
 import { useCan } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
+import { debounce } from "@/lib/debounce";
 
 /** Client option carries its agency + plain holder name for the selection. */
 export type ClientOption = AsyncSelectOption & {
@@ -107,10 +109,7 @@ export function toClientOption(client: Client): ClientOption {
 }
 
 function toOption(client: Client): ClientOption {
-  const name =
-    [client.last_name?.toUpperCase(), client.first_name, client.middle_name]
-      .filter((part): part is string => !!part && part.length > 0)
-      .join(" ") || client.public_id;
+  const name = clientDisplayName(client) || client.public_id;
   return {
     value: client.public_id,
     label: client.client_reference ? `${name} — ${client.client_reference}` : name,
@@ -119,13 +118,3 @@ function toOption(client: Client): ClientOption {
   };
 }
 
-function debounce<A extends unknown[]>(
-  fn: (...args: A) => void,
-  ms: number,
-): (...args: A) => void {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  return (...args: A) => {
-    if (timer) clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), ms);
-  };
-}

@@ -119,7 +119,12 @@ export default function SessionsPage() {
   );
 
   const tellerNameOf = useCallback(
-    (publicId: string | null) => {
+    (publicId: string | null, serverName?: string | null) => {
+      // Prefer the name the API embeds. The staff directory consulted below
+      // needs `users.view`, which the teller does not hold — and the teller is
+      // precisely who works this screen — so `tellers` is empty for them and
+      // the column used to print a raw ULID.
+      if (serverName) return serverName;
       if (!publicId) return "—";
       return tellers.find((u) => u.public_id === publicId)?.name ?? publicId;
     },

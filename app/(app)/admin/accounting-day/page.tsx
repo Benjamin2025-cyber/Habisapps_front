@@ -59,8 +59,19 @@ export default function AccountingDayPage() {
   const canOpen = isPlatformAdmin || canOpenPerm;
   const canClose = isPlatformAdmin || canClosePerm;
   const canReopen = isPlatformAdmin || canReopenPerm;
+  // The institution's own period (the arrêté comptable) is head-office
+  // accounting work, so it is gated on a permission rather than on
+  // platform-admin. `chief-accountant` holds it and carries no agency.
+  const canInstitutionScopePerm = useCanAny([
+    "accounting.scope.institution.manage",
+  ]);
+  const canManageInstitutionScope = isPlatformAdmin || canInstitutionScopePerm;
 
   const token = session.status === "authenticated" ? session.token : null;
+  // Head-office actors have no agency assignment, so the backend cannot resolve
+  // an agency-scoped day for them: they must name the scope explicitly.
+  const hasOwnAgency =
+    session.status === "authenticated" && session.user.agency_public_id != null;
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
@@ -84,7 +95,9 @@ export default function AccountingDayPage() {
     async (signal: AbortSignal): Promise<AccountingDay | null> => {
       if (!token) throw new Error("Missing session token");
       void signal;
-      if (isPlatformAdmin) {
+      // Naming the scope is required, not just an admin convenience: without an
+      // agency assignment an unscoped request cannot be resolved (422).
+      if (canManageInstitutionScope) {
         return scopeValue === "institution"
           ? fetchCurrentAccountingDay(token, { scope: "institution" })
           : fetchCurrentAccountingDay(token, {
@@ -94,7 +107,7 @@ export default function AccountingDayPage() {
       }
       return fetchCurrentAccountingDay(token);
     },
-    [token, isPlatformAdmin, scopeValue],
+    [token, canManageInstitutionScope, scopeValue],
   );
 
   const historyFetcher = useCallback(
@@ -111,7 +124,22 @@ export default function AccountingDayPage() {
     loading: currentLoading,
     error: currentError,
     refetch: refetchCurrent,
-  } = useApi(currentFetcher, [token, isPlatformAdmin, scopeValue]);
+  } = useApi(currentFetcher, [token, canManageInstitutionScope, scopeValue]);
+
+  // Fetched regardless of the scope being viewed, because an agency day can only
+  // open on the institution's date and the drawer has to state that date whichever
+  // scope the page happens to be showing. Absent means the institution has no day
+  // open, which is a reason no agency day can be opened yet.
+  const institutionFetcher = useCallback(async () => {
+    if (!token) return null;
+
+    return fetchCurrentAccountingDay(token, { scope: "institution" });
+  }, [token]);
+
+  const { data: institutionDay, refetch: refetchInstitutionDay } = useApi(
+    institutionFetcher,
+    [token],
+  );
 
   const scopeOptions = useMemo(
     () => [
@@ -164,9 +192,13 @@ export default function AccountingDayPage() {
     };
   }, [token, currentDay, isPlatformAdmin]);
 
-  // Agencies only matter for the platform-admin open form (scope = agency).
+  // Head office needs the agency list too, not just platform admins: it manages
+  // agency days on the same institution-scope permission that already lets it post
+  // into agency books, and the institution's own close waits on those days being
+  // closed. Without the list the scope selector offered only Établissement and the
+  // chef comptable could not reach the agencies he has to close.
   useEffect(() => {
-    if (!token || !isPlatformAdmin) return;
+    if (!token || !(isPlatformAdmin || canManageInstitutionScope)) return;
     let cancelled = false;
     fetchAgencies(token, { perPage: 100 })
       .then((response) => {
@@ -178,13 +210,16 @@ export default function AccountingDayPage() {
     return () => {
       cancelled = true;
     };
-  }, [token, isPlatformAdmin]);
+  }, [token, isPlatformAdmin, canManageInstitutionScope]);
 
   if (session.status !== "authenticated" || !canView) return null;
 
   function refetchAll() {
     refetchCurrent();
     refetchHistory();
+    // Opening or closing the institution day changes what agency days may do, so
+    // the drawer's reference date has to move with it.
+    refetchInstitutionDay();
   }
 
   async function handleOpen(payload: OpenAccountingDayPayload) {
@@ -192,7 +227,7 @@ export default function AccountingDayPage() {
     const day = await openAccountingDay(token, payload);
     // Point the admin's scope view at whatever they just opened, so the card
     // reflects the new day instead of the previously-selected scope.
-    if (isPlatformAdmin) {
+    if (canManageInstitutionScope) {
       setScopeValue(
         day.scope === "institution" ? "institution" : day.agency_public_id ?? "institution",
       );
@@ -324,7 +359,7 @@ export default function AccountingDayPage() {
         }
       />
 
-      {isPlatformAdmin ? (
+      {canManageInstitutionScope ? (
         <div className="max-w-sm">
           <Select
             id="accounting-day-scope-view"
@@ -415,8 +450,13 @@ export default function AccountingDayPage() {
           open={openDrawer}
           onClose={() => setOpenDrawer(false)}
           onSubmit={handleOpen}
-          isPlatformAdmin={isPlatformAdmin}
+          canOpenInstitutionScope={canManageInstitutionScope}
+          // Opening another agency's day is head-office work, on the same
+          // permission as managing it.
+          canOpenAnyAgency={isPlatformAdmin || canManageInstitutionScope}
+          hasOwnAgency={hasOwnAgency}
           agencies={agencies}
+          institutionBusinessDate={institutionDay?.business_date ?? null}
         />
       ) : null}
 

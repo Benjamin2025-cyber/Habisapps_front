@@ -48,22 +48,35 @@ export function AccountingDayChip() {
 
   const token = session.status === "authenticated" ? session.token : null;
 
+  /*
+   * The backend resolves an unscoped "current day" from the actor's agency
+   * assignment, so anyone without one must name the scope explicitly or the
+   * request fails and the chip silently disappears.
+   *
+   * That applies to platform admins and to head-office roles alike:
+   * `chief-accountant` carries no agency by design and is precisely the actor
+   * running the institution's period, so it must not be the one left with no
+   * indicator.
+   */
+  const hasOwnAgency =
+    session.status === "authenticated" && session.user.agency_public_id != null;
+  const wantsInstitutionScope = isPlatformAdmin || !hasOwnAgency;
+
   const fetcher = useCallback(
     async (signal: AbortSignal): Promise<AccountingDay | null> => {
       void signal;
       if (!token || !canView) return null;
-      // Platform admins have no single agency scope; show the institution day.
-      return isPlatformAdmin
+      return wantsInstitutionScope
         ? fetchCurrentAccountingDay(token, { scope: "institution" })
         : fetchCurrentAccountingDay(token);
     },
-    [token, canView, isPlatformAdmin],
+    [token, canView, wantsInstitutionScope],
   );
 
   const { data: day, loading, error } = useApi(fetcher, [
     token,
     canView,
-    isPlatformAdmin,
+    wantsInstitutionScope,
   ]);
 
   if (!canView || error) return null;
@@ -95,6 +108,23 @@ export function AccountingDayChip() {
     >
       <Icon className="h-3.5 w-3.5" />
       <span>{label}</span>
+      {/* Which day this is. There are two scopes — one per agency, and one for the
+          institution that head-office staff work in — and the status alone is the
+          same sentence for both. Two people side by side were reading "journée
+          ouverte" about different days, and an agency day being open says nothing
+          about the institution's, or the other way round. Taken from the day the
+          API returned rather than from the scope requested, so it says what is
+          actually on screen. */}
+      {day ? (
+        <>
+          <span aria-hidden className="h-3 w-px bg-current opacity-30" />
+          <span className="opacity-80">
+            {day.scope === "institution"
+              ? t("shell.topBar.accountingDay.scopeInstitution")
+              : t("shell.topBar.accountingDay.scopeAgency")}
+          </span>
+        </>
+      ) : null}
       {day?.business_date ? (
         <>
           <span aria-hidden className="h-3 w-px bg-current opacity-30" />

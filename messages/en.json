@@ -572,6 +572,7 @@
         "roles": "Roles & permissions",
         "audit": "Audit log",
         "databaseBackups": "Backups",
+        "institution": "Institution",
         "denominations": "Currency denomination",
         "batch": "Batch Procedure",
         "tills": "Tills",
@@ -595,13 +596,16 @@
         "operationCodes": "Operation codes & postings",
         "sectors": "Business sectors",
         "journalEntries": "Miscellaneous entries",
+        "exerciseClosings": "Exercise closing",
+        "resultAppropriations": "Result appropriation",
         "globalClientImage": "Global client image",
         "reportsPar": "PAR",
         "ledgerJournal": "Journal of entries",
         "cashDraft": "Cash blotter",
         "reportsExigible": "Loan receivables",
         "reportsRelease": "Lien release",
-        "reportsBalance": "Trial balance"
+        "reportsBalance": "Trial balance",
+        "reportsIncomeStatement": "Income statement"
       }
     },
     "topBar": {
@@ -629,7 +633,9 @@
         "cancelled": "Day cancelled",
         "none": "No open day",
         "loading": "Day status…",
-        "ariaLabel": "View accounting day"
+        "ariaLabel": "View accounting day",
+        "scopeInstitution": "Head office",
+        "scopeAgency": "Agency"
       }
     },
     "userMenu": {
@@ -978,6 +984,19 @@
         "updatedBody": "Changes have been saved.",
         "statusChangedTitle": "Status changed",
         "statusChangedBody": "Action \"{action}\" applied."
+      },
+      "viewer": {
+        "visual": "Document",
+        "characteristics": "Characteristics",
+        "front": "Front",
+        "back": "Back",
+        "loading": "Loading…",
+        "unavailable": "File unavailable",
+        "noFile": "No file attached",
+        "openFile": "Open in a new tab",
+        "submittedAt": "Submitted on",
+        "verifiedAt": "Verified on",
+        "rejectionReason": "Rejection reason"
       }
     },
     "guarantors": {
@@ -1407,6 +1426,67 @@
       "managerChangedBody": "Management of {name} has been updated."
     }
   },
+  "institution": {
+    "pageTitle": "Institution",
+    "pageDescription": "The institution's declared legal identity. These details are stamped onto supervisory filings and issued attestations.",
+    "errorTitle": "Unable to load the institution profile",
+    "saveErrorTitle": "Unable to save",
+    "unconfiguredTitle": "Institution not yet identified",
+    "unconfiguredBody": "The legal name and approval details are blank. Fill them in before generating a regulatory filing — they are never guessed.",
+    "sections": {
+      "identity": "Legal identity",
+      "regulatory": "Approval and registration",
+      "address": "Head office",
+      "contact": "Contact",
+      "declared": "Declared accounting settings"
+    },
+    "fields": {
+      "legal_name": "Legal name",
+      "legal_nameHint": "The legal person, exactly as written on the approval decision and the RCCM — including the legal form (e.g. \"HABIS MICROFINANCE SA\"). Regulatory filings use this name.",
+      "trade_name": "Trade name",
+      "legal_form": "Legal form",
+      "emf_category": "EMF category",
+      "supervisory_authority": "Supervisory authority",
+      "approval_number": "Approval number",
+      "approval_date": "Approval date",
+      "registration_number": "Registration number (RCCM)",
+      "tax_identification_number": "Taxpayer number (NIU)",
+      "address_line_1": "Address line 1",
+      "address_line_2": "Address line 2",
+      "po_box": "PO box",
+      "city": "City",
+      "region": "Region",
+      "country": "Country",
+      "phone_number": "Phone",
+      "fax_number": "Fax",
+      "email": "Email",
+      "website": "Website",
+      "declared_reporting_currency": "Declared reporting currency",
+      "declaredCurrencyHint": "Declarative only: the accounting configuration remains authoritative for the currency actually used.",
+      "fiscal_year_start_month": "First month of the fiscal year",
+      "fiscalMonthPlaceholder": "Choose a month",
+      "fiscalMonthHint": "Declarative only: the accounting calendar remains authoritative.",
+      "trade_nameHint": "The name you trade under publicly — the branch sign, receipts, the app (e.g. \"HabisLoan\"). Leave empty if it is the same as the legal name."
+    },
+    "months": {
+      "1": "January",
+      "2": "February",
+      "3": "March",
+      "4": "April",
+      "5": "May",
+      "6": "June",
+      "7": "July",
+      "8": "August",
+      "9": "September",
+      "10": "October",
+      "11": "November",
+      "12": "December"
+    },
+    "toast": {
+      "savedTitle": "Institution updated",
+      "savedBody": "The institution profile has been saved."
+    }
+  },
   "accounts": {
     "pageTitle": "Reference data — Customer accounts",
     "pageDescription": "Branch customer accounts: balances, transactions and lifecycle.",
@@ -1483,6 +1563,7 @@
       "productHint": "Catalog managed in \"Account products\".",
       "legacyType": "Type (free text)",
       "ledgerAccount": "Ledger account",
+      "ledgerAccountCode": "Accounting account (GL code)",
       "ledgerAccountPlaceholder": "Inherit from product",
       "ledgerAccountHint": "Optional — if left blank, the account inherits the product's ledger account.",
       "noLedgerAccounts": "No active ledger account in this branch. Create one in Ledger accounts.",
@@ -1493,7 +1574,9 @@
       "status": "Status",
       "statusPlaceholder": "Select a status…",
       "pendingOpeningFee": "Opening fee to collect",
-      "openingFeeCollectedAt": "Opening fee collected on"
+      "openingFeeCollectedAt": "Opening fee collected on",
+      "noProducts": "No active account product for this agency. Create one under “Account products”, or check the agency you selected.",
+      "ledgerAccountInherits": "Leave empty: the account takes its product's default ledger account. Choosing one here requires chart-of-accounts access."
     },
     "toast": {
       "createdTitle": "Account created",
@@ -1587,7 +1670,12 @@
         "phone": "Phone",
         "mandate": "Mandate type",
         "status": "Status",
-        "period": "Period"
+        "period": "Period",
+        "scope": "Scope"
+      },
+      "scope": {
+        "client": "All accounts",
+        "account": "This account"
       }
     },
     "signatures": {
@@ -2034,6 +2122,7 @@
       "firstInstallment": "1st installment",
       "trancheDuration": "Frequency (days)",
       "daysHint": "In days.",
+      "derivedHint": "Computed automatically from the number of installments and the first due date.",
       "gracePeriod": "Grace period (days)",
       "totalDuration": "Total term (days)",
       "amortizationAccount": "Amortization account",
@@ -2047,9 +2136,9 @@
       "sectorPlaceholder": "Select a sector…",
       "subSector": "Sub-sector",
       "subSectorPlaceholder": "Select a sub-sector…",
-      "financedActivityCode": "Financed activity code",
       "activityAddress": "Activity address",
-      "entrepreneurAddress": "Entrepreneur address"
+      "entrepreneurAddress": "Entrepreneur address",
+      "accountsNone": "This client has no account. Not a blocker: these accounts are only used for disbursement and repayments, and the loan registers without them."
     },
     "toast": {
       "createdTitle": "Loan created",
@@ -2132,7 +2221,8 @@
         "tax": "Tax",
         "total": "Total",
         "remaining": "Outstanding principal"
-      }
+      },
+      "emptyNoPermission": "No schedule generated, and your profile cannot generate one. Ask a loan officer or the branch manager."
     },
     "visa": {
       "title": "Approval workflow",
@@ -2225,10 +2315,6 @@
       "monthly": "Monthly",
       "custom": "Custom"
     },
-    "depositType": {
-      "percentage": "Percentage",
-      "fixed": "Fixed amount"
-    },
     "filters": {
       "searchLabel": "Search",
       "searchPlaceholder": "Product code or name…",
@@ -2287,66 +2373,24 @@
       "amountHint": "Amount in currency (XAF).",
       "dueDateDay": "Due date day",
       "dueDateDayHint": "Day of the month (1–31).",
-      "minGrace": "Min. grace period (days)",
-      "maxGrace": "Max. grace period (days)",
+      "minGrace": "Min. repayment deferral (days)",
+      "maxGrace": "Max. repayment deferral (days)",
       "interestRate": "Interest rate",
-      "taxRate": "Tax rate",
+      "taxRate": "VAT on principal",
       "insuranceRate": "Insurance rate",
       "rateHint": "Decimal value (per the API convention).",
-      "feeAmount": "Processing fee",
-      "floorAmount": "Floor amount",
-      "depositType": "Guarantee deposit type",
-      "depositTypePlaceholder": "Select…",
-      "depositValue": "Guarantee deposit value",
-      "depositValueHint": "Percentage or amount depending on the selected type.",
+      "depositValue": "Guarantee deposit (%)",
+      "depositValueHint": "Percentage of the granted principal. The approved policy is 10%.",
       "penaltyGraceDays": "Grace days before penalty",
       "penaltyGraceDaysHint": "Period (in days) after the due date before a penalty is applied. The field actually used by the engine.",
-      "penaltyHint": "Penalty applied each arrears period. The engine uses the value type, value and base; the value frozen when the loan was created takes precedence over later product edits.",
-      "penaltyValue": "Penalty value",
-      "penaltyValueAmountHint": "Flat amount in FCFA charged each arrears period.",
-      "penaltyValueRateHint": "Percentage rate (e.g. 2 = 2%) applied to the chosen base each period.",
-      "penaltyValueType": "Penalty value type",
-      "penaltyValueTypeHint": "Flat amount or percentage of the base.",
-      "penaltyValueTypePlaceholder": "Select a type…",
-      "penaltyFormulaType": "Formula type (descriptive)",
-      "penaltyFormulaTypeHint": "Descriptive label frozen onto the loan; does not affect the calculation.",
-      "penaltyFormulaTypePlaceholder": "Select a formula…",
-      "penaltyFormulaBase": "Penalty formula base",
-      "penaltyFormulaBaseHint": "The amount the percentage applies to.",
-      "penaltyFormulaBasePlaceholder": "Select a base…",
-      "ledgerAccount": "Default ledger account",
-      "ledgerAccountHint": "Ledger account (chart of accounts, P16) inherited by default by loans created with this product.",
-      "ledgerAccountPlaceholder": "Select an account…",
-      "policiesLabel": "Attached calculation policies",
-      "policiesHint": "Enables a named calculation policy (a formula configured on the back end). Leave unchecked if not used.",
-      "policyInterest": "Interest policy",
-      "policyPenalty": "Penalty & arrears policy",
-      "policyPenaltyDisabledHint": "Unavailable: this policy is not approved on the back end (attaching it causes loan creation to fail). See back-issues #16.",
-      "policyUnapprovedHint": "Unavailable: policy not approved on the back end (formula-policies catalog). Attaching it causes loan creation to fail.",
-      "policyRepaymentAllocation": "Repayment allocation order",
-      "policyFee": "Fee policy",
-      "policyTax": "Tax policy",
-      "policyInsurance": "Insurance policy",
-      "policyGuaranteeDeposit": "Guarantee deposit policy",
+      "dossierFeeTaxRate": "VAT on dossier fees (%)",
+      "penaltyHint": "The penalty is the same for every credit: a fixed part of 5,000 FCFA plus a variable part of 2% of the unpaid amount, applied together by the arrears engine. It is not configurable per product — only the grace period above is.",
+      "accountsAutomaticHint": "No default accounting account: each credit line automatically opens its own accounts at setup — a receivable for the principal and, where a guarantee is taken, a liability holding it — under the control accounts mapped for the agency.",
+      "policiesAutomaticHint": "Credit policies — interest, schedule, repayment allocation, fees, taxes, insurance, guarantee and penalties — apply automatically to every loan.",
       "status": "Status",
       "statusPlaceholder": "Default status (active)…",
-      "statusHint": "Archiving is done via the \"Archive\" action."
-    },
-    "penaltyValueTypeOptions": {
-      "amount": "Flat amount",
-      "percentage": "Percentage"
-    },
-    "penaltyFormulaBaseOptions": {
-      "unpaid_scheduled_due": "Remaining unpaid due",
-      "overdue_amount": "Overdue amount (gross)",
-      "principal": "Installment principal",
-      "outstanding_principal": "Outstanding principal"
-    },
-    "penaltyFormulaTypeOptions": {
-      "fixed": "Fixed",
-      "flat_rate": "Flat rate",
-      "percentage": "Percentage",
-      "variable_rate": "Variable rate"
+      "statusHint": "Archiving is done via the \"Archive\" action.",
+      "feeRate": "Dossier fee rate (%)"
     },
     "toast": {
       "createdTitle": "Product created",
@@ -2440,9 +2484,6 @@
       "openingFeeLedgerAccountPlaceholder": "Use the agency mapping",
       "openingFeeLedgerAccountHint": "Leave empty to use the agency-wide opening fee mapping. Otherwise type a code to pick a commission sub-account dedicated to this account type.",
       "amountHint": "Amount in the product currency.",
-      "isOrdinarySavings": "Ordinary savings",
-      "isRecoveryAccount": "Recovery account",
-      "allowsRecoveryDebit": "Allows recovery debit",
       "allowsOverdraft": "Allows overdraft",
       "overdraftLimit": "Overdraft limit",
       "status": "Status",
@@ -2679,7 +2720,8 @@
       "needSource": "Choose the payment source first.",
       "types": {
         "dossier_fee": "Dossier fee",
-        "dossier_fee_tax": "Dossier fee tax",
+        "principal_tax": "Principal VAT",
+        "dossier_fee_tax": "Dossier fee VAT",
         "guarantee_deposit": "Guarantee deposit"
       },
       "status": {
@@ -2726,6 +2768,7 @@
     "columns": {
       "code": "Code",
       "name": "Name",
+      "structure": "Structure",
       "class": "Class",
       "normalSide": "Normal balance side",
       "type": "Type",
@@ -2733,15 +2776,20 @@
       "actions": "Actions"
     },
     "class": {
-      "asset": "Asset",
-      "liability": "Liability",
-      "equity": "Equity",
-      "revenue": "Revenue",
-      "expense": "Expense"
+      "capitaux_permanents": "Class 1 — Permanent capital",
+      "valeurs_immobilisees": "Class 2 — Fixed assets",
+      "operations_clientele": "Class 3 — Customer operations",
+      "tiers": "Class 4 — Third parties",
+      "tresorerie_interbancaire": "Class 5 — Treasury & interbank operations",
+      "charges": "Class 6 — Expenses",
+      "produits": "Class 7 — Income",
+      "hors_bilan": "Class 9 — Off-balance sheet",
+      "soldes_intermediaires_gestion": "Class 8 — Intermediate management balances"
     },
     "side": {
       "debit": "Debit",
-      "credit": "Credit"
+      "credit": "Credit",
+      "none": "No imposed side (bivalent)"
     },
     "status": {
       "active": "Active",
@@ -2769,12 +2817,16 @@
       "name": "Name",
       "class": "Class",
       "classPlaceholder": "Choose a class",
-      "classEditHint": "The class is immutable after creation.",
+      "classEditHint": "Correctable while the account carries no movements. By PCEMF convention the class matches the leading digit of the code (a 5xxxxx code is class 5).",
       "type": "Type (optional)",
       "typeHint": "Free-form sub-categorisation, e.g. \"cash\", \"bank\".",
       "agency": "Agency",
       "agencyPlaceholder": "Assigned agency",
-      "agencyHint": "Leave empty for an institutional account (all agencies).",
+      "agencyHint": "Leave empty to use your own agency.",
+      "scope": "Scope",
+      "scopeHint": "An institution account groups the detail accounts of every agency (e.g. 571000 Caisse Globale above 571001, 571002…).",
+      "nature": "Nature",
+      "natureHint": "A grouping account consolidates the accounts beneath it and receives no entries.",
       "parent": "Parent account",
       "parentPlaceholder": "None (root account)",
       "parentHint": "Links this account to a higher-level account.",
@@ -2783,7 +2835,8 @@
       "normalSideHint": "Side that increases the account. Pre-filled based on the class.",
       "status": "Status",
       "statusPlaceholder": "Status",
-      "statusHint": "An inactive account can no longer be posted to."
+      "statusHint": "An inactive account can no longer be posted to.",
+      "classDerivedHint": "Determined by the code: in the PCEMF chart the class is its leading digit (a 5xxxxx code is class 5)."
     },
     "drawer": {
       "titleCreate": "New general ledger account",
@@ -2793,7 +2846,16 @@
       "sectionIdentity": "Identity",
       "sectionStructure": "Structure",
       "sectionAccounting": "Accounting",
+      "institutionGroupingNote": "An institution account is always a grouping account: it consolidates the agency accounts beneath it and receives no entries.",
       "create": "Create"
+    },
+    "scope": {
+      "agency": "Agency",
+      "institution": "Institution"
+    },
+    "nature": {
+      "postable": "Postable account (detail)",
+      "grouping": "Grouping account"
     },
     "archive": {
       "title": "Archive this account?",
@@ -2821,9 +2883,12 @@
       "print": "Print / PDF",
       "openingBalance": "Opening balance",
       "closingBalance": "Closing balance",
+      "balanceSide": "Balance position",
       "totalDebit": "Total debit",
       "totalCredit": "Total credit",
       "empty": "No movement for this period.",
+      "consolidatedNote": "Grouping account: the amounts below consolidate the detail accounts beneath it.",
+      "consolidatedForbidden": "An institution account's balance consolidates the entries of every agency. Reading it requires the institution-scope read permission.",
       "pageOf": "Page {page} / {total}",
       "printFilePrefix": "ledger-account-statement",
       "printHeading": "General ledger account statement",
@@ -2834,6 +2899,10 @@
         "debit": "Debit",
         "credit": "Credit"
       }
+    },
+    "picker": {
+      "noResults": "No matching account",
+      "searching": "Searching…"
     }
   },
   "sectors": {
@@ -3570,7 +3639,13 @@
       "submitting": "Generating…",
       "errorTitle": "Generation failed",
       "successTitle": "Report generated",
-      "successBody": "The report was computed and added to the list."
+      "successBody": "The report was computed and added to the list.",
+      "consolidated": "Consolidation",
+      "consolidatedHint": "Consolidated, grouping accounts report the total of the detail accounts beneath them. Grand totals count each movement once either way.",
+      "consolidatedOff": "Detail accounts only",
+      "consolidatedOn": "Consolidated (rolled up)",
+      "agencyAllPlaceholder": "All agencies (institution-wide)",
+      "agencyConsolidatedHint": "Leave empty for the institution-wide rollup. Choosing an agency restricts the report to that agency's own tree."
     },
     "unavailableType": "No matching report type is exposed by the API for this section.",
     "errorTitle": "Unable to load reports",
@@ -3588,6 +3663,7 @@
       "trial_balance": "Trial balance",
       "general_ledger": "General ledger",
       "emf_trial_balance": "EMF trial balance (COBAC)",
+      "income_statement": "Income statement",
       "credit_portfolio_outstanding": "Loan portfolio outstanding",
       "credit_par_delinquency": "Portfolio at risk (PAR)",
       "credit_collection_performance": "Collection performance"
@@ -3617,6 +3693,10 @@
       "balance": {
         "title": "Trial balance",
         "description": "Trial balance, general ledger and EMF/COBAC balance."
+      },
+      "incomeStatement": {
+        "title": "Income statement",
+        "description": "The eight soldes intermédiaires de gestion (80 to 87), computed from classes 6 and 7."
       }
     },
     "release": {
@@ -3686,7 +3766,9 @@
         "itemsTitle": "Asset details",
         "noItems": "No detailed asset"
       }
-    }
+    },
+    "definitionsForbidden": "You do not have access to the report catalogue, so no report can be generated here. Reports already generated remain viewable and printable.",
+    "definitionsUnavailable": "The report catalogue could not be loaded, so no report can be generated here. Reports already generated remain viewable and printable."
   },
   "operationCodes": {
     "pageTitle": "Accounting — Operation codes & postings",
@@ -3819,7 +3901,9 @@
         "edit": "Edit",
         "approve": "Approve",
         "archive": "Archive",
-        "menu": "Posting actions"
+        "menu": "Posting actions",
+        "approve": "Approve",
+        "reject": "Reject"
       },
       "filters": {
         "search": "Search",
@@ -3864,9 +3948,11 @@
         "updatedBody": "The posting has been updated.",
         "archivedTitle": "Posting archived",
         "archivedBody": "The posting has been archived.",
-        "approvedTitle": "Posting approved",
-        "approvedBody": "The posting can now be used by the engine.",
-        "errorTitle": "Action not allowed"
+        "errorTitle": "Action not allowed",
+        "approvedTitle": "Mapping approved",
+        "approvedBody": "The posting rule is now in service.",
+        "rejectedTitle": "Mapping rejected",
+        "rejectedBody": "The posting rule was not approved."
       }
     }
   },
@@ -4182,7 +4268,11 @@
       "openSessionsBody": "Close every teller session before starting the day-close. Otherwise the day stays stuck in closing (sessions can no longer be closed once the close has started).",
       "openSessionsLink": "Go to teller sessions →",
       "openSessionsBlock": "Close the open teller sessions first.",
-      "errorTitle": "Could not load the accounting day"
+      "errorTitle": "Could not load the accounting day",
+      "controlsPassed": "The {count} close control(s) have run and passed. You can finalise the day, or cancel the closing to reopen it.",
+      "controlsFailed": "{count} close control(s) failed. Fix the cause and cancel the closing to return the day to open, then start it again.",
+      "controlOk": "passed",
+      "controlKo": "failed"
     },
     "fields": {
       "openedAt": "Opened at",
@@ -4211,7 +4301,9 @@
       "dateHint": "Leave empty to derive the next business date automatically.",
       "submit": "Open the day",
       "submitting": "Opening…",
-      "errorTitle": "Could not open the day"
+      "errorTitle": "Could not open the day",
+      "dateFollowsInstitution": "An agency day opens on the institution's date. Head office moves that date for the whole network.",
+      "institutionNotOpen": "The institution has no accounting day open, so no agency day can be opened yet. Open the institution's date first — the whole network works within it."
     },
     "reopen": {
       "title": "Reopen the accounting day",
@@ -4473,5 +4565,93 @@
       "cancelToastTitle": "Plan cancelled",
       "cancelToastBody": "The restore plan was cancelled."
     }
+  },
+  "exerciseClosings": {
+    "title": "Exercise closing",
+    "description": "Solde classes 6 and 7 and carry the result to 131 (profit) or 132 (loss).",
+    "close": "Close the exercise",
+    "closing": "Closing…",
+    "created": "Closing drawn up. Approve and post it with the “Approve and post” button on its row — as a different user from the one who just drew it up.",
+    "ownAgency": "My agency",
+    "preconditions": "Exercises are closed in order, and the previous closing must already be posted. The entry is dated the last day of the exercise, so that agency's accounting day for that date must be open — the head-office day is a separate one and does not stand in for it.",
+    "awaitingNotice": "A closing awaiting review has transferred nothing: its exercise is still held in classes 6 and 7. The “Approve and post” button on its row completes the transfer, and must be used by someone other than whoever drew it up.",
+    "empty": "No exercise has been closed yet.",
+    "benefice": "profit",
+    "perte": "loss",
+    "fields": {
+      "agency": "Agency",
+      "fiscalYear": "Exercise"
+    },
+    "columns": {
+      "fiscalYear": "Exercise",
+      "agency": "Agency",
+      "period": "Period",
+      "result": "Net result",
+      "carriedTo": "Carried to",
+      "status": "Status",
+      "action": "Action"
+    },
+    "status": {
+      "posted": "Posted",
+      "awaitingReview": "Awaiting review"
+    },
+    "errors": {
+      "year": "Enter the exercise as a four-digit year, for example 2026."
+    },
+    "forbidden": "Your profile does not have the rights required to view exercise closings.",
+    "finish": "Approve and post",
+    "finishing": "Posting…",
+    "finished": "Closing posted. The result is now carried to its account.",
+    "finishFailed": "Could not post the closing"
+  },
+  "resultAppropriations": {
+    "title": "Result appropriation",
+    "description": "Allocate the exercise's result out of 131 (or 132) as the general assembly decided: legal reserve, other reserves, retained earnings, dividends.",
+    "allocate": "Record the appropriation",
+    "allocating": "Recording…",
+    "addLine": "Add a line",
+    "created": "Appropriation recorded. Approve and post it with the “Approve and post” button on its row — as a different user from the one who just recorded it.",
+    "ownAgency": "My agency",
+    "toAllocate": "To allocate:",
+    "remaining": "Remaining:",
+    "decidedOnHint": "Date of the assembly's decision.",
+    "noPostedClosing": "No posted closing found for this exercise and agency. The result must be closed and its transfer posted before it can be allocated.",
+    "preconditions": "The allocations must add up to exactly the result being allocated, and the agency's accounting day for the decision date must be open — the head-office day is a separate one. An exercise is allocated once.",
+    "awaitingNotice": "An appropriation awaiting review has moved nothing: the result is still held in 131 or 132. The “Approve and post” button on its row completes it, and must be used by someone other than whoever recorded it.",
+    "empty": "No result has been allocated yet.",
+    "forbidden": "Your profile does not have the rights required to view result appropriations.",
+    "fields": {
+      "agency": "Agency",
+      "fiscalYear": "Exercise",
+      "decidedOn": "Decided on",
+      "account": "Destination account",
+      "amount": "Amount"
+    },
+    "columns": {
+      "fiscalYear": "Exercise",
+      "agency": "Agency",
+      "decidedOn": "Decided on",
+      "amount": "Amount",
+      "source": "From",
+      "status": "Status",
+      "action": "Action"
+    },
+    "status": {
+      "posted": "Posted",
+      "awaitingReview": "Awaiting review"
+    },
+    "errors": {
+      "year": "Enter the exercise as a four-digit year, for example 2026.",
+      "decidedOn": "Give the date of the assembly's decision.",
+      "noAllocations": "Add at least one destination account with an amount.",
+      "amount": "Each amount must be greater than zero."
+    },
+    "finish": "Approve and post",
+    "finishing": "Posting…",
+    "finished": "Appropriation posted. The result has left 131/132.",
+    "finishFailed": "Could not post the appropriation"
+  },
+  "staffPicker": {
+    "empty": "No eligible staff member. Check that someone in this agency holds the expected role."
   }
 }

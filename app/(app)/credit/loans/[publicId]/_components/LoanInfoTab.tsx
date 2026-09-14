@@ -1,5 +1,6 @@
 "use client";
 
+import { clientDisplayName } from "@/lib/format/clientName";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
@@ -32,25 +33,40 @@ export function LoanInfoTab({
 }: Props) {
   const t = useTranslations();
 
-  const clientName = client
-    ? [client.last_name?.toUpperCase(), client.first_name]
-        .filter((part): part is string => !!part && part.length > 0)
-        .join(" ") ||
-      client.client_reference ||
-      client.public_id
-    : loan.client_public_id;
+  // Server-resolved: the local `clients` list is capped, so the lookup misses
+  // for any holder past it and used to fall back to a raw ULID — and the join
+  // below dropped the middle name even when it hit.
+  const clientName =
+    loan.client_display_name ??
+    (client
+      ? clientDisplayName(client) || client.client_reference || client.public_id
+      : loan.client_public_id);
 
+  // Server-resolved first, for the same reason as the holder above: each of
+  // these catalogues is a separate privileged fetch. The product needs
+  // `loan.products.view` (the accountant and compliance-officer lack it, yet
+  // both sign a visa from this file, so they saw a ULID) and the sector lists
+  // need `sectors.view` / `sub-sectors.view` (held only by the agency-manager
+  // and kyc-officer, so for everyone else the fields rendered blank — reading
+  // as « the sector was never saved » rather than as a lookup failure).
   const product = products.find(
     (p) => p.public_id === loan.loan_product_public_id,
   );
-  const productLabel = product
-    ? `${product.code} — ${product.name}`
-    : loan.loan_product_public_id;
+  const productLabel =
+    loan.loan_product_label ??
+    (product
+      ? `${product.code} — ${product.name}`
+      : loan.loan_product_public_id);
 
   const sector = sectors.find((s) => s.public_id === loan.sector_public_id);
   const subSector = subSectors.find(
     (s) => s.public_id === loan.sub_sector_public_id,
   );
+  const sectorLabel =
+    loan.sector_label ?? (sector ? `${sector.code} — ${sector.name}` : null);
+  const subSectorLabel =
+    loan.sub_sector_label ??
+    (subSector ? `${subSector.code} — ${subSector.name}` : null);
 
   return (
     <div className="flex flex-col gap-4">
@@ -99,16 +115,11 @@ export function LoanInfoTab({
         <Grid>
           <PlainField
             label={t("loans.fields.sector")}
-            value={sector ? `${sector.code} — ${sector.name}` : null}
+            value={sectorLabel}
           />
           <PlainField
             label={t("loans.fields.subSector")}
-            value={subSector ? `${subSector.code} — ${subSector.name}` : null}
-          />
-          <PlainField
-            label={t("loans.fields.financedActivityCode")}
-            value={loan.financed_activity_code}
-            mono
+            value={subSectorLabel}
           />
           <PlainField
             label={t("loans.fields.activityAddress")}

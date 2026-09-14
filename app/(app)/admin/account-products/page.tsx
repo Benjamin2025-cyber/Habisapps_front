@@ -5,8 +5,6 @@ import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { fetchAgencies, type Agency } from "@/lib/api/agencies";
 import {
-  fetchLedgerAccounts,
-  type LedgerAccount,
 } from "@/lib/api/ledger-accounts";
 import {
   createAccountProduct,
@@ -92,58 +90,23 @@ export default function AccountProductsPage() {
   ]);
 
   const [agencies, setAgencies] = useState<Agency[]>([]);
-  const [ledgerAccounts, setLedgerAccounts] = useState<LedgerAccount[]>([]);
+  const [agenciesError, setAgenciesError] = useState<string | null>(null);
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
-    Promise.all([
-      fetchAgencies(token, { perPage: 100 }).catch(() => ({ data: [] })),
-      fetchLedgerAccounts(token, { perPage: 100 }).catch(() => ({ data: [] })),
-    ]).then(([ag, la]) => {
-      if (cancelled) return;
-      setAgencies(ag.data as Agency[]);
-      setLedgerAccounts(la.data as LedgerAccount[]);
-    });
+    // One list, loaded on its own: a swallowed failure here used to leave the
+    // agency picker empty with nothing to say why.
+    fetchAgencies(token, { perPage: 100 })
+      .then((ag) => {
+        if (!cancelled) setAgencies(ag.data as Agency[]);
+      })
+      .catch((cause: unknown) => {
+        if (!cancelled) setAgenciesError(localizeApiError(cause).generalMessage);
+      });
     return () => {
       cancelled = true;
     };
   }, [token]);
-
-  /*
-   * The picker's list. Two things make a naive load useless here: the chart
-   * runs to several hundred accounts across agencies, and the endpoint orders
-   * by recency — so the first page is entirely per-dossier divisionaries
-   * (`3222.LN-…`, `CLI000001`) created by the last loans and clients, and the
-   * account someone actually wants is never in it.
-   *
-   * So an empty term is allowed as long as an agency is given: opening the
-   * drawer loads that agency's accounts rather than a global first hundred that
-   * may belong to another agency entirely and filter down to nothing. Typing
-   * then searches the whole chart server-side.
-   */
-  const searchLedgerAccounts = useCallback(
-    async (search: string, agencyPublicId: string) => {
-      if (!token) return;
-      const term = search.trim();
-      if (term.length < 2 && !agencyPublicId) return;
-      try {
-        const response = await fetchLedgerAccounts(token, {
-          perPage: 100,
-          search: term.length >= 2 ? term : undefined,
-          agencyPublicId: agencyPublicId || undefined,
-          excludeDivisionary: true,
-        });
-        setLedgerAccounts((current) => {
-          const merged = new Map(current.map((account) => [account.public_id, account]));
-          response.data.forEach((account) => merged.set(account.public_id, account));
-          return Array.from(merged.values());
-        });
-      } catch {
-        // Keep the already loaded referential available if lookup fails.
-      }
-    },
-    [token],
-  );
 
   const visibleProducts = useMemo(() => {
     if (!data) return [];
@@ -298,8 +261,7 @@ export default function AccountProductsPage() {
           mode={drawerMode ?? "create"}
           initial={editing}
           agencies={agencies}
-          ledgerAccounts={ledgerAccounts}
-          onLedgerAccountSearch={searchLedgerAccounts}
+          agenciesError={agenciesError}
           onClose={closeDrawer}
           onSubmit={handleSubmit}
         />

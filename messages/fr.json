@@ -572,6 +572,7 @@
         "roles": "Rôles & permissions",
         "audit": "Journal d'audit",
         "databaseBackups": "Sauvegardes",
+        "institution": "Institution",
         "denominations": "Type monnaie",
         "batch": "Procédure Batch",
         "tills": "Caisses",
@@ -595,13 +596,16 @@
         "operationCodes": "Codes opération & imputations",
         "sectors": "Secteurs d'activité",
         "journalEntries": "Opérations diverses",
+        "exerciseClosings": "Clôture de l'exercice",
+        "resultAppropriations": "Affectation du résultat",
         "globalClientImage": "Image globale client",
         "reportsPar": "PAR",
         "ledgerJournal": "Journal des écritures",
         "cashDraft": "Brouillard de caisse",
         "reportsExigible": "Exigible prêt",
         "reportsRelease": "Main levée",
-        "reportsBalance": "Balance des comptes"
+        "reportsBalance": "Balance des comptes",
+        "reportsIncomeStatement": "Compte de résultat"
       }
     },
     "topBar": {
@@ -629,7 +633,9 @@
         "cancelled": "Journée annulée",
         "none": "Aucune journée ouverte",
         "loading": "Statut journée…",
-        "ariaLabel": "Voir la journée comptable"
+        "ariaLabel": "Voir la journée comptable",
+        "scopeInstitution": "Siège",
+        "scopeAgency": "Agence"
       }
     },
     "userMenu": {
@@ -978,6 +984,19 @@
         "updatedBody": "Les modifications ont été enregistrées.",
         "statusChangedTitle": "Statut modifié",
         "statusChangedBody": "Action « {action} » appliquée."
+      },
+      "viewer": {
+        "visual": "Document",
+        "characteristics": "Caractéristiques",
+        "front": "Recto",
+        "back": "Verso",
+        "loading": "Chargement…",
+        "unavailable": "Fichier indisponible",
+        "noFile": "Aucun fichier joint",
+        "openFile": "Ouvrir dans un nouvel onglet",
+        "submittedAt": "Soumis le",
+        "verifiedAt": "Vérifié le",
+        "rejectionReason": "Motif du rejet"
       }
     },
     "guarantors": {
@@ -1407,6 +1426,67 @@
       "managerChangedBody": "La gestion de {name} a été mise à jour."
     }
   },
+  "institution": {
+    "pageTitle": "Institution",
+    "pageDescription": "L'identité légale déclarée de l'institution. Ces informations sont reportées sur les états réglementaires et les attestations délivrées.",
+    "errorTitle": "Impossible de charger la fiche institution",
+    "saveErrorTitle": "Enregistrement impossible",
+    "unconfiguredTitle": "Institution non encore identifiée",
+    "unconfiguredBody": "La raison sociale et les références d'agrément sont vides. Renseignez-les avant de générer un état réglementaire : elles ne sont jamais déduites.",
+    "sections": {
+      "identity": "Identité légale",
+      "regulatory": "Agrément et immatriculation",
+      "address": "Siège social",
+      "contact": "Contact",
+      "declared": "Paramètres comptables déclarés"
+    },
+    "fields": {
+      "legal_name": "Raison sociale",
+      "legal_nameHint": "La personne morale, exactement telle qu'elle figure sur la décision d'agrément et au RCCM — forme juridique incluse (ex. « HABIS MICROFINANCE SA »). C'est ce nom qui figure sur les états réglementaires.",
+      "trade_name": "Nom commercial",
+      "legal_form": "Forme juridique",
+      "emf_category": "Catégorie EMF",
+      "supervisory_authority": "Autorité de supervision",
+      "approval_number": "Numéro d'agrément",
+      "approval_date": "Date d'agrément",
+      "registration_number": "Numéro d'immatriculation (RCCM)",
+      "tax_identification_number": "Numéro d'identifiant unique (NIU)",
+      "address_line_1": "Adresse ligne 1",
+      "address_line_2": "Adresse ligne 2",
+      "po_box": "Boîte postale",
+      "city": "Ville",
+      "region": "Région",
+      "country": "Pays",
+      "phone_number": "Téléphone",
+      "fax_number": "Fax",
+      "email": "E-mail",
+      "website": "Site web",
+      "declared_reporting_currency": "Devise de reporting déclarée",
+      "declaredCurrencyHint": "Purement déclaratif : la configuration comptable reste la référence pour la devise réellement utilisée.",
+      "fiscal_year_start_month": "Premier mois de l'exercice",
+      "fiscalMonthPlaceholder": "Choisir un mois",
+      "fiscalMonthHint": "Purement déclaratif : le calendrier comptable reste la référence.",
+      "trade_nameHint": "Le nom sous lequel vous exercez publiquement — l'enseigne de l'agence, les reçus, l'application (ex. « HabisLoan »). Laissez vide s'il est identique à la raison sociale."
+    },
+    "months": {
+      "1": "Janvier",
+      "2": "Février",
+      "3": "Mars",
+      "4": "Avril",
+      "5": "Mai",
+      "6": "Juin",
+      "7": "Juillet",
+      "8": "Août",
+      "9": "Septembre",
+      "10": "Octobre",
+      "11": "Novembre",
+      "12": "Décembre"
+    },
+    "toast": {
+      "savedTitle": "Institution mise à jour",
+      "savedBody": "La fiche institution a été enregistrée."
+    }
+  },
   "accounts": {
     "pageTitle": "Référentiel — Comptes clients",
     "pageDescription": "Comptes clients de l'agence : soldes, mouvements et cycle de vie.",
@@ -1483,6 +1563,7 @@
       "productHint": "Catalogue géré dans « Produits de compte ».",
       "legacyType": "Type (libellé libre)",
       "ledgerAccount": "Compte comptable",
+      "ledgerAccountCode": "Compte comptable (code)",
       "ledgerAccountPlaceholder": "Hériter du produit",
       "ledgerAccountHint": "Optionnel — laissé vide, le compte hérite du compte comptable du produit.",
       "noLedgerAccounts": "Aucun compte comptable actif dans cette agence. Créez-en dans Comptes généraux.",
@@ -1493,7 +1574,9 @@
       "status": "Statut",
       "statusPlaceholder": "Sélectionner un statut…",
       "pendingOpeningFee": "Frais d'ouverture à prélever",
-      "openingFeeCollectedAt": "Frais d'ouverture prélevés le"
+      "openingFeeCollectedAt": "Frais d'ouverture prélevés le",
+      "noProducts": "Aucun produit de compte actif pour cette agence. Créez-en un dans « Produits de compte », ou vérifiez l'agence choisie.",
+      "ledgerAccountInherits": "Laissez vide : le compte reprendra le compte comptable par défaut de son produit. Choisir un compte ici demande un droit sur le plan comptable."
     },
     "toast": {
       "createdTitle": "Compte créé",
@@ -1587,7 +1670,12 @@
         "phone": "Téléphone",
         "mandate": "Type de mandat",
         "status": "Statut",
-        "period": "Période"
+        "period": "Période",
+        "scope": "Portée"
+      },
+      "scope": {
+        "client": "Tous les comptes",
+        "account": "Ce compte"
       }
     },
     "signatures": {
@@ -2034,6 +2122,7 @@
       "firstInstallment": "1re échéance",
       "trancheDuration": "Périodicité (jours)",
       "daysHint": "En jours.",
+      "derivedHint": "Calculé automatiquement à partir du nombre d'échéances et de la date de première échéance.",
       "gracePeriod": "Différé (jours)",
       "totalDuration": "Durée totale (jours)",
       "amortizationAccount": "Compte d'amortissement",
@@ -2047,9 +2136,9 @@
       "sectorPlaceholder": "Sélectionner un secteur…",
       "subSector": "Sous-secteur",
       "subSectorPlaceholder": "Sélectionner un sous-secteur…",
-      "financedActivityCode": "Code activité financée",
       "activityAddress": "Adresse de l'activité",
-      "entrepreneurAddress": "Adresse de l'entrepreneur"
+      "entrepreneurAddress": "Adresse de l'entrepreneur",
+      "accountsNone": "Ce client n'a aucun compte. Ce n'est pas bloquant : ces comptes ne servent qu'au déblocage et aux remboursements, et le prêt s'enregistre sans eux."
     },
     "toast": {
       "createdTitle": "Prêt créé",
@@ -2132,7 +2221,8 @@
         "tax": "Taxe",
         "total": "Total",
         "remaining": "Capital restant"
-      }
+      },
+      "emptyNoPermission": "Aucun tableau généré, et votre profil ne permet pas de le générer. Demandez à un agent de crédit ou au chef d'agence."
     },
     "visa": {
       "title": "Circuit de visa",
@@ -2225,10 +2315,6 @@
       "monthly": "Mensuelle",
       "custom": "Personnalisée"
     },
-    "depositType": {
-      "percentage": "Pourcentage",
-      "fixed": "Montant fixe"
-    },
     "filters": {
       "searchLabel": "Rechercher",
       "searchPlaceholder": "Code ou nom du produit…",
@@ -2287,66 +2373,24 @@
       "amountHint": "Montant en devise (XAF).",
       "dueDateDay": "Jour d'échéance",
       "dueDateDayHint": "Jour du mois (1–31).",
-      "minGrace": "Délai de grâce min. (jours)",
-      "maxGrace": "Délai de grâce max. (jours)",
+      "minGrace": "Différé de remboursement min. (jours)",
+      "maxGrace": "Différé de remboursement max. (jours)",
       "interestRate": "Taux d'intérêt",
-      "taxRate": "Taux de taxe",
+      "taxRate": "TVA sur le principal",
       "insuranceRate": "Taux d'assurance",
       "rateHint": "Valeur décimale (selon la convention de l'API).",
-      "feeAmount": "Frais de dossier",
-      "floorAmount": "Montant plancher",
-      "depositType": "Type de dépôt de garantie",
-      "depositTypePlaceholder": "Sélectionner…",
-      "depositValue": "Valeur du dépôt de garantie",
-      "depositValueHint": "Pourcentage ou montant selon le type choisi.",
+      "depositValue": "Dépôt de garantie (%)",
+      "depositValueHint": "Pourcentage du capital accordé. La politique approuvée est de 10 %.",
       "penaltyGraceDays": "Jours de grâce avant pénalité",
       "penaltyGraceDaysHint": "Délai (en jours) après l'échéance avant l'application d'une pénalité. Champ réellement utilisé par le moteur.",
-      "penaltyHint": "Pénalité appliquée à chaque période d'arriéré. Le moteur utilise le type de valeur, la valeur et la base ; la valeur figée à la création du prêt prime sur les modifications ultérieures du produit.",
-      "penaltyValue": "Valeur de pénalité",
-      "penaltyValueAmountHint": "Montant fixe en FCFA prélevé à chaque période d'arriéré.",
-      "penaltyValueRateHint": "Taux en pourcentage (ex. 2 = 2 %) appliqué à la base choisie à chaque période.",
-      "penaltyValueType": "Type de valeur de pénalité",
-      "penaltyValueTypeHint": "Montant fixe ou pourcentage de la base.",
-      "penaltyValueTypePlaceholder": "Sélectionner un type…",
-      "penaltyFormulaType": "Type de formule (descriptif)",
-      "penaltyFormulaTypeHint": "Étiquette descriptive figée sur le prêt ; n'affecte pas le calcul.",
-      "penaltyFormulaTypePlaceholder": "Sélectionner une formule…",
-      "penaltyFormulaBase": "Base de la formule de pénalité",
-      "penaltyFormulaBaseHint": "Montant auquel le pourcentage s'applique.",
-      "penaltyFormulaBasePlaceholder": "Sélectionner une base…",
-      "ledgerAccount": "Compte comptable par défaut",
-      "ledgerAccountHint": "Compte comptable (plan comptable P16) hérité par défaut par les prêts créés avec ce produit.",
-      "ledgerAccountPlaceholder": "Sélectionner un compte…",
-      "policiesLabel": "Politiques de calcul rattachées",
-      "policiesHint": "Active une politique de calcul nommée (formule paramétrée côté back). Laisser décoché si non utilisée.",
-      "policyInterest": "Politique d'intérêt",
-      "policyPenalty": "Politique de pénalités & arriérés",
-      "policyPenaltyDisabledHint": "Non disponible : cette politique n'est pas approuvée côté back (la rattacher fait échouer la création de prêt). Voir back-issues #16.",
-      "policyUnapprovedHint": "Non disponible : politique non approuvée côté back (catalogue formula-policies). La rattacher fait échouer la création de prêt.",
-      "policyRepaymentAllocation": "Ordre d'imputation des remboursements",
-      "policyFee": "Politique de frais",
-      "policyTax": "Politique de taxe",
-      "policyInsurance": "Politique d'assurance",
-      "policyGuaranteeDeposit": "Politique de dépôt de garantie",
+      "dossierFeeTaxRate": "TVA sur les frais de dossier (%)",
+      "penaltyHint": "La pénalité est la même pour tous les crédits : une partie fixe de 5 000 FCFA plus une partie variable de 2 % du montant impayé, appliquées ensemble par le moteur des arriérés. Elle n'est pas paramétrable par produit — seul le délai de grâce ci-dessus l'est.",
+      "accountsAutomaticHint": "Aucun compte comptable par défaut : chaque ligne de crédit ouvre automatiquement ses propres comptes lors de la mise en place — une créance pour le principal et, si une garantie est prise, un compte de dépôt qui la porte — sous les comptes de regroupement mappés pour l'agence.",
+      "policiesAutomaticHint": "Les politiques de crédit — intérêts, échéancier, imputation, frais, taxes, assurance, garantie et pénalités — sont appliquées automatiquement à tous les prêts.",
       "status": "Statut",
       "statusPlaceholder": "Statut par défaut (actif)…",
-      "statusHint": "L'archivage se fait via l'action « Archiver »."
-    },
-    "penaltyValueTypeOptions": {
-      "amount": "Montant fixe",
-      "percentage": "Pourcentage"
-    },
-    "penaltyFormulaBaseOptions": {
-      "unpaid_scheduled_due": "Échéance impayée restante",
-      "overdue_amount": "Montant échu (brut)",
-      "principal": "Principal de l'échéance",
-      "outstanding_principal": "Principal restant dû"
-    },
-    "penaltyFormulaTypeOptions": {
-      "fixed": "Forfaitaire",
-      "flat_rate": "Taux fixe",
-      "percentage": "Pourcentage",
-      "variable_rate": "Taux variable"
+      "statusHint": "L'archivage se fait via l'action « Archiver ».",
+      "feeRate": "Taux des frais de dossier (%)"
     },
     "toast": {
       "createdTitle": "Produit créé",
@@ -2440,9 +2484,6 @@
       "openingFeeLedgerAccountPlaceholder": "Utiliser le mappage de l'agence",
       "openingFeeLedgerAccountHint": "Laissez vide pour utiliser le mappage « frais d'ouverture » de l'agence. Sinon, tapez un code pour choisir un sous-compte de commissions dédié à ce type de compte.",
       "amountHint": "Montant dans la devise du produit.",
-      "isOrdinarySavings": "Épargne ordinaire",
-      "isRecoveryAccount": "Compte de recouvrement",
-      "allowsRecoveryDebit": "Autorise le débit de recouvrement",
       "allowsOverdraft": "Autorise le découvert",
       "overdraftLimit": "Plafond de découvert",
       "status": "Statut",
@@ -2679,7 +2720,8 @@
       "needSource": "Choisissez d’abord la source de paiement.",
       "types": {
         "dossier_fee": "Frais de dossier",
-        "dossier_fee_tax": "Taxe sur frais de dossier",
+        "principal_tax": "TVA sur le principal",
+        "dossier_fee_tax": "TVA sur les frais de dossier",
         "guarantee_deposit": "Dépôt de garantie"
       },
       "status": {
@@ -2726,6 +2768,7 @@
     "columns": {
       "code": "Code",
       "name": "Intitulé",
+      "structure": "Structure",
       "class": "Classe",
       "normalSide": "Sens normal",
       "type": "Type",
@@ -2733,15 +2776,20 @@
       "actions": "Actions"
     },
     "class": {
-      "asset": "Actif",
-      "liability": "Passif",
-      "equity": "Capitaux propres",
-      "revenue": "Produit",
-      "expense": "Charge"
+      "capitaux_permanents": "Classe 1 — Comptes de capitaux permanents",
+      "valeurs_immobilisees": "Classe 2 — Comptes de valeurs immobilisées",
+      "operations_clientele": "Classe 3 — Comptes d'opérations avec la clientèle",
+      "tiers": "Classe 4 — Comptes de tiers",
+      "tresorerie_interbancaire": "Classe 5 — Comptes de trésorerie et d'opérations interbancaires",
+      "charges": "Classe 6 — Comptes de charges",
+      "produits": "Classe 7 — Comptes de produits",
+      "hors_bilan": "Classe 9 — Comptes de hors bilan",
+      "soldes_intermediaires_gestion": "Classe 8 — Soldes intermédiaires de gestion"
     },
     "side": {
       "debit": "Débit",
-      "credit": "Crédit"
+      "credit": "Crédit",
+      "none": "Sans sens imposé (bivalent)"
     },
     "status": {
       "active": "Actif",
@@ -2769,12 +2817,16 @@
       "name": "Intitulé",
       "class": "Classe",
       "classPlaceholder": "Choisir une classe",
-      "classEditHint": "La classe est immuable après création.",
+      "classEditHint": "Corrigeable tant que le compte ne porte aucun mouvement. Par convention PCEMF, la classe correspond au premier chiffre du code (un code 5xxxxx relève de la classe 5).",
       "type": "Type (optionnel)",
       "typeHint": "Sous-catégorisation libre, ex. « caisse », « banque ».",
       "agency": "Agence",
       "agencyPlaceholder": "Agence de rattachement",
-      "agencyHint": "Laissez vide pour un compte institutionnel (toutes agences).",
+      "agencyHint": "Laissez vide pour utiliser votre agence de rattachement.",
+      "scope": "Périmètre",
+      "scopeHint": "Un compte institutionnel regroupe les comptes de détail de toutes les agences (ex. 571000 Caisse Globale au-dessus de 571001, 571002…).",
+      "nature": "Nature",
+      "natureHint": "Un compte de regroupement consolide les comptes placés sous lui et ne reçoit aucune écriture.",
       "parent": "Compte parent",
       "parentPlaceholder": "Aucun (compte racine)",
       "parentHint": "Rattache ce compte à un compte de niveau supérieur.",
@@ -2783,7 +2835,8 @@
       "normalSideHint": "Sens d'augmentation du compte. Pré-rempli selon la classe.",
       "status": "Statut",
       "statusPlaceholder": "Statut",
-      "statusHint": "Un compte inactif ne peut plus être imputé."
+      "statusHint": "Un compte inactif ne peut plus être imputé.",
+      "classDerivedHint": "Déterminée par le code : dans le plan PCEMF, la classe est son premier chiffre (un code 5xxxxx relève de la classe 5)."
     },
     "drawer": {
       "titleCreate": "Nouveau compte général",
@@ -2793,7 +2846,16 @@
       "sectionIdentity": "Identité",
       "sectionStructure": "Structure",
       "sectionAccounting": "Comptabilité",
+      "institutionGroupingNote": "Un compte institutionnel est toujours un compte de regroupement : il consolide les comptes des agences placés sous lui et ne reçoit aucune écriture.",
       "create": "Créer"
+    },
+    "scope": {
+      "agency": "Agence",
+      "institution": "Institution"
+    },
+    "nature": {
+      "postable": "Compte imputable (détail)",
+      "grouping": "Compte de regroupement"
     },
     "archive": {
       "title": "Archiver ce compte ?",
@@ -2821,9 +2883,12 @@
       "print": "Imprimer / PDF",
       "openingBalance": "Solde d'ouverture",
       "closingBalance": "Solde de clôture",
+      "balanceSide": "Position du solde",
       "totalDebit": "Total débit",
       "totalCredit": "Total crédit",
       "empty": "Aucun mouvement sur cette période.",
+      "consolidatedNote": "Compte de regroupement : les montants ci-dessous consolident les comptes de détail placés sous celui-ci.",
+      "consolidatedForbidden": "Le solde d'un compte institutionnel consolide les écritures de toutes les agences. Sa consultation requiert l'habilitation de lecture au périmètre institution.",
       "pageOf": "Page {page} / {total}",
       "printFilePrefix": "releve-compte",
       "printHeading": "Relevé de compte général",
@@ -2834,6 +2899,10 @@
         "debit": "Débit",
         "credit": "Crédit"
       }
+    },
+    "picker": {
+      "noResults": "Aucun compte correspondant",
+      "searching": "Recherche…"
     }
   },
   "sectors": {
@@ -3570,7 +3639,13 @@
       "submitting": "Génération…",
       "errorTitle": "Échec de la génération",
       "successTitle": "Rapport généré",
-      "successBody": "Le rapport a été calculé et ajouté à la liste."
+      "successBody": "Le rapport a été calculé et ajouté à la liste.",
+      "consolidated": "Consolidation",
+      "consolidatedHint": "En consolidé, les comptes de regroupement reportent le total des comptes de détail placés sous eux. Les totaux généraux ne comptent chaque mouvement qu'une fois dans les deux cas.",
+      "consolidatedOff": "Comptes de détail uniquement",
+      "consolidatedOn": "Consolidé (cumulé)",
+      "agencyAllPlaceholder": "Toutes les agences (institution)",
+      "agencyConsolidatedHint": "Laissez vide pour le cumul au niveau institution. Choisir une agence limite l'état à l'arborescence de cette seule agence."
     },
     "unavailableType": "Aucun type de rapport correspondant n'est exposé par l'API pour cette rubrique.",
     "errorTitle": "Impossible de charger les rapports",
@@ -3588,6 +3663,7 @@
       "trial_balance": "Balance des comptes",
       "general_ledger": "Grand livre",
       "emf_trial_balance": "Balance EMF (COBAC)",
+      "income_statement": "Compte de résultat",
       "credit_portfolio_outstanding": "Encours de crédit",
       "credit_par_delinquency": "Portefeuille à risque (PAR)",
       "credit_collection_performance": "Performance de recouvrement"
@@ -3617,6 +3693,10 @@
       "balance": {
         "title": "Balance des comptes",
         "description": "Balance, grand livre et balance EMF/COBAC."
+      },
+      "incomeStatement": {
+        "title": "Compte de résultat",
+        "description": "Les huit soldes intermédiaires de gestion (80 à 87), calculés à partir des classes 6 et 7."
       }
     },
     "release": {
@@ -3686,7 +3766,9 @@
         "itemsTitle": "Détail des biens",
         "noItems": "Aucun bien détaillé"
       }
-    }
+    },
+    "definitionsForbidden": "Vous n'avez pas accès au catalogue des rapports : aucun rapport ne peut être généré ici. Les rapports déjà générés restent consultables et imprimables.",
+    "definitionsUnavailable": "Le catalogue des rapports n'a pas pu être chargé : aucun rapport ne peut être généré ici. Les rapports déjà générés restent consultables et imprimables."
   },
   "operationCodes": {
     "pageTitle": "Comptabilité — Codes opération & imputations",
@@ -3819,7 +3901,9 @@
         "edit": "Modifier",
         "approve": "Approuver",
         "archive": "Archiver",
-        "menu": "Actions de l'imputation"
+        "menu": "Actions de l'imputation",
+        "approve": "Approuver",
+        "reject": "Rejeter"
       },
       "filters": {
         "search": "Recherche",
@@ -3864,9 +3948,11 @@
         "updatedBody": "L'imputation a été modifiée.",
         "archivedTitle": "Imputation archivée",
         "archivedBody": "L'imputation a été archivée.",
+        "errorTitle": "Action impossible",
         "approvedTitle": "Imputation approuvée",
-        "approvedBody": "L'imputation est maintenant utilisable par le moteur.",
-        "errorTitle": "Action impossible"
+        "approvedBody": "La règle d'imputation est désormais en service.",
+        "rejectedTitle": "Imputation rejetée",
+        "rejectedBody": "La règle d'imputation n'a pas été approuvée."
       }
     }
   },
@@ -4182,7 +4268,11 @@
       "openSessionsBody": "Fermez toutes les sessions de caisse avant de démarrer la clôture. Sinon la journée reste bloquée en clôture (les sessions ne peuvent plus être fermées une fois la clôture lancée).",
       "openSessionsLink": "Aller aux sessions de caisse →",
       "openSessionsBlock": "Fermez d'abord les sessions de caisse ouvertes.",
-      "errorTitle": "Impossible de charger la journée comptable"
+      "errorTitle": "Impossible de charger la journée comptable",
+      "controlsPassed": "Les {count} contrôle(s) de clôture ont été exécutés et sont réussis. Vous pouvez finaliser la journée, ou annuler la clôture pour la réouvrir.",
+      "controlsFailed": "{count} contrôle(s) de clôture ont échoué. Corrigez la cause puis annulez la clôture pour remettre la journée à l'état ouvert, avant de la relancer.",
+      "controlOk": "réussi",
+      "controlKo": "échoué"
     },
     "fields": {
       "openedAt": "Ouverte le",
@@ -4211,7 +4301,9 @@
       "dateHint": "Laissez vide pour déduire automatiquement la prochaine date ouvrée.",
       "submit": "Ouvrir la journée",
       "submitting": "Ouverture…",
-      "errorTitle": "Échec de l'ouverture"
+      "errorTitle": "Échec de l'ouverture",
+      "dateFollowsInstitution": "Une journée d'agence s'ouvre à la date de l'institution. C'est le siège qui déplace cette date, pour tout le réseau.",
+      "institutionNotOpen": "L'institution n'a aucune journée comptable ouverte : aucune journée d'agence ne peut donc encore être ouverte. Ouvrez d'abord la date de l'institution — tout le réseau travaille à l'intérieur de celle-ci."
     },
     "reopen": {
       "title": "Rouvrir la journée comptable",
@@ -4473,5 +4565,93 @@
       "cancelToastTitle": "Plan annulé",
       "cancelToastBody": "Le plan de restauration a été annulé."
     }
+  },
+  "exerciseClosings": {
+    "title": "Clôture de l'exercice",
+    "description": "Solde les classes 6 et 7 et porte le résultat au 131 (bénéfice) ou au 132 (perte).",
+    "close": "Clôturer l'exercice",
+    "closing": "Clôture en cours…",
+    "created": "Clôture établie. Approuvez-la et comptabilisez-la avec le bouton « Approuver et comptabiliser » de sa ligne — par un autre utilisateur que celui qui vient de l'établir.",
+    "ownAgency": "Mon agence",
+    "preconditions": "Les exercices se clôturent dans l'ordre, et la clôture précédente doit déjà être comptabilisée. L'écriture est datée du dernier jour de l'exercice : la journée comptable de cette date, pour cette agence, doit donc être ouverte — celle du siège est une journée distincte et ne la remplace pas.",
+    "awaitingNotice": "Une clôture en attente de revue n'a rien transféré : son exercice reste logé dans les classes 6 et 7. Le bouton « Approuver et comptabiliser » de sa ligne achève le transfert ; il doit être actionné par un autre utilisateur que celui qui l'a établie.",
+    "empty": "Aucun exercice n'a encore été clôturé.",
+    "benefice": "bénéfice",
+    "perte": "perte",
+    "fields": {
+      "agency": "Agence",
+      "fiscalYear": "Exercice"
+    },
+    "columns": {
+      "fiscalYear": "Exercice",
+      "agency": "Agence",
+      "period": "Période",
+      "result": "Résultat net",
+      "carriedTo": "Porté au",
+      "status": "Statut",
+      "action": "Action"
+    },
+    "status": {
+      "posted": "Comptabilisée",
+      "awaitingReview": "En attente de revue"
+    },
+    "errors": {
+      "year": "Saisissez l'exercice sous forme d'année à quatre chiffres, par exemple 2026."
+    },
+    "forbidden": "Votre profil ne dispose pas des droits nécessaires pour consulter les clôtures d'exercice.",
+    "finish": "Approuver et comptabiliser",
+    "finishing": "Comptabilisation…",
+    "finished": "Clôture comptabilisée. Le résultat est porté à son compte.",
+    "finishFailed": "Impossible de comptabiliser la clôture"
+  },
+  "resultAppropriations": {
+    "title": "Affectation du résultat",
+    "description": "Répartissez le résultat de l'exercice depuis le 131 (ou le 132) selon la décision de l'assemblée générale : réserve légale, autres réserves, report à nouveau, dividendes.",
+    "allocate": "Enregistrer l'affectation",
+    "allocating": "Enregistrement…",
+    "addLine": "Ajouter une ligne",
+    "created": "Affectation enregistrée. Approuvez-la et comptabilisez-la avec le bouton « Approuver et comptabiliser » de sa ligne — par un autre utilisateur que celui qui vient de l'enregistrer.",
+    "ownAgency": "Mon agence",
+    "toAllocate": "À répartir :",
+    "remaining": "Reste à affecter :",
+    "decidedOnHint": "Date de la décision de l'assemblée.",
+    "noPostedClosing": "Aucune clôture comptabilisée pour cet exercice et cette agence. Le résultat doit être clôturé et son transfert comptabilisé avant de pouvoir être affecté.",
+    "preconditions": "Les affectations doivent totaliser exactement le résultat à répartir, et la journée comptable de la date de décision, pour cette agence, doit être ouverte — celle du siège est une journée distincte. Un exercice ne s'affecte qu'une fois.",
+    "awaitingNotice": "Une affectation en attente de revue n'a rien transféré : le résultat reste logé au 131 ou au 132. Le bouton « Approuver et comptabiliser » de sa ligne l'achève ; il doit être actionné par un autre utilisateur que celui qui l'a enregistrée.",
+    "empty": "Aucun résultat n'a encore été affecté.",
+    "forbidden": "Votre profil ne dispose pas des droits nécessaires pour consulter les affectations du résultat.",
+    "fields": {
+      "agency": "Agence",
+      "fiscalYear": "Exercice",
+      "decidedOn": "Décidé le",
+      "account": "Compte de destination",
+      "amount": "Montant"
+    },
+    "columns": {
+      "fiscalYear": "Exercice",
+      "agency": "Agence",
+      "decidedOn": "Décidé le",
+      "amount": "Montant",
+      "source": "Depuis",
+      "status": "Statut",
+      "action": "Action"
+    },
+    "status": {
+      "posted": "Comptabilisée",
+      "awaitingReview": "En attente de revue"
+    },
+    "errors": {
+      "year": "Saisissez l'exercice sous forme d'année à quatre chiffres, par exemple 2026.",
+      "decidedOn": "Indiquez la date de la décision de l'assemblée.",
+      "noAllocations": "Ajoutez au moins un compte de destination avec un montant.",
+      "amount": "Chaque montant doit être supérieur à zéro."
+    },
+    "finish": "Approuver et comptabiliser",
+    "finishing": "Comptabilisation…",
+    "finished": "Affectation comptabilisée. Le résultat a quitté le 131/132.",
+    "finishFailed": "Impossible de comptabiliser l'affectation"
+  },
+  "staffPicker": {
+    "empty": "Aucun membre du personnel éligible. Vérifiez que quelqu'un porte bien le rôle attendu dans cette agence."
   }
 }

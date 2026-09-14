@@ -3,6 +3,7 @@
 import { SearchIcon } from "@/components/ui/icons";
 import { Select } from "@/components/ui/Select";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
+import { SELECTABLE_LEDGER_ACCOUNT_CLASSES } from "@/lib/api/ledger-accounts";
 import type {
   LedgerAccountClass,
   LedgerAccountStatus,
@@ -20,13 +21,14 @@ export const EMPTY_LEDGER_ACCOUNTS_FILTERS: LedgerAccountsFilterState = {
   status: "",
 };
 
-const CLASSES: LedgerAccountClass[] = [
-  "asset",
-  "liability",
-  "equity",
-  "revenue",
-  "expense",
-];
+/**
+ * Shared with the create form rather than listed again here. The two lists were
+ * identical copies, which is exactly how they come apart: class 8 has to be
+ * absent from both, for related but not identical reasons — unselectable in the
+ * form because the API refuses it, and pointless as a filter because no class 8
+ * account can exist to match.
+ */
+const CLASSES = SELECTABLE_LEDGER_ACCOUNT_CLASSES;
 
 const STATUSES: LedgerAccountStatus[] = [
   "active",

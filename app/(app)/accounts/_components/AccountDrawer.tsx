@@ -1,11 +1,16 @@
 "use client";
 
+import { clientDisplayName } from "@/lib/format/clientName";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
 import { localizeApiError } from "@/lib/api/errors";
+import {
+  LedgerAccountPicker,
+  type LedgerAccountOption,
+} from "@/app/(app)/_components/LedgerAccountPicker";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
 import { ClientPicker, type ClientOption } from "../../_components/ClientPicker";
 import type { Agency } from "@/lib/api/agencies";
@@ -27,7 +32,7 @@ type Props = {
   clients: ReadonlyArray<Client>;
   agencies: ReadonlyArray<Agency>;
   accountProducts: ReadonlyArray<AccountProduct>;
-  ledgerAccounts: ReadonlyArray<LedgerAccount>;
+  accountProductsError?: string | null;
   onClose: () => void;
   onSubmit: (payload: CustomerAccountWritePayload) => Promise<void>;
 };
@@ -65,7 +70,7 @@ export function AccountDrawer({
   clients,
   agencies,
   accountProducts,
-  ledgerAccounts,
+  accountProductsError,
   onClose,
   onSubmit,
 }: Props) {
@@ -115,11 +120,7 @@ export function AccountDrawer({
     const id = initial?.client_public_id;
     if (!id) return null;
     const client = clients.find((c) => c.public_id === id);
-    const name = client
-      ? [client.last_name?.toUpperCase(), client.first_name]
-          .filter((part): part is string => !!part && part.length > 0)
-          .join(" ") || id
-      : id;
+    const name = client ? clientDisplayName(client) || id : id;
     return {
       value: id,
       label:
@@ -168,29 +169,24 @@ export function AccountDrawer({
   // Active ledger accounts in the account's agency (or institutional). A client
   // deposit account is typically a liability control account (e.g. dépôts).
   const ledgerAgency = form.agency_public_id || null;
-  const ledgerOptions = useMemo(
-    () =>
-      ledgerAccounts
-        .filter(
-          (a) =>
-            a.status === "active" &&
-            (a.agency_public_id === null ||
-              !ledgerAgency ||
-              a.agency_public_id === ledgerAgency),
-        )
-        .map((a) => ({
-          value: a.public_id,
-          label: `${a.code} — ${a.name}`,
-        })),
-    [ledgerAccounts, ledgerAgency],
-  );
+  const [ledgerSelection, setLedgerSelection] =
+    useState<LedgerAccountOption | null>(null);
+  const [ledgerError, setLedgerError] = useState<string | null>(null);
 
   // The "type de compte" is really the linked account product. Only active
   // products are offered; an already-linked product is kept visible even if it
   // is no longer active so editing doesn't silently drop it.
   const productOptions = useMemo(() => {
     const options = accountProducts
-      .filter((product) => product.status === "active")
+      .filter(
+        (product) =>
+          product.status === "active" &&
+          // The catalogue holds a product per agency, so offering all of them
+          // invites opening an account against another branch's product.
+          (product.agency_public_id === null ||
+            !form.agency_public_id ||
+            product.agency_public_id === form.agency_public_id),
+      )
       .map((product) => ({
         value: product.public_id,
         label: `${product.name} — ${t(`accountProducts.family.${product.account_family}`)}`,
@@ -206,7 +202,7 @@ export function AccountDrawer({
       });
     }
     return options;
-  }, [accountProducts, initial, t]);
+  }, [accountProducts, initial, form.agency_public_id, t]);
 
   const statusOptions: Array<{ value: CustomerAccountStatus; label: string }> = [
     { value: "active", label: t("accounts.status.active") },
@@ -361,8 +357,12 @@ export function AccountDrawer({
             placeholder={t("accounts.fields.productPlaceholder")}
             isClearable
             onChange={(next) => set("account_product_public_id", next)}
-            error={errors.account_product_public_id}
-            hint={t("accounts.fields.productHint")}
+            error={accountProductsError ?? errors.account_product_public_id}
+            hint={
+              productOptions.length === 0 && !accountProductsError
+                ? t("accounts.fields.noProducts")
+                : t("accounts.fields.productHint")
+            }
           />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <TextField
@@ -395,17 +395,34 @@ export function AccountDrawer({
         </Section>
 
         <Section title={t("accounts.drawer.sectionAccounting")}>
-          <Select
+          {/* Server-searched and scoped to the account's own agency: the chart
+              runs past a thousand rows per agency, and it repeats each detail
+              account once per agency, so a prefetched page both hid most of the
+              chart and showed the rest three times over. */}
+          <LedgerAccountPicker
             label={t("accounts.fields.ledgerAccount")}
-            value={form.ledger_account_public_id}
-            options={ledgerOptions}
+            value={ledgerSelection}
+            onChange={(option) => {
+              setLedgerSelection(option);
+              set("ledger_account_public_id", option?.value ?? "");
+            }}
+            agencyPublicId={ledgerAgency}
+            resetKey={ledgerAgency ?? ""}
+            initialValuePublicId={initial?.ledger_account_public_id ?? null}
+            filter={(a) => a.status === "active"}
+            onLoadError={setLedgerError}
             placeholder={t("accounts.fields.ledgerAccountPlaceholder")}
-            isClearable
-            onChange={(next) => set("ledger_account_public_id", next)}
             error={errors.ledger_account_public_id}
+            /*
+             * Left blank, the account takes the product's default ledger account
+             * (CustomerAccountWorkflow). That matters most for a teller, who has
+             * no right to read the chart and so sees no options at all: without
+             * saying so, an empty picker looks like a form that cannot be
+             * completed rather than a field that fills itself.
+             */
             hint={
-              ledgerOptions.length === 0
-                ? t("accounts.fields.noLedgerAccounts")
+              ledgerError
+                ? t("accounts.fields.ledgerAccountInherits")
                 : t("accounts.fields.ledgerAccountHint")
             }
           />

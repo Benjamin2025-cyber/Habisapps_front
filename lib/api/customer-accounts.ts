@@ -23,12 +23,17 @@ export type CustomerAccountStatus =
 export type CustomerAccount = {
   public_id: string;
   client_public_id: string | null;
+  /** NOM Prénoms, resolved server-side — no client-side lookup list to miss. */
   client_display_name: string | null;
   agency_public_id: string | null;
   agency_name: string | null;
   ledger_account_public_id: string | null;
+  /** GL code the entries carry — the client's own number. */
   ledger_account_code: string | null;
   account_product_public_id: string | null;
+  /** Resolved server-side. Listing the catalogue needs `account.products.view`,
+   *  which the loan-officer lacks, so the client-side lookup came back empty
+   *  and the sheet printed the product's ULID. */
   account_product_name: string | null;
   account_product_family: string | null;
   account_number: string;

@@ -1,12 +1,11 @@
 "use client";
 
+import { clientDisplayName } from "@/lib/format/clientName";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { fetchAgencies, type Agency } from "@/lib/api/agencies";
 import {
-  fetchLedgerAccounts,
-  type LedgerAccount,
 } from "@/lib/api/ledger-accounts";
 import { fetchClients, type Client } from "@/lib/api/clients";
 import {
@@ -55,12 +54,22 @@ export default function AccountsPage() {
   const session = useSession();
   const toast = useToast();
   const allowed = usePermissionGuard(["customer.accounts.view"]);
-  const canManagePerm = useCanAny([
+  const isPlatformAdmin = useHasRole(["platform-admin"]);
+  /*
+   * Gated on the permission, not on being the platform administrator. Opening a
+   * client account is counter work: the teller who holds
+   * `customer.accounts.create` could not see this button, because the check
+   * asked which role you had rather than what you were allowed to do. Everywhere
+   * else in the app pairs the admin bypass with a permission the way the API
+   * does; this screen was the one that did not.
+   */
+  const managePerm = useCanAny([
     "customer.accounts.create",
     "customer.accounts.update",
-    "customer.accounts.close",
   ]);
-  const canManage = useHasRole(["platform-admin"]) || canManagePerm;
+  // Hook first, combine after: `isPlatformAdmin || useCanAny(...)` short-circuits
+  // the hook call and breaks the rules of hooks.
+  const canManage = isPlatformAdmin || managePerm;
   const canScopeInstitution = useCan("crm.scope.institution.read");
 
   const [filters, setFilters] = useState<AccountsFilterState>(
@@ -98,7 +107,7 @@ export default function AccountsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [products, setProducts] = useState<AccountProduct[]>([]);
-  const [ledgerAccounts, setLedgerAccounts] = useState<LedgerAccount[]>([]);
+  const [productsError, setProductsError] = useState<string | null>(null);
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
@@ -108,14 +117,27 @@ export default function AccountsPage() {
         scope: canScopeInstitution ? "all" : undefined,
       }).catch(() => null),
       fetchAgencies(token, { perPage: 100 }).catch(() => null),
-      fetchAccountProducts(token, { perPage: 100 }).catch(() => null),
-      fetchLedgerAccounts(token, { perPage: 100 }).catch(() => null),
-    ]).then(([clientsResponse, agenciesResponse, productsResponse, ledgerResponse]) => {
+      fetchAccountProducts(token, { perPage: 100 }).catch(
+        (cause: unknown) => cause,
+      ),
+    ]).then(([clientsResponse, agenciesResponse, productsResponse]) => {
       if (cancelled) return;
       setClients(clientsResponse?.data ?? []);
       setAgencies(agenciesResponse?.data ?? []);
-      setProducts(productsResponse?.data ?? []);
-      setLedgerAccounts(ledgerResponse?.data ?? []);
+      // A refused catalogue used to arrive as an empty list, which reads as "this
+      // institution has no products" — so the opening form looked broken rather
+      // than forbidden, and there was nothing on screen to say which.
+      if (
+        productsResponse &&
+        typeof productsResponse === "object" &&
+        "data" in productsResponse
+      ) {
+        setProducts(productsResponse.data as AccountProduct[]);
+        setProductsError(null);
+      } else {
+        setProducts([]);
+        setProductsError(localizeApiError(productsResponse).generalMessage);
+      }
     });
     return () => {
       cancelled = true;
@@ -126,17 +148,16 @@ export default function AccountsPage() {
     const byId = new Map<string, string>();
     for (const client of clients) {
       const name =
-        [client.last_name?.toUpperCase(), client.first_name, client.middle_name]
-          .filter((part): part is string => !!part && part.length > 0)
-          .join(" ") ||
-        client.client_reference ||
-        client.public_id;
+        clientDisplayName(client) || client.client_reference || client.public_id;
       byId.set(client.public_id, name);
     }
     return (publicId: string | null) =>
       publicId ? byId.get(publicId) ?? publicId : "—";
   }, [clients]);
 
+  // `serverName` first: the catalogue fetch above needs
+  // `account.products.view`, which the loan-officer lacks, so `products` came
+  // back empty for them and this column printed the product's ULID.
   const productNameOf = useMemo(() => {
     const byId = new Map<string, string>();
     for (const product of products) {
@@ -145,8 +166,18 @@ export default function AccountsPage() {
         `${product.name} — ${t(`accountProducts.family.${product.account_family}`)}`,
       );
     }
-    return (publicId: string | null) =>
-      publicId ? byId.get(publicId) ?? publicId : "—";
+    return (
+      publicId: string | null,
+      serverName?: string | null,
+      serverFamily?: string | null,
+    ) => {
+      if (serverName) {
+        return serverFamily
+          ? `${serverName} — ${t(`accountProducts.family.${serverFamily}`)}`
+          : serverName;
+      }
+      return publicId ? byId.get(publicId) ?? publicId : "—";
+    };
   }, [products, t]);
 
   // Client-side text filter: the index supports `status` server-side but no
@@ -158,6 +189,7 @@ export default function AccountsPage() {
     return data.data.filter(
       (account) =>
         account.account_number.toLowerCase().includes(needle) ||
+        (account.ledger_account_code ?? "").toLowerCase().includes(needle) ||
         (account.account_title ?? "").toLowerCase().includes(needle) ||
         clientNameOf(account.client_public_id).toLowerCase().includes(needle),
     );
@@ -309,7 +341,7 @@ export default function AccountsPage() {
           clients={clients}
           agencies={agencies}
           accountProducts={products}
-          ledgerAccounts={ledgerAccounts}
+          accountProductsError={productsError}
           onClose={closeDrawer}
           onSubmit={handleSubmit}
         />

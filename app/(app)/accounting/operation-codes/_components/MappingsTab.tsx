@@ -17,11 +17,13 @@ import { Select } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
 import {
   createOperationAccountMapping,
-  approveOperationAccountMapping,
   deleteOperationAccountMapping,
   fetchOperationAccountMappings,
   updateOperationAccountMapping,
+  approveOperationAccountMapping,
+  rejectOperationAccountMapping,
   MAPPING_CREATE_APPROVAL_STATUSES,
+  MAPPING_EDIT_APPROVAL_STATUSES,
   type MappingApprovalStatus,
   type MappingStatus,
   type MappingWritePayload,
@@ -32,10 +34,11 @@ import {
   fetchOperationCodes,
   type OperationCode,
 } from "@/lib/api/operation-codes";
+import { isPostableTarget } from "@/lib/api/ledger-accounts";
 import {
-  fetchLedgerAccounts,
-  type LedgerAccount,
-} from "@/lib/api/ledger-accounts";
+  LedgerAccountPicker,
+  type LedgerAccountOption,
+} from "@/app/(app)/_components/LedgerAccountPicker";
 import { listAgencies, type Agency } from "@/lib/api/agencies";
 import { localizeApiError, localizeApiMessage } from "@/lib/api/errors";
 import { useCanAny, useHasRole } from "@/lib/auth/permissions";
@@ -64,16 +67,6 @@ const APPROVAL_TONE: Record<
   archived: "neutral",
 };
 
-const ALL_APPROVAL_STATUSES: MappingApprovalStatus[] = [
-  "draft",
-  "submitted",
-  "approved",
-  "rejected",
-  "suspended",
-  "revoked",
-  "expired",
-  "archived",
-];
 
 function short(pid: string | null): string {
   if (!pid) return "—";
@@ -90,11 +83,15 @@ export function MappingsTab() {
   const create = useCanAny(["operation.mappings.create"]);
   const update = useCanAny(["operation.mappings.update"]);
   const archive = useCanAny(["operation.mappings.archive"]);
-  const approve = useCanAny(["operation.mappings.approve"]);
   const canCreate = isPlatformAdmin || create;
   const canUpdate = isPlatformAdmin || update;
   const canArchive = isPlatformAdmin || archive;
+  // Approving is the checker half of a maker-checker control, so it is its own
+  // permission — holding create does not imply it.
+  const approve = useCanAny(["operation.mappings.approve"]);
   const canApprove = isPlatformAdmin || approve;
+  // A reviewer holding only the approve permission still needs the row menu —
+  // that is the entire point of splitting maker from checker.
   const hasRowActions = canUpdate || canArchive || canApprove;
 
   const [page, setPage] = useState(1);
@@ -122,58 +119,42 @@ export function MappingsTab() {
   // Reference data: drive the create pickers AND resolve the resource's bare
   // `*_public_id` references to readable codes/names (the API returns only ids).
   const [codes, setCodes] = useState<OperationCode[]>([]);
-  const [accounts, setAccounts] = useState<LedgerAccount[]>([]);
   const [agencies, setAgencies] = useState<Agency[]>([]);
+  const [codesError, setCodesError] = useState<string | null>(null);
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
-    Promise.all([
-      fetchOperationCodes(token, { perPage: 100 }).then((r) => r.data),
-      fetchLedgerAccounts(token, { perPage: 200 }).then((r) => r.data),
-      listAgencies(token),
-    ])
-      .then(([c, a, ag]) => {
-        if (cancelled) return;
-        setCodes(c);
-        setAccounts(a);
-        setAgencies(ag);
+    /*
+     * Loaded independently. Under Promise.all a single refused list rejected the
+     * whole batch, so one missing permission on the operation codes also emptied
+     * the agency picker — two blank dropdowns, one cause, and nothing on screen
+     * connecting them. "Pickers degrade to ids" was only true for the list that
+     * actually failed.
+     */
+    fetchOperationCodes(token, { perPage: 100 })
+      .then((r) => {
+        if (!cancelled) setCodes(r.data);
+      })
+      .catch((cause: unknown) => {
+        if (!cancelled) setCodesError(localizeApiError(cause).generalMessage);
+      });
+
+    listAgencies(token)
+      .then((ag) => {
+        if (!cancelled) setAgencies(ag);
       })
       .catch(() => {
-        /* pickers degrade to ids; non-fatal */
+        /* the agency column falls back to ids; not worth a banner */
       });
     return () => {
       cancelled = true;
     };
   }, [token]);
 
-  const searchLedgerAccounts = useCallback(
-    async (search: string, agencyPublicId: string) => {
-      if (!token || search.trim().length < 2) return;
-      try {
-        const response = await fetchLedgerAccounts(token, {
-          perPage: 100,
-          search,
-          agencyPublicId: agencyPublicId || undefined,
-        });
-        setAccounts((current) => {
-          const merged = new Map(current.map((account) => [account.public_id, account]));
-          response.data.forEach((account) => merged.set(account.public_id, account));
-          return Array.from(merged.values());
-        });
-      } catch {
-        // The base account list remains usable when a remote lookup fails.
-      }
-    },
-    [token],
-  );
 
   const codeByPid = useMemo(
     () => new Map(codes.map((c) => [c.public_id, c])),
     [codes],
-  );
-  const accountByPid = useMemo(
-    () => new Map(accounts.map((a) => [a.public_id, a])),
-    [accounts],
   );
   const agencyByPid = useMemo(
     () => new Map(agencies.map((a) => [a.public_id, a])),
@@ -185,20 +166,11 @@ export function MappingsTab() {
       pid ? (codeByPid.get(pid)?.code ?? short(pid)) : "—",
     [codeByPid],
   );
+  // Read straight off the mapping: the API sends the code and name with it, so
+  // labelling no longer depends on having the account in a locally loaded page.
   const accountLabel = useCallback(
-    (pid: string | null) => {
-      if (!pid) return "—";
-      const a = accountByPid.get(pid);
-      return a ? a.code : short(pid);
-    },
-    [accountByPid],
-  );
-  const accountName = useCallback(
-    (pid: string | null) => {
-      if (!pid) return undefined;
-      return accountByPid.get(pid)?.name;
-    },
-    [accountByPid],
+    (code: string | null, pid: string | null) => code ?? (pid ? short(pid) : "—"),
+    [],
   );
 
   const fetcher = useCallback(
@@ -223,6 +195,34 @@ export function MappingsTab() {
   ]);
 
   const rows = data?.data ?? [];
+
+  // useCallback so the columns memo below (which closes over this) can list it
+  // as a dependency without recomputing on every render.
+  const decide = useCallback(
+    async (mapping: OperationAccountMapping, decision: "approve" | "reject") => {
+      if (!token) return;
+      try {
+        if (decision === "approve") {
+          await approveOperationAccountMapping(token, mapping.public_id);
+        } else {
+          await rejectOperationAccountMapping(token, mapping.public_id);
+        }
+        toast.success(
+          t(`operationCodes.mappings.toast.${decision}dTitle`),
+          t(`operationCodes.mappings.toast.${decision}dBody`),
+        );
+        refetch();
+      } catch (cause) {
+        // Chiefly the two the API enforces: 403 when the caller wrote the rule,
+        // 422 when it has already been decided. Both read clearly as-is.
+        toast.error(
+          t("operationCodes.mappings.toast.errorTitle"),
+          localizeApiError(cause).generalMessage,
+        );
+      }
+    },
+    [token, t, refetch, toast],
+  );
 
   async function handleArchive() {
     if (!token || !confirmArchive) return;
@@ -320,19 +320,16 @@ export function MappingsTab() {
         accessorKey: "debit_ledger_account_public_id",
         header: t("operationCodes.mappings.columns.debit"),
         cell: ({ row }) => {
-          const pid = row.original.debit_ledger_account_public_id;
-          // The code the API serves, not a client-side lookup: resolving the
-          // ULID against a fetched page of accounts stops working the moment
-          // the chart is longer than that page, and the column then prints the
-          // identifier — which is no use to anyone reading a mapping.
-          const code = row.original.debit_ledger_account_code ?? accountLabel(pid);
-          const name = row.original.debit_ledger_account_name ?? accountName(pid);
+          const mapping = row.original;
           return (
             <span
               className="font-mono text-xs tabular-nums text-muted-foreground"
-              title={name ?? undefined}
+              title={mapping.debit_ledger_account_name ?? undefined}
             >
-              {code ?? "—"}
+              {accountLabel(
+                mapping.debit_ledger_account_code,
+                mapping.debit_ledger_account_public_id,
+              )}
             </span>
           );
         },
@@ -341,19 +338,16 @@ export function MappingsTab() {
         accessorKey: "credit_ledger_account_public_id",
         header: t("operationCodes.mappings.columns.credit"),
         cell: ({ row }) => {
-          const pid = row.original.credit_ledger_account_public_id;
-          // The code the API serves, not a client-side lookup: resolving the
-          // ULID against a fetched page of accounts stops working the moment
-          // the chart is longer than that page, and the column then prints the
-          // identifier — which is no use to anyone reading a mapping.
-          const code = row.original.credit_ledger_account_code ?? accountLabel(pid);
-          const name = row.original.credit_ledger_account_name ?? accountName(pid);
+          const mapping = row.original;
           return (
             <span
               className="font-mono text-xs tabular-nums text-muted-foreground"
-              title={name ?? undefined}
+              title={mapping.credit_ledger_account_name ?? undefined}
             >
-              {code ?? "—"}
+              {accountLabel(
+                mapping.credit_ledger_account_code,
+                mapping.credit_ledger_account_public_id,
+              )}
             </span>
           );
         },
@@ -408,13 +402,17 @@ export function MappingsTab() {
                 }
                 if (
                   canApprove &&
-                  ["draft", "submitted"].includes(m.approval_status)
+                  (m.approval_status === "draft" || m.approval_status === "submitted")
                 ) {
                   if (items.length > 0) items.push({ kind: "separator" });
                   items.push({
                     label: t("operationCodes.mappings.actions.approve"),
-                    onClick: () => void handleApprove(m),
-                    disabled: approving === m.public_id,
+                    onClick: () => void decide(m, "approve"),
+                  });
+                  items.push({
+                    label: t("operationCodes.mappings.actions.reject"),
+                    onClick: () => void decide(m, "reject"),
+                    destructive: true,
                   });
                 }
                 if (canArchive && m.status !== "archived") {
@@ -445,14 +443,12 @@ export function MappingsTab() {
       t,
       hasRowActions,
       canUpdate,
-      canApprove,
       canArchive,
-      approving,
+      canApprove,
+      decide,
       codeLabel,
       accountLabel,
-      accountName,
       agencyByPid,
-      handleApprove,
     ],
   );
 
@@ -545,10 +541,9 @@ export function MappingsTab() {
           mode={drawer?.mode ?? "create"}
           initial={drawer?.initial ?? null}
           codes={codes}
-          accounts={accounts}
           agencies={agencies}
+          codesError={codesError}
           codeLabel={codeLabel}
-          onAccountSearch={searchLedgerAccounts}
           onClose={() => setDrawer(null)}
           onSubmit={handleSubmit}
         />
@@ -574,10 +569,9 @@ function MappingDrawer({
   mode,
   initial,
   codes,
-  accounts,
   agencies,
+  codesError,
   codeLabel,
-  onAccountSearch,
   onClose,
   onSubmit,
 }: {
@@ -585,10 +579,9 @@ function MappingDrawer({
   mode: "create" | "edit";
   initial: OperationAccountMapping | null;
   codes: OperationCode[];
-  accounts: LedgerAccount[];
   agencies: Agency[];
+  codesError?: string | null;
   codeLabel: (pid: string | null) => string;
-  onAccountSearch: (search: string, agencyPublicId: string) => Promise<void>;
   onClose: () => void;
   onSubmit: (
     payload: MappingWritePayload,
@@ -610,6 +603,8 @@ function MappingDrawer({
     approval_status: "draft" as MappingApprovalStatus,
   });
   const [submitting, setSubmitting] = useState(false);
+  const [debitAccount, setDebitAccount] = useState<LedgerAccountOption | null>(null);
+  const [creditAccount, setCreditAccount] = useState<LedgerAccountOption | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
 
@@ -643,13 +638,9 @@ function MappingDrawer({
         .map((c) => ({ value: c.public_id, label: `${c.code} — ${c.label}` })),
     [codes],
   );
-  const accountOptions = useMemo(
-    () =>
-      accounts
-        .filter((a) => a.status === "active")
-        .map((a) => ({ value: a.public_id, label: `${a.code} — ${a.name}` })),
-    [accounts],
-  );
+  // A grouping account cannot be an automatic posting target either: the API
+  // refuses it when resolving the mapping's debit/credit legs, so keep it out
+  // of the picker rather than surfacing a 422 on save.
   const agencyOptions = useMemo(
     () =>
       agencies
@@ -664,8 +655,12 @@ function MappingDrawer({
       : (["active", "inactive"] as const)
   ).map((s) => ({ value: s, label: t(`operationCodes.mappings.status.${s}`) }));
 
+  // Neither list offers `approved`/`rejected`: those are decisions taken from
+  // the row menu by someone other than the author, and the API refuses them here.
   const approvalOptions = (
-    isEdit ? ALL_APPROVAL_STATUSES : [...MAPPING_CREATE_APPROVAL_STATUSES]
+    isEdit
+      ? [...MAPPING_EDIT_APPROVAL_STATUSES]
+      : [...MAPPING_CREATE_APPROVAL_STATUSES]
   ).map((s) => ({ value: s, label: t(`operationCodes.mappings.approval.${s}`) }));
 
   const noLeg =
@@ -783,7 +778,10 @@ function MappingDrawer({
             onChange={(next) =>
               setForm((c) => ({ ...c, operation_code_public_id: next }))
             }
-            error={errors.operation_code_public_id}
+            /* A refused catalogue used to render as "no codes", which reads as an
+               institution with none configured rather than a right the reader
+               lacks. */
+            error={codesError ?? errors.operation_code_public_id}
           />
         )}
 
@@ -801,31 +799,39 @@ function MappingDrawer({
           hint={t("operationCodes.mappings.fields.agencyHint")}
         />
 
-        <Select
+        <LedgerAccountPicker
           label={t("operationCodes.mappings.fields.debit")}
-          value={form.debit_ledger_account_public_id}
-          options={accountOptions}
+          value={debitAccount}
+          onChange={(option) => {
+            setDebitAccount(option);
+            setForm((c) => ({
+              ...c,
+              debit_ledger_account_public_id: option?.value ?? "",
+            }));
+          }}
+          initialValuePublicId={initial?.debit_ledger_account_public_id ?? null}
           placeholder={t("operationCodes.mappings.fields.accountPlaceholder")}
-          isClearable
-          isSearchable
-          onInputChange={(search) => void onAccountSearch(search, form.agency_public_id)}
-          onChange={(next) =>
-            setForm((c) => ({ ...c, debit_ledger_account_public_id: next }))
-          }
           error={errors.debit_ledger_account_public_id}
+          // A grouping account is never an automatic posting target either: the
+          // API refuses it when resolving the mapping's legs.
+          filter={isPostableTarget}
         />
-        <Select
+        <LedgerAccountPicker
           label={t("operationCodes.mappings.fields.credit")}
-          value={form.credit_ledger_account_public_id}
-          options={accountOptions}
+          value={creditAccount}
+          onChange={(option) => {
+            setCreditAccount(option);
+            setForm((c) => ({
+              ...c,
+              credit_ledger_account_public_id: option?.value ?? "",
+            }));
+          }}
+          initialValuePublicId={initial?.credit_ledger_account_public_id ?? null}
           placeholder={t("operationCodes.mappings.fields.accountPlaceholder")}
-          isClearable
-          isSearchable
-          onInputChange={(search) => void onAccountSearch(search, form.agency_public_id)}
-          onChange={(next) =>
-            setForm((c) => ({ ...c, credit_ledger_account_public_id: next }))
-          }
           error={errors.credit_ledger_account_public_id}
+          // A grouping account is never an automatic posting target either: the
+          // API refuses it when resolving the mapping's legs.
+          filter={isPostableTarget}
         />
         {noLeg ? (
           <p className="rounded-[var(--radius-field)] border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-foreground">

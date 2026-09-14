@@ -12,6 +12,7 @@ import { createReportRun, type ReportRun } from "@/lib/api/report-runs";
 import { localizeApiError } from "@/lib/api/errors";
 import { useSession } from "@/lib/auth/SessionProvider";
 import { useTranslations } from "@/lib/i18n/I18nProvider";
+import { useCanAny, useHasRole } from "@/lib/auth/permissions";
 
 type Props = {
   open: boolean;
@@ -37,6 +38,7 @@ export function GenerateReportDrawer({ open, onClose, definitions, onGenerated }
   const [currency, setCurrency] = useState("XAF");
   const [periodStart, setPeriodStart] = useState("");
   const [periodEnd, setPeriodEnd] = useState("");
+  const [consolidated, setConsolidated] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -75,6 +77,7 @@ export function GenerateReportDrawer({ open, onClose, definitions, onGenerated }
     setCurrency("XAF");
     setPeriodStart("");
     setPeriodEnd("");
+    setConsolidated(false);
     setError(null);
   }
 
@@ -87,10 +90,40 @@ export function GenerateReportDrawer({ open, onClose, definitions, onGenerated }
   const needsAgency = selected?.requires_agency ?? false;
   const needsCurrency = selected?.requires_currency ?? false;
   const needsPeriod = selected?.requires_period ?? false;
+  /**
+   * Driven by what the definition advertises rather than by its code, so a new
+   * consolidatable report needs no change here. A consolidated run rolls the
+   * chart up through parent accounts and adds scope / parent / postable columns
+   * per row; grand totals still count each movement once.
+   */
+  const supportsConsolidated =
+    selected?.supported_parameters?.includes("consolidated") ?? false;
+
+  /**
+   * A consolidated run spans every agency, so the API requires institution-wide
+   * ledger read — the same grant that gates an institution account's balance.
+   * `accounting.audit.view`, which is all this page needs, does not confer it:
+   * auditor and compliance-officer hold one and not the other. Offering the
+   * choice to them would only produce a 403 on generate.
+   */
+  // Computed unconditionally, then OR'd: `a() || b()` would skip the second
+  // hook whenever the first is true.
+  const isPlatformAdmin = useHasRole(["platform-admin"]);
+  const hasInstitutionRead = useCanAny(["ledger.scope.institution.read"]);
+  const canConsolidate = isPlatformAdmin || hasInstitutionRead;
+
+  /**
+   * Consolidation is institution-wide by nature: with no agency the rollup spans
+   * every agency, which is the whole point of an institution grouping account
+   * (571000 totalling 571001 + 571002…). Naming an agency narrows the run to that
+   * agency's own tree — valid, but it is no longer the consolidated institution
+   * figure. So the agency stops being required as soon as consolidation is on.
+   */
+  const agencyRequired = needsAgency && !consolidated;
 
   const canSubmit =
     !!selected &&
-    (!needsAgency || !!agencyId) &&
+    (!agencyRequired || !!agencyId) &&
     (!needsCurrency || currency.trim().length === 3) &&
     (!needsPeriod || (!!periodStart && !!periodEnd)) &&
     !submitting;
@@ -102,10 +135,17 @@ export function GenerateReportDrawer({ open, onClose, definitions, onGenerated }
     try {
       const run = await createReportRun(token, {
         report_definition_public_id: selected.public_id,
-        agency_public_id: needsAgency ? agencyId : undefined,
+        // Only send an agency that was actually chosen: an empty string would be
+        // rejected, and omitting it is what widens a consolidated run to the
+        // whole institution.
+        agency_public_id: needsAgency && agencyId !== "" ? agencyId : undefined,
         currency: needsCurrency ? currency.trim().toUpperCase() : undefined,
         period_starts_on: needsPeriod ? periodStart : undefined,
         period_ends_on: needsPeriod ? periodEnd : undefined,
+        parameters:
+          supportsConsolidated && consolidated
+            ? { consolidated: true }
+            : undefined,
       });
       reset();
       onGenerated(run);
@@ -164,11 +204,36 @@ export function GenerateReportDrawer({ open, onClose, definitions, onGenerated }
             label={t("reports.generateDrawer.agency")}
             value={agencyId}
             onChange={setAgencyId}
-            placeholder={t("reports.generateDrawer.agencyPlaceholder")}
+            placeholder={
+              agencyRequired
+                ? t("reports.generateDrawer.agencyPlaceholder")
+                : t("reports.generateDrawer.agencyAllPlaceholder")
+            }
+            isClearable={!agencyRequired}
+            hint={
+              agencyRequired
+                ? undefined
+                : t("reports.generateDrawer.agencyConsolidatedHint")
+            }
             options={agencies.map((a) => ({
               value: a.public_id,
               label: a.code ? `${a.code} — ${a.name}` : a.name,
             }))}
+          />
+        ) : null}
+
+        {supportsConsolidated && canConsolidate ? (
+          <Select
+            id="report-consolidated"
+            label={t("reports.generateDrawer.consolidated")}
+            value={consolidated ? "1" : "0"}
+            onChange={(next) => setConsolidated(next === "1")}
+            isSearchable={false}
+            hint={t("reports.generateDrawer.consolidatedHint")}
+            options={[
+              { value: "0", label: t("reports.generateDrawer.consolidatedOff") },
+              { value: "1", label: t("reports.generateDrawer.consolidatedOn") },
+            ]}
           />
         ) : null}
 

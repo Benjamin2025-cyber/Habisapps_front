@@ -20,7 +20,7 @@ type Props = {
    *  sessions (the backend rejects closing someone else's session). */
   currentTellerPublicId: string | null;
   tillLabelOf: (publicId: string | null) => string;
-  tellerNameOf: (publicId: string | null) => string;
+  tellerNameOf: (publicId: string | null, serverName?: string | null) => string;
   onClose: (session: TellerSession) => void;
 };
 
@@ -69,8 +69,10 @@ export function SessionsTable({
         header: t("sessions.columns.teller"),
         cell: ({ row }) => (
           <span className="block max-w-[10rem] truncate text-muted-foreground">
-            {row.original.teller_user_name ??
-              tellerNameOf(row.original.teller_user_public_id)}
+            {tellerNameOf(
+              row.original.teller_user_public_id,
+              row.original.teller_user_name,
+            )}
           </span>
         ),
       },
