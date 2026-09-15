@@ -1576,7 +1576,9 @@
       "pendingOpeningFee": "Opening fee to collect",
       "openingFeeCollectedAt": "Opening fee collected on",
       "noProducts": "No active account product for this agency. Create one under “Account products”, or check the agency you selected.",
-      "ledgerAccountInherits": "Leave empty: the account takes its product's default ledger account. Choosing one here requires chart-of-accounts access."
+      "ledgerAccountInherits": "Leave empty: the account takes its product's default ledger account. Choosing one here requires chart-of-accounts access.",
+      "openingFeeDue": "Opening fee still due",
+      "openingFeeDueHint": "In minor units. Changing the product tariff does not affect already-open accounts: set here what this account should owe."
     },
     "toast": {
       "createdTitle": "Account created",
@@ -2138,7 +2140,12 @@
       "subSectorPlaceholder": "Select a sub-sector…",
       "activityAddress": "Activity address",
       "entrepreneurAddress": "Entrepreneur address",
-      "accountsNone": "This client has no account. Not a blocker: these accounts are only used for disbursement and repayments, and the loan registers without them."
+      "accountsNone": "This client has no account. Not a blocker: these accounts are only used for disbursement and repayments, and the loan registers without them.",
+      "boundsRange": "Product: between {min} and {max} {unit}",
+      "boundsMin": "Product: at least {min} {unit}",
+      "boundsMax": "Product: at most {max} {unit}",
+      "unitDays": "days",
+      "accountsAutoCreated": "The loan's account (amortisation, arrears, transfer and recovery) is created automatically on save. Its number derives from the general-ledger account matching the term: 3282 short, 3181 medium, 3081 long."
     },
     "toast": {
       "createdTitle": "Loan created",
@@ -3328,7 +3335,13 @@
       "signaturePlaceholder": "Choose a signature",
       "noSignatures": "No active signature specimen on this account — required for a withdrawal.",
       "method": "Verification method",
-      "description": "Memo / note"
+      "description": "Memo / note",
+      "depositorIdReference": "Depositor ID document",
+      "depositorIdReferenceHint": "ID card no. 1234567890",
+      "specimen": "Signature specimen",
+      "specimenCapturedOn": "captured on",
+      "specimenMissing": "No scanned specimen is attached to this signature.",
+      "specimenError": "The specimen could not be loaded."
     },
     "initiator": {
       "holder": "Holder",
@@ -3412,7 +3425,14 @@
       "value": "Value",
       "fileName": "operation-receipt",
       "heading": "Cash receipt",
-      "printError": "Could not open the print window (blocked by the browser)."
+      "printError": "Could not open the print window (blocked by the browser).",
+      "paymentMethod": "Payment method",
+      "depositor": "Depositor",
+      "depositorId": "Depositor ID document",
+      "branchCode": "Branch code",
+      "signatureClient": "The customer",
+      "signatureTeller": "The teller",
+      "signatureStamp": "Habibi Finance stamp"
     },
     "submit": {
       "deposit": "Record deposit",
@@ -3456,6 +3476,22 @@
       "reversedTitle": "Transaction reversed",
       "reversedBody": "The transaction has been reversed.",
       "errorTitle": "Action not allowed"
+    },
+    "paymentMethod": {
+      "cash": "Cash",
+      "cheque": "Cheque",
+      "transfer": "Transfer",
+      "mixed": "Mixed"
+    },
+    "channel": {
+      "mobile_money": "Mobile Money",
+      "orange_money": "Orange Money Cameroon",
+      "mtn_mobile_money": "MTN Mobile Money Cameroon",
+      "bank_transfer": "Bank transfer",
+      "clearing_house": "Clearing house",
+      "internal_transfer": "Internal transfer",
+      "branch_counter": "Counter",
+      "other": "Other"
     }
   },
   "cashInspection": {
@@ -3902,7 +3938,6 @@
         "approve": "Approve",
         "archive": "Archive",
         "menu": "Posting actions",
-        "approve": "Approve",
         "reject": "Reject"
       },
       "filters": {

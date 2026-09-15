@@ -79,6 +79,14 @@ export type CustomerAccountWritePayload = {
   currency?: string | null;
   opened_on?: string;
   closed_on?: string | null;
+  /**
+   * Correct what an already-open account still owes in opening fees. A
+   * product's tariff is snapshot at opening and never reaches accounts already
+   * on it — otherwise switching the fee on would bill the whole book — so this
+   * is how one account is brought into line deliberately. Refused by the API
+   * once the fee has been collected.
+   */
+  opening_fee_due_minor?: number;
   status?: CustomerAccountStatus;
 };
 

@@ -41,6 +41,7 @@ type FormState = {
   client_public_id: string;
   account_number: string;
   account_title: string;
+  opening_fee_due_minor: string;
   account_product_public_id: string;
   currency: string;
   agency_public_id: string;
@@ -54,6 +55,7 @@ const EMPTY: FormState = {
   client_public_id: "",
   account_number: "",
   account_title: "",
+  opening_fee_due_minor: "",
   account_product_public_id: "",
   currency: "XAF",
   agency_public_id: "",
@@ -97,6 +99,7 @@ export function AccountDrawer({
         client_public_id: initial.client_public_id ?? "",
         account_number: initial.account_number ?? "",
         account_title: initial.account_title ?? "",
+        opening_fee_due_minor: String(initial.pending_opening_fee_minor ?? 0),
         account_product_public_id: initial.account_product_public_id ?? "",
         currency: initial.currency ?? "XAF",
         agency_public_id: initial.agency_public_id ?? "",
@@ -226,6 +229,13 @@ export function AccountDrawer({
           currency: nullable(form.currency)?.toUpperCase() ?? undefined,
           ledger_account_public_id: nullable(form.ledger_account_public_id),
           closed_on: nullable(form.closed_on),
+          // Only when still owed; the API refuses it after collection.
+          ...(initial?.opening_fee_collected_at == null &&
+          form.opening_fee_due_minor !== ""
+            ? {
+                opening_fee_due_minor: Number(form.opening_fee_due_minor),
+              }
+            : {}),
           status: form.status || undefined,
         }
       : {
@@ -446,6 +456,23 @@ export function AccountDrawer({
               onChange={(event) => set("closed_on", event.target.value)}
               error={errors.closed_on}
             />
+            {/* A product's tariff is snapshot at opening, so switching it on
+                later does not reach accounts already open — that is what stops
+                it billing the existing book. This is the deliberate way to
+                bring one account into line (14/09/2026, point 3). */}
+            {isEdit && initial?.opening_fee_collected_at == null ? (
+              <TextField
+                label={t("accounts.fields.openingFeeDue")}
+                type="number"
+                min={0}
+                value={form.opening_fee_due_minor}
+                onChange={(event) =>
+                  set("opening_fee_due_minor", event.target.value)
+                }
+                error={errors.opening_fee_due_minor}
+                hint={t("accounts.fields.openingFeeDueHint")}
+              />
+            ) : null}
             {isEdit ? (
               <Select
                 label={t("accounts.fields.status")}

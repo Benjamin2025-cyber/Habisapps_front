@@ -1576,7 +1576,9 @@
       "pendingOpeningFee": "Frais d'ouverture à prélever",
       "openingFeeCollectedAt": "Frais d'ouverture prélevés le",
       "noProducts": "Aucun produit de compte actif pour cette agence. Créez-en un dans « Produits de compte », ou vérifiez l'agence choisie.",
-      "ledgerAccountInherits": "Laissez vide : le compte reprendra le compte comptable par défaut de son produit. Choisir un compte ici demande un droit sur le plan comptable."
+      "ledgerAccountInherits": "Laissez vide : le compte reprendra le compte comptable par défaut de son produit. Choisir un compte ici demande un droit sur le plan comptable.",
+      "openingFeeDue": "Frais d'ouverture à prélever",
+      "openingFeeDueHint": "En unités mineures. Modifier le tarif du produit ne touche pas les comptes déjà ouverts : saisissez ici le montant à appliquer à ce compte."
     },
     "toast": {
       "createdTitle": "Compte créé",
@@ -2138,7 +2140,12 @@
       "subSectorPlaceholder": "Sélectionner un sous-secteur…",
       "activityAddress": "Adresse de l'activité",
       "entrepreneurAddress": "Adresse de l'entrepreneur",
-      "accountsNone": "Ce client n'a aucun compte. Ce n'est pas bloquant : ces comptes ne servent qu'au déblocage et aux remboursements, et le prêt s'enregistre sans eux."
+      "accountsNone": "Ce client n'a aucun compte. Ce n'est pas bloquant : ces comptes ne servent qu'au déblocage et aux remboursements, et le prêt s'enregistre sans eux.",
+      "boundsRange": "Produit : entre {min} et {max} {unit}",
+      "boundsMin": "Produit : au moins {min} {unit}",
+      "boundsMax": "Produit : au plus {max} {unit}",
+      "unitDays": "jours",
+      "accountsAutoCreated": "Le compte du prêt (amortissement, impayés, virement et recouvrement) est créé automatiquement à l'enregistrement. Son numéro dérive du compte comptable correspondant à la durée : 3282 court terme, 3181 moyen terme, 3081 long terme."
     },
     "toast": {
       "createdTitle": "Prêt créé",
@@ -3328,7 +3335,13 @@
       "signaturePlaceholder": "Choisir une signature",
       "noSignatures": "Aucun spécimen de signature actif sur ce compte — requis pour un retrait.",
       "method": "Méthode de vérification",
-      "description": "Libellé / note"
+      "description": "Libellé / note",
+      "depositorIdReference": "Pièce d'identité du déposant",
+      "depositorIdReferenceHint": "CNI n° 1234567890",
+      "specimen": "Spécimen de signature",
+      "specimenCapturedOn": "déposé le",
+      "specimenMissing": "Aucun spécimen numérisé n'est rattaché à cette signature.",
+      "specimenError": "Le spécimen n'a pas pu être chargé."
     },
     "initiator": {
       "holder": "Titulaire",
@@ -3412,7 +3425,14 @@
       "value": "Valeur",
       "fileName": "recu-operation",
       "heading": "Reçu de caisse",
-      "printError": "Impossible d'ouvrir la fenêtre d'impression (bloquée par le navigateur)."
+      "printError": "Impossible d'ouvrir la fenêtre d'impression (bloquée par le navigateur).",
+      "paymentMethod": "Mode de règlement",
+      "depositor": "Déposant",
+      "depositorId": "Pièce d'identité du déposant",
+      "branchCode": "Code guichet",
+      "signatureClient": "Le Client",
+      "signatureTeller": "Le Caissier",
+      "signatureStamp": "Cachet Habibi Finance"
     },
     "submit": {
       "deposit": "Enregistrer le versement",
@@ -3456,6 +3476,22 @@
       "reversedTitle": "Opération extournée",
       "reversedBody": "L'opération a été extournée.",
       "errorTitle": "Action impossible"
+    },
+    "paymentMethod": {
+      "cash": "Espèces",
+      "cheque": "Chèque",
+      "transfer": "Virement",
+      "mixed": "Mixte"
+    },
+    "channel": {
+      "mobile_money": "Mobile Money",
+      "orange_money": "Orange Money Cameroun",
+      "mtn_mobile_money": "MTN Mobile Money Cameroun",
+      "bank_transfer": "Virement bancaire",
+      "clearing_house": "Chambre de compensation",
+      "internal_transfer": "Virement interne",
+      "branch_counter": "Guichet",
+      "other": "Autres"
     }
   },
   "cashInspection": {
@@ -3902,7 +3938,6 @@
         "approve": "Approuver",
         "archive": "Archiver",
         "menu": "Actions de l'imputation",
-        "approve": "Approuver",
         "reject": "Rejeter"
       },
       "filters": {

@@ -18,6 +18,7 @@ import {
   type TellerTransaction,
 } from "@/lib/api/teller-transactions";
 import { localizeApiError } from "@/lib/api/errors";
+import { fetchInstitutionName } from "@/lib/api/institution";
 import { printCashReceipt } from "@/lib/print/cashReceipt";
 import { useCanAny, useHasRole } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/SessionProvider";
@@ -157,6 +158,26 @@ export default function CashTransactionsPage() {
 
   const activeSession = openSessions.find((s) => s.public_id === sessionId) ?? null;
 
+  // The receipt is issued by the institution, not by the software, so its
+  // header carries their name. Fetched once; a missing profile simply leaves
+  // the product wordmark in place.
+  const [institutionName, setInstitutionName] = useState<string | undefined>();
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    fetchInstitutionName(token)
+      .then((name) => {
+        if (cancelled) return;
+        if (name) setInstitutionName(name);
+      })
+      .catch(() => {
+        /* Branding is cosmetic; never block a receipt on it. */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
   if (session.status !== "authenticated" || !canView) return null;
 
   function handleDone(tx: TellerTransaction) {
@@ -182,23 +203,8 @@ export default function CashTransactionsPage() {
   function handlePrintReceipt(tx: TellerTransaction) {
     const printed = printCashReceipt({
       transaction: tx,
-      labels: {
-        fileName: t("cashTx.receipt.fileName"),
-        heading: t("cashTx.receipt.heading"),
-        reference: t("cashTx.receipt.reference"),
-        date: t("cashTx.receipt.date"),
-        type: t("cashTx.receipt.type"),
-        typeLabel: t(`cashTx.txType.${tx.transaction_type}`),
-        account: t("cashTx.receipt.account"),
-        holder: t("cashTx.receipt.holder"),
-        amount: t("cashTx.receipt.amount"),
-        openingFee: t("cashTx.receipt.openingFee"),
-        detail: t("cashTx.receipt.label"),
-        value: t("cashTx.receipt.value"),
-        generatedOn: t("common.generatedOn"),
-        status: t("cashTx.recent.status"),
-        statusLabel: t(`cashTx.status.${tx.status}`),
-      },
+      t,
+      institutionName,
       formattedAmount: format.currencyMinor(tx.amount_minor, {
         currency: tx.currency ?? "XAF",
       }),

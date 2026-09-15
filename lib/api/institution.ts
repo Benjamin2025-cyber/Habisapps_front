@@ -86,3 +86,33 @@ export function isInstitutionConfigured(
 ): boolean {
   return profile?.legal_name != null && profile.legal_name.trim() !== "";
 }
+
+/**
+ * The institution's display name for documents handed to customers.
+ *
+ * Read from /me rather than /institution: a teller is the one who prints
+ * receipts and is not allowed the institution profile, which carries tax
+ * identifiers and approval numbers. Returns null when unset, and the caller
+ * falls back to the product wordmark.
+ */
+export async function fetchInstitutionName(token: string): Promise<string | null> {
+  const response = await fetch("/api/v1/me", {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      "X-API-Version": process.env.NEXT_PUBLIC_API_VERSION ?? "1",
+      Authorization: `Bearer ${token}`,
+    },
+    credentials: "omit",
+  });
+
+  if (!response.ok) return null;
+
+  const body: unknown = await response.json();
+  const name =
+    typeof body === "object" && body !== null
+      ? (body as { data?: { institution_name?: unknown } }).data?.institution_name
+      : undefined;
+
+  return typeof name === "string" && name.trim() !== "" ? name : null;
+}
