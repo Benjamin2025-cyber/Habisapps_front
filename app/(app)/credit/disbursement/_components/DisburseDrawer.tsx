@@ -54,7 +54,12 @@ export function DisburseDrawer({ open, loan, onClose, onSubmit }: Props) {
   useEffect(() => {
     if (!open) return;
     setChannel("transfer_account");
-    setTransferAccountId(loan?.transfer_account_public_id ?? "");
+    // Not pre-filled from loan.transfer_account_public_id: that field is also
+    // where the loan's own dossier account is linked (mise en place), so for
+    // any loan created since then it names the loan itself, not a payout
+    // account. The API refuses it either way, but a pre-filled value reads as
+    // a suggestion — better to make the choice deliberate every time.
+    setTransferAccountId("");
     setTellerSessionId("");
     setBusinessDate("");
     setNotes("");
@@ -86,10 +91,16 @@ export function DisburseDrawer({ open, loan, onClose, onSubmit }: Props) {
 
   const accountOptions = useMemo(
     () =>
-      accounts.map((a) => ({
-        value: a.public_id,
-        label: `${a.account_number ?? a.public_id}${a.status ? ` (${a.status})` : ""}`,
-      })),
+      accounts
+        // A loan's own dossier account never holds funds to pay out from or
+        // collect a setup charge into — it is a receivable, credited only by
+        // disbursement itself. Offering it here is how an operator ends up
+        // paying a loan out into itself.
+        .filter((a) => a.account_type !== "loan")
+        .map((a) => ({
+          value: a.public_id,
+          label: `${a.account_number ?? a.public_id}${a.status ? ` (${a.status})` : ""}`,
+        })),
     [accounts],
   );
 
