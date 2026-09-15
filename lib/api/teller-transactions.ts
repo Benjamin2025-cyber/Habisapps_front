@@ -59,6 +59,25 @@ export type TellerTransaction = {
   operation_code: string | null;
   depositor_name: string | null;
   depositor_address: string | null;
+  /** « Références de la pièce d'identité du déposant » — free text, keyed at the counter. */
+  depositor_id_reference: string | null;
+  /** « Code guichet » — the agency's own code, printed on the receipt. */
+  agency_code: string | null;
+  payment_method: string | null;
+  /**
+   * The individual tenders making up the operation. `channel` names how the
+   * money actually arrived — `orange_money`, `mtn_mobile_money`, `bank_transfer`
+   * — which is more specific than `payment_method` and is what the receipt
+   * prints as the mode de règlement.
+   */
+  tenders?: Array<{
+    public_id: string;
+    method: string | null;
+    amount_minor: number | null;
+    currency: string | null;
+    channel: string | null;
+    external_reference: string | null;
+  }>;
   initiator_type: string | null;
   description: string | null;
   created_at: string;
@@ -172,6 +191,7 @@ export type CashDepositPayload = {
   operation_code?: string | null;
   depositor_name?: string | null;
   depositor_address?: string | null;
+  depositor_id_reference?: string | null;
   initiator_type?: InitiatorType;
   initiator_proxy_public_id?: string | null;
   description?: string | null;

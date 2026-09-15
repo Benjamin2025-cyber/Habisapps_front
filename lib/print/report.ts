@@ -28,7 +28,13 @@ export type BrandedReportOptions = {
   generatedLabel: string;
   /** Shown when there are no rows. */
   emptyLabel: string;
-  /** App/brand name shown next to the logo. */
+  /**
+   * Name shown next to the logo. Defaults to the product's own wordmark, but a
+   * document handed to a customer is issued by the institution, not by the
+   * software: « Le logo à afficher sur les reçus est celui d'Habibi Finance
+   * S.A » (14/09/2026). Pass the institution profile's legal or trade name and
+   * the receipt is signed by them.
+   */
   brandName?: string;
   /**
    * Page orientation. Portrait suits a statement's five columns; a wide sheet
@@ -38,6 +44,26 @@ export type BrandedReportOptions = {
    * that wide because it has a lot to say.
    */
   orientation?: "portrait" | "landscape";
+  /**
+   * Paper size. A cash receipt holds a dozen lines; on A4 it fills the top
+   * third and the counter throws away two thirds of every sheet. A5 is the
+   * half-format the guichet actually uses.
+   */
+  pageSize?: "A4" | "A5";
+  /**
+   * Serif typography for documents handed to a customer. The screen stack
+   * (ui-sans-serif → system-ui) resolves to whatever the workstation has and
+   * printed muddy on the counter's laser; a named serif prints the same
+   * everywhere.
+   */
+  serif?: boolean;
+  /** Drop the brand strip under the table — a receipt ends on its signatures. */
+  hideFooter?: boolean;
+  /**
+   * Signature blocks across the foot of the document: « Le Client », « Le
+   * Caissier », « Cachet ». Each gets a ruled space to sign above its label.
+   */
+  signatures?: string[];
 };
 
 function esc(value: unknown): string {
@@ -68,9 +94,14 @@ export function openBrandedReport(options: BrandedReportOptions): boolean {
     emptyLabel,
     brandName = "HabisLoan",
     orientation = "portrait",
+    pageSize = "A4",
+    serif = false,
+    hideFooter = false,
+    signatures = [],
   } = options;
 
   const isLandscape = orientation === "landscape";
+  const isCompact = pageSize === "A5";
 
   const origin = window.location.origin;
   const logoUrl = `${origin}/brand/logo-icon.png`;
@@ -115,30 +146,30 @@ export function openBrandedReport(options: BrandedReportOptions): boolean {
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-family: ${serif ? '"Times New Roman", Times, serif' : 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif'};
     color: #1a1a2e;
-    padding: 28px 32px;
-    font-size: ${isLandscape ? "10px" : "12px"};
+    padding: ${isCompact ? "14px 16px" : "28px 32px"};
+    font-size: ${serif ? "11pt" : isLandscape ? "10px" : "12px"};
   }
-  .brand { display: flex; align-items: center; gap: 12px; border-bottom: 2px solid #e5e7eb; padding-bottom: 14px; }
-  .brand img { width: 48px; height: 48px; object-fit: contain; }
-  .brand .name { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+  .brand { display: flex; align-items: center; gap: 12px; border-bottom: 2px solid #e5e7eb; padding-bottom: ${isCompact ? "6px" : "14px"}; }
+  .brand img { width: ${isCompact ? "32px" : "48px"}; height: ${isCompact ? "32px" : "48px"}; object-fit: contain; }
+  .brand .name { font-size: ${isCompact ? "15px" : "20px"}; font-weight: 800; letter-spacing: -0.5px; }
   .brand .name .accent { color: #a3158a; }
   .brand .name .primary { color: #0b1020; }
-  .doc-head { margin-top: 18px; }
-  .doc-head h1 { font-size: 17px; margin: 0; }
+  .doc-head { margin-top: ${isCompact ? "8px" : "18px"}; }
+  .doc-head h1 { font-size: ${isCompact ? "13px" : "17px"}; margin: 0; }
   .doc-head .sub { color: #6b7280; margin-top: 2px; }
   .doc-head .generated { color: #9ca3af; font-size: 10px; margin-top: 4px; }
-  .meta { display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 16px 0 18px; }
+  .meta { display: flex; flex-wrap: wrap; gap: ${isCompact ? "4px 20px" : "8px 28px"}; margin: ${isCompact ? "8px 0 8px" : "16px 0 18px"}; }
   .meta-item { display: flex; flex-direction: column; }
   .meta-label { text-transform: uppercase; font-size: 9px; letter-spacing: 0.04em; color: #9ca3af; font-weight: 700; }
   .meta-value { font-weight: 600; }
   table { width: 100%; border-collapse: collapse; }
   thead th {
     text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em;
-    color: #6b7280; border-bottom: 1.5px solid #d1d5db; padding: ${isLandscape ? '6px 6px' : '8px 10px'}; background: #f9fafb;
+    color: #6b7280; border-bottom: 1.5px solid #d1d5db; padding: ${isCompact ? '4px 6px' : isLandscape ? '6px 6px' : '8px 10px'}; background: #f9fafb;
   }
-  tbody td { padding: ${isLandscape ? '5px 6px' : '8px 10px'}; border-bottom: 1px solid #eef0f3; vertical-align: top; }
+  tbody td { padding: ${isCompact ? '3px 6px' : isLandscape ? '5px 6px' : '8px 10px'}; border-bottom: 1px solid #eef0f3; vertical-align: top; }
   /* A long sheet repeats its header on every page; the accounting team signs
      each one, and an unlabelled page 3 is not a document. */
   thead { display: table-header-group; }
@@ -147,14 +178,22 @@ export function openBrandedReport(options: BrandedReportOptions): boolean {
   .empty { text-align: center; color: #9ca3af; padding: 28px 10px; }
   tbody tr:nth-child(even) { background: #fcfcfd; }
   .foot { margin-top: 22px; border-top: 1px solid #e5e7eb; padding-top: 8px; color: #9ca3af; font-size: 9px; display: flex; justify-content: space-between; }
-  @page { size: A4 ${orientation}; margin: ${isLandscape ? "10mm" : "14mm"}; }
+  .signatures { display: flex; gap: 16px; margin-top: ${isCompact ? "14px" : "26px"}; page-break-inside: avoid; break-inside: avoid; }
+  .signatures .sig { flex: 1; text-align: center; }
+  /* Room to actually sign, then the rule, then the label beneath it. */
+  .signatures .sig .space { height: ${isCompact ? "42px" : "64px"}; }
+  .signatures .sig .rule { border-top: 1px solid #1a1a2e; margin: 0 6px; }
+  .signatures .sig .who { margin-top: 5px; font-size: ${serif ? "10pt" : "10px"}; font-weight: 700; }
+  @page { size: ${pageSize} ${orientation}; margin: ${isCompact ? "8mm" : isLandscape ? "10mm" : "14mm"}; }
   @media print { body { padding: 0; } .num, tbody tr:nth-child(even) { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 </style>
 </head>
 <body>
   <header class="brand">
     <img src="${esc(logoUrl)}" alt="" />
-    <div class="name"><span class="primary">Habis</span><span class="accent">Loan</span></div>
+    <div class="name">${brandName === "HabisLoan"
+      ? '<span class="primary">Habis</span><span class="accent">Loan</span>'
+      : `<span class="primary">${esc(brandName)}</span>`}</div>
   </header>
   <div class="doc-head">
     <h1>${esc(heading)}</h1>
@@ -166,10 +205,14 @@ export function openBrandedReport(options: BrandedReportOptions): boolean {
     <thead><tr>${headHtml}</tr></thead>
     <tbody>${bodyHtml}</tbody>
   </table>
-  <div class="foot">
-    <span>${esc(brandName)}</span>
-    <span>${esc(documentTitle)}</span>
-  </div>
+  ${signatures.length
+    ? `<div class="signatures">${signatures
+        .map((who) => `<div class="sig"><div class="space"></div><div class="rule"></div><div class="who">${esc(who)}</div></div>`)
+        .join("")}</div>`
+    : ""}
+  ${hideFooter
+    ? ""
+    : `<div class="foot"><span>${esc(brandName)}</span><span>${esc(documentTitle)}</span></div>`}
   <script>
     window.addEventListener("load", function () {
       // Give the logo a moment to paint before opening the print dialog.

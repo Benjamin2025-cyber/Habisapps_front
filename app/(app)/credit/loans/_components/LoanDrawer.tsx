@@ -224,6 +224,28 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
     [accounts],
   );
 
+  /**
+   * The bounds the selected product enforces. Périodicité, différé and durée
+   * are derived server-side and shown read-only, so when a first-instalment
+   * date pushes the différé outside the product's window the rejection lands
+   * on a field the agent cannot edit. Stating the window up front is what the
+   * accounting team asked for on 04/09: « le différé se discute lors de la
+   * mise en place avec le client », which is a conversation they need the
+   * numbers for before they type a date, not after.
+   */
+  const selectedProduct = useMemo(
+    () => products.find((p) => p.public_id === form.loan_product_public_id),
+    [products, form.loan_product_public_id],
+  );
+
+  function boundsHint(min: number | null, max: number | null, unit: string) {
+    if (min === null && max === null) return t("loans.fields.derivedHint");
+    if (min !== null && max !== null)
+      return t("loans.fields.boundsRange", { min, max, unit });
+    if (min !== null) return t("loans.fields.boundsMin", { min, unit });
+    return t("loans.fields.boundsMax", { max: max as number, unit });
+  }
+
   const productName = useMemo(() => {
     if (!isEdit) return "";
     const match = products.find(
@@ -479,7 +501,11 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
               readOnly
               disabled
               error={errors.grace_period_duration}
-              hint={t("loans.fields.derivedHint")}
+              hint={boundsHint(
+                selectedProduct?.min_grace_period_days ?? null,
+                selectedProduct?.max_grace_period_days ?? null,
+                t("loans.fields.unitDays"),
+              )}
             />
             <TextField
               label={t("loans.fields.totalDuration")}
@@ -503,7 +529,18 @@ export function LoanDrawer({ open, mode, initial, onClose, onSubmit }: Props) {
               {t("loans.fields.accountsNone")}
             </p>
           ) : null}
-          {clientPublicId ? (
+          {/* « Le compte d'amortissement du prêt, des impayés, de virement et
+              de recouvrement, est le même pour un crédit donné, il est créé
+              automatiquement lors de la mise en place » (04/09/2026). So a new
+              loan has nothing to pick: the server opens one account under 3282,
+              3181 or 3081 according to the term and links all four. The pickers
+              stay on an existing file, whose accounts may have been chosen by
+              hand and must remain what it was reconciled against. */}
+          {!isEdit ? (
+            <p className="rounded-[var(--radius-field)] border border-border bg-surface-muted/40 px-3 py-2 text-xs text-muted-foreground">
+              {t("loans.fields.accountsAutoCreated")}
+            </p>
+          ) : clientPublicId ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Select
                 label={t("loans.fields.amortizationAccount")}

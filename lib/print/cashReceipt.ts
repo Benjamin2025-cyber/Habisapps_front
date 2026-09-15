@@ -8,68 +8,99 @@ import { openBrandedReport } from "./report";
  * printed, needs the receipt of any operation of the session.
  *
  * Shared by the entry form and the session's operation list so the two cannot
- * print different receipts for the same operation.
+ * print different receipts for the same operation. The labels are resolved
+ * here, from the caller's translator, rather than assembled by each caller —
+ * two hand-written dictionaries are exactly how the two receipts drift apart.
+ *
+ * Format follows CORRECTIONS HABISLOAN 14/09/2026, deuxième préoccupation:
+ * A5 (half-sheet), Times New Roman 11, three signature blocks, and no page
+ * footer — the counter was printing one operation across two A4 sheets.
  */
 export type CashReceiptInput = {
   transaction: TellerTransaction;
-  /** Localised labels; the caller owns the dictionary. */
-  labels: {
-    fileName: string;
-    heading: string;
-    reference: string;
-    date: string;
-    type: string;
-    typeLabel: string;
-    account: string;
-    holder: string;
-    amount: string;
-    amountInWords?: string;
-    openingFee: string;
-    detail: string;
-    value: string;
-    generatedOn: string;
-    status: string;
-    statusLabel: string;
-  };
+  /** The caller's translator; this module owns which keys it needs. */
+  t: (key: string, params?: Record<string, string | number>) => string;
   /** Formatted by the caller, which owns the locale and the currency. */
   formattedAmount: string;
   amountInWords?: string;
   /** Present only on the operation that actually swept it. */
   formattedOpeningFee?: string;
+  /** Institution legal/trade name; the receipt is issued by them, not by us. */
+  institutionName?: string;
 };
 
 export function printCashReceipt(input: CashReceiptInput): boolean {
-  const { transaction: tx, labels } = input;
+  const { transaction: tx, t } = input;
 
   const rows: Array<[string, string]> = [
-    [labels.account, tx.customer_account_number ?? "—"],
-    [labels.holder, tx.client_display_name ?? "—"],
-    [labels.amount, input.formattedAmount],
+    [t("cashTx.receipt.account"), tx.customer_account_number ?? "—"],
+    [t("cashTx.receipt.holder"), tx.client_display_name ?? "—"],
+    [t("cashTx.receipt.amount"), input.formattedAmount],
   ];
 
-  if (input.amountInWords && labels.amountInWords) {
-    rows.push([labels.amountInWords, input.amountInWords]);
+  if (input.amountInWords) {
+    rows.push([t("cashTx.receipt.amountInWords"), input.amountInWords]);
+  }
+  // « Le mode de règlement doit être ajouté comme rubrique du reçu […]
+  // (espèces, orange money cameroun, mtn mobile money cameroun, autres) ».
+  // The tender's channel names the operator where the payment method only says
+  // "transfer", and the counter needs the operator: the institution's caisse
+  // plan gives Orange Money and MTN their own sub-caisses.
+  const channel = tx.tenders?.find((tender) => tender.channel)?.channel;
+  rows.push([
+    t("cashTx.receipt.paymentMethod"),
+    channel && channel !== "branch_counter"
+      ? t(`cashTx.channel.${channel}`)
+      : tx.payment_method
+        ? t(`cashTx.paymentMethod.${tx.payment_method}`)
+        : "—",
+  ]);
+  // « Les références de la pièce d'identité du déposant » — only on the
+  // operations that have a depositor to identify.
+  if (tx.depositor_name || tx.depositor_id_reference) {
+    rows.push([t("cashTx.receipt.depositor"), tx.depositor_name ?? "—"]);
+    rows.push([
+      t("cashTx.receipt.depositorId"),
+      tx.depositor_id_reference ?? "—",
+    ]);
   }
   if (input.formattedOpeningFee) {
-    rows.push([labels.openingFee, input.formattedOpeningFee]);
+    rows.push([t("cashTx.receipt.openingFee"), input.formattedOpeningFee]);
   }
   // A reversed operation must say so on its face, or the reprint of an annulled
   // receipt is indistinguishable from a live one.
-  rows.push([labels.status, labels.statusLabel]);
+  rows.push([t("cashTx.recent.status"), t(`cashTx.status.${tx.status}`)]);
 
   return openBrandedReport({
-    documentTitle: labels.fileName,
-    heading: labels.heading,
-    subheading: tx.reference ?? "—",
+    documentTitle: t("cashTx.receipt.fileName"),
+    ...(input.institutionName ? { brandName: input.institutionName } : {}),
+    heading: t("cashTx.receipt.heading"),
     meta: [
-      { label: labels.reference, value: tx.reference ?? "—" },
-      { label: labels.date, value: tx.transaction_date ?? "—" },
-      { label: labels.type, value: labels.typeLabel },
+      { label: t("cashTx.receipt.reference"), value: tx.reference ?? "—" },
+      { label: t("cashTx.receipt.date"), value: tx.transaction_date ?? "—" },
+      {
+        label: t("cashTx.receipt.type"),
+        value: t(`cashTx.txType.${tx.transaction_type}`),
+      },
+      // « Le code guichet doit être ajouté comme rubrique du reçu ».
+      { label: t("cashTx.receipt.branchCode"), value: tx.agency_code ?? "—" },
     ],
-    columns: [labels.detail, labels.value],
+    columns: [t("cashTx.receipt.label"), t("cashTx.receipt.value")],
     rows,
     numericColumns: [],
-    generatedLabel: labels.generatedOn,
+    generatedLabel: t("common.generatedOn"),
     emptyLabel: "",
+    pageSize: "A5",
+    // « la dimension A5 / un demi format / 21cm sur 15 » — 21 wide by 15 tall
+    // is A5 on its side, i.e. an A4 sheet halved across. Portrait A5 would be
+    // 15 by 21 and is not what the guichet cuts its paper to.
+    orientation: "landscape",
+    serif: true,
+    hideFooter: true,
+    signatures: [
+      t("cashTx.receipt.signatureClient"),
+      t("cashTx.receipt.signatureTeller"),
+      t("cashTx.receipt.signatureStamp"),
+    ],
   });
 }

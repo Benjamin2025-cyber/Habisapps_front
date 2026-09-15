@@ -29,7 +29,9 @@ import type { TellerSession } from "@/lib/api/teller-sessions";
 import { getTill } from "@/lib/api/tills";
 import { localizeApiError } from "@/lib/api/errors";
 import { amountInWords } from "@/lib/format/amountInWords";
+import { fetchInstitutionName } from "@/lib/api/institution";
 import { printCashReceipt } from "@/lib/print/cashReceipt";
+import { SignatureSpecimenPanel } from "./SignatureSpecimenPanel";
 import {
   DenominationCounter,
   type DenominationLine,
@@ -75,6 +77,9 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
   const [description, setDescription] = useState("");
   const [depositorName, setDepositorName] = useState("");
   const [depositorAddress, setDepositorAddress] = useState("");
+  // « Les références de la pièce d'identité du déposant […] se saisit
+  // manuellement lors de l'opération au guichet » — printed on the receipt.
+  const [depositorIdReference, setDepositorIdReference] = useState("");
   const [initiatorType, setInitiatorType] = useState<InitiatorType>("holder");
   const [signatures, setSignatures] = useState<CustomerAccountSignature[]>([]);
   const [signatureId, setSignatureId] = useState("");
@@ -276,11 +281,32 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
     denomComplete &&
     !submitting;
 
+  // The receipt is issued by the institution, not by the software, so its
+  // header carries their name. Fetched once; a missing profile simply leaves
+  // the product wordmark in place.
+  const [institutionName, setInstitutionName] = useState<string | undefined>();
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    fetchInstitutionName(token)
+      .then((name) => {
+        if (cancelled) return;
+        if (name) setInstitutionName(name);
+      })
+      .catch(() => {
+        /* Branding is cosmetic; never block a receipt on it. */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
   function resetAfterDone() {
     setAmount("");
     setDescription("");
     setDepositorName("");
     setDepositorAddress("");
+    setDepositorIdReference("");
     setSignatureId("");
     setDenomLines([]);
     setDenomTotalMinor(0);
@@ -313,6 +339,7 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
           initiator_type: initiatorType,
           depositor_name: depositorName.trim() || null,
           depositor_address: depositorAddress.trim() || null,
+          depositor_id_reference: depositorIdReference.trim() || null,
           description: description.trim() || null,
           denomination_counts: requiresDenominations ? denomLines : undefined,
         });
@@ -355,24 +382,8 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
     if (!receipt) return;
     const printed = printCashReceipt({
       transaction: receipt.tx,
-      labels: {
-        fileName: t("cashTx.receipt.fileName"),
-        heading: t("cashTx.receipt.heading"),
-        reference: t("cashTx.receipt.reference"),
-        date: t("cashTx.receipt.date"),
-        type: t("cashTx.receipt.type"),
-        typeLabel: t(`cashTx.txType.${receipt.tx.transaction_type}`),
-        account: t("cashTx.receipt.account"),
-        holder: t("cashTx.receipt.holder"),
-        amount: t("cashTx.receipt.amount"),
-        amountInWords: t("cashTx.receipt.amountInWords"),
-        openingFee: t("cashTx.receipt.openingFee"),
-        detail: t("cashTx.receipt.label"),
-        value: t("cashTx.receipt.value"),
-        generatedOn: t("common.generatedOn"),
-        status: t("cashTx.recent.status"),
-        statusLabel: t(`cashTx.status.${receipt.tx.status}`),
-      },
+      t,
+      institutionName,
       formattedAmount: format.currencyMinor(receipt.amountMinor, {
         currency: receipt.currency,
       }),
@@ -592,6 +603,14 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
                       : undefined
                   }
                 />
+                {token ? (
+                  <SignatureSpecimenPanel
+                    token={token}
+                    signature={signatures.find(
+                      (s) => s.public_id === signatureId,
+                    )}
+                  />
+                ) : null}
                 <Select
                   label={t("cashTx.fields.method")}
                   value={method}
@@ -615,6 +634,14 @@ export function CashTransactionForm({ direction, session, onDone }: Props) {
                 label={t("cashTx.fields.depositorAddress")}
                 value={depositorAddress}
                 onChange={(event) => setDepositorAddress(event.target.value)}
+              />
+              <TextField
+                label={t("cashTx.fields.depositorIdReference")}
+                placeholder={t("cashTx.fields.depositorIdReferenceHint")}
+                value={depositorIdReference}
+                onChange={(event) =>
+                  setDepositorIdReference(event.target.value)
+                }
               />
             </div>
           )}
