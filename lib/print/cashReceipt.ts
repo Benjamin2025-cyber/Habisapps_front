@@ -13,8 +13,11 @@ import { openBrandedReport } from "./report";
  * two hand-written dictionaries are exactly how the two receipts drift apart.
  *
  * Format follows CORRECTIONS HABISLOAN 14/09/2026, deuxième préoccupation:
- * A5 (half-sheet), Times New Roman 11, three signature blocks, and no page
- * footer — the counter was printing one operation across two A4 sheets.
+ * A5 (half-sheet), Times New Roman 11, and three signature blocks — the
+ * counter was printing one operation across two A4 sheets. The institution's
+ * registered-office footer (openBrandedReport's letterhead) still prints
+ * below the signatures: that information doesn't stop being required because
+ * the sheet is smaller.
  */
 export type CashReceiptInput = {
   transaction: TellerTransaction;
@@ -96,7 +99,6 @@ export function printCashReceipt(input: CashReceiptInput): boolean {
     // 15 by 21 and is not what the guichet cuts its paper to.
     orientation: "landscape",
     serif: true,
-    hideFooter: true,
     signatures: [
       t("cashTx.receipt.signatureClient"),
       t("cashTx.receipt.signatureTeller"),

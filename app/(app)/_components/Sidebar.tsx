@@ -476,11 +476,11 @@ function SubLink({
 
 function SmallBrand() {
   return (
-    // Collapsed sidebar mark — the real dove icon (transparent PNG).
+    // Collapsed sidebar mark — the Habibi Finance bird (transparent PNG).
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src="/brand/logo-icon.png"
-      alt="HabisLoan"
+      alt="Habibi Finance"
       className="h-16 w-16 object-contain"
     />
   );

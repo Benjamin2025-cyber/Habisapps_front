@@ -14,7 +14,7 @@ export function BrandLogo({
   return (
     <div
       className={cn("flex items-center gap-1.5", className)}
-      aria-label="HabisLoan"
+      aria-label="Habibi Finance"
     >
       <BrandMark className={iconClassName} />
       <span
@@ -23,8 +23,8 @@ export function BrandLogo({
           wordmarkClassName,
         )}
       >
-        <span className="text-primary">Habis</span>
-        <span className="text-accent">Loan</span>
+        <span className="text-primary">Habibi</span>{" "}
+        <span className="text-accent">Finance</span>
       </span>
     </div>
   );
@@ -33,7 +33,9 @@ export function BrandLogo({
 function BrandMark({ className }: { className?: string }) {
   return (
     // Plain <img> (next/image isn't used in this project — same pattern as
-    // ImageUploadField). The icon is a transparent PNG so it sits on any surface.
+    // ImageUploadField). The icon is a transparent PNG so it sits on any
+    // surface; object-contain lets its natural (portrait, non-square) aspect
+    // fit any box a caller sizes it to without distortion or cropping.
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src="/brand/logo-icon.png"
